@@ -49,12 +49,27 @@ static void SignificantBitTests()
     printf("finished significant bit tests\n");
 }
 
+static void ChangeEndiannessTests()
+{
+    ui64 ui64value = 0xFF'00'00'FF'00'FF'00ULL;
+    ASSUME(ChangeEndianness(ui64value) == 0x00'FF'00'FF'00'00'FFULL);
+    ui32 ui32value = 0xFF'00'00'00;
+    ASSUME(ChangeEndianness(ui32value) == 0x00'00'00'FF);
+    ui16 ui16value = 0xFF'00;
+    ASSUME(ChangeEndianness(ui16value) == 0x00'FF);
+    ui8 ui8value = 0xFF;
+    ASSUME(ChangeEndianness(ui8value) == 0xFF);
+
+    printf("finished change endianness tests\n");
+}
+
 int main()
 {
     StdLib::Initialization::CoreInitialize({});
 
     SetBitTests();
     SignificantBitTests();
+    ChangeEndiannessTests();
 
     getchar();
 }
