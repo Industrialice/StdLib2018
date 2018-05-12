@@ -64,13 +64,39 @@ static void ChangeEndiannessTests()
     ui64 ui64value = 0xFF'00'00'00'FF'00'00'00ULL;
     ASSUME(ChangeEndianness(ui64value) == 0x00'00'00'FF'00'00'00'FFULL);
     ui32 ui32value = 0xFF'00'00'00;
-    ASSUME(ChangeEndianness(ui32value) == 0x00'00'00'FF);
+    ASSUME(ChangeEndianness(ui32value) == 0x00'00'00'FFU);
     ui16 ui16value = 0xFF'00;
     ASSUME(ChangeEndianness(ui16value) == 0x00'FF);
     ui8 ui8value = 0xFF;
     ASSUME(ChangeEndianness(ui8value) == 0xFF);
 
     PRINTLOG("finished change endianness tests\n");
+}
+
+static void RotateBitsTests()
+{
+    ui64 ui64value = 0b001;
+    ui64value = RotateBitsRight(ui64value, 2);
+    ASSUME(ui64value == 0x40'00'00'00'00'00'00'00ULL);
+    ui64value = RotateBitsLeft(ui64value, 2);
+    ASSUME(ui64value == 0b001);
+    ui32 ui32value = 0b001;
+    ui32value = RotateBitsRight(ui32value, 2);
+    ASSUME(ui32value == 0x40'00'00'00U);
+    ui32value = RotateBitsLeft(ui32value, 2);
+    ASSUME(ui32value == 0b001);
+    ui16 ui16value = 0b001;
+    ui16value = RotateBitsRight(ui16value, 2);
+    ASSUME(ui16value == 0x40'00);
+    ui16value = RotateBitsLeft(ui16value, 2);
+    ASSUME(ui16value == 0b001);
+    ui8 ui8value = 0b001;
+    ui8value = RotateBitsRight(ui8value, 2);
+    ASSUME(ui8value == 0x40);
+    ui8value = RotateBitsLeft(ui8value, 2);
+    ASSUME(ui8value == 0b001);
+
+    PRINTLOG("finished rotate bits tests\n");
 }
 
 int main()
@@ -80,6 +106,7 @@ int main()
     SetBitTests();
     SignificantBitTests();
     ChangeEndiannessTests();
+    RotateBitsTests();
 
 #ifdef PLATFORM_WINDOWS
     getchar();

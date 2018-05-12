@@ -144,6 +144,62 @@ namespace StdLib::Funcs
     #endif
         return ChangeEndianness(value);
     }
+
+    template <typename T> [[nodiscard]] T RotateBitsLeft(T value, ui32 shift)
+    {
+        static_assert(std::is_pod_v<T>, "val is not a POD type in RotateBitsLeft");
+        static_assert(sizeof(T) == 8 || sizeof(T) == 4 || sizeof(T) == 2 || sizeof(T) == 1, "incorrect size of value in RotateBitsLeft");
+        ASSUME(shift < sizeof(T) * 8);
+        if constexpr (sizeof(value) == 8)
+        {
+            ui64 temp = *(ui64 *)&value;
+            temp = _ROTATE64L(temp, shift);
+            return *(T *)&temp;
+        }
+        if constexpr (sizeof(value) == 4)
+        {
+            ui32 temp = *(ui32 *)&value;
+            temp = _ROTATE32L(temp, shift);
+            return *(T *)&temp;
+        }
+        if constexpr (sizeof(value) == 2)
+        {
+            ui16 temp = *(ui16 *)&value;
+            temp = _ROTATE16L(temp, shift);
+            return *(T *)&temp;
+        }
+        ui8 temp = *(ui8 *)&value;
+        temp = _ROTATE8L(temp, shift);
+        return *(T *)&temp;
+    }
+
+    template <typename T> [[nodiscard]] T RotateBitsRight(T value, ui32 shift)
+    {
+        static_assert(std::is_pod_v<T>, "val is not a POD type in RotateBitsRight");
+        static_assert(sizeof(T) == 8 || sizeof(T) == 4 || sizeof(T) == 2 || sizeof(T) == 1, "incorrect size of value in RotateBitsRight");
+        ASSUME(shift < sizeof(T) * 8);
+        if constexpr (sizeof(value) == 8)
+        {
+            ui64 temp = *(ui64 *)&value;
+            temp = _ROTATE64R(temp, shift);
+            return *(T *)&temp;
+        }
+        if constexpr (sizeof(value) == 4)
+        {
+            ui32 temp = *(ui32 *)&value;
+            temp = _ROTATE32R(temp, shift);
+            return *(T *)&temp;
+        }
+        if constexpr (sizeof(value) == 2)
+        {
+            ui16 temp = *(ui16 *)&value;
+            temp = _ROTATE16R(temp, shift);
+            return *(T *)&temp;
+        }
+        ui8 temp = *(ui8 *)&value;
+        temp = _ROTATE8R(temp, shift);
+        return *(T *)&temp;
+    }
 }
 
 namespace StdLib::MemOps
