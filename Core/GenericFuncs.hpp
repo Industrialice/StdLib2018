@@ -4,14 +4,12 @@
 
 namespace StdLib::Funcs
 {
-    template <typename T> void Drop(T &&) {}
-
-    template <typename T, typename R> bool AreSharedPointersEqual(T &&left, R &&right)
+    template <typename T, typename R>[[nodiscard]] bool AreSharedPointersEqual(T &&left, R &&right)
     {
         return left.owner_before(right) == false && right.owner_before(left) == false;
     }
 
-    template <typename Tin> constexpr uiw CountOf()
+    template <typename Tin> [[nodiscard]] constexpr uiw CountOf()
     {
         using T = typename std::remove_reference_t<Tin>;
         static_assert(std::is_array_v<T>, "CountOf() requires an array argument");
@@ -27,7 +25,7 @@ namespace StdLib::Funcs
     template <> struct _NearestInt<4> { using type = ui32; };
     template <> struct _NearestInt<8> { using type = ui64; };
 
-    template <typename T> T SetBit(T value, ui32 bitNum, bool bitValue)
+    template <typename T> [[nodiscard]] T SetBit(T value, ui32 bitNum, bool bitValue)
     {
         ASSUME(sizeof(T) * 8 > bitNum);
         using intType = typename _NearestInt<sizeof(T)>::type;
@@ -43,7 +41,7 @@ namespace StdLib::Funcs
         return *(T *)&reinterpreted;
     }
 
-    template <typename T> bool IsBitSet(T value, ui32 bitNum)
+    template <typename T> [[nodiscard]] bool IsBitSet(T value, ui32 bitNum)
     {
         ASSUME(sizeof(T) * 8 > bitNum);
         using intType = typename _NearestInt<sizeof(T)>::type;
@@ -51,12 +49,12 @@ namespace StdLib::Funcs
         return (reinterpreted & (1 << bitNum)) != 0;
     }
 
-    template <typename T, typename R = T> constexpr R BitPos(T pos)
+    template <typename T, typename R = T> [[nodiscard]] constexpr R BitPos(T pos)
     {
         return (R)1 << pos;
     }
 
-    template <typename T> ui32 MostSignificantNonZeroBit(T value)
+    template <typename T> [[nodiscard]] ui32 MostSignificantNonZeroBit(T value)
     {
         static_assert(std::is_integral_v<T>, "Cannot operate on non-integral types");
         ui32 result;
@@ -66,13 +64,15 @@ namespace StdLib::Funcs
         }
         else
         {
-            std::conditional_t<std::is_signed_v<T>, i32, ui32> temp = value;
-            _MSNZB32(temp, &result);
+            using tempValType = typename _NearestInt<sizeof(T)>::type;
+            tempValType temp = *(tempValType *)&value;
+            ui32 temp32Bit = temp;
+            _MSNZB32(temp32Bit, &result);
         }
         return result;
     }
 
-    template <typename T> ui32 LeastSignificantNonZeroBit(T value)
+    template <typename T> [[nodiscard]] ui32 LeastSignificantNonZeroBit(T value)
     {
         static_assert(std::is_integral_v<T>, "Cannot operate on non-integral types");
         ui32 result;
@@ -88,7 +88,7 @@ namespace StdLib::Funcs
         return result;
     }
 
-    template <typename T> T ChangeEndianness(T value)
+    template <typename T> [[nodiscard]] T ChangeEndianness(T value)
     {
         static_assert(std::is_pod_v<T>, "val is not a POD type in ChangeEndianness");
         static_assert(sizeof(T) == 8 || sizeof(T) == 4 || sizeof(T) == 2 || sizeof(T) == 1, "incorrect size of value in ChangeEndianness");
@@ -113,7 +113,7 @@ namespace StdLib::Funcs
         return value;
     }
 
-    template <typename T> T NativeToLittleEndian(T value)
+    template <typename T> [[nodiscard]] T NativeToLittleEndian(T value)
     {
     #ifdef BIG_ENDIAN
         return ChangeEndianness(value);
@@ -121,7 +121,7 @@ namespace StdLib::Funcs
         return value;
     }
 
-    template <typename T> T NativeToBigEndian(T value)
+    template <typename T> [[nodiscard]] T NativeToBigEndian(T value)
     {
     #ifdef BIG_ENDIAN
         return value;
@@ -129,7 +129,7 @@ namespace StdLib::Funcs
         return ChangeEndianness(value);
     }
 
-    template <typename T> T LittleEndianToNative(T value)
+    template <typename T> [[nodiscard]] T LittleEndianToNative(T value)
     {
     #ifdef BIG_ENDIAN
         return ChangeEndianness(value);
@@ -137,7 +137,7 @@ namespace StdLib::Funcs
         return value;
     }
 
-    template <typename T> T BigEndianToNative(T value)
+    template <typename T> [[nodiscard]] T BigEndianToNative(T value)
     {
     #ifdef BIG_ENDIAN
         return value;
@@ -170,7 +170,7 @@ namespace StdLib::MemOps
         return 0 == memmove_s(destination, destinationCapacity * sizeof(T), source, count * sizeof(T));
     }
 
-    template <typename T> i32 Compare(const T *target, const T *source, uiw count)
+    template <typename T> [[nodiscard]] i32 Compare(const T *target, const T *source, uiw count)
     {
         ASSUME(target && source);
         return memcmp(target, source, count * sizeof(T));
@@ -187,7 +187,7 @@ namespace StdLib::MemOps
         return 0 == memset_s(destination, destinationCapacity * sizeof(T), value, count * sizeof(T));
     }
 
-    template <typename T> T *Chr(const T *source, ui8 value, uiw count)
+    template <typename T> [[nodiscard]] T *Chr(const T *source, ui8 value, uiw count)
     {
         ASSUME(source);
         return (T *)memchr(source, value, count * sizeof(T));

@@ -9,7 +9,7 @@ namespace StdLib::ApproxMath
     -0.061322.
     The constant 0x5f400000 makes the relative error range from 0 to
     +0.088662. */
-    inline f32 RSqrtF3(f32 input)
+    [[nodiscard]] inline f32 RSqrtF3(f32 input)
     {
         union { i32 ix; f32 x; };
 
@@ -30,7 +30,7 @@ namespace StdLib::ApproxMath
     -0.00175123). However, using that value seems to usually give a slightly
     larger relative error, according to Chris.
     The routine can be adapted to IEEE double precision. */
-    inline f32 RSqrtF2(f32 input)
+    [[nodiscard]] inline f32 RSqrtF2(f32 input)
     {
         union { i32 ix; f32 x; };
 
@@ -45,7 +45,7 @@ namespace StdLib::ApproxMath
     increased accuracy. The constant 0x5f37599e makes the relative error
     range from 0 to -0.00000463.
     You can't balance the error by adjusting the constant. */
-    inline f32 RSqrtF1(f32 input)
+    [[nodiscard]] inline f32 RSqrtF1(f32 input)
     {
         f32 xhalf = 0.5f * input;
         i32 i = *(i32 *)&input;
@@ -56,17 +56,17 @@ namespace StdLib::ApproxMath
         return input;
     }
 
-    inline f32 SqrtF3(f32 input)
+    [[nodiscard]] inline f32 SqrtF3(f32 input)
     {
         return input * RSqrtF3(input);
     }
 
-    inline f32 SqrtF2(f32 input)
+    [[nodiscard]] inline f32 SqrtF2(f32 input)
     {
         return input * RSqrtF2(input);
     }
 
-    inline f32 SqrtF1(f32 input)
+    [[nodiscard]] inline f32 SqrtF1(f32 input)
     {
         return input * RSqrtF1(input);
     }

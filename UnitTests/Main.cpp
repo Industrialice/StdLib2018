@@ -1,19 +1,29 @@
 #include <StdCoreLib.hpp>
 
+#ifdef PLATFORM_ANDROID
+    #include <android/log.h>
+#endif
+
+#ifdef PLATFORM_ANDROID
+    #define PRINTLOG(...) __android_log_print(ANDROID_LOG_INFO, "StdLib", __VA_ARGS__)
+#else
+    #define PRINTLOG(...) printf(__VA_ARGS__)
+#endif
+
 using namespace StdLib;
 using namespace Funcs;
 
 static void SetBitTests()
 {
     ui32 value = 0;
-    SetBit(value, 14, true);
+    value = SetBit(value, 14, true);
     ASSUME(value == 16384);
     ASSUME(IsBitSet(value, 14) == true);
     ASSUME(IsBitSet(value, 13) == false);
-    SetBit(value, 14, false);
+    value = SetBit(value, 14, false);
     ASSUME(value == 0);
 
-    printf("finished set bit tests\n");
+    PRINTLOG("finished set bit tests\n");
 }
 
 static void SignificantBitTests()
@@ -21,11 +31,11 @@ static void SignificantBitTests()
     ui64 ui64value = 16384;
     ASSUME(MostSignificantNonZeroBit(ui64value) == 14);
     ASSUME(LeastSignificantNonZeroBit(ui64value) == 14);
-    ui64value = 18'446'744'073'709'551'615ULL;
+    ui64value = 1ULL << 63;
     ASSUME(MostSignificantNonZeroBit(ui64value) == 63);
     ASSUME(LeastSignificantNonZeroBit(ui64value) == 63);
 
-    i64 i64value = -9223372036854775808LL;
+    i64 i64value = i64_min;
     ASSUME(MostSignificantNonZeroBit(i64value) == 63);
     ASSUME(LeastSignificantNonZeroBit(i64value) == 63);
     i64value = 15;
@@ -46,13 +56,13 @@ static void SignificantBitTests()
     ASSUME(MostSignificantNonZeroBit(i8value) == 3);
     ASSUME(LeastSignificantNonZeroBit(i8value) == 0);
 
-    printf("finished significant bit tests\n");
+    PRINTLOG("finished significant bit tests\n");
 }
 
 static void ChangeEndiannessTests()
 {
-    ui64 ui64value = 0xFF'00'00'FF'00'FF'00ULL;
-    ASSUME(ChangeEndianness(ui64value) == 0x00'FF'00'FF'00'00'FFULL);
+    ui64 ui64value = 0xFF'00'00'00'FF'00'00'00ULL;
+    ASSUME(ChangeEndianness(ui64value) == 0x00'00'00'FF'00'00'00'FFULL);
     ui32 ui32value = 0xFF'00'00'00;
     ASSUME(ChangeEndianness(ui32value) == 0x00'00'00'FF);
     ui16 ui16value = 0xFF'00;
@@ -60,7 +70,7 @@ static void ChangeEndiannessTests()
     ui8 ui8value = 0xFF;
     ASSUME(ChangeEndianness(ui8value) == 0xFF);
 
-    printf("finished change endianness tests\n");
+    PRINTLOG("finished change endianness tests\n");
 }
 
 int main()
@@ -71,5 +81,7 @@ int main()
     SignificantBitTests();
     ChangeEndiannessTests();
 
+#ifdef PLATFORM_WINDOWS
     getchar();
+#endif
 }

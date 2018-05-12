@@ -52,7 +52,7 @@
     #define _LSNZB32(tosearch, result) do { ASSUME(*(unsigned int *)&tosearch != 0); *result = __builtin_ctz(*(unsigned int *)&tosearch); } while(0)
 
     #define _MSNZB64(tosearch, result) do { ASSUME(*(unsigned long long *)&tosearch != 0); *result = (63 - __builtin_clzll(*(unsigned long long *)&tosearch)); } while(0)
-    #define _LSNZB64(tosearch, result) do { ASSUME(*(unsigned long long *)&tosearch != 0); *result = __builtin_clzll(*(unsigned long long *)&tosearch); } while(0)
+    #define _LSNZB64(tosearch, result) do { ASSUME(*(unsigned long long *)&tosearch != 0); *result = __builtin_ctzll(*(unsigned long long *)&tosearch); } while(0)
 
     #define _BYTESWAP16(value) __builtin_bswap16(value)
     #define _BYTESWAP32(value) __builtin_bswap32(value)

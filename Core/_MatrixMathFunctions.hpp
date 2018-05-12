@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MatrixMathTypes.hpp"
+#include "ApproxMath.hpp"
 
 namespace StdLib
 {
