@@ -8,6 +8,7 @@
 #include <array>
 #include <iterator>
 #include <vector>
+#include <variant>
 
 using namespace std::literals::string_literals;
 

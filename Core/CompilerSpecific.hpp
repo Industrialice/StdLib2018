@@ -65,28 +65,28 @@
 #endif
 
 #ifndef _ROTATE64R
-    #define _ROTATE64R(val, shift) ((ui64)((ui64)(val) >> (shift)) | (ui64)((ui64)(val) << 64 - (shift)))
+    #define _ROTATE64R(val, shift) ((ui64)((ui64)(val) >> (shift)) | (ui64)((ui64)(val) << (64 - (shift))))
 #endif
 #ifndef _ROTATE64L
-    #define _ROTATE64L(val, shift) ((ui64)((ui64)(val) << (shift)) | (ui64)((ui64)(val) >> 64 - (shift)))
+    #define _ROTATE64L(val, shift) ((ui64)((ui64)(val) << (shift)) | (ui64)((ui64)(val) >> (64 - (shift))))
 #endif
 #ifndef _ROTATE32R
-    #define _ROTATE32R(val, shift) ((ui32)((ui32)(val) >> (shift)) | (ui32)((ui32)(val) << 32 - (shift)))
+    #define _ROTATE32R(val, shift) ((ui32)((ui32)(val) >> (shift)) | (ui32)((ui32)(val) << (32 - (shift))))
 #endif
 #ifndef _ROTATE32L
-    #define _ROTATE32L(val, shift) ((ui32)((ui32)(val) << (shift)) | (ui32)((ui32)(val) >> 32 - (shift)))
+    #define _ROTATE32L(val, shift) ((ui32)((ui32)(val) << (shift)) | (ui32)((ui32)(val) >> (32 - (shift))))
 #endif
 #ifndef _ROTATE16R
-    #define _ROTATE16R(val, shift) ((ui16)((ui16)(val) >> (shift)) | (ui16)((ui16)(val) << 16 - (shift)))
+    #define _ROTATE16R(val, shift) ((ui16)((ui16)(val) >> (shift)) | (ui16)((ui16)(val) << (16 - (shift))))
 #endif
 #ifndef _ROTATE16L
-    #define _ROTATE16L(val, shift) ((ui16)((ui16)(val) << (shift)) | (ui16)((ui16)(val) >> 16 - (shift)))
+    #define _ROTATE16L(val, shift) ((ui16)((ui16)(val) << (shift)) | (ui16)((ui16)(val) >> (16 - (shift))))
 #endif
 #ifndef _ROTATE8R
-    #define _ROTATE8R(val, shift) ((ui8)((ui8)(val) >> (shift)) | (ui8)((ui8)(val) << 8 - (shift)))
+    #define _ROTATE8R(val, shift) ((ui8)((ui8)(val) >> (shift)) | (ui8)((ui8)(val) << (8 - (shift))))
 #endif
 #ifndef _ROTATE8L
-    #define _ROTATE8L(val, shift) ((ui8)((ui8)(val) << (shift)) | (ui8)((ui8)(val) >> 8 - (shift)))
+    #define _ROTATE8L(val, shift) ((ui8)((ui8)(val) << (shift)) | (ui8)((ui8)(val) >> (8 - (shift))))
 #endif
 
 #ifndef _MSNZB32

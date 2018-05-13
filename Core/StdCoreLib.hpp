@@ -3,6 +3,7 @@
 #include "GenericFuncs.hpp"
 #include "ApproxMath.hpp"
 #include "MatrixMathTypes.hpp"
+#include "Error.hpp"
 
 namespace StdLib::Initialization
 {

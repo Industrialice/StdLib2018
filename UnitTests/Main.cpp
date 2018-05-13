@@ -99,6 +99,34 @@ static void RotateBitsTests()
     PRINTLOG("finished rotate bits tests\n");
 }
 
+static void ErrorTests()
+{
+    auto okError = DefaultError::Ok();
+    ASSUME(okError.IsOk());
+    ASSUME(okError == DefaultError::Ok());
+    ASSUME(okError != DefaultError::UnknownError());
+
+    auto unknownFormatWithAttachment = Error<std::string>(DefaultError::UnknownFormat(), "MPEG");
+    ASSUME(!unknownFormatWithAttachment.IsOk());
+    ASSUME(unknownFormatWithAttachment == DefaultError::UnknownFormat());
+    ASSUME(unknownFormatWithAttachment.Attachment() == "MPEG");
+
+    auto busyWithCustomDescription = Error<void, std::string>(DefaultError::Busy(), "Bus was handling "s + std::to_string(284) + " other requrests"s);
+    ASSUME(!busyWithCustomDescription.IsOk());
+    ASSUME(busyWithCustomDescription == DefaultError::Busy());
+    ASSUME(busyWithCustomDescription.Description() == "Bus was handling "s + std::to_string(284) + " other requrests"s);
+
+    struct Canceller {};
+    auto canceller = std::make_shared<Canceller>();
+    auto cancelledWithAttachmentAndCustomDescription = Error<std::shared_ptr<Canceller>, std::string>(DefaultError::Cancelled(), canceller, "Cancelling reason: "s + "interrupted by user"s);
+    ASSUME(!cancelledWithAttachmentAndCustomDescription.IsOk());
+    ASSUME(cancelledWithAttachmentAndCustomDescription == DefaultError::Cancelled());
+    ASSUME(AreSharedPointersEqual(cancelledWithAttachmentAndCustomDescription.Attachment(), canceller));
+    ASSUME(cancelledWithAttachmentAndCustomDescription.Description() == "Cancelling reason: "s + "interrupted by user"s);
+
+    PRINTLOG("finished error tests\n");
+}
+
 int main()
 {
     StdLib::Initialization::CoreInitialize({});
@@ -107,6 +135,7 @@ int main()
     SignificantBitTests();
     ChangeEndiannessTests();
     RotateBitsTests();
+    ErrorTests();
 
 #ifdef PLATFORM_WINDOWS
     getchar();

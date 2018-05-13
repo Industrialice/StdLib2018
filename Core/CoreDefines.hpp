@@ -21,3 +21,9 @@ namespace StdLib::_Private
 
 #define TOSTR(code) #code
 #define CONCAT(first, second) first##second
+
+#define ENUM_COMBINABLE(Name, Type) \
+    inline Name operator - (Name left, Name right) { return Name((Type)left & ~(Type)right); } \
+    inline Name operator + (Name left, Name right) { return Name((Type)left | (Type)right); } \
+    inline Name &operator -= (Name &left, Name right) { left = left - right; return left; } \
+    inline Name &operator += (Name &left, Name right) { left = left + right; return left; }

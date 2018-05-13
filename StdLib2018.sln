@@ -7,6 +7,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Core\Core.vcxproj",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTests", "UnitTests\UnitTests.vcxproj", "{D08822D6-1711-41D1-B4FE-A5BE27712CAD}"
 	ProjectSection(ProjectDependencies) = postProject
+		{BEF88DA3-8D9C-4F6A-9EA8-813BBA9B6C9C} = {BEF88DA3-8D9C-4F6A-9EA8-813BBA9B6C9C}
+		{10CBD4DC-3EF9-4D17-A0A8-88EC76ED59A2} = {10CBD4DC-3EF9-4D17-A0A8-88EC76ED59A2}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlatformAbstraction", "PlatformAbstraction\PlatformAbstraction.vcxproj", "{BEF88DA3-8D9C-4F6A-9EA8-813BBA9B6C9C}"
+	ProjectSection(ProjectDependencies) = postProject
 		{10CBD4DC-3EF9-4D17-A0A8-88EC76ED59A2} = {10CBD4DC-3EF9-4D17-A0A8-88EC76ED59A2}
 	EndProjectSection
 EndProject
@@ -34,6 +40,14 @@ Global
 		{D08822D6-1711-41D1-B4FE-A5BE27712CAD}.Release|x64.Build.0 = Release|x64
 		{D08822D6-1711-41D1-B4FE-A5BE27712CAD}.Release|x86.ActiveCfg = Release|Win32
 		{D08822D6-1711-41D1-B4FE-A5BE27712CAD}.Release|x86.Build.0 = Release|Win32
+		{BEF88DA3-8D9C-4F6A-9EA8-813BBA9B6C9C}.Debug|x64.ActiveCfg = Debug|x64
+		{BEF88DA3-8D9C-4F6A-9EA8-813BBA9B6C9C}.Debug|x64.Build.0 = Debug|x64
+		{BEF88DA3-8D9C-4F6A-9EA8-813BBA9B6C9C}.Debug|x86.ActiveCfg = Debug|Win32
+		{BEF88DA3-8D9C-4F6A-9EA8-813BBA9B6C9C}.Debug|x86.Build.0 = Debug|Win32
+		{BEF88DA3-8D9C-4F6A-9EA8-813BBA9B6C9C}.Release|x64.ActiveCfg = Release|x64
+		{BEF88DA3-8D9C-4F6A-9EA8-813BBA9B6C9C}.Release|x64.Build.0 = Release|x64
+		{BEF88DA3-8D9C-4F6A-9EA8-813BBA9B6C9C}.Release|x86.ActiveCfg = Release|Win32
+		{BEF88DA3-8D9C-4F6A-9EA8-813BBA9B6C9C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

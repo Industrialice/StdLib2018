@@ -22,12 +22,13 @@ else()
 endif()
 
 add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++1z> $<$<COMPILE_LANGUAGE:C>:-std=c99>)
-add_compile_options(-Wno-missing-braces -Wno-inconsistent-missing-override -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden)
-add_compile_options(-fno-stack-protector -D_FORTIFY_SOURCE=0 -fno-sanitize=memory)
+add_compile_options(-Wno-missing-braces -Wno-inconsistent-missing-override -Wpessimizing-move -Wlarge-by-value-copy -Winstantiation-after-specialization -Wself-assign)
+add_compile_options(-fno-stack-protector -D_FORTIFY_SOURCE=0 -fno-sanitize=memory -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden)
 
 add_definitions(-DPLATFORM_ANDROID)
 
 file(GLOB CORE_FILES "../../Core/*.cpp")
+file(GLOB PLATFORMABSTRACTION_FILES "../../PlatformAbstraction/*.cpp")
 file(GLOB UNITTEST_FILES "../../UnitTests/*.cpp")
 
 # Creates and names a library, sets it as either STATIC
@@ -45,6 +46,7 @@ add_library(
     # Provides a relative path to your source file(s).
     src/main/cpp/native-lib.cpp
     ${CORE_FILES}
+    ${PLATFORMABSTRACTION_FILES}
     ${UNITTEST_FILES}
 )
 

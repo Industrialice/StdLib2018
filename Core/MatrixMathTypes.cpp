@@ -48,22 +48,22 @@ Vector2 Vector2::GetRightNormal() const
 
 void Vector3::Cross(const Vector3 &other)
 {
-    f32 x = this->y * other.z - this->z * other.y;
-    f32 y = this->z * other.x - this->x * other.z;
-    f32 z = this->x * other.y - this->y * other.x;
+    f32 nx = this->y * other.z - this->z * other.y;
+    f32 ny = this->z * other.x - this->x * other.z;
+    f32 nz = this->x * other.y - this->y * other.x;
 
-    x = x;
-    y = y;
-    z = z;
+    x = nx;
+    y = ny;
+    z = nz;
 }
 
 Vector3 Vector3::GetCrossed(const Vector3 &other) const
 {
-    f32 x = this->y * other.z - this->z * other.y;
-    f32 y = this->z * other.x - this->x * other.z;
-    f32 z = this->x * other.y - this->y * other.x;
+    f32 nx = this->y * other.z - this->z * other.y;
+    f32 ny = this->z * other.x - this->x * other.z;
+    f32 nz = this->x * other.y - this->y * other.x;
 
-    return Vector3(x, y, z);
+    return Vector3(nx, ny, nz);
 }
 
 ///////////////
