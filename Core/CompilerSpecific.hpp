@@ -8,6 +8,8 @@
 
     #define RSTR __restrict
     #define ALLOCA(size) _alloca(size)
+    #define UNIQUEPTRRETURN __declspec(restrict)
+    #define ALLOCATORFUNC __declspec(allocator)
 
     #define _UNREACHABLE __assume(0)
 
@@ -40,6 +42,8 @@
 
     #define RSTR __restrict__
     #define ALLOCA(size) __builtin_alloca(size)
+    #define UNIQUEPTRRETURN /* TODO: find out */
+    #define ALLOCATORFUNC
 
     #define _UNREACHABLE __builtin_unreachable()
 

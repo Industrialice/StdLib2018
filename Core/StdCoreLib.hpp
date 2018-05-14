@@ -3,7 +3,8 @@
 #include "GenericFuncs.hpp"
 #include "ApproxMath.hpp"
 #include "MatrixMathTypes.hpp"
-#include "Error.hpp"
+#include "Result.hpp"
+#include "Allocators.hpp"
 
 namespace StdLib::Initialization
 {

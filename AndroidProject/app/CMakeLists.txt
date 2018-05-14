@@ -31,6 +31,12 @@ file(GLOB CORE_FILES "../../Core/*.cpp")
 file(GLOB PLATFORMABSTRACTION_FILES "../../PlatformAbstraction/*.cpp")
 file(GLOB UNITTEST_FILES "../../UnitTests/*.cpp")
 
+foreach(item ${PLATFORMABSTRACTION_FILES})
+  if(${item} MATCHES "Win_.*cpp")
+    list(REMOVE_ITEM PLATFORMABSTRACTION_FILES ${item})
+  endif()
+endforeach()
+
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
@@ -52,6 +58,7 @@ add_library(
 
 include_directories(
     ../../Core/
+    ../../PlatformAbstraction/
     ../../UnitTests/
 )
 

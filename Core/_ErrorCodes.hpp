@@ -17,8 +17,7 @@ namespace StdLib::_ErrorCodes
         friend struct AlreadyExists;
         friend struct NotFound;
         friend struct AccessDenied;
-        friend struct UnsupportedFormat;
-        friend struct UnsupportedFeature;
+        friend struct Unsupported;
         friend struct NotImplemented;
         friend struct Obsolete;
         friend struct Interrupted;
@@ -49,35 +48,47 @@ namespace StdLib::_ErrorCodes
             return _label;
         }
     };
-
-#define ERROR_DEFINITION(Code, Name) \
-    struct Name : public ErrorCodeBase \
-    { \
-        Name() \
-        { \
-            _code = Code; \
-            _label = TOSTR(Name); \
-        } \
-    };
-
-    ERROR_DEFINITION(0, Ok)
-    ERROR_DEFINITION(1, UnknownError)
-    ERROR_DEFINITION(2, InvalidArgument)
-    ERROR_DEFINITION(3, OutOfMemory)
-    ERROR_DEFINITION(4, AlreadyExists)
-    ERROR_DEFINITION(5, NotFound)
-    ERROR_DEFINITION(6, AccessDenied)
-    ERROR_DEFINITION(7, UnsupportedFormat)
-    ERROR_DEFINITION(8, UnsupportedFeature)
-    ERROR_DEFINITION(9, NotImplemented)
-    ERROR_DEFINITION(10, Obsolete)
-    ERROR_DEFINITION(11, Interrupted)
-    ERROR_DEFINITION(12, Cancelled)
-    ERROR_DEFINITION(13, UnknownFormat)
-    ERROR_DEFINITION(14, Corrupted)
-    ERROR_DEFINITION(15, NotReady)
-    ERROR_DEFINITION(16, Busy)
-    ERROR_DEFINITION(17, Timeouted)
-
-#undef ERROR_DEFINITION
 }
+
+#define ERROR_CODE_DEFINITION(Code, Name) \
+    namespace StdLib::_ErrorCodes \
+    { \
+        struct Name : public ::StdLib::_ErrorCodes::ErrorCodeBase \
+        { \
+            Name() \
+            { \
+                _code = Code; \
+                _label = TOSTR(Name); \
+            } \
+        }; \
+    }
+
+    ERROR_CODE_DEFINITION(0, Ok)
+    ERROR_CODE_DEFINITION(1, UnknownError)
+    ERROR_CODE_DEFINITION(2, InvalidArgument)
+    ERROR_CODE_DEFINITION(3, OutOfMemory)
+    ERROR_CODE_DEFINITION(4, AlreadyExists)
+    ERROR_CODE_DEFINITION(5, NotFound)
+    ERROR_CODE_DEFINITION(6, AccessDenied)
+    ERROR_CODE_DEFINITION(7, Unsupported)
+    ERROR_CODE_DEFINITION(8, NotImplemented)
+    ERROR_CODE_DEFINITION(9, Obsolete)
+    ERROR_CODE_DEFINITION(10, Interrupted)
+    ERROR_CODE_DEFINITION(11, Cancelled)
+    ERROR_CODE_DEFINITION(12, UnknownFormat)
+    ERROR_CODE_DEFINITION(13, Corrupted)
+    ERROR_CODE_DEFINITION(14, NotReady)
+    ERROR_CODE_DEFINITION(15, Busy)
+    ERROR_CODE_DEFINITION(16, Timeouted)
+
+#undef ERROR_CODE_DEFINITION
+
+#define ERROR_CODE_DEFINITION(Code, Name) \
+    namespace _ErrorCodes \
+    { \
+        struct Name : public ::StdLib::_ErrorCodes::ErrorCodeBase \
+        { \
+            Name() : ErrorCodeBase(Code, TOSTR(Name)) \
+            {} \
+        }; \
+    }

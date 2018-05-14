@@ -14,9 +14,18 @@
     <ClInclude Include="VirtualMemory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="StdPlatformAbstractionLib.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="VirtualMemory.cpp">
+    <ClCompile Include="Win_VirtualMemory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Posix_VirtualMemory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StdPlatformAbstractionLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -123,12 +123,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Allocators.hpp" />
     <ClInclude Include="ApproxMath.hpp" />
     <ClInclude Include="CoreDefines.hpp" />
     <ClInclude Include="CoreHeader.hpp" />
     <ClInclude Include="CoreTypes.hpp" />
     <ClInclude Include="CompilerSpecific.hpp" />
     <ClInclude Include="Error.hpp" />
+    <ClInclude Include="IMemoryStream.hpp" />
+    <ClInclude Include="Result.hpp" />
     <ClInclude Include="_ErrorCodes.hpp" />
     <ClInclude Include="GenericFuncs.hpp" />
     <ClInclude Include="MathFunctions.hpp" />
