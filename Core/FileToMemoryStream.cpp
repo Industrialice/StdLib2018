@@ -6,12 +6,8 @@ static bool IsProcModeSet(FileProcMode procModeCombo, FileProcMode flag);
 
 FileToMemoryStream::FileToMemoryStream(IMemoryStream &stream, FileProcMode procMode, Error<> *error)
 {
-    Error<> dummyError = DefaultError::Ok();
-    if (error == nullptr)
-    {
-        error = &dummyError;
-    }
-    *error = this->Open(stream, procMode);
+    Error<> dummyError = this->Open(stream, procMode);
+    if (error) *error = dummyError;
 }
 
 FileToMemoryStream::FileToMemoryStream(FileToMemoryStream &&source)
@@ -40,7 +36,7 @@ Error<> FileToMemoryStream::Open(IMemoryStream &stream, FileProcMode procMode)
     _offset = 0;
     _startOffset = 0;
 
-    if (!IsProcModeSet(procMode, FileProcMode::Read + FileProcMode::Write))
+    if (!IsProcModeSet(procMode, FileProcMode::Read) && !IsProcModeSet(procMode, FileProcMode::Write))
     {
         return DefaultError::InvalidArgument("Neither FileProcMode::Read, nor FileProcMode::Write is set");
     }
@@ -282,5 +278,5 @@ FileCacheMode FileToMemoryStream::CacheMode() const
 
 bool IsProcModeSet(FileProcMode procModeCombo, FileProcMode flag)
 {
-    return procModeCombo != (procModeCombo - flag);
+    return procModeCombo == (procModeCombo + flag);
 }

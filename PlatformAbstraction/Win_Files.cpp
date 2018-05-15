@@ -8,7 +8,7 @@ using namespace StdLib;
     #pragma optimize( "s", on ) // TODO: global solution
 #endif
 
-NOINLINE Error<> StdLib_FileError()
+extern NOINLINE Error<> StdLib_FileError()
 {
     DWORD code = GetLastError();
 
@@ -128,7 +128,7 @@ Error<> Files::CopyObjectTo(const FilePath &sourcePnn, const FilePath &targetPnn
     }
 
    // TODO: Windows 7, Windows Server 2008 R2, Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP: Security resource properties for the existing file are not copied to the new file until Windows 8 and Windows Server 2012.
-    BOOL result = ::CopyFileW(sourcePnn.PlatformPath().data(), targetPnn.PlatformPath().data(), isReplace ? FALSE : TRUE);
+    BOOL result = CopyFileW(sourcePnn.PlatformPath().data(), targetPnn.PlatformPath().data(), isReplace ? FALSE : TRUE);
     if (result == FALSE)
     {
         return StdLib_FileError();
@@ -186,7 +186,7 @@ NOINLINE Error<> Files::RemoveFolder(const FilePath &path) // potentially recurs
     }
     do
     {
-        if (!::wcscmp(dataFind.cFileName, L".") || !::wcscmp(dataFind.cFileName, L".."))
+        if (!wcscmp(dataFind.cFileName, L".") || !wcscmp(dataFind.cFileName, L".."))
         {
             continue;
         }
@@ -383,7 +383,7 @@ Result<bool> Files::IsFolderEmpty(const FilePath &pnn)
     }
     do
     {
-        if (!::wcscmp(dataFind.cFileName, L".") || !::wcscmp(dataFind.cFileName, L".."))
+        if (!wcscmp(dataFind.cFileName, L".") || !wcscmp(dataFind.cFileName, L".."))
         {
             continue;
         }

@@ -319,7 +319,7 @@ static void FileWrite(IFile &file)
 
 static void FileRead(IFile &file)
 {
-    ASSUME((file.ProcMode() + FileProcMode::Read) == file.ProcMode());
+    ASSUME(file.ProcMode() == FileProcMode::Read);
     ASSUME(file.OffsetGet().Unwrap() == 0);
 
     std::string_view str = file.IsSeekSupported() ? "test trat" : "test star";
@@ -342,6 +342,32 @@ static void FileRead(IFile &file)
     }
 }
 
+static void FileAppendWrite(IFile &file)
+{
+    ASSUME((file.ProcMode() + FileProcMode::WriteAppend) == file.ProcMode());
+    ASSUME(file.OffsetGet().Unwrap() == 0);
+    std::string_view str = "9184";
+    ui32 written = 0;
+    ASSUME(file.Write(str.data(), str.length(), &written));
+    ASSUME(written == str.length());
+    ASSUME(file.OffsetGet().Unwrap() == str.length());
+    ASSUME(file.SizeGet().Unwrap() == str.length());
+}
+
+static void FileAppendRead(IFile &file)
+{
+
+    ASSUME(file.ProcMode() == FileProcMode::Read);
+    ASSUME(file.OffsetGet().Unwrap() == 0);
+    std::string_view str = file.IsSeekSupported() ? "test trat9184" : "test star9184";
+    ASSUME(file.SizeGet().Unwrap() == str.length());
+    std::string target(str.length(), '\0');
+    ui32 read = 0;
+    ASSUME(file.Read(target.data(), target.length(), &read));
+    ASSUME(read == str.length());
+    ASSUME(target == str);
+}
+
 static void TestFileToMemoryStream()
 {
     MemoryStreamAllocator<> memoryStream;
@@ -354,6 +380,14 @@ static void TestFileToMemoryStream()
     file = FileToMemoryStream(memoryStream, FileProcMode::Read, &fileError);
     ASSUME(!fileError && file.IsOpened());
     FileRead(file);
+
+    file = FileToMemoryStream(memoryStream, FileProcMode::WriteAppend, &fileError);
+    ASSUME(!fileError && file.IsOpened());
+    FileAppendWrite(file);
+
+    file = FileToMemoryStream(memoryStream, FileProcMode::Read, &fileError);
+    ASSUME(!fileError && file.IsOpened());
+    FileAppendRead(file);
 
     PRINTLOG("finished file memory stream tests\n");
 }
@@ -368,6 +402,14 @@ static void TestFileToCFile(const FilePath &folderForTests)
     file = FileToCFile(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, FileCacheMode::Default, &fileError);
     ASSUME(!fileError && file.IsOpened());
     FileRead(file);
+
+    file = FileToCFile(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::WriteAppend, FileCacheMode::Default, &fileError);
+    ASSUME(!fileError && file.IsOpened());
+    FileAppendWrite(file);
+
+    file = FileToCFile(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, FileCacheMode::Default, &fileError);
+    ASSUME(!fileError && file.IsOpened());
+    FileAppendRead(file);
 
     PRINTLOG("finished file to C FILE tests\n");
 }

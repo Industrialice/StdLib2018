@@ -115,9 +115,20 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
 
     pathString procModeStr;
 
-    if (IsProcModeSet(procMode, FileProcMode::Read) && IsProcModeSet(procMode, FileProcMode::Write))
+    if (IsProcModeSet(procMode, FileProcMode::WriteAppend))
     {
-        procModeStr += fileExistenceResult ? TSTR("r+") : TSTR("w+");
+        procModeStr += TSTR("a");
+    }
+    else if (IsProcModeSet(procMode, FileProcMode::Read) && IsProcModeSet(procMode, FileProcMode::Write))
+    {
+        if (fileExistenceResult)
+        {
+            procModeStr += TSTR("r+");
+        }
+        else
+        {
+            procModeStr += TSTR("w+");
+        }
     }
     else if (IsProcModeSet(procMode, FileProcMode::Read))
     {
@@ -143,7 +154,7 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
         if (setvbuf((FILE *)_file, 0, _IONBF, 0) != 0)
         {
             fclose((FILE *)_file);
-            _file = 0;
+            _file = nullptr;
             return DefaultError::UnknownError("setvbuf failed, cannot disable caching");
         }
     }
@@ -157,9 +168,18 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
 
     if (IsProcModeSet(procMode, FileProcMode::WriteAppend))
     {
+        if (fseek((FILE *)_file, 0, SEEK_END) != 0)
+        {
+            fclose((FILE *)_file);
+            _file = nullptr;
+            return DefaultError::UnknownError("fseek failed");
+        }
+
         _offsetToStart = ftell((FILE *)_file);
         if (_offsetToStart == -1)
         {
+            fclose((FILE *)_file);
+            _file = nullptr;
             return DefaultError::UnknownError("ftell failed");
         }
     }
@@ -394,10 +414,10 @@ FileOpenMode FileToCFile::OpenModeGet() const
 
 bool IsProcModeSet(FileProcMode procModeCombo, FileProcMode flag)
 {
-    return procModeCombo != (procModeCombo - flag);
+    return procModeCombo == (procModeCombo + flag);
 }
 
 bool IsCacheModeSet(FileCacheMode cacheModeCombo, FileCacheMode flag)
 {
-    return cacheModeCombo != (cacheModeCombo - flag);
+    return cacheModeCombo == (cacheModeCombo + flag);
 }
