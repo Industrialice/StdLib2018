@@ -10,6 +10,8 @@
     #define ALLOCA(size) _alloca(size)
     #define UNIQUEPTRRETURN __declspec(restrict)
     #define ALLOCATORFUNC __declspec(allocator)
+    #define NOINLINE __declspec(noinline)
+    #define FORCEINLINE __forceinline
 
     #define _UNREACHABLE __assume(0)
 
@@ -44,6 +46,8 @@
     #define ALLOCA(size) __builtin_alloca(size)
     #define UNIQUEPTRRETURN /* TODO: find out */
     #define ALLOCATORFUNC
+    #define NOINLINE __attribute__((noinline))
+    #define FORCEINLINE __attribute__((always_inline)) inline
 
     #define _UNREACHABLE __builtin_unreachable()
 

@@ -1,4 +1,7 @@
 #include <StdPlatformAbstractionLib.hpp>
+#include <FileToMemoryStream.hpp>
+#include <FileToCFile.hpp>
+#include <Files.hpp>
 
 #ifdef PLATFORM_WINDOWS
     #include <Windows.h>
@@ -210,7 +213,7 @@ static void VirtualMemoryTests()
 
     ASSUME(VirtualMemory::Free(memory, 999));
 
-    memory = VirtualMemory::Alloc(999, VirtualMemory::PageMode::Read + VirtualMemory::PageMode::Write).Unwrap();
+    memory = VirtualMemory::Alloc(999, VirtualMemory::PageMode::Read + VirtualMemory::PageMode::Write);
     ASSUME(memory);
     EXCEPTION_CHECK(memset(memory, 0, 10), false);
 
@@ -241,9 +244,140 @@ static void AllocatorsTests()
     PRINTLOG("finished allocators tests\n");
 }
 
+void FilePathTests()
+{
+    FilePath path{L"C:\\ext\\\\no.txt"};
+
+    path.Normalize();
+    ASSUME(path.PlatformPath() == L"C:/ext/no.txt");
+    auto fileName = path.FileNameView();
+    ASSUME(fileName == L"no");
+    auto fileExt = path.ExtensionView();
+    ASSUME(fileExt == L"txt");
+    path.ReplaceExtension(L"bmp");
+    fileExt = path.ExtensionView();
+    ASSUME(fileExt == L"bmp");
+    path.ReplaceFileName(L"yes");
+    fileName = path.FileNameView();
+    ASSUME(fileName == L"yes");
+    ASSUME(path.PlatformPath() == L"C:/ext/yes.bmp");
+    ASSUME(path.FileNameExtView() == L"yes.bmp");
+    path.RemoveLevel();
+    ASSUME(path.PlatformPath() == L"C:/ext/");
+    path.RemoveLevel();
+    ASSUME(path.PlatformPath() == L"C:/");
+    path += L"folder";
+    ASSUME(path.PlatformPath() == L"C:/folder");
+    ASSUME(path.FileNameView() == L"folder");
+    ASSUME(path.FileNameExtView() == L"folder");
+    ASSUME(path.HasFileName());
+    ASSUME(!path.ExtensionView());
+    ASSUME(!path.HasExtension());
+    path /= L"file.ext";
+    ASSUME(path.PlatformPath() == L"C:/folder/file.ext");
+    path.ReplaceFileNameExt(L"new.fil");
+    ASSUME(path.PlatformPath() == L"C:/folder/new.fil");
+
+    PRINTLOG("finished FilePath tests\n");
+}
+
+static void FileWrite(IFile &file)
+{
+    ASSUME((file.ProcMode() + FileProcMode::Write) == file.ProcMode());
+    ASSUME(file.OffsetGet().Unwrap() == 0);
+    
+    std::string_view str = "test start";
+    ui32 written = 0;
+    ASSUME(file.Write(str.data(), str.length(), &written));
+    ASSUME(written == str.length());
+    ASSUME(file.OffsetGet(FileOffsetMode::FromBegin).Unwrap() == str.length());
+    ASSUME(file.OffsetGet(FileOffsetMode::FromCurrent).Unwrap() == 0);
+    ASSUME(file.OffsetGet(FileOffsetMode::FromEnd).Unwrap() == 0);
+    
+    if (file.IsSeekSupported())
+    {
+        i64 oldOffset = file.OffsetGet().Unwrap();
+        ASSUME(file.OffsetSet(FileOffsetMode::FromCurrent, -5));
+        ASSUME(file.OffsetGet(FileOffsetMode::FromBegin).Unwrap() == 5);
+        ASSUME(file.OffsetGet(FileOffsetMode::FromCurrent).Unwrap() == 0);
+        ASSUME(file.OffsetGet(FileOffsetMode::FromEnd).Unwrap() == -5);
+        str = "trats";
+        ASSUME(file.Write(str.data(), str.length(), &written));
+        ASSUME(written == str.length());
+        ASSUME(file.OffsetGet().Unwrap() == oldOffset);
+    }
+
+    auto startSize = "test start"s.length();
+    ASSUME(file.SizeGet().Unwrap() == startSize);
+    ASSUME(!file.SizeSet(startSize - 1));
+    ASSUME(file.SizeGet().Unwrap() == startSize - 1);
+    ASSUME(!file.SizeSet(startSize + 1));
+    ASSUME(file.SizeGet().Unwrap() == startSize + 1);
+    ASSUME(!file.SizeSet(startSize - 1));
+    ASSUME(file.SizeGet().Unwrap() == startSize - 1);
+}
+
+static void FileRead(IFile &file)
+{
+    ASSUME((file.ProcMode() + FileProcMode::Read) == file.ProcMode());
+    ASSUME(file.OffsetGet().Unwrap() == 0);
+
+    std::string_view str = file.IsSeekSupported() ? "test trat" : "test star";
+    ASSUME(file.SizeGet().Unwrap() == str.length());
+    ui32 read = 0;
+    std::string target(str.length(), '\0');
+    ASSUME(file.Read(target.data(), target.length(), &read));
+    ASSUME(read == str.length());
+    ASSUME(str == target);
+    ASSUME(file.OffsetGet().Unwrap() == str.length());
+
+    if (file.IsSeekSupported())
+    {
+        ASSUME(file.OffsetSet(FileOffsetMode::FromCurrent, -4));
+        str = file.IsSeekSupported() ? "trat" : "star";
+        target.resize(str.length());
+        ASSUME(file.Read(target.data(), target.length(), &read));
+        ASSUME(read == str.length());
+        ASSUME(target == str);
+    }
+}
+
+static void TestFileToMemoryStream()
+{
+    MemoryStreamAllocator<> memoryStream;
+    
+    Error<> fileError = DefaultError::Ok();
+    FileToMemoryStream file = FileToMemoryStream(memoryStream, FileProcMode::Write, &fileError);
+    ASSUME(!fileError && file.IsOpened());
+    FileWrite(file);
+
+    file = FileToMemoryStream(memoryStream, FileProcMode::Read, &fileError);
+    ASSUME(!fileError && file.IsOpened());
+    FileRead(file);
+
+    PRINTLOG("finished file memory stream tests\n");
+}
+
+static void TestFileToCFile(const FilePath &folderForTests)
+{
+    Error<> fileError = DefaultError::Ok();
+    FileToCFile file = FileToCFile(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::CreateAlways, FileProcMode::Write, FileCacheMode::Default, &fileError);
+    ASSUME(!fileError && file.IsOpened());
+    FileWrite(file);
+
+    file = FileToCFile(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, FileCacheMode::Default, &fileError);
+    ASSUME(!fileError && file.IsOpened());
+    FileRead(file);
+
+    PRINTLOG("finished file to C FILE tests\n");
+}
+
 int main()
 {
     StdLib::Initialization::PlatformAbstractionInitialize({});
+
+    FilePath folderForTests = TSTR("FileTestsFolder");
+    ASSUME(!Files::CreateNewFolder(folderForTests, {}, true));
 
     SetBitTests();
     SignificantBitTests();
@@ -253,6 +387,9 @@ int main()
     ResultTests();
     VirtualMemoryTests();
     AllocatorsTests();
+    FilePathTests();
+    TestFileToMemoryStream();
+    TestFileToCFile(folderForTests);
 
 #ifdef PLATFORM_WINDOWS
     getchar();

@@ -13,6 +13,12 @@ namespace StdLib
 
         union ValueStore
         {
+            ~ValueStore()
+            {}
+
+            ValueStore()
+            {}
+
             char empty;
             T value;
         };

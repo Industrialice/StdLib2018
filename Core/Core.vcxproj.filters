@@ -59,12 +59,21 @@
     <ClInclude Include="Allocators.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IFile.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileToMemoryStream.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StdCoreLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MatrixMathTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileToMemoryStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

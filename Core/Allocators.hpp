@@ -64,4 +64,12 @@ namespace StdLib::Allocator
             free(memory);
         }
     };
+
+    /*template <uiw Size> class Fixed
+    {
+        ui8 _buffer[Size];
+        uiw _currentSize = 0;
+
+    public:
+    };*/
 }

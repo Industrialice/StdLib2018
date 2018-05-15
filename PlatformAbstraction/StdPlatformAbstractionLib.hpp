@@ -1,5 +1,6 @@
 #pragma once
 
+#include "FilePath.hpp"
 #include "VirtualMemory.hpp"
 
 namespace StdLib::Initialization

@@ -13,7 +13,7 @@ namespace StdLib::VirtualMemory
 
     [[nodiscard]] UNIQUEPTRRETURN ALLOCATORFUNC void *Reserve(uiw size);
     Error<> Commit(void *memory, uiw size, PageMode pageMode);
-    [[nodiscard]] ALLOCATORFUNC Result<void *> Alloc(uiw size, PageMode pageMode);
+    [[nodiscard]] UNIQUEPTRRETURN ALLOCATORFUNC void *Alloc(uiw size, PageMode pageMode);
     bool Free(void *memory, uiw memorySize);
     [[nodiscard]] Result<PageMode> PageModeGet(const void *memory, uiw size); // Possible errors are InconsistentProtection on Windows, always returns Unsupported on POSIX
     Error<> PageModeSet(void *memory, uiw size, PageMode pageMode); // can commit uncommitted memory
@@ -25,5 +25,5 @@ namespace StdLib::VirtualMemory
 
 namespace StdLib
 {
-    ENUM_COMBINABLE(VirtualMemory::PageMode, ui32)
+    ENUM_COMBINABLE(VirtualMemory::PageMode, ui32);
 }

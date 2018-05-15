@@ -17,6 +17,18 @@
     <ClInclude Include="StdPlatformAbstractionLib.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FilePath.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlatformAbstractionCoreTypes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileToCFile.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Files.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win_VirtualMemory.cpp">
@@ -26,6 +38,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="StdPlatformAbstractionLib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FilePath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileToCFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Win_Files.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Posix_Files.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

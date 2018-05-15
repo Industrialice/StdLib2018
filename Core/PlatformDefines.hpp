@@ -17,11 +17,13 @@ namespace StdLib
 
 #ifdef PLATFORM_WINDOWS
     #define _RAISE_EXCEPTION __debugbreak()
+    constexpr ui32 MaxPathLength = 260;
     constexpr ui32 MaxFileNameLength = 256;
 #elif defined(PLATFORM_ANDROID) || defined(PLATFORM_IOS) || defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS) || defined(PLATFORM_EMSCRIPTEN)
     #include <signal.h>
     #define PLATFORM_POSIX
     #define _RAISE_EXCEPTION raise(SIGTRAP)
+    constexpr ui32 MaxPathLength = 512;
     constexpr ui32 MaxFileNameLength = 256;
 #else
     #error unknown platform

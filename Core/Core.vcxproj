@@ -130,6 +130,8 @@
     <ClInclude Include="CoreTypes.hpp" />
     <ClInclude Include="CompilerSpecific.hpp" />
     <ClInclude Include="Error.hpp" />
+    <ClInclude Include="FileToMemoryStream.hpp" />
+    <ClInclude Include="IFile.hpp" />
     <ClInclude Include="IMemoryStream.hpp" />
     <ClInclude Include="Result.hpp" />
     <ClInclude Include="_ErrorCodes.hpp" />
@@ -141,6 +143,7 @@
     <ClInclude Include="_MatrixMathFunctions.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FileToMemoryStream.cpp" />
     <ClCompile Include="MatrixMathTypes.cpp" />
     <ClCompile Include="StdCoreLib.cpp" />
   </ItemGroup>

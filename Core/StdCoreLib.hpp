@@ -1,8 +1,6 @@
 #pragma once
 
 #include "GenericFuncs.hpp"
-#include "ApproxMath.hpp"
-#include "MatrixMathTypes.hpp"
 #include "Result.hpp"
 #include "Allocators.hpp"
 

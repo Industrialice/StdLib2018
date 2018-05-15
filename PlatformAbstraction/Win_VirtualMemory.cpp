@@ -7,14 +7,14 @@ namespace
 {
     constexpr std::array<DWORD, 8> PageProtectionMapping =
     {
-        0,  //  0 - Unused
-        0,  //  1 - Write
-        PAGE_READONLY,  //  2 - Read
-        PAGE_READWRITE,  //  3 - Write + Read
-        PAGE_EXECUTE,  //  4 - Execute
-        0,  //  5 - Execute + Write
-        PAGE_EXECUTE_READ,  //  6 - Execute + Read
-        PAGE_EXECUTE_READWRITE  //  7 - Execute + Write + Read
+        0, // 0 - Unused
+        0, // 1 - Write
+        PAGE_READONLY, // 2 - Read
+        PAGE_READWRITE, // 3 - Write + Read
+        PAGE_EXECUTE, // 4 - Execute
+        0, // 5 - Execute + Write
+        PAGE_EXECUTE_READ, // 6 - Execute + Read
+        PAGE_EXECUTE_READWRITE // 7 - Execute + Write + Read
     };
 
     uiw Static_PageSize{};
@@ -43,20 +43,16 @@ Error<> VirtualMemory::Commit(void *memory, uiw size, PageMode pageMode)
     return DefaultError::UnknownError("VirtualAlloc failed");
 }
 
-Result<void *> VirtualMemory::Alloc(uiw size, PageMode pageMode)
+void *VirtualMemory::Alloc(uiw size, PageMode pageMode)
 {
     ASSUME(size);
     DWORD protection = PageModeToWinAPI(pageMode);
     if (!protection)
     {
         SOFTBREAK;
-        return DefaultError::InvalidArgument("Such page mode isn't permitted");
+        return nullptr;
     }
-    if (void *memory = VirtualAlloc(0, size, MEM_RESERVE | MEM_COMMIT, protection); memory)
-    {
-        return memory;
-    }
-    return DefaultError::UnknownError("VirtualAlloc failed");
+    return VirtualAlloc(0, size, MEM_RESERVE | MEM_COMMIT, protection);
 }
 
 bool VirtualMemory::Free(void *memory, uiw memorySize)

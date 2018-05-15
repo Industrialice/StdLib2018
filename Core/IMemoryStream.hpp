@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreHeader.hpp"
+#include "Allocators.hpp"
 
 namespace StdLib
 {
@@ -17,7 +18,7 @@ namespace StdLib
         [[nodiscard]] virtual bool IsWritable() const = 0;
     };
 
-    // uses a fixed buffer
+    // uses a fixed sized buffer
     template <uiw size> class MemoryStreamFixed final : public IMemoryStream
     {
         ui8 _buffer[size];
@@ -67,7 +68,7 @@ namespace StdLib
         }
     };
 
-    // uses an external buffer
+    // uses an externally provided buffer
     class MemoryStreamFixedExt final : public IMemoryStream
     {
         ui8 *_writeBuffer = nullptr;
@@ -141,19 +142,20 @@ namespace StdLib
         }
     };
 
-    // uses a heap allocated buffer
-    class MemoryStreamHeap final : public IMemoryStream
+    // uses an allocator
+    template <typename AllocatorType = Allocator::MallocBased> class MemoryStreamAllocator final : public IMemoryStream
     {
+        AllocatorType _allocator{};
         ui8 *_buffer = nullptr;
         uiw _currentSize = 0;
 
     public:
-        ~MemoryStreamHeap()
+        ~MemoryStreamAllocator()
         {
-            free(_buffer);
+            _allocator.Free(_buffer);
         }
 
-        MemoryStreamHeap() = default;
+        MemoryStreamAllocator() = default;
 
         [[nodiscard]] virtual uiw Size() const override
         {
@@ -166,7 +168,7 @@ namespace StdLib
             {
                 _currentSize = newSize;
                 newSize += newSize == 0;
-                _buffer = (ui8 *)realloc(_buffer, newSize);
+                _buffer = _allocator.Reallocate(_buffer, newSize);
             }
             return _currentSize;
         }
@@ -197,6 +199,6 @@ namespace StdLib
         }
     };
 
-    //  TODO: add a fixed buffered mem stream that uses a heap if the fixed buffer is not enough
-    //  TODO: also add heap with reserve
+    // TODO: add a fixed buffered mem stream that uses a heap if the fixed buffer is not enough
+    // TODO: also add heap with reserve
 }
