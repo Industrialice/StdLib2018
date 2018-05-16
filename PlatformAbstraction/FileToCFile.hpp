@@ -8,7 +8,7 @@ namespace StdLib
 {
     class FileToCFile final : public IFile
     {
-        void *_file = nullptr;
+        FILE *_file = nullptr;
         FileOpenMode _openMode;
         FileProcMode _procMode;
         FileCacheMode _cacheMode;

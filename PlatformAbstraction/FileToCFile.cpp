@@ -12,6 +12,8 @@
     #define fclose _fclose_nolock
     #define ftell _ftelli64_nolock
     #define fseek _fseeki64_nolock
+#else
+    #include <unistd.h>
 #endif
 
 using namespace StdLib;
@@ -56,7 +58,7 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
     this->Close();
 
     Result<bool> isFileExists = Files::IsExists(path);
-    if (!isFileExists)
+    if (!isFileExists.IsOk())
     {
         return isFileExists.GetError();
     }
@@ -87,13 +89,13 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
         }
     }
 
-    bool is_disableCache = false;
+    bool isDisableCache = false;
 
     if (IsCacheModeSet(cacheMode, FileCacheMode::DisableSystemWriteCache))
     {
         if (IsProcModeSet(procMode, FileProcMode::Write))
         {
-            is_disableCache = true;
+            isDisableCache = true;
         }
         else
         {
@@ -105,7 +107,7 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
     {
         if (IsProcModeSet(procMode, FileProcMode::Read))
         {
-            is_disableCache = true;
+            isDisableCache = true;
         }
         else
         {
@@ -149,7 +151,7 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
         return DefaultError::UnknownError("fopen failed");
     }
 
-    if (is_disableCache)
+    if (isDisableCache)
     {
         if (setvbuf((FILE *)_file, 0, _IONBF, 0) != 0)
         {
@@ -241,7 +243,7 @@ bool FileToCFile::BufferSet(ui32 size, bufferType &&buffer)
         return false;
     }
 
-    if (fflush((FILE *)_file) != 0)
+    if (fflush((FILE *)_file) != 0) // TODO: do I have to do it manually?
     {
         return false;
     }
@@ -380,12 +382,12 @@ Error<> FileToCFile::SizeSet(ui64 newSize)
     newSize += _offsetToStart;
 
 #ifdef PLATFORM_WINDOWS
-    if (_chsize(_fileno((FILE *)_file), newSize) != 0)
+    if (_chsize(_fileno((FILE *)_file), newSize) != 0) // TODO: 2GB cap this way
     {
         return DefaultError::UnknownError("_chsize failed");
     }
 #else
-    if (ftruncate((FILE *)_file, newSize) != 0)
+    if (ftruncate(fileno((FILE *)_file), newSize) != 0)
     {
         return DefaultError::UnknownError("ftrancate failed");
     }

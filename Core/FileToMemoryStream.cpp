@@ -151,7 +151,7 @@ Result<i64> FileToMemoryStream::OffsetGet(FileOffsetMode offsetMode)
     ASSUME(_stream);
     if (offsetMode == FileOffsetMode::FromBegin)
     {
-        return _offset - _startOffset;
+        return (i64)_offset - (i64)_startOffset;
     }
     else if (offsetMode == FileOffsetMode::FromCurrent)
     {
@@ -160,7 +160,7 @@ Result<i64> FileToMemoryStream::OffsetGet(FileOffsetMode offsetMode)
     else  //  if( offsetMode == FileOffsetMode::FromEnd )
     {
         ASSUME(offsetMode == FileOffsetMode::FromEnd);
-        return _offset - _stream->Size();
+        return (i64)_offset - (i64)_stream->Size();
     }
 }
 

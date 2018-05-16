@@ -73,7 +73,7 @@ bool FilePath::IsValid() const
         return false;
     }
 
-    // TODO: actual validation of the math
+    // TODO: actual validation of the path
     // TODO: file names length check
     return true;
 }
@@ -112,7 +112,7 @@ FilePath FilePath::FromChar(const std::string &path)
     return FilePath(path);
 }
 
-void FilePath::Normalize()
+FilePath &FilePath::Normalize()
 {
     bool isPrevDelim = false;
     uiw target = 0;
@@ -135,6 +135,8 @@ void FilePath::Normalize()
     }
 
     _path.resize(target);
+
+    return *this;
 }
 
 bool FilePath::IsValid() const
@@ -147,6 +149,17 @@ bool FilePath::IsValid() const
     if (_path.length() >= maxPathLength)
     {
         return false;
+    }
+
+    for (pathChar ch : _path)
+    {
+        if (IsPathDelim(ch))
+        {
+            if (!IsValidPathDelim(ch))
+            {
+                return false;
+            }
+        }
     }
 
     // TODO: actual validation of the math

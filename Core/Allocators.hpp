@@ -1,5 +1,7 @@
 #pragma once
 
+#include <malloc.h>
+
 namespace StdLib::Allocator
 {
     // TODO: alignment
@@ -52,10 +54,12 @@ namespace StdLib::Allocator
         {
         #ifdef PLATFORM_WINDOWS
             return _msize((void *)memory);
-        #elif defined(PLATFORM_ANDROID) || defined(PLATFORM_LINUX) || defined(PLATFORM_EMSCRIPTEN)
-            return malloc_usable_size(memory);
+        #elif defined(PLATFORM_ANDROID)
+            return 0; // TODO: workaround
+        #elif defined(PLATFORM_LINUX) || defined(PLATFORM_EMSCRIPTEN)
+            return malloc_usable_size((void *)memory);
         #else
-            return malloc_size(memory);
+            return malloc_size((void *)memory);
         #endif
         }
 

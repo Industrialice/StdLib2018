@@ -18,13 +18,21 @@ namespace StdLib
     {
         return ch == L'\\' || ch == L'/';
     }
+    constexpr bool IsValidPathDelim(pathChar ch)
+    {
+        return IsPathDelim(ch);
+    }
 #define PTHSTR "%ls"
 #define TSTR(str) L##str
 #else
     using pathChar = char;
     constexpr bool IsPathDelim(pathChar ch)
     {
-        return ch == L'/';
+        return ch == '\\' || ch == '/';
+    }
+    constexpr bool IsValidPathDelim(pathChar ch)
+    {
+        return ch == '/';
     }
 #define PTHSTR "%s"
 #define TSTR(str) str
