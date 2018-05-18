@@ -1,7 +1,7 @@
 #include <StdPlatformAbstractionLib.hpp>
 #include <FileToMemoryStream.hpp>
 #include <FileToCFile.hpp>
-#include <Files.hpp>
+#include <FileSystem.hpp>
 
 #ifdef PLATFORM_WINDOWS
     #include <Windows.h>
@@ -455,6 +455,41 @@ static void TestFileToCFile(const FilePath &folderForTests)
     PRINTLOG("finished file to C FILE tests\n");
 }
 
+static void TestFiles(const FilePath &folderForTests)
+{
+    UnitTest<false>(FileSystem::CreateNewFolder(folderForTests, TSTR("folder"), true));
+    UnitTest<true>(FileSystem::CreateNewFolder(folderForTests, TSTR("folder"), false));
+    FilePath dirTestPath = folderForTests / TSTR("folder");
+    UnitTest<Equal>(FileSystem::Classify(dirTestPath).Unwrap(), FileSystem::ObjectType::Folder);
+    UnitTest<NotEqual>(FileSystem::Classify(dirTestPath).Unwrap(), FileSystem::ObjectType::File);
+    UnitTest<true>(FileSystem::IsFolderEmpty(dirTestPath).Unwrap());
+    UnitTest<false>(FileSystem::Remove(dirTestPath));
+
+    FilePath tempFilePath = dirTestPath / TSTR("tempFile.txt");
+    UnitTest<false>(FileSystem::CreateNewFolder(dirTestPath, {}, false));
+    UnitTest<Equal>(FileSystem::IsFolderEmpty(dirTestPath).Unwrap(), true);
+    Error<> fileError = DefaultError::Ok();
+    UnitTest<Equal>(FileSystem::Classify(tempFilePath).GetError(), DefaultError::NotFound());
+    FileToCFile(tempFilePath, FileOpenMode::CreateAlways, FileProcMode::Write, FileCacheMode::Default, &fileError);
+    UnitTest<false>(fileError);
+    UnitTest<Equal>(FileSystem::IsFolderEmpty(dirTestPath).Unwrap(), false);
+    UnitTest<Equal>(FileSystem::Classify(tempFilePath).Unwrap(), FileSystem::ObjectType::File);
+    FilePath tempFile2Path = dirTestPath / TSTR("tempFile2.txt");
+    UnitTest<false>(FileSystem::CopyTo(tempFilePath, tempFile2Path, false));
+    FilePath tempFileRenamedPath = dirTestPath / TSTR("tempFileRenamed.txt");
+    UnitTest<false>(FileSystem::MoveTo(tempFilePath, tempFileRenamedPath, false));
+    UnitTest<Equal>(FileSystem::Classify(tempFilePath).GetError(), DefaultError::NotFound());
+    UnitTest<Equal>(FileSystem::Classify(tempFileRenamedPath).Unwrap(), FileSystem::ObjectType::File);
+
+    /*UnitTest<Equal>(FileSystem::IsReadOnlyGet(tempFileRenamedPath).Unwrap(), false);
+    UnitTest<false>(FileSystem::IsReadOnlySet(tempFileRenamedPath, true));
+    UnitTest<Equal>(FileSystem::IsReadOnlyGet(tempFileRenamedPath).Unwrap(), true);
+    UnitTest<false>(FileSystem::IsReadOnlySet(tempFileRenamedPath, false));
+    UnitTest<Equal>(FileSystem::IsReadOnlyGet(tempFileRenamedPath).Unwrap(), false);*/
+
+    PRINTLOG("finished filesystem tests\n");
+}
+
 int main(int argc, const char **argv)
 {
     std::string filesTestFolder = "FileTestsFolder";
@@ -471,7 +506,7 @@ int main(int argc, const char **argv)
     StdLib::Initialization::PlatformAbstractionInitialize({});
 
     FilePath folderForTests = FilePath::FromChar(filesTestFolder);
-    UnitTest<false>(Files::CreateNewFolder(folderForTests, {}, true));
+    UnitTest<false>(FileSystem::CreateNewFolder(folderForTests, {}, true));
 
     SetBitTests();
     SignificantBitTests();
@@ -484,6 +519,9 @@ int main(int argc, const char **argv)
     FilePathTests();
     TestFileToMemoryStream();
     TestFileToCFile(folderForTests);
+    TestFiles(folderForTests);
+
+    UnitTest<false>(FileSystem::Remove(folderForTests));
 
 #ifdef PLATFORM_WINDOWS
     getchar();

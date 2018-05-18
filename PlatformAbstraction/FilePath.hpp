@@ -25,7 +25,7 @@ namespace StdLib
         static FilePath FromChar(const char *path);
         static FilePath FromChar(const std::string &path);
 
-        pathStringView PlatformPath() const { return _path; } // always null-terminated
+        pathStringView PlatformPath() const { ASSUME(!_path[_path.size()]); return _path; } // always null-terminated
 
         void Append(pathStringView path) { _path += path; }
         void Append(const FilePath &path) { _path += path._path; }

@@ -127,7 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Files.hpp" />
+    <ClInclude Include="FileSystem.hpp" />
     <ClInclude Include="FileToCFile.hpp" />
     <ClInclude Include="PlatformAbstractionCoreTypes.hpp" />
     <ClInclude Include="FilePath.hpp" />
@@ -136,13 +136,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FilePath.cpp" />
-    <ClCompile Include="Posix_Files.cpp">
+    <ClCompile Include="Posix_FileSystem.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Win_Files.cpp" />
+    <ClCompile Include="Win_FileSystem.cpp" />
     <ClCompile Include="FileToCFile.cpp" />
     <ClCompile Include="Posix_VirtualMemory.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>

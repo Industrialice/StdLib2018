@@ -26,7 +26,7 @@
     <ClInclude Include="FileToCFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Files.hpp">
+    <ClInclude Include="FileSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -46,10 +46,10 @@
     <ClCompile Include="FileToCFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Win_Files.cpp">
+    <ClCompile Include="Posix_FileSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Posix_Files.cpp">
+    <ClCompile Include="Win_FileSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,6 +1,6 @@
 #include <StdCoreLib.hpp>
 #include "FileToCFile.hpp"
-#include "Files.hpp"
+#include "FileSystem.hpp"
 
 #ifdef PLATFORM_WINDOWS
     #include <io.h>
@@ -57,17 +57,15 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
 {
     this->Close();
 
-    Result<bool> isFileExists = Files::IsExists(path);
-    if (!isFileExists.IsOk())
+    bool isFileFound = false;
+    if (auto result = FileSystem::Classify(path); result)
     {
-        return isFileExists.GetError();
+        isFileFound = true;
     }
-
-    bool fileExistenceResult = isFileExists.Unwrap();
 
     if (openMode == FileOpenMode::OpenExisting)
     {
-        if (!fileExistenceResult)
+        if (!isFileFound)
         {
             return DefaultError::NotFound();
         }
@@ -75,7 +73,7 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
 
     if (openMode == FileOpenMode::CreateNew)
     {
-        if (fileExistenceResult)
+        if (isFileFound)
         {
             return DefaultError::AlreadyExists();
         }
@@ -123,7 +121,7 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
     }
     else if (IsProcModeSet(procMode, FileProcMode::Read) && IsProcModeSet(procMode, FileProcMode::Write))
     {
-        if (fileExistenceResult)
+        if (isFileFound)
         {
             procModeStr += TSTR("r+");
         }
