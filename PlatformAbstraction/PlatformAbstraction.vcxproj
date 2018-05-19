@@ -127,14 +127,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="File.hpp" />
     <ClInclude Include="FileSystem.hpp" />
     <ClInclude Include="FileToCFile.hpp" />
+    <ClInclude Include="MemoryMappedFile.hpp" />
     <ClInclude Include="PlatformAbstractionCoreTypes.hpp" />
     <ClInclude Include="FilePath.hpp" />
     <ClInclude Include="StdPlatformAbstractionLib.hpp" />
     <ClInclude Include="VirtualMemory.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="File.cpp" />
     <ClCompile Include="FilePath.cpp" />
     <ClCompile Include="Posix_FileSystem.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -142,6 +145,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Win_File.cpp" />
     <ClCompile Include="Win_FileSystem.cpp" />
     <ClCompile Include="FileToCFile.cpp" />
     <ClCompile Include="Posix_VirtualMemory.cpp">

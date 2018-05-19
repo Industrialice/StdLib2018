@@ -4,12 +4,10 @@
 
 namespace StdLib::VirtualMemory
 {
-    enum class PageMode : ui32
-    {
+    ENUM_COMBINABLE(PageMode, ui32,
         Write = Funcs::BitPos(0),
         Read = Funcs::BitPos(1),
-        Execute = Funcs::BitPos(2)
-    };
+        Execute = Funcs::BitPos(2));
 
     [[nodiscard]] UNIQUEPTRRETURN ALLOCATORFUNC void *Reserve(uiw size);
     Error<> Commit(void *memory, uiw size, PageMode pageMode);
@@ -21,9 +19,4 @@ namespace StdLib::VirtualMemory
 
     ERROR_CODE_DEFINITION(0, InconsistentProtection);
     [[nodiscard]] inline Error<> InconsistentProtection() { return Error<>(_ErrorCodes::InconsistentProtection(), "VirtualMemory", nullptr); }
-}
-
-namespace StdLib
-{
-    ENUM_COMBINABLE(VirtualMemory::PageMode, ui32);
 }

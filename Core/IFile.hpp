@@ -5,12 +5,17 @@
 
 namespace StdLib
 {
-    enum class FileProcMode : ui8
-    {
-        Read = Funcs::BitPos(1),
-        Write = Funcs::BitPos(2),
-        WriteAppend = Funcs::BitPos(3) | Funcs::BitPos(2)  //  makes existing part of the file virtually invisible( isn't reported with Size calls, isn't accessible through offset sets )
-    };
+    ENUM_COMBINABLE(FileProcMode, ui8,
+        Read = Funcs::BitPos(0),
+        Write = Funcs::BitPos(1),
+        WriteAppend = Funcs::BitPos(1) | Funcs::BitPos(2)); // makes existing part of the file virtually invisible (isn't reported with Size calls, isn't accessible through offset sets)
+
+    // these constraints aren't strictly enforced, so you should not rely on them only
+    ENUM_COMBINABLE(FileShareMode, ui8,
+        None = 0,
+        Read = Funcs::BitPos(0),
+        Write = Funcs::BitPos(1),
+        Delete = Funcs::BitPos(2));
 
     // mode                already exists        doesn't exist
     // ***                 ***                   ***
@@ -28,16 +33,14 @@ namespace StdLib
     };
 
     // sometimes disabling write cache you'll also disable read cache and vise versa
-    enum class FileCacheMode : ui8
-    {
+    ENUM_COMBINABLE(FileCacheMode, ui8,
         Default = 0,
-        LinearRead = Funcs::BitPos(1), // requires ProcMode::Read, can't be used with RandomRead
-        LinearWrite = Funcs::BitPos(2), // requires ProcMode::Write, can't be used with RandomWrite
-        RandomRead = Funcs::BitPos(3), // requires ProcMode::Read, can't be used with LinearRead
-        RandomWrite = Funcs::BitPos(4), // requires ProcMode::Write, can't be used with LinearWrite
-        DisableSystemWriteCache = Funcs::BitPos(5), // requires ProcMode::Write
-        DisableSystemReadCache = Funcs::BitPos(6) // requires ProcMode::Read
-    };
+        LinearRead = Funcs::BitPos(0), /* requires ProcMode::Read, can't be used with RandomRead */
+        LinearWrite = Funcs::BitPos(1), /* requires ProcMode::Write, can't be used with RandomWrite */
+        RandomRead = Funcs::BitPos(2), /* requires ProcMode::Read, can't be used with LinearRead */
+        RandomWrite = Funcs::BitPos(3), /* requires ProcMode::Write, can't be used with LinearWrite */
+        DisableSystemWriteCache = Funcs::BitPos(4), /* requires ProcMode::Write */
+        DisableSystemReadCache = Funcs::BitPos(5) /* requires ProcMode::Read */);
 
     // file content: ....#.....
     // OffsetGet(FileOffsetMode::FromBegin) == 4
@@ -72,13 +75,10 @@ namespace StdLib
         virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) = 0;
         virtual Result<i64> OffsetSet(FileOffsetMode offsetMode, i64 offset) = 0;
 
-        virtual Result<ui64> SizeGet() const = 0;
+        virtual Result<ui64> SizeGet() = 0;
         virtual Error<> SizeSet(ui64 newSize) = 0; // if the file is extended, the extended part's content is undefined
 
         virtual FileProcMode ProcMode() const = 0;
         virtual FileCacheMode CacheMode() const = 0;
     };
-
-    ENUM_COMBINABLE(FileProcMode, ui8);
-    ENUM_COMBINABLE(FileCacheMode, ui8);
 }

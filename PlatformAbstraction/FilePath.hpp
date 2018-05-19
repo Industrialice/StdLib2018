@@ -83,6 +83,7 @@ namespace StdLib
         bool IsValid() const; // false if empty, too big or isn't supported by the platform
 
         void MakeAbsolute();
+        FilePath ToAbsolute() const;
         bool IsAbsolute() const;
 
         // without extension

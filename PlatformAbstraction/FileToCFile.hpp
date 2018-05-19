@@ -19,12 +19,12 @@ namespace StdLib
     public:
         ~FileToCFile();
         FileToCFile() = default;
-        FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode = FileCacheMode::Default, Error<> *error = 0);
+        FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None, Error<> *error = 0);
 
         FileToCFile(FileToCFile &&source);
         FileToCFile &operator = (FileToCFile &&source);
 
-        Error<> Open(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode = FileCacheMode::Default);
+        Error<> Open(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None);
 
         virtual void Close() override;
         virtual bool IsOpened() const override;
@@ -41,7 +41,7 @@ namespace StdLib
         virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) override;
         virtual Result<i64> OffsetSet(FileOffsetMode offsetMode, i64 offset) override;
 
-        virtual Result<ui64> SizeGet() const override;
+        virtual Result<ui64> SizeGet() override;
         virtual Error<> SizeSet(ui64 newSize) override;
 
         virtual FileProcMode ProcMode() const override;

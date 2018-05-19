@@ -13,6 +13,8 @@ namespace StdLib
     using string_utf32 = std::basic_string<utf32char>;
 
 #ifdef PLATFORM_WINDOWS
+    using fileHandle = void *;
+    static const fileHandle fileHandle_undefined = (void *)-1;
     using pathChar = wchar_t;
     constexpr bool IsPathDelim(pathChar ch)
     {
@@ -25,6 +27,8 @@ namespace StdLib
 #define PTHSTR "%ls"
 #define TSTR(str) L##str
 #else
+    using fileHandle = int;
+    static constexpr fileHandle fileHandle_undefined = -1;
     using pathChar = char;
     constexpr bool IsPathDelim(pathChar ch)
     {

@@ -4,7 +4,6 @@
 
 #ifdef PLATFORM_WINDOWS
     #include <io.h>
-    #define fopen _wfopen
     #define fread _fread_nolock
     #define fwrite _fwrite_nolock
     #define fputc _fputc_nolock
@@ -18,17 +17,14 @@
 
 using namespace StdLib;
 
-static bool IsProcModeSet(FileProcMode procModeCombo, FileProcMode flag);
-static bool IsCacheModeSet(FileCacheMode cacheModeCombo, FileCacheMode flag);
-
 FileToCFile::~FileToCFile()
 {
     this->Close();
 }
 
-FileToCFile::FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode, Error<> *error)
+FileToCFile::FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode, FileShareMode shareMode, Error<> *error)
 {
-    auto result = this->Open(path, openMode, procMode, FileCacheMode::Default);
+    auto result = this->Open(path, openMode, procMode, cacheMode, shareMode);
     if (error) *error = result;
 }
 
@@ -53,7 +49,7 @@ FileToCFile &FileToCFile::operator = (FileToCFile &&source)
     return *this;
 }
 
-Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode)
+Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode, FileShareMode shareMode)
 {
     this->Close();
 
@@ -81,7 +77,7 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
 
     if (openMode == FileOpenMode::CreateAlways)
     {
-        if (!IsProcModeSet(procMode, FileProcMode::Write))
+        if (!(procMode && FileProcMode::Write))
         {
             return DefaultError::InvalidArgument("FileOpenMode::CreateAlways cannot be used without FileProcMode::Write");
         }
@@ -89,9 +85,9 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
 
     bool isDisableCache = false;
 
-    if (IsCacheModeSet(cacheMode, FileCacheMode::DisableSystemWriteCache))
+    if (cacheMode && FileCacheMode::DisableSystemWriteCache)
     {
-        if (IsProcModeSet(procMode, FileProcMode::Write))
+        if (procMode && FileProcMode::Write)
         {
             isDisableCache = true;
         }
@@ -101,9 +97,9 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
         }
     }
 
-    if (IsCacheModeSet(cacheMode, FileCacheMode::DisableSystemReadCache))
+    if (cacheMode && FileCacheMode::DisableSystemReadCache)
     {
-        if (IsProcModeSet(procMode, FileProcMode::Read))
+        if (procMode && FileProcMode::Read)
         {
             isDisableCache = true;
         }
@@ -115,11 +111,11 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
 
     pathString procModeStr;
 
-    if (IsProcModeSet(procMode, FileProcMode::WriteAppend))
+    if (procMode && FileProcMode::WriteAppend)
     {
         procModeStr += TSTR("a");
     }
-    else if (IsProcModeSet(procMode, FileProcMode::Read) && IsProcModeSet(procMode, FileProcMode::Write))
+    else if ((procMode && FileProcMode::Read) && (procMode && FileProcMode::Write))
     {
         if (isFileFound)
         {
@@ -130,20 +126,42 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
             procModeStr += TSTR("w+");
         }
     }
-    else if (IsProcModeSet(procMode, FileProcMode::Read))
+    else if (procMode && FileProcMode::Read)
     {
         procModeStr += TSTR("r");
     }
     else
     {
-        ASSUME(IsProcModeSet(procMode, FileProcMode::Write));
+        ASSUME(procMode && FileProcMode::Write);
         procModeStr += TSTR("w");
     }
 
     procModeStr += TSTR("b");
 
-    _file = fopen(path.PlatformPath().data(), procModeStr.c_str());
+    if (shareMode && FileShareMode::Read)
+    {
+        if (procMode && FileProcMode::Write)
+        {
+            if (!(shareMode && FileShareMode::Write))
+            {
+                return DefaultError::InvalidArgument("FileShareMode::Read without FileShareMode::Write is not a valid sharable option for a file that is opened for write");
+            }
+        }
+    }
 
+#ifdef PLATFORM_WINDOWS
+    static constexpr std::array<int, 4> sharingArray
+    {
+        _SH_DENYRW, // FileShareMode::None
+        _SH_DENYWR, // FileShareMode::Read
+        _SH_DENYRD, // FileShareMode::Write
+        _SH_DENYNO  // FileShareMode::Read + FileShareMode::Write
+    };
+    int sharingOption = sharingArray[shareMode._value & 0b11];
+    _file = _wfsopen(path.PlatformPath().data(), procModeStr.c_str(), sharingOption);
+#else
+    _file = fopen(path.PlatformPath().data(), procModeStr.c_str());
+#endif
     if (!_file)
     {
         return DefaultError::UnknownError("fopen failed");
@@ -166,7 +184,7 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
     _bufferSize = 0;
     _customBufferPtr = 0;
 
-    if (IsProcModeSet(procMode, FileProcMode::WriteAppend))
+    if (procMode && FileProcMode::WriteAppend)
     {
         if (fseek((FILE *)_file, 0, SEEK_END) != 0)
         {
@@ -204,7 +222,7 @@ bool FileToCFile::IsOpened() const
 bool FileToCFile::Read(void *target, ui32 len, ui32 *read)
 {
     ASSUME(IsOpened());
-    ui32 actuallyRead = fread(target, 1, len, (FILE *)_file);
+    ui32 actuallyRead = (ui32)fread(target, 1, len, (FILE *)_file);
     if (read) *read = actuallyRead;
     return true;
 }
@@ -212,7 +230,7 @@ bool FileToCFile::Read(void *target, ui32 len, ui32 *read)
 bool FileToCFile::Write(const void *source, ui32 len, ui32 *written)
 {
     ASSUME(IsOpened());
-    ui32 actuallyWritten = fwrite(source, 1, len, (FILE *)_file);
+    ui32 actuallyWritten = (ui32)fwrite(source, 1, len, (FILE *)_file);
     if (written) *written = actuallyWritten;
     return true;
 }
@@ -227,7 +245,7 @@ bool FileToCFile::IsBufferingSupported() const
 {
     ASSUME(IsOpened());
 
-    bool isCachingDisabled = IsCacheModeSet(_cacheMode, FileCacheMode::DisableSystemWriteCache) || IsCacheModeSet(_cacheMode, FileCacheMode::DisableSystemReadCache);
+    bool isCachingDisabled = (_cacheMode && FileCacheMode::DisableSystemWriteCache) || (_cacheMode && FileCacheMode::DisableSystemReadCache);
 
     return !isCachingDisabled;
 }
@@ -245,7 +263,8 @@ bool FileToCFile::BufferSet(ui32 size, bufferType &&buffer)
     {
         return false;
     }
-    if (setvbuf((FILE *)_file, (char *)buffer.get(), _IOFBF, size) != 0)
+    int mode = size > 0 ? _IOFBF : _IONBF;
+    if (setvbuf((FILE *)_file, (char *)buffer.get(), mode, size) != 0)
     {
         return false;
     }
@@ -344,7 +363,7 @@ Result<i64> FileToCFile::OffsetSet(FileOffsetMode offsetMode, i64 offset)
     return DefaultError::UnknownError();
 }
 
-Result<ui64> FileToCFile::SizeGet() const
+Result<ui64> FileToCFile::SizeGet()
 {
     ASSUME(IsOpened());
 
@@ -410,14 +429,4 @@ FileOpenMode FileToCFile::OpenModeGet() const
 {
     ASSUME(IsOpened());
     return _openMode;
-}
-
-bool IsProcModeSet(FileProcMode procModeCombo, FileProcMode flag)
-{
-    return procModeCombo == (procModeCombo + flag);
-}
-
-bool IsCacheModeSet(FileCacheMode cacheModeCombo, FileCacheMode flag)
-{
-    return cacheModeCombo == (cacheModeCombo + flag);
 }

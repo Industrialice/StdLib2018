@@ -34,7 +34,7 @@ namespace StdLib
         virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) override;
         virtual Result<i64> OffsetSet(FileOffsetMode offsetMode, i64 offset) override;
 
-        virtual Result<ui64> SizeGet() const override;
+        virtual Result<ui64> SizeGet() override;
         virtual Error<> SizeSet(ui64 newSize) override;
 
         virtual FileProcMode ProcMode() const override;

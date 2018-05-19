@@ -82,7 +82,7 @@ auto VirtualMemory::PageModeGet(const void *memory, uiw size) -> Result<PageMode
     {
         if (PageProtectionMapping[index] == mbi.Protect)
         {
-            return (PageMode)index;
+            return PageMode((PageMode::_type)index);
         }
     }
     SOFTBREAK;
@@ -114,7 +114,7 @@ uiw VirtualMemory::PageSize()
 
 constexpr DWORD PageModeToWinAPI(VirtualMemory::PageMode pageMode)
 {
-    return PageProtectionMapping[(ui32)pageMode];
+    return PageProtectionMapping[(ui32)pageMode._value];
 }
 
 namespace StdLib::VirtualMemory

@@ -2,8 +2,6 @@
 
 using namespace StdLib;
 
-static bool IsProcModeSet(FileProcMode procModeCombo, FileProcMode flag);
-
 FileToMemoryStream::FileToMemoryStream(IMemoryStream &stream, FileProcMode procMode, Error<> *error)
 {
     Error<> dummyError = this->Open(stream, procMode);
@@ -36,26 +34,26 @@ Error<> FileToMemoryStream::Open(IMemoryStream &stream, FileProcMode procMode)
     _offset = 0;
     _startOffset = 0;
 
-    if (!IsProcModeSet(procMode, FileProcMode::Read) && !IsProcModeSet(procMode, FileProcMode::Write))
+    if (!(procMode && FileProcMode::Read) && !(procMode && FileProcMode::Write))
     {
         return DefaultError::InvalidArgument("Neither FileProcMode::Read, nor FileProcMode::Write is set");
     }
 
-    if (IsProcModeSet(procMode, FileProcMode::Read))
+    if (procMode && FileProcMode::Read)
     {
         if (stream.IsReadable() == false)
         {
             return DefaultError::AccessDenied("Requested read proc mode, but the stream is not readable");
         }
     }
-    if (IsProcModeSet(procMode, FileProcMode::Write))
+    if (procMode && FileProcMode::Write)
     {
         if (stream.IsWritable() == false)
         {
             return DefaultError::AccessDenied("Requested write proc mode, but the stream is not readable");
         }
     }
-    if (IsProcModeSet(procMode, FileProcMode::WriteAppend))
+    if (procMode && FileProcMode::WriteAppend)
     {
         _offset = _startOffset = stream.Size();
     }
@@ -78,13 +76,13 @@ bool FileToMemoryStream::IsOpened() const
 
 bool FileToMemoryStream::Read(void *target, ui32 len, ui32 *read)
 {
-    ASSUME(_stream && IsProcModeSet(_procMode, FileProcMode::Read));
+    ASSUME(_stream && (_procMode && FileProcMode::Read));
     ASSUME(len == 0 || target);
     uiw diff = _offset <= _stream->Size() ? _stream->Size() - _offset : 0;
-    len = std::min<uiw>(len, diff);
+    len = std::min(len, (ui32)diff);
     if (_offset + len < _offset)  //  overflow
     {
-        len = uiw_max - _offset;
+        len = (ui32)(uiw_max - _offset);
     }
     memcpy(target, _stream->Memory() + _offset, len);
     _offset += len;
@@ -94,13 +92,13 @@ bool FileToMemoryStream::Read(void *target, ui32 len, ui32 *read)
 
 bool FileToMemoryStream::Write(const void *source, ui32 len, ui32 *written)
 {
-    ASSUME(_stream && IsProcModeSet(_procMode, FileProcMode::Write));
+    ASSUME(_stream && (_procMode && FileProcMode::Write));
     ASSUME(len == 0 || source);
     uiw writeEnd = _offset + len;
     if (writeEnd < _offset)  //  overflow
     {
         writeEnd = uiw_max;
-        len = uiw_max - _offset;
+        len = (ui32)(uiw_max - _offset);
     }
     if (writeEnd > _stream->Size())
     {
@@ -111,7 +109,7 @@ bool FileToMemoryStream::Write(const void *source, ui32 len, ui32 *written)
         }
         else
         {
-            len = newSize - _offset;
+            len = (ui32)(newSize - _offset);
         }
     }
     memcpy(_stream->Memory() + _offset, source, len);
@@ -244,7 +242,7 @@ Result<i64> FileToMemoryStream::OffsetSet(FileOffsetMode offsetMode, i64 offset)
     return _offset - _startOffset;
 }
 
-Result<ui64> FileToMemoryStream::SizeGet() const
+Result<ui64> FileToMemoryStream::SizeGet()
 {
     ASSUME(_stream);
     return _stream->Size() - _startOffset;
@@ -274,9 +272,4 @@ FileCacheMode FileToMemoryStream::CacheMode() const
 {
     ASSUME(_stream);
     return FileCacheMode::Default;
-}
-
-bool IsProcModeSet(FileProcMode procModeCombo, FileProcMode flag)
-{
-    return procModeCombo == (procModeCombo + flag);
 }
