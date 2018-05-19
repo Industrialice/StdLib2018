@@ -28,6 +28,7 @@ extern NOINLINE Error<> StdLib_FileError()
     case EACCES:
     case EFAULT:
     case EROFS:
+    case ETXTBSY:
         return DefaultError::AccessDenied();
     case EDQUOT:
     case ELOOP:
@@ -35,9 +36,12 @@ extern NOINLINE Error<> StdLib_FileError()
     case ENOMEM:
     case ENOSPC:
     case EOVERFLOW:
+    case EMFILE:
         return DefaultError::OutOfMemory();
     case EEXIST:
         return DefaultError::AlreadyExists();
+    case EINTR:
+        return DefaultError::Interrupted();
     default:
         return DefaultError::UnknownError();
     }
@@ -268,10 +272,11 @@ Result<bool> FileSystem::IsReadOnlyGet(const FilePath &pnn)
 Error<> FileSystem::IsReadOnlySet(const FilePath &pnn, bool isReadOnly)
 {
     mode_t mode = isReadOnly ? (S_IRUSR | S_IRGRP | S_IROTH) : (S_IRWXU | S_IRWXG | S_IRWXO);
-    if (chmod(pnn.PlatformPath().data(), mode) != 0) // TODO: for some reason causes SIGILL on Android when the path is valid
+    if (chmod(pnn.PlatformPath().data(), mode) != 0)
     {
         return StdLib_FileError();
     }
+    return DefaultError::Ok();
 }
 
 NOINLINE Error<> FileSystem::CreateNewFolder(const FilePath &where, const FilePath &name, bool isOverrideExisting)
@@ -360,6 +365,12 @@ Error<> RemoveFolderInternal(const char *pnn)
     uiw originalPathLength = strlen(pnn);
     ASSUME(originalPathLength <= MaxPathLength);
     strcpy(currentPath, pnn);
+    if (originalPathLength != 0 && currentPath[originalPathLength - 1] != '/')
+    {
+        currentPath[originalPathLength] = '/';
+        ++originalPathLength;
+        currentPath[originalPathLength] = '\0';
+    }
 
     DIR *dirHandle = opendir(currentPath);
     if (!dirHandle)

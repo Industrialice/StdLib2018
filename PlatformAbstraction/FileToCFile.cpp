@@ -160,7 +160,7 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
     int sharingOption = sharingArray[shareMode._value & 0b11];
     _file = _wfsopen(path.PlatformPath().data(), procModeStr.c_str(), sharingOption);
 #else
-    _file = fopen(path.PlatformPath().data(), procModeStr.c_str());
+    _file = fopen(path.PlatformPath().data(), procModeStr.c_str()); // TODO: process shareMode
 #endif
     if (!_file)
     {
@@ -338,6 +338,7 @@ Result<i64> FileToCFile::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 
     if (offsetMode == FileOffsetMode::FromBegin)
     {
+        ASSUME(offset >= 0);
         if (fseek((FILE *)_file, offset, SEEK_SET) == 0)
         {
             return ftell((FILE *)_file);
@@ -354,6 +355,7 @@ Result<i64> FileToCFile::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 
     if (offsetMode == FileOffsetMode::FromEnd) // we need this check if an error occured in prior conditions
     {
+        ASSUME(offset <= 0);
         if (fseek((FILE *)_file, offset, SEEK_END) == 0)
         {
             return ftell((FILE *)_file);

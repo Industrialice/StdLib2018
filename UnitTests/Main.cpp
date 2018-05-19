@@ -326,7 +326,7 @@ void FilePathTests()
 static void FileWrite(IFile &file)
 {
     UnitTest<Equal>((file.ProcMode() + FileProcMode::Write), file.ProcMode());
-    UnitTest<Equal>(file.OffsetGet().Unwrap(), 0);
+    UnitTest<Equal>(file.OffsetGet(FileOffsetMode::FromBegin).Unwrap(), 0);
     
     std::string_view str = "test0123456789 start";
     ui32 written = 0;
@@ -414,6 +414,62 @@ static void FileAppendRead(IFile &file)
     UnitTest<Equal>(target, str);
 }
 
+static void FileWriteRead(IFile &file)
+{
+    std::string crapString0(256, '\0');
+    std::string crapString1(128, '\0');
+
+    for (char &ch : crapString0)
+    {
+        ch = 32 + rand() % 96;
+    }
+    for (char &ch : crapString1)
+    {
+        ch = 32 + rand() % 96;
+    }
+
+    ui32 written, read;
+
+    char readBuf[256];
+
+    UnitTest<Equal>((file.ProcMode() + FileProcMode::Write + FileProcMode::Read), file.ProcMode());
+
+    UnitTest<Equal>(file.OffsetGet().Unwrap(), 0);
+    UnitTest<true>(file.Write(crapString0.data(), (ui32)crapString0.length(), &written));
+    UnitTest<Equal>(written, (ui32)crapString0.length());
+    UnitTest<Equal>(file.OffsetGet(FileOffsetMode::FromBegin).Unwrap(), (i64)crapString0.length());
+    UnitTest<Equal>(file.OffsetGet(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
+    UnitTest<Equal>(file.OffsetGet(FileOffsetMode::FromEnd).Unwrap(), (i64)0);
+    UnitTest<Equal>(file.SizeGet().Unwrap(), crapString0.length());
+
+    UnitTest<true>(file.OffsetSet(FileOffsetMode::FromBegin, (i64)32));
+    UnitTest<Equal>(file.OffsetGet(FileOffsetMode::FromBegin).Unwrap(), (i64)32);
+    UnitTest<Equal>(file.OffsetGet(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
+    UnitTest<Equal>(file.OffsetGet(FileOffsetMode::FromEnd).Unwrap(), -((i64)crapString0.length() - 32));
+    UnitTest<true>(file.Read(readBuf, (ui32)crapString0.length() - 32, &read));
+    UnitTest<Equal>(read, (ui32)crapString0.length() - 32);
+    UnitTest<true>(!memcmp(readBuf, crapString0.data() + 32, crapString0.length() - 32));
+    UnitTest<Equal>(file.SizeGet().Unwrap(), crapString0.length());
+    UnitTest<Equal>(file.OffsetGet(FileOffsetMode::FromBegin).Unwrap(), (i64)crapString0.length());
+    UnitTest<Equal>(file.OffsetGet(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
+    UnitTest<Equal>(file.OffsetGet(FileOffsetMode::FromEnd).Unwrap(), (i64)0);
+
+    UnitTest<true>(file.OffsetSet(FileOffsetMode::FromBegin, 64));
+    UnitTest<Equal>(file.OffsetGet(FileOffsetMode::FromBegin).Unwrap(), (i64)64);
+    UnitTest<Equal>(file.OffsetGet(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
+    UnitTest<Equal>(file.OffsetGet(FileOffsetMode::FromEnd).Unwrap(), -(i64)(crapString0.length() - 64));
+    UnitTest<Equal>(file.SizeGet().Unwrap(), crapString0.length());
+    UnitTest<true>(file.Write(crapString1.data(), (ui32)crapString1.length(), &written));
+    UnitTest<Equal>(written, (ui32)crapString1.length());
+
+    UnitTest<true>(file.OffsetSet(FileOffsetMode::FromBegin, 0));
+    UnitTest<Equal>(file.SizeGet().Unwrap(), crapString0.length());
+    crapString0.replace(crapString0.begin() + 64, crapString0.begin() + 64 + crapString1.length(), crapString1.data(), crapString1.length());
+    UnitTest<true>(file.Read(readBuf, (ui32)crapString0.length(), &read));
+    UnitTest<Equal>(read, (ui32)crapString0.length());
+    UnitTest<true>(!memcmp(readBuf, crapString0.data(), crapString0.length()));
+}
+
 static void TestFileToMemoryStream()
 {
     MemoryStreamAllocator<> memoryStream;
@@ -434,6 +490,10 @@ static void TestFileToMemoryStream()
     file = FileToMemoryStream(memoryStream, FileProcMode::Read, &fileError);
     UnitTest<true>(!fileError && file.IsOpened());
     FileAppendRead(file);
+
+    file = FileToMemoryStream(memoryStream, FileProcMode::Read + FileProcMode::Write, &fileError);
+    UnitTest<true>(!fileError && file.IsOpened());
+    FileWriteRead(file);
 
     PRINTLOG("finished file memory stream tests\n");
 }
@@ -465,6 +525,12 @@ template <typename T> void TestFile(const FilePath &folderForTests)
         UnitTest<true>(!fileError && file.IsOpened());
         file.BufferSet(bufferSize, move(buffer));
         FileAppendRead(file);
+        file.Close();
+
+        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::CreateAlways, FileProcMode::Read + FileProcMode::Write, FileCacheMode::Default, FileShareMode::Read + FileShareMode::Write, &fileError);
+        UnitTest<true>(!fileError && file.IsOpened());
+        file.BufferSet(bufferSize, move(buffer));
+        FileWriteRead(file);
     };
 
     internalTest(0, {nullptr, nullptr});
@@ -477,7 +543,7 @@ template <typename T> void TestFile(const FilePath &folderForTests)
 
 template <typename T> void TestFileSharing(const FilePath &folderForTests)
 {
-    Error<> fileError = DefaultError::Ok();
+    /*Error<> fileError = DefaultError::Ok();
     T file = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::CreateAlways, FileProcMode::Write, FileCacheMode::Default, FileShareMode::None, &fileError);
     UnitTest<true>(!fileError && file.IsOpened());
 
@@ -490,7 +556,7 @@ template <typename T> void TestFileSharing(const FilePath &folderForTests)
 
     file2.Close();
     file = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, FileCacheMode::Default, FileShareMode::Write, &fileError);
-    UnitTest<true>(!fileError && file.IsOpened());
+    UnitTest<true>(!fileError && file.IsOpened());*/
 
     PRINTLOG("finished template file sharing tests\n");
 }
@@ -521,11 +587,11 @@ static void TestFiles(const FilePath &folderForTests)
     UnitTest<Equal>(FileSystem::Classify(tempFilePath).GetError(), DefaultError::NotFound());
     UnitTest<Equal>(FileSystem::Classify(tempFileRenamedPath).Unwrap(), FileSystem::ObjectType::File);
 
-    /*UnitTest<Equal>(FileSystem::IsReadOnlyGet(tempFileRenamedPath).Unwrap(), false);
+    UnitTest<Equal>(FileSystem::IsReadOnlyGet(tempFileRenamedPath).Unwrap(), false);
     UnitTest<false>(FileSystem::IsReadOnlySet(tempFileRenamedPath, true));
     UnitTest<Equal>(FileSystem::IsReadOnlyGet(tempFileRenamedPath).Unwrap(), true);
     UnitTest<false>(FileSystem::IsReadOnlySet(tempFileRenamedPath, false));
-    UnitTest<Equal>(FileSystem::IsReadOnlyGet(tempFileRenamedPath).Unwrap(), false);*/
+    UnitTest<Equal>(FileSystem::IsReadOnlyGet(tempFileRenamedPath).Unwrap(), false);
 
     PRINTLOG("finished filesystem tests\n");
 }

@@ -54,6 +54,11 @@ namespace StdLib
             ASSUME(!_error.IsOk());
         }
 
+        void AssumeOk() const
+        {
+            ASSUME(_error.IsOk());
+        }
+
         [[nodiscard]] T Unwrap()
         {
             ASSUME(_error != AlreadyUnwrapped());

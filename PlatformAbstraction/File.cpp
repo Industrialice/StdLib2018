@@ -66,8 +66,8 @@ File &File::operator = (File &&other)
     return *this;
 }
 
-#ifdef ENABLE_FILEIO_STATS
-auto File::StatsGet() -> FileStats
+#ifdef ENABLE_FILE_STATS
+auto File::StatsGet() const -> FileStats
 {
     ASSUME(IsOpened());
     return _stats;
@@ -110,7 +110,7 @@ NOINLINE bool File::Read(void *target, ui32 len, ui32 *read)
 {
     ASSUME(IsOpened());
     ASSUME(target || len == 0);
-    ASSUME((_procMode + FileProcMode::Read) == _procMode);
+    ASSUME(_procMode && FileProcMode::Read);
 
     auto readFromBuffer = [this](void *target, ui32 len)
     {
@@ -174,7 +174,7 @@ NOINLINE bool File::Write(const void *source, ui32 len, ui32 *written)
 {
     ASSUME(IsOpened());
     ASSUME(source || len == 0);
-    ASSUME((_procMode + FileProcMode::Write) == _procMode);
+    ASSUME(_procMode && FileProcMode::Write);
     ASSUME(_bufferPos <= _bufferSize);
 
     if (written) *written = 0;
@@ -282,6 +282,59 @@ std::pair<ui32, const void *> File::BufferGet() const
 bool File::IsSeekSupported() const
 {
     return true;
+}
+
+Result<i64> File::OffsetGet(FileOffsetMode offsetMode)
+{
+    ASSUME(IsOpened());
+
+    if (offsetMode == FileOffsetMode::FromCurrent)
+    {
+        return 0;
+    }
+
+    if (offsetMode == FileOffsetMode::FromEnd)
+    {
+        if (!CancelCachedRead() || !File::Flush())
+        {
+            return DefaultError::UnknownError();
+        }
+    }
+
+    auto currentOffsetResult = CurrentFileOffset();
+    if (!currentOffsetResult)
+    {
+        return currentOffsetResult.GetError();
+    }
+
+    i64 offsetFromBegin = currentOffsetResult.Unwrap() - _offsetToStart;
+
+    if (offsetMode == FileOffsetMode::FromBegin)
+    {
+        ASSUME(_bufferPos == 0 || _internalBuffer.get());
+        if (_readBufferCurrentSize)
+        {
+            offsetFromBegin -= (i64)(_readBufferCurrentSize - _bufferPos);
+        }
+        else
+        {
+            offsetFromBegin += (i64)_bufferPos;
+        }
+
+        return offsetFromBegin;
+    }
+    else
+    {
+        ASSUME(offsetMode == FileOffsetMode::FromEnd);
+
+        auto fileSize = File::SizeGet();
+        if (!fileSize)
+        {
+            return fileSize.GetError();
+        }
+
+        return offsetFromBegin - fileSize.Unwrap();
+    }
 }
 
 FileProcMode File::ProcMode() const

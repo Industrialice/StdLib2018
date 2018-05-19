@@ -214,58 +214,6 @@ void File::Close()
     _readBufferCurrentSize = 0;
 }
 
-Result<i64> File::OffsetGet(FileOffsetMode offsetMode)
-{
-    ASSUME(IsOpened());
-
-    if (offsetMode == FileOffsetMode::FromEnd)
-    {
-        if (!CancelCachedRead() || !File::Flush())
-        {
-            return DefaultError::UnknownError();
-        }
-    }
-
-    LARGE_INTEGER pos;
-    if (!SetFilePointerEx(_handle, LARGE_INTEGER(), &pos, FILE_CURRENT))
-    {
-        return StdLib_FileError();
-    }
-    ASSUME(pos.QuadPart >= (i64)_offsetToStart);
-    LONGLONG offsetFromBegin = pos.QuadPart - _offsetToStart;
-
-    if (offsetMode == FileOffsetMode::FromBegin)
-    {
-        ASSUME(_bufferPos == 0 || _internalBuffer.get());
-        if (_readBufferCurrentSize)
-        {
-            offsetFromBegin -= (LONGLONG)(_readBufferCurrentSize - _bufferPos);
-        }
-        else
-        {
-            offsetFromBegin += (LONGLONG)_bufferPos;
-        }
-
-        return offsetFromBegin;
-    }
-    else if (offsetMode == FileOffsetMode::FromCurrent)
-    {
-        return 0;
-    }
-    else
-    {
-        ASSUME(offsetMode == FileOffsetMode::FromEnd);
-
-        auto fileSize = File::SizeGet();
-        if (!fileSize)
-        {
-            return fileSize.GetError();
-        }
-
-        return offsetFromBegin - fileSize.Unwrap();
-    }
-}
-
 Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 {
     ASSUME(IsOpened());
@@ -279,6 +227,7 @@ Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 
     if (offsetMode == FileOffsetMode::FromBegin)
     {
+        ASSUME(offset >= 0);
         moveMethod = FILE_BEGIN;
         offset += _offsetToStart;
     }
@@ -288,6 +237,7 @@ Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
     }
     else
     {
+        ASSUME(offset <= 0);
         ASSUME(offsetMode == FileOffsetMode::FromEnd);
         moveMethod = FILE_END;
     }
@@ -323,7 +273,7 @@ Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 Result<ui64> File::SizeGet()
 {
     ASSUME(IsOpened());
-    if (!File::Flush())
+    if (!File::Flush()) // flushing first because file pointer may not be at the end of the file, in that case we can't just return FileSize + BufferSize
     {
         return DefaultError::UnknownError();
     }
@@ -421,6 +371,7 @@ bool File::ReadFromFile(void *target, ui32 len, ui32 *read)
     DWORD wapiRead = 0;
     if (len && !ReadFile(_handle, target, len, &wapiRead, 0))
     {
+        if (read) *read = 0;
         return false;
     }
 
@@ -447,6 +398,17 @@ NOINLINE bool File::CancelCachedRead()
     BOOL result = SetFilePointerEx(_handle, quadMove, 0, FILE_CURRENT);
     _bufferPos = _readBufferCurrentSize = 0;
     return result != FALSE;
+}
+
+Result<i64> File::CurrentFileOffset() const
+{
+    LARGE_INTEGER currentOffset;
+    if (!SetFilePointerEx(_handle, {}, &currentOffset, FILE_CURRENT))
+    {
+        return StdLib_FileError();
+    }
+    ASSUME(currentOffset.QuadPart >= (i64)_offsetToStart);
+    return currentOffset.QuadPart;
 }
 
 namespace StdLib::FileInitialization

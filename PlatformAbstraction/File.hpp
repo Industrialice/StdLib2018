@@ -20,7 +20,7 @@ namespace StdLib
             counter_t readsFromBufferCount;
             counter_t readsFromFileCount;
             counter_t bytesFromBufferRead;
-            counter_t bytesFromFileReaded;
+            counter_t bytesFromFileRead;
             counter_t bytesToBufferWritten;
             counter_t bytesToFileWritten;
             counter_t bufferedWrites;
@@ -32,7 +32,7 @@ namespace StdLib
 
     private:
         fileHandle _handle = fileHandle_undefined;
-    #ifdef ENABLE_FILEIO_STATS
+    #ifdef ENABLE_FILE_STATS
         FileStats _stats{};
     #endif
         ui64 _offsetToStart; // used only when you're using ProcMode::Append, the file will be opened as usual, then the offset will be added so you can't work with the existing part of the file
@@ -58,7 +58,7 @@ namespace StdLib
         File &operator = (File &&other);
         [[nodiscard]] Error<> Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None);
         [[nodiscard]] Error<> Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership);
-    #ifdef ENABLE_FILEIO_STATS
+    #ifdef ENABLE_FILE_STATS
         MUST_BE_OPENED [[nodiscard]] FileStats StatsGet() const;
         MUST_BE_OPENED void StatsReset();
     #endif
@@ -86,6 +86,7 @@ namespace StdLib
         bool WriteToFile(const void *source, ui32 len, ui32 *written);
         bool ReadFromFile(void *target, ui32 len, ui32 *read);
         bool CancelCachedRead();
+        Result<i64> CurrentFileOffset() const;
     };
 
 #undef MUST_BE_OPENED

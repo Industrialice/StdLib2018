@@ -69,11 +69,11 @@ namespace StdLib
         virtual bool Flush() = 0;
         virtual bool IsBufferingSupported() const = 0;
         virtual bool BufferSet(ui32 size, bufferType &&buffer = {nullptr, nullptr}) = 0; // will reject this call if buffering isn't supported, pass null as a buffer to use an auto allocated buffer, pass 0 as a size to disable buffering
-        virtual std::pair<ui32, const void *> BufferGet() const = 0; //  will return nullptr if there's no buffer
+        virtual std::pair<ui32, const void *> BufferGet() const = 0; // will return nullptr if there's no buffer
 
         virtual bool IsSeekSupported() const = 0;
         virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) = 0;
-        virtual Result<i64> OffsetSet(FileOffsetMode offsetMode, i64 offset) = 0;
+        virtual Result<i64> OffsetSet(FileOffsetMode offsetMode, i64 offset) = 0; // negative offset with FileOffsetMode::Begin and positive offset with FileOffsetMode::FromEnd is undefined behavior
 
         virtual Result<ui64> SizeGet() = 0;
         virtual Error<> SizeSet(ui64 newSize) = 0; // if the file is extended, the extended part's content is undefined

@@ -155,7 +155,7 @@ Result<i64> FileToMemoryStream::OffsetGet(FileOffsetMode offsetMode)
     {
         return 0;
     }
-    else  //  if( offsetMode == FileOffsetMode::FromEnd )
+    else
     {
         ASSUME(offsetMode == FileOffsetMode::FromEnd);
         return (i64)_offset - (i64)_stream->Size();
@@ -165,31 +165,35 @@ Result<i64> FileToMemoryStream::OffsetGet(FileOffsetMode offsetMode)
 Result<i64> FileToMemoryStream::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 {
     ASSUME(_stream);
+    ASSUME(_startOffset <= _stream->Size());
 
-    if (offset <= 0)  //  backward
+    if (offset < 0) // backward
     {
         if (offsetMode == FileOffsetMode::FromBegin)
         {
-            _offset = _startOffset;
+            SOFTBREAK;
+            return DefaultError::InvalidArgument("Cannot specify negative offset with FileOffsetMode::FromBegin");
         }
         else if (offsetMode == FileOffsetMode::FromCurrent)
         {
-            if (_offset + offset < _startOffset)  //  underflow
+            if (_offset + offset < _startOffset) // underflow
             {
-                _offset = _startOffset;
+                SOFTBREAK;
+                return DefaultError::InvalidArgument("Specified offset is out of range for the file");
             }
             else
             {
                 _offset += offset;
             }
         }
-        else  //  if( offsetMode == FileOffsetMode::FromEnd )
+        else
         {
             ASSUME(offsetMode == FileOffsetMode::FromEnd);
 
-            if (_stream->Size() + offset < _startOffset)  //  underflow
+            if (_stream->Size() + offset < _startOffset) // underflow
             {
-                _offset = _startOffset;
+                SOFTBREAK;
+                return DefaultError::InvalidArgument("Specified offset is out of range for the file");
             }
             else
             {
@@ -197,14 +201,14 @@ Result<i64> FileToMemoryStream::OffsetSet(FileOffsetMode offsetMode, i64 offset)
             }
         }
     }
-    else  //  forward
+    else // forward
     {
         if (offsetMode == FileOffsetMode::FromBegin)
         {
-            uiw diff = uiw_max - _startOffset;
-            if (offset >= (i64)diff)  //  overflow
+            if (offset > (i64)(_stream->Size() - _startOffset)) // overflow
             {
-                _offset = (i64)uiw_max;
+                SOFTBREAK;
+                return DefaultError::InvalidArgument("Specified offset is out of range for the file");
             }
             else
             {
@@ -213,28 +217,24 @@ Result<i64> FileToMemoryStream::OffsetSet(FileOffsetMode offsetMode, i64 offset)
         }
         else if (offsetMode == FileOffsetMode::FromCurrent)
         {
-            uiw diffToOverflow = uiw_max - _offset;
-            if (offset > (i64)diffToOverflow)  //  overflow
+            if (offset > (i64)(_stream->Size() > _startOffset)) // overflow
             {
-                _offset = (i64)uiw_max;
+                SOFTBREAK;
+                return DefaultError::InvalidArgument("Specified offset is out of range for the file");
             }
             else
             {
                 _offset += offset;
             }
         }
-        else  //  if( offsetMode == FileOffsetMode::FromEnd )
+        else
         {
             ASSUME(offsetMode == FileOffsetMode::FromEnd);
 
-            uiw diffToOverflow = uiw_max - _stream->Size();
-            if (offset >= (i64)diffToOverflow)  //  overflow
+            if (offset)
             {
-                _offset = (i64)uiw_max;
-            }
-            else
-            {
-                _offset = _stream->Size() + offset;
+                SOFTBREAK;
+                return DefaultError::InvalidArgument("Cannot specify positive offset with FileOffsetMode::FromEnd");
             }
         }
     }

@@ -88,7 +88,7 @@ uiw VirtualMemory::PageSize()
 
 constexpr int PageModeToPosix(VirtualMemory::PageMode pageMode)
 {
-    return PageProtectionMapping[(ui32)pageMode];
+    return PageProtectionMapping[(ui32)pageMode._value];
 }
 
 namespace StdLib::VirtualMemory
