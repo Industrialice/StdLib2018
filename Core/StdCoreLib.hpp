@@ -3,6 +3,8 @@
 #include "GenericFuncs.hpp"
 #include "Result.hpp"
 #include "Allocators.hpp"
+#include "IMemoryStream.hpp"
+#include "IFile.hpp"
 
 namespace StdLib::Initialization
 {

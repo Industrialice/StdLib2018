@@ -9,6 +9,8 @@ namespace StdLib
 
     class File : public IFile
     {
+        friend class MemoryMappedFile;
+
     public:
 
     #ifdef ENABLE_FILE_STATS

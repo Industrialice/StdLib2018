@@ -3,6 +3,7 @@
 #include <FileToCFile.hpp>
 #include <FileSystem.hpp>
 #include <File.hpp>
+#include <MemoryMappedFile.hpp>
 
 #ifdef PLATFORM_WINDOWS
     #include <Windows.h>
@@ -465,7 +466,7 @@ static void FileWriteRead(IFile &file)
     UnitTest<true>(file.OffsetSet(FileOffsetMode::FromBegin, 0));
     UnitTest<Equal>(file.SizeGet().Unwrap(), crapString0.length());
     crapString0.replace(crapString0.begin() + 64, crapString0.begin() + 64 + crapString1.length(), crapString1.data(), crapString1.length());
-    UnitTest<true>(file.Read(readBuf, (ui32)crapString0.length(), &read));
+    UnitTest<true>(file.Read(readBuf, (ui32)crapString0.length() + 999, &read)); // read outside the file, must truncate the requested size
     UnitTest<Equal>(read, (ui32)crapString0.length());
     UnitTest<true>(!memcmp(readBuf, crapString0.data(), crapString0.length()));
 }
@@ -596,6 +597,46 @@ static void TestFiles(const FilePath &folderForTests)
     PRINTLOG("finished filesystem tests\n");
 }
 
+static void TestMemoryMappedFile(const FilePath &folderForTests)
+{
+    std::string crapString(256, '\0');
+    for (char &ch : crapString)
+    {
+        ch = 32 + rand() % 96;
+    }
+
+    char tempBuf[256];
+
+    File file = File(folderForTests / TSTR("memMapped.txt"), FileOpenMode::CreateAlways, FileProcMode::Read + FileProcMode::Write);
+    UnitTest<true>(file.IsOpened());
+    UnitTest<true>(file.Write(crapString.data(), crapString.length()));
+
+    Error<> error = DefaultError::Ok();
+    MemoryMappedFile mapping = MemoryMappedFile(file, 0, uiw_max, false, &error);
+    UnitTest<true>(!error && mapping.IsOpened());
+    UnitTest<Equal>(mapping.Size(), crapString.length());
+    UnitTest<Equal>(mapping.IsWritable(), true);
+    UnitTest<true>(!memcmp(crapString.data(), mapping.Memory(), crapString.size()));
+
+    std::reverse(crapString.begin(), crapString.end());
+    UnitTest<false>(!memcmp(crapString.data(), mapping.Memory(), crapString.size()));
+
+    UnitTest<true>(file.OffsetSet(FileOffsetMode::FromBegin, 0));
+    UnitTest<true>(file.Write(crapString.data(), crapString.length()));
+
+    UnitTest<true>(!memcmp(crapString.data(), mapping.Memory(), crapString.size()));
+    std::reverse(crapString.begin(), crapString.end());
+    UnitTest<false>(!memcmp(crapString.data(), mapping.Memory(), crapString.size()));
+
+    UnitTest<true>(file.Flush());
+    memcpy(mapping.Memory(), crapString.data(), crapString.length());
+    UnitTest<true>(file.OffsetSet(FileOffsetMode::FromBegin, 0));
+    UnitTest<true>(file.Read(tempBuf, crapString.length()));
+    UnitTest<true>(!memcmp(crapString.data(), tempBuf, crapString.length()));
+
+    PRINTLOG("finished memory mapped file tests\n");
+}
+
 int main(int argc, const char **argv)
 {
     std::string filesTestFolder = "FileTestsFolder";
@@ -629,6 +670,7 @@ int main(int argc, const char **argv)
     TestFileSharing<FileToCFile>(folderForTests);
     TestFileSharing<File>(folderForTests);
     TestFiles(folderForTests);
+    TestMemoryMappedFile(folderForTests);
 
     UnitTest<false>(FileSystem::Remove(folderForTests));
 

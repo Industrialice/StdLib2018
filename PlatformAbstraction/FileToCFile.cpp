@@ -169,9 +169,9 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
 
     if (isDisableCache)
     {
-        if (setvbuf((FILE *)_file, 0, _IONBF, 0) != 0)
+        if (setvbuf(_file, 0, _IONBF, 0) != 0)
         {
-            fclose((FILE *)_file);
+            fclose(_file);
             _file = nullptr;
             return DefaultError::UnknownError("setvbuf failed, cannot disable caching");
         }
@@ -186,17 +186,17 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
 
     if (procMode && FileProcMode::WriteAppend)
     {
-        if (fseek((FILE *)_file, 0, SEEK_END) != 0)
+        if (fseek(_file, 0, SEEK_END) != 0)
         {
-            fclose((FILE *)_file);
+            fclose(_file);
             _file = nullptr;
             return DefaultError::UnknownError("fseek failed");
         }
 
-        _offsetToStart = ftell((FILE *)_file);
+        _offsetToStart = ftell(_file);
         if (_offsetToStart == -1)
         {
-            fclose((FILE *)_file);
+            fclose(_file);
             _file = nullptr;
             return DefaultError::UnknownError("ftell failed");
         }
@@ -209,7 +209,7 @@ void FileToCFile::Close()
 {
     if (_file)
     {
-        fclose((FILE *)_file);
+        fclose(_file);
     }
     _file = 0;
 }
@@ -222,7 +222,7 @@ bool FileToCFile::IsOpened() const
 bool FileToCFile::Read(void *target, ui32 len, ui32 *read)
 {
     ASSUME(IsOpened());
-    ui32 actuallyRead = (ui32)fread(target, 1, len, (FILE *)_file);
+    ui32 actuallyRead = (ui32)fread(target, 1, len, _file);
     if (read) *read = actuallyRead;
     return true;
 }
@@ -230,7 +230,7 @@ bool FileToCFile::Read(void *target, ui32 len, ui32 *read)
 bool FileToCFile::Write(const void *source, ui32 len, ui32 *written)
 {
     ASSUME(IsOpened());
-    ui32 actuallyWritten = (ui32)fwrite(source, 1, len, (FILE *)_file);
+    ui32 actuallyWritten = (ui32)fwrite(source, 1, len, _file);
     if (written) *written = actuallyWritten;
     return true;
 }
@@ -238,7 +238,7 @@ bool FileToCFile::Write(const void *source, ui32 len, ui32 *written)
 bool FileToCFile::Flush()
 {
     ASSUME(IsOpened());
-    return fflush((FILE *)_file) == 0;
+    return fflush(_file) == 0;
 }
 
 bool FileToCFile::IsBufferingSupported() const
@@ -259,12 +259,12 @@ bool FileToCFile::BufferSet(ui32 size, bufferType &&buffer)
         return false;
     }
 
-    if (fflush((FILE *)_file) != 0) // TODO: do I have to do it manually?
+    if (fflush(_file) != 0) // TODO: do I have to do it manually?
     {
         return false;
     }
     int mode = size > 0 ? _IOFBF : _IONBF;
-    if (setvbuf((FILE *)_file, (char *)buffer.get(), mode, size) != 0)
+    if (setvbuf(_file, (char *)buffer.get(), mode, size) != 0)
     {
         return false;
     }
@@ -296,7 +296,7 @@ Result<i64> FileToCFile::OffsetGet(FileOffsetMode offsetMode)
         return 0;
     }
 
-    i64 currentOffset = ftell((FILE *)_file);
+    i64 currentOffset = ftell(_file);
     if (currentOffset == -1)
     {
         return DefaultError::UnknownError("ftell failed");
@@ -309,12 +309,12 @@ Result<i64> FileToCFile::OffsetGet(FileOffsetMode offsetMode)
 
     ASSUME(offsetMode == FileOffsetMode::FromEnd);
 
-    if (fseek((FILE *)_file, 0, SEEK_END) != 0)
+    if (fseek(_file, 0, SEEK_END) != 0)
     {
         return DefaultError::UnknownError("fseek failed");
     }
 
-    i64 fileEnd = ftell((FILE *)_file);
+    i64 fileEnd = ftell(_file);
     if (fileEnd == -1)
     {
         return DefaultError::UnknownError("ftell failed");
@@ -322,7 +322,7 @@ Result<i64> FileToCFile::OffsetGet(FileOffsetMode offsetMode)
 
     i64 offsetDiff = currentOffset - fileEnd;
 
-    if (fseek((FILE *)_file, currentOffset, SEEK_SET) != 0)
+    if (fseek(_file, currentOffset, SEEK_SET) != 0)
     {
         return DefaultError::UnknownError("fseek failed");
     }
@@ -339,26 +339,26 @@ Result<i64> FileToCFile::OffsetSet(FileOffsetMode offsetMode, i64 offset)
     if (offsetMode == FileOffsetMode::FromBegin)
     {
         ASSUME(offset >= 0);
-        if (fseek((FILE *)_file, offset, SEEK_SET) == 0)
+        if (fseek(_file, offset, SEEK_SET) == 0)
         {
-            return ftell((FILE *)_file);
+            return ftell(_file);
         }
     }
 
     if (offsetMode == FileOffsetMode::FromCurrent)
     {
-        if (fseek((FILE *)_file, offset, SEEK_CUR) == 0)
+        if (fseek(_file, offset, SEEK_CUR) == 0)
         {
-            return ftell((FILE *)_file);
+            return ftell(_file);
         }
     }
 
     if (offsetMode == FileOffsetMode::FromEnd) // we need this check if an error occured in prior conditions
     {
         ASSUME(offset <= 0);
-        if (fseek((FILE *)_file, offset, SEEK_END) == 0)
+        if (fseek(_file, offset, SEEK_END) == 0)
         {
-            return ftell((FILE *)_file);
+            return ftell(_file);
         }
     }
 
@@ -369,24 +369,24 @@ Result<ui64> FileToCFile::SizeGet()
 {
     ASSUME(IsOpened());
 
-    i64 currentOffset = ftell((FILE *)_file);
+    i64 currentOffset = ftell(_file);
     if (currentOffset == -1)
     {
         return DefaultError::UnknownError("ftell failed");
     }
 
-    if (fseek((FILE *)_file, 0, SEEK_END) != 0)
+    if (fseek(_file, 0, SEEK_END) != 0)
     {
         return DefaultError::UnknownError("fseek failed");
     }
 
-    i64 endOfFile = ftell((FILE *)_file);
+    i64 endOfFile = ftell(_file);
     if (endOfFile == -1)
     {
         return DefaultError::UnknownError("ftell failed");
     }
 
-    if (fseek((FILE *)_file, currentOffset, SEEK_SET) != 0)
+    if (fseek(_file, currentOffset, SEEK_SET) != 0)
     {
         return DefaultError::UnknownError("fseek failed");
     }
@@ -400,13 +400,15 @@ Error<> FileToCFile::SizeSet(ui64 newSize)
 
     newSize += _offsetToStart;
 
+    fflush(_file);
+
 #ifdef PLATFORM_WINDOWS
-    if (_chsize(_fileno((FILE *)_file), newSize) != 0) // TODO: 2GB cap this way
+    if (_chsize(_fileno(_file), newSize) != 0) // TODO: 2GB cap this way
     {
         return DefaultError::UnknownError("_chsize failed");
     }
 #else
-    if (ftruncate(fileno((FILE *)_file), newSize) != 0)
+    if (ftruncate(fileno(_file), newSize) != 0)
     {
         return DefaultError::UnknownError("ftrancate failed");
     }

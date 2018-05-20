@@ -14,6 +14,8 @@ extern NOINLINE Error<> StdLib_FileError()
 
     switch (code)
     {
+    case ERROR_FILE_INVALID:
+        return DefaultError::InvalidArgument();
     case ERROR_FILE_NOT_FOUND:
     case ERROR_PATH_NOT_FOUND:
         return DefaultError::NotFound();

@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClCompile Include="File.cpp" />
     <ClCompile Include="FilePath.cpp" />
+    <ClCompile Include="MemoryMappedFile.cpp" />
     <ClCompile Include="Posix_File.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -161,6 +162,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="StdPlatformAbstractionLib.cpp" />
+    <ClCompile Include="Win_MemoryMappedFile.cpp" />
     <ClCompile Include="Win_VirtualMemory.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
