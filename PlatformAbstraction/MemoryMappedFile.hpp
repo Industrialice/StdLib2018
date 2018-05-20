@@ -27,6 +27,7 @@ namespace StdLib
         Error<> Open(File &file, uiw offset, uiw size, bool isCopyOnWrite);
         void Close();
         bool IsOpened() const;
+        void Flush() const;
         bool IsWritable() const;
         ui8 *Memory();
         const ui8 *Memory() const;

@@ -96,3 +96,10 @@ void MemoryMappedFile::Close()
         ASSUME(result);
     }
 }
+
+void MemoryMappedFile::Flush() const
+{
+    ASSUME(IsOpened());
+    BOOL result = FlushViewOfFile(_memory, _size);
+    ASSUME(result);
+}

@@ -368,7 +368,7 @@ static void FileRead(IFile &file)
     UnitTest<Equal>(file.OffsetGet().Unwrap(), 0);
 
     std::string_view str = file.IsSeekSupported() ? "test0123456789 trat" : "test0123456789 star";
-    UnitTest<Equal>(file.SizeGet().Unwrap(), str.length());
+    UnitTest<LeftGreaterEqual>(file.SizeGet().Unwrap(), str.length());
     ui32 read = 0;
     std::string target(str.length(), '\0');
     UnitTest<true>(file.Read(target.data(), (ui32)target.length(), &read));
@@ -630,9 +630,23 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
 
     UnitTest<true>(file.Flush());
     memcpy(mapping.Memory(), crapString.data(), crapString.length());
+    mapping.Flush();
     UnitTest<true>(file.OffsetSet(FileOffsetMode::FromBegin, 0));
     UnitTest<true>(file.Read(tempBuf, crapString.length()));
     UnitTest<true>(!memcmp(crapString.data(), tempBuf, crapString.length()));
+
+    file.Close();
+    UnitTest<true>(!memcmp(crapString.data(), mapping.Memory(), crapString.size()));
+
+    file = File(folderForTests / TSTR("memMapped2.txt"), FileOpenMode::CreateAlways, FileProcMode::Read + FileProcMode::Write);
+    UnitTest<true>(file.IsOpened());
+    FileWrite(file);
+    mapping = MemoryMappedFile(file, 0, uiw_max, false);
+    UnitTest<true>(mapping.IsOpened());
+    auto memoryStream = mapping.ToMemoryStream();
+    FileToMemoryStream memoryStreamFile = FileToMemoryStream(memoryStream, FileProcMode::Read);
+    UnitTest<true>(memoryStreamFile.IsOpened());
+    FileRead(memoryStreamFile);
 
     PRINTLOG("finished memory mapped file tests\n");
 }

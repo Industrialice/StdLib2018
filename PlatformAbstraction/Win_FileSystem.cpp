@@ -23,6 +23,7 @@ extern NOINLINE Error<> StdLib_FileError()
     case ERROR_WRITE_PROTECT:
     case ERROR_SHARING_VIOLATION:
     case ERROR_LOCK_VIOLATION:
+    case ERROR_USER_MAPPED_FILE:
         return DefaultError::AccessDenied();
     case ERROR_NOT_ENOUGH_MEMORY:
     case ERROR_OUTOFMEMORY:
