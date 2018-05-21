@@ -13,6 +13,7 @@ namespace StdLib
     using string_utf32 = std::basic_string<utf32char>;
 
 #ifdef PLATFORM_WINDOWS
+    using platformTimeCounter = i64;
     using fileHandle = void *;
     static const fileHandle fileHandle_undefined = (void *)-1;
     using pathChar = wchar_t;
@@ -27,6 +28,7 @@ namespace StdLib
 #define PTHSTR "%ls"
 #define TSTR(str) L##str
 #else
+    using platformTimeCounter = ui64;
     using fileHandle = int;
     static constexpr fileHandle fileHandle_undefined = -1;
     using pathChar = char;

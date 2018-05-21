@@ -21,10 +21,10 @@ namespace StdLib
     public:
         ~MemoryMappedFile();
         MemoryMappedFile() = default;
-        MemoryMappedFile(File &file, uiw offset, uiw size, bool isCopyOnWrite, Error<> *error = nullptr);
+        MemoryMappedFile(File &file, uiw offset, uiw size, bool isCopyOnWrite, bool isPrecommitSpace, Error<> *error = nullptr);
         MemoryMappedFile(MemoryMappedFile &&source);
         MemoryMappedFile &operator = (MemoryMappedFile &&source);
-        Error<> Open(File &file, uiw offset, uiw size, bool isCopyOnWrite);
+        Error<> Open(File &file, uiw offset, uiw size, bool isCopyOnWrite, bool isPrecommitSpace);
         void Close();
         bool IsOpened() const;
         void Flush() const;

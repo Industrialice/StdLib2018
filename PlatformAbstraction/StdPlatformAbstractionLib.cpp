@@ -10,10 +10,16 @@ namespace StdLib::FileInitialization
     void Initialize();
 }
 
+namespace StdLib::TimeMomentInitialization
+{
+    void Initialize();
+}
+
 void StdLib::Initialization::PlatformAbstractionInitialize(const PlatformAbstractionParameters &parameters)
 {
     CoreInitialize(parameters.coreParameters);
 
     VirtualMemory::Initialize();
     FileInitialization::Initialize();
+    TimeMomentInitialization::Initialize();
 }

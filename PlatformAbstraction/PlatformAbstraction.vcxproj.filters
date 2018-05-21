@@ -35,6 +35,9 @@
     <ClInclude Include="File.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TimeMoment.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win_VirtualMemory.cpp">
@@ -74,6 +77,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Posix_MemoryMappedFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Win_TimeMoment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Posix_TimeMoment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeMoment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

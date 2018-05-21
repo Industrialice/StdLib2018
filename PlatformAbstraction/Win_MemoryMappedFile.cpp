@@ -12,7 +12,7 @@ MemoryMappedFile::~MemoryMappedFile()
     Close();
 }
 
-Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWrite)
+Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWrite, bool isPrecommitSpace)
 {
     Close();
 
@@ -38,9 +38,10 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
     _size = std::min(size, fileSize);
 
     DWORD protection = (isCopyOnWrite || !(file._procMode && FileProcMode::Write)) ? PAGE_WRITECOPY : PAGE_READWRITE; // for memory mapped files PAGE_WRITECOPY is equivalent to PAGE_READONLY
+    DWORD commitMode = isPrecommitSpace ? SEC_COMMIT : SEC_RESERVE;
     LARGE_INTEGER sizeToMap;
     sizeToMap.QuadPart = (LONGLONG)_size;
-    _mappingHandle = CreateFileMappingW(file._handle, nullptr, protection, sizeToMap.HighPart, sizeToMap.LowPart, nullptr);
+    _mappingHandle = CreateFileMappingW(file._handle, nullptr, protection | commitMode, sizeToMap.HighPart, sizeToMap.LowPart, nullptr);
     if (_mappingHandle == NULL)
     {
         return StdLib_FileError();

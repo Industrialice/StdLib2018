@@ -4,6 +4,9 @@
 #include <FileSystem.hpp>
 #include <File.hpp>
 #include <MemoryMappedFile.hpp>
+#include <TimeMoment.hpp>
+#include <thread>
+#include <MathFunctions.hpp>
 
 #ifdef PLATFORM_WINDOWS
     #include <Windows.h>
@@ -410,7 +413,7 @@ static void FileAppendRead(IFile &file)
     UnitTest<Equal>(file.SizeGet().Unwrap(), str.length());
     std::string target(str.length(), '\0');
     ui32 read = 0;
-    UnitTest<true>(file.Read(target.data(), target.length(), &read));
+    UnitTest<true>(file.Read(target.data(), (ui32)target.length(), &read));
     UnitTest<Equal>(read, str.length());
     UnitTest<Equal>(target, str);
 }
@@ -609,10 +612,10 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
 
     File file = File(folderForTests / TSTR("memMapped.txt"), FileOpenMode::CreateAlways, FileProcMode::Read + FileProcMode::Write);
     UnitTest<true>(file.IsOpened());
-    UnitTest<true>(file.Write(crapString.data(), crapString.length()));
+    UnitTest<true>(file.Write(crapString.data(), (ui32)crapString.length()));
 
     Error<> error = DefaultError::Ok();
-    MemoryMappedFile mapping = MemoryMappedFile(file, 0, uiw_max, false, &error);
+    MemoryMappedFile mapping = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
     UnitTest<true>(!error && mapping.IsOpened());
     UnitTest<Equal>(mapping.Size(), crapString.length());
     UnitTest<Equal>(mapping.IsWritable(), true);
@@ -622,7 +625,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     UnitTest<false>(!memcmp(crapString.data(), mapping.Memory(), crapString.size()));
 
     UnitTest<true>(file.OffsetSet(FileOffsetMode::FromBegin, 0));
-    UnitTest<true>(file.Write(crapString.data(), crapString.length()));
+    UnitTest<true>(file.Write(crapString.data(), (ui32)crapString.length()));
 
     UnitTest<true>(!memcmp(crapString.data(), mapping.Memory(), crapString.size()));
     std::reverse(crapString.begin(), crapString.end());
@@ -632,7 +635,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     memcpy(mapping.Memory(), crapString.data(), crapString.length());
     mapping.Flush();
     UnitTest<true>(file.OffsetSet(FileOffsetMode::FromBegin, 0));
-    UnitTest<true>(file.Read(tempBuf, crapString.length()));
+    UnitTest<true>(file.Read(tempBuf, (ui32)crapString.length()));
     UnitTest<true>(!memcmp(crapString.data(), tempBuf, crapString.length()));
 
     file.Close();
@@ -641,7 +644,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     file = File(folderForTests / TSTR("memMapped2.txt"), FileOpenMode::CreateAlways, FileProcMode::Read + FileProcMode::Write);
     UnitTest<true>(file.IsOpened());
     FileWrite(file);
-    mapping = MemoryMappedFile(file, 0, uiw_max, false);
+    mapping = MemoryMappedFile(file, 0, uiw_max, false, false);
     UnitTest<true>(mapping.IsOpened());
     auto memoryStream = mapping.ToMemoryStream();
     FileToMemoryStream memoryStreamFile = FileToMemoryStream(memoryStream, FileProcMode::Read);
@@ -649,6 +652,32 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     FileRead(memoryStreamFile);
 
     PRINTLOG("finished memory mapped file tests\n");
+}
+
+static void TimeMomentTests()
+{
+    using namespace std::chrono_literals;
+    TimeMoment moment;
+    UnitTest<false>(moment.HasValue());
+    moment = TimeMoment::Now();
+    UnitTest<true>(moment.HasValue());
+    std::this_thread::sleep_for(10ms);
+    TimeMoment moment2 = TimeMoment::Now();
+    UnitTest<LeftLess>(moment, moment2);
+    UnitTest<LeftGreater>(moment2, moment);
+    UnitTest<LeftGreater>(moment + 0.5f, moment2);
+    UnitTest<LeftGreater>(moment, moment2 - 0.5f);
+    TimeDifference diff = moment2 - moment;
+    f32 diffSeconds = diff.ToSeconds();
+    UnitTest<LeftGreater>(diffSeconds, 0.0001f);
+    UnitTest<LeftGreaterEqual>(TimeMoment::Now(), moment2);
+    UnitTest<LeftGreaterEqual>(TimeMoment::Now(), moment);
+    UnitTest<true>(EqualsWithEpsilon(((moment + diff) - moment2).ToSeconds(), 0.0f, 0.0001f));
+    UnitTest<true>(EqualsWithEpsilon(((moment2 - diff) - moment).ToSeconds(), 0.0f, 0.0001f));
+    TimeDifference refDiff = 0.5f;
+    UnitTest<true>(EqualsWithEpsilon(refDiff.ToSeconds(), 0.5f, 0.0001f));
+
+    PRINTLOG("finished time moment tests\n");
 }
 
 int main(int argc, const char **argv)
@@ -685,6 +714,7 @@ int main(int argc, const char **argv)
     TestFileSharing<File>(folderForTests);
     TestFiles(folderForTests);
     TestMemoryMappedFile(folderForTests);
+    TimeMomentTests();
 
     UnitTest<false>(FileSystem::Remove(folderForTests));
 

@@ -3,9 +3,9 @@
 
 using namespace StdLib;
 
-MemoryMappedFile::MemoryMappedFile(File &file, uiw offset, uiw size, bool isCopyOnWrite, Error<> *error)
+MemoryMappedFile::MemoryMappedFile(File &file, uiw offset, uiw size, bool isCopyOnWrite, bool isPrecommitSpace, Error<> *error)
 {
-    Error<> result = Open(file, offset, size, isCopyOnWrite);
+    Error<> result = Open(file, offset, size, isCopyOnWrite, isPrecommitSpace);
     if (error) *error = result;
 }
 

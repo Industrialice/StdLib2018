@@ -11,7 +11,7 @@ MemoryMappedFile::~MemoryMappedFile()
     Close();
 }
 
-Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWrite)
+Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWrite, bool isPrecommitSpace)
 {
     Close();
 
@@ -48,6 +48,7 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
     }
 
     int flags = isCopyOnWrite ? MAP_PRIVATE : MAP_SHARED;
+    flags |= isPrecommitSpace ? MAP_POPULATE : MAP_NORESERVE;
 
     _memory = mmap(nullptr, _size, prot, flags, file._handle, offset);
     if (!_memory)
