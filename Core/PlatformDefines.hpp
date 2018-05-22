@@ -12,6 +12,10 @@
 
 // TODO: check for multiple defined platforms
 
+#ifndef PLATFORM_WINDOWS
+    #include <signal.h>
+#endif
+
 namespace StdLib
 {
 
@@ -20,7 +24,6 @@ namespace StdLib
     constexpr ui32 MaxPathLength = 260;
     constexpr ui32 MaxFileNameLength = 256;
 #elif defined(PLATFORM_ANDROID) || defined(PLATFORM_IOS) || defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS) || defined(PLATFORM_EMSCRIPTEN)
-    #include <signal.h>
     #define PLATFORM_POSIX
     #define _RAISE_EXCEPTION raise(SIGTRAP)
     constexpr ui32 MaxPathLength = 512;

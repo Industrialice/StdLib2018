@@ -10,13 +10,25 @@ namespace StdLib
     {
         friend TimeDifference;
 
-        platformTimeCounter _counter{};
+        i64 _counter = i64_min;
 
     public:
         TimeDifference64() = default;
         TimeDifference64(f64 seconds);
 
         f64 ToSeconds() const;
+
+        TimeDifference64 operator - (const TimeDifference64 &other) const;
+        TimeDifference64 operator + (const TimeDifference64 &other) const;
+        TimeDifference64 &operator -= (const TimeDifference64 &other);
+        TimeDifference64 &operator += (const TimeDifference64 &other);
+
+        bool operator < (const TimeDifference64 &other) const;
+        bool operator <= (const TimeDifference64 &other) const;
+        bool operator > (const TimeDifference64 &other) const;
+        bool operator >= (const TimeDifference64 &other) const;
+        bool operator == (const TimeDifference64 &other) const;
+        bool operator != (const TimeDifference64 &other) const;
 
         TimeDifference As32() const;
         explicit operator TimeDifference() const;
@@ -27,13 +39,25 @@ namespace StdLib
         friend class TimeMoment;
         friend TimeDifference64;
          
-        platformTimeCounter _counter{};
+        i64 _counter = i64_min;
 
     public:
         TimeDifference() = default;
         TimeDifference(f32 seconds);
 
         f32 ToSeconds() const;
+
+        TimeDifference operator - (const TimeDifference &other) const;
+        TimeDifference operator + (const TimeDifference &other) const;
+        TimeDifference &operator -= (const TimeDifference &other);
+        TimeDifference &operator += (const TimeDifference &other);
+
+        bool operator < (const TimeDifference &other) const;
+        bool operator <= (const TimeDifference &other) const;
+        bool operator > (const TimeDifference &other) const;
+        bool operator >= (const TimeDifference &other) const;
+        bool operator == (const TimeDifference &other) const;
+        bool operator != (const TimeDifference &other) const;
 
         TimeDifference64 As64() const;
         explicit operator TimeDifference64() const;
@@ -44,7 +68,7 @@ namespace StdLib
     // use TimeMoment::New() to create a TimeMoment for the current moment
     class TimeMoment
     {
-        platformTimeCounter _counter{};
+        i64 _counter = i64_min;
 
     public:
         TimeMoment() = default;

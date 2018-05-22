@@ -19,11 +19,13 @@ namespace StdLib
         FilePath(pathStringView path) : _path(path) {}
         FilePath(const pathChar *path) : _path(path) {}
         FilePath(const pathString &path) : _path(path) {}
+        FilePath(pathString &&path) : _path(std::move(path)) {}
 
         // the source will be simply copied, it won't be treated as UTF-8
         static FilePath FromChar(std::string_view path);
         static FilePath FromChar(const char *path);
         static FilePath FromChar(const std::string &path);
+        static FilePath FromChar(std::string &&path);
 
         pathStringView PlatformPath() const { ASSUME(!_path[_path.size()]); return _path; } // always null-terminated
 
@@ -61,8 +63,9 @@ namespace StdLib
         friend FilePath operator / (const pathString &left, const FilePath &right) { return FilePath{left} / right; }
 
         FilePath &operator = (pathStringView path) { _path = path; return *this; }
-        FilePath &operator = (const pathString &path) { _path = path; return *this; }
         FilePath &operator = (const pathChar *path) { _path = path; return *this; }
+        FilePath &operator = (const pathString &path) { _path = path; return *this; }
+        FilePath &operator = (pathString &&path) { _path = std::move(path); return *this; }
 
         bool operator == (pathStringView path) const { return _path == path; }
         bool operator == (const pathChar *path) const { return _path == path; }
@@ -78,9 +81,9 @@ namespace StdLib
 
         bool IsEmpty() const;
         uiw Length() const;
-        FilePath &Normalize(); /* replaces \ with / on Windows, does nothing on POSIX */
+        FilePath &Normalize();
         FilePath ToNormalized() const;
-        bool IsValid() const; // false if empty, too big or isn't supported by the platform
+        bool IsValid() const; // false if too big or isn't supported by the platform
 
         void MakeAbsolute();
         FilePath ToAbsolute() const;

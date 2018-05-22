@@ -335,6 +335,16 @@ Error<> File::SizeSet(ui64 newSize)
     return DefaultError::Ok();
 }
 
+void File::FlushSystemCaches()
+{
+    ASSUME(IsOpened());
+    if (_procMode && FileProcMode::Write)
+    {
+        BOOL result = FlushFileBuffers(_handle);
+        ASSUME(result);
+    }
+}
+
 bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
 {
     ASSUME(IsOpened());

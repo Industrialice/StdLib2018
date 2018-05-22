@@ -9,7 +9,11 @@ namespace StdLib::_Private
     #define HARDBREAK _RAISE_EXCEPTION
     #define SOFTBREAK _Private::SoftBreak(__FILE__, __LINE__, __COUNTER__)
     #define UNREACHABLE _RAISE_EXCEPTION
-    #define ASSUME(condition) do { if (!(condition)) HARDBREAK; } while(0)
+    #ifdef PLATFORM_EMSCRIPTEN
+        #define ASSUME(condition) do { if (!(condition)) { printf("!!!ASSUMPTION %s FAILED!!!\n", TOSTR(condition)); HARDBREAK; } } while(0)
+    #else
+        #define ASSUME(condition) do { if (!(condition)) HARDBREAK; } while(0)
+    #endif
 #else
     #define HARDBREAK _UNREACHABLE
     #define SOFTBREAK

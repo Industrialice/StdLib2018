@@ -38,6 +38,8 @@ extern NOINLINE Error<> StdLib_FileError()
 
 static Error<> RemoveFileInternal(const wchar_t *pnn);
 static Error<> RemoveFolderInternal(const wchar_t *pnn);
+static Error<> CopyFileInternal(const wchar_t *sourcePnn, const wchar_t *targetPnn);
+static Error<> CopyFolderInternal(const wchar_t *sourcePnn, const wchar_t *targetPnn);
 
 NOINLINE Error<> FileSystem::MoveTo(const FilePath &sourcePnn, const FilePath &targetPnn, bool isReplace)
 {
@@ -70,19 +72,19 @@ NOINLINE Error<> FileSystem::MoveTo(const FilePath &sourcePnn, const FilePath &t
 
 Error<> FileSystem::CopyTo(const FilePath &sourcePnn, const FilePath &targetPnn, bool isReplace)
 {
-    if (!sourcePnn.IsValid() || !targetPnn.IsValid())
+    auto classifyResult = Classify(sourcePnn);
+    if (!classifyResult)
     {
-        return DefaultError::InvalidArgument("source or target path isn't valid");
+        return classifyResult.GetError();
     }
 
-   // TODO: Windows 7, Windows Server 2008 R2, Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP: Security resource properties for the existing file are not copied to the new file until Windows 8 and Windows Server 2012.
-    BOOL result = CopyFileW(sourcePnn.PlatformPath().data(), targetPnn.PlatformPath().data(), isReplace ? FALSE : TRUE);
-    if (result == FALSE)
+    if (!isReplace && Classify(targetPnn))
     {
-        return StdLib_FileError();
+        return DefaultError::AlreadyExists();
     }
 
-    return DefaultError::Ok();
+    auto funcPtr = classifyResult.Unwrap() == ObjectType::File ? CopyFileInternal : CopyFolderInternal;
+    return funcPtr(sourcePnn.PlatformPath().data(), targetPnn.PlatformPath().data());
 }
 
 auto FileSystem::Classify(const FilePath &sourcePnn) -> Result<ObjectType>
@@ -386,4 +388,22 @@ Error<> RemoveFolderInternal(const wchar_t *pnn)
     }
 
     return DefaultError::Ok();
+}
+
+Error<> CopyFileInternal(const wchar_t *sourcePnn, const wchar_t *targetPnn)
+{    
+    // TODO: Windows 7, Windows Server 2008 R2, Windows Server 2008, Windows Vista, Windows Server 2003, and Windows XP: Security resource properties for the existing file are not copied to the new file until Windows 8 and Windows Server 2012.
+    BOOL result = CopyFileW(sourcePnn, targetPnn, FALSE);
+    if (result == FALSE)
+    {
+        return StdLib_FileError();
+    }
+
+    return DefaultError::Ok();
+}
+
+Error<> CopyFolderInternal(const wchar_t *sourcePnn, const wchar_t *targetPnn)
+{
+    NOIMPL;
+    return DefaultError::NotImplemented();
 }

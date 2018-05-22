@@ -4,7 +4,7 @@
 
 using namespace StdLib;
 
-static platformTimeCounter CurrentTime();
+static i64 CurrentTime();
 
 namespace
 {
@@ -16,7 +16,7 @@ namespace
 
 TimeDifference64::TimeDifference64(f64 seconds)
 {
-    _counter = (ui64)(seconds * Sec64ToCounter);
+    _counter = (i64)(seconds * Sec64ToCounter);
 }
 
 f64 TimeDifference64::ToSeconds() const
@@ -26,7 +26,7 @@ f64 TimeDifference64::ToSeconds() const
 
 TimeDifference::TimeDifference(f32 seconds)
 {
-    _counter = (ui64)(seconds * Sec32ToCounter);
+    _counter = (i64)(seconds * Sec32ToCounter);
 }
 
 f32 TimeDifference::ToSeconds() const
@@ -47,9 +47,13 @@ namespace StdLib::TimeMomentInitialization
     {}
 }
 
-platformTimeCounter CurrentTime()
+i64 CurrentTime()
 {
     timespec t;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t);
-    return t.tv_sec * 100000000ULL + (t.tv_nsec / 10);
+    clockid_t id = CLOCK_MONOTONIC_RAW;
+#ifdef PLATFORM_EMSCRIPTEN
+    id = CLOCK_MONOTONIC;
+#endif
+    clock_gettime(id, &t);
+    return t.tv_sec * 100000000ULL + (t.tv_nsec / 10); // TODO: possible overflow?
 }

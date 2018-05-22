@@ -289,6 +289,13 @@ Error<> File::SizeSet(ui64 newSize)
     return DefaultError::Ok();
 }
 
+void File::FlushSystemCaches()
+{
+    ASSUME(IsOpened());
+    int result = fsync(_handle);
+    ASSUME(result == 0);
+}
+
 bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
 {
     ASSUME(IsOpened());

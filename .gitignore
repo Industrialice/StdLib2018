@@ -19,6 +19,7 @@ Debug_x64/
 Debug_Win32/
 Release_x64/
 Release_Win32/
+EmscriptenProject/stdlib.js
 
 # Test folders
 UnitTests/FileTestsFolder/

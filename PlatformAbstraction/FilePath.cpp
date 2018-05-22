@@ -27,6 +27,11 @@ FilePath FilePath::FromChar(const std::string &path)
     return FromChar(std::string_view{path});
 }
 
+FilePath FilePath::FromChar(std::string &&path)
+{
+    return FromChar(std::string_view{path});
+}
+
 FilePath &FilePath::Normalize()
 {
     bool isPrevDelim = false;
@@ -50,6 +55,10 @@ FilePath &FilePath::Normalize()
     }
 
     _path.resize(target);
+    if (_path.size() && _path.back() == L'/')
+    {
+        _path.pop_back();
+    }
 
     return *this;
 }
@@ -63,11 +72,6 @@ FilePath FilePath::ToNormalized() const
 
 bool FilePath::IsValid() const
 {
-    if (_path.empty())
-    {
-        return false;
-    }
-
     if (_path.length() >= maxPathLength)
     {
         return false;
@@ -124,6 +128,11 @@ FilePath FilePath::FromChar(const std::string &path)
     return FilePath(path);
 }
 
+FilePath FilePath::FromChar(std::string &&path)
+{
+    return FilePath(std::move(path));
+}
+
 FilePath &FilePath::Normalize()
 {
     bool isPrevDelim = false;
@@ -147,17 +156,16 @@ FilePath &FilePath::Normalize()
     }
 
     _path.resize(target);
+    if (_path.size() && _path.back() == '/')
+    {
+        _path.pop_back();
+    }
 
     return *this;
 }
 
 bool FilePath::IsValid() const
 {
-    if (_path.empty())
-    {
-        return false;
-    }
-
     if (_path.length() >= maxPathLength)
     {
         return false;

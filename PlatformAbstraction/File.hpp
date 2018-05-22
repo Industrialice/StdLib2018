@@ -13,7 +13,7 @@ namespace StdLib
 
     public:
 
-    #ifdef ENABLE_FILE_STATS
+    #ifdef ENABLE_FILE_STATS // TODO: add check that will ensure that header/cpp are built with the same define
         struct FileStats
         {
             using counter_t = ui64;
@@ -85,6 +85,7 @@ namespace StdLib
         MUST_BE_OPENED virtual FileCacheMode CacheMode() const override;
 
     private:
+        void FlushSystemCaches();
         bool WriteToFile(const void *source, ui32 len, ui32 *written);
         bool ReadFromFile(void *target, ui32 len, ui32 *read);
         bool CancelCachedRead();

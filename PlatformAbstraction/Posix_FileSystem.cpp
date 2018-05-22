@@ -49,6 +49,8 @@ extern NOINLINE Error<> StdLib_FileError()
 
 static Error<> RemoveFileInternal(const char *pnn);
 static Error<> RemoveFolderInternal(const char *pnn);
+static Error<> CopyFileInternal(const char *sourcePnn, const char *targetPnn);
+static Error<> CopyFolderInternal(const char *sourcePnn, const char *targetPnn);
 
 NOINLINE Error<> FileSystem::MoveTo(const FilePath &sourcePnn, const FilePath &targetPnn, bool isReplace)
 {
@@ -70,46 +72,19 @@ NOINLINE Error<> FileSystem::MoveTo(const FilePath &sourcePnn, const FilePath &t
 
 NOINLINE Error<> FileSystem::CopyTo(const FilePath &sourcePnn, const FilePath &targetPnn, bool isReplace)
 {
-    if (!isReplace)
+    auto classifyResult = Classify(sourcePnn);
+    if (!classifyResult)
     {
-        if (Classify(targetPnn))
-        {
-            return DefaultError::AlreadyExists("object at target path already exists");
-        }
+        return classifyResult.GetError();
     }
 
-    int sourceFile = open(sourcePnn.PlatformPath().data(), O_RDONLY, 0);
-    if (sourceFile == -1)
+    if (!isReplace && Classify(targetPnn))
     {
-        return StdLib_FileError();
+        return DefaultError::AlreadyExists();
     }
 
-    struct stat stat_source;
-    if (fstat(sourceFile, &stat_source) != 0)
-    {
-        close(sourceFile);
-        return StdLib_FileError();
-    }
-
-    mode_t processMask = umask(0);
-    int targetFile = open(targetPnn.PlatformPath().data(), O_WRONLY | O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO);
-    umask(processMask);
-    if (targetFile == -1)
-    {
-        close(sourceFile);
-        return StdLib_FileError();
-    }
-
-    int sendFileResult = sendfile(targetFile, sourceFile, 0, stat_source.st_size);
-    close(sourceFile);
-    close(targetFile);
-
-    if (sendFileResult == -1)
-    {
-        return StdLib_FileError();
-    }
-
-    return DefaultError::Ok();
+    auto funcPtr = classifyResult.Unwrap() == ObjectType::File ? CopyFileInternal : CopyFolderInternal;
+    return funcPtr(sourcePnn.PlatformPath().data(), targetPnn.PlatformPath().data());
 }
 
 auto FileSystem::Classify(const FilePath &sourcePnn) -> Result<ObjectType>
@@ -284,6 +259,7 @@ NOINLINE Error<> FileSystem::CreateNewFolder(const FilePath &where, const FilePa
     FilePath fullPath = where;
     fullPath.AddLevel();
     fullPath += name;
+    fullPath.Normalize();
 
     mode_t processMask = umask(0);
 
@@ -428,4 +404,74 @@ Error<> RemoveFolderInternal(const char *pnn)
     }
 
     return DefaultError::Ok();
+}
+
+Error<> CopyFileInternal(const char *sourcePnn, const char *targetPnn)
+{
+    int sourceFile = open(sourcePnn, O_RDONLY, 0);
+    if (sourceFile == -1)
+    {
+        return StdLib_FileError();
+    }
+
+    struct stat64 statSource;
+    if (fstat64(sourceFile, &statSource) != 0)
+    {
+        close(sourceFile);
+        return StdLib_FileError();
+    }
+
+    mode_t processMask = umask(0);
+    int targetFile = open(targetPnn, O_WRONLY | O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO);
+    umask(processMask);
+    if (targetFile == -1)
+    {
+        close(sourceFile);
+        return StdLib_FileError();
+    }
+
+    int copyFileResult = 0;
+
+#ifdef PLATFORM_EMSCRIPTEN
+    char localBuffer[8192];
+    auto sizeLeft = statSource.st_size;
+    while (sizeLeft > 0)
+    {
+        auto actuallyRead = read(sourceFile, localBuffer, Funcs::CountOf(localBuffer));
+        if (actuallyRead == 0)
+        {
+            break;
+        }
+        if (actuallyRead == (ssize_t)-1)
+        {
+            copyFileResult = -1;
+            break;
+        }
+        auto actuallyWritten = write(targetFile, localBuffer, actuallyRead);
+        if (actuallyWritten == (ssize_t)-1 || actuallyWritten < actuallyRead)
+        {
+            copyFileResult = -1;
+            break;
+        }
+        ASSUME(sizeLeft >= actuallyRead);
+        sizeLeft -= actuallyRead;
+    }
+#else
+    copyFileResult = sendfile(targetFile, sourceFile, 0, statSource.st_size);
+#endif
+    close(sourceFile);
+    close(targetFile);
+
+    if (copyFileResult == -1)
+    {
+        return StdLib_FileError();
+    }
+
+    return DefaultError::Ok();
+}
+
+Error<> CopyFolderInternal(const char *sourcePnn, const char *targetPnn)
+{
+    NOIMPL;
+    return DefaultError::NotImplemented();
 }

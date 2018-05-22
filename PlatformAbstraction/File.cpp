@@ -220,6 +220,7 @@ NOINLINE bool File::Flush()
 {
     ASSUME(IsOpened());
     ASSUME(_bufferPos <= _bufferSize);
+    FlushSystemCaches();
     if (_readBufferCurrentSize)
     {
         return true;
