@@ -5,6 +5,7 @@
 #include "Allocators.hpp"
 #include "IMemoryStream.hpp"
 #include "IFile.hpp"
+#include "DataHolder.hpp"
 
 namespace StdLib::Initialization
 {

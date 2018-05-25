@@ -121,6 +121,7 @@ bool FileToMemoryStream::Write(const void *source, ui32 len, ui32 *written)
 bool FileToMemoryStream::Flush()
 {
     ASSUME(_stream);
+    _stream->Flush();
     return true;
 }
 

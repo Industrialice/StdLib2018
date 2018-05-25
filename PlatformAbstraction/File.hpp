@@ -5,7 +5,7 @@
 
 namespace StdLib
 {
-#define MUST_BE_OPENED
+    #define MUST_BE_OPENED
 
     class File : public IFile
     {
@@ -13,7 +13,7 @@ namespace StdLib
 
     public:
 
-    #ifdef ENABLE_FILE_STATS // TODO: add check that will ensure that header/cpp are built with the same define
+    #if ENABLE_FILE_STATS
         struct FileStats
         {
             using counter_t = ui64;
@@ -34,10 +34,10 @@ namespace StdLib
 
     private:
         fileHandle _handle = fileHandle_undefined;
-    #ifdef ENABLE_FILE_STATS
+    #if ENABLE_FILE_STATS
         FileStats _stats{};
     #endif
-        ui64 _offsetToStart; // used only when you're using ProcMode::Append, the file will be opened as usual, then the offset will be added so you can't work with the existing part of the file
+        ui64 _offsetToStart = 0; // used only when you're using ProcMode::Append, the file will be opened as usual, then the offset will be added so you can't work with the existing part of the file
         bufferType _internalBuffer = {nullptr, nullptr};
         ui32 _bufferSize = 0;
         ui32 _bufferPos = 0;
@@ -60,7 +60,7 @@ namespace StdLib
         File &operator = (File &&other);
         [[nodiscard]] Error<> Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None);
         [[nodiscard]] Error<> Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership);
-    #ifdef ENABLE_FILE_STATS
+    #if ENABLE_FILE_STATS
         MUST_BE_OPENED [[nodiscard]] FileStats StatsGet() const;
         MUST_BE_OPENED void StatsReset();
     #endif
@@ -73,16 +73,16 @@ namespace StdLib
         MUST_BE_OPENED virtual bool Read(void *target, ui32 len, ui32 *read = 0) override;
         MUST_BE_OPENED virtual bool Write(const void *source, ui32 len, ui32 *written = 0) override;
         MUST_BE_OPENED virtual bool Flush() override;
-        virtual bool IsBufferingSupported() const override;
+        [[nodiscard]] virtual bool IsBufferingSupported() const override;
         virtual bool BufferSet(ui32 size, bufferType &&buffer = {nullptr, nullptr}) override;
-        virtual std::pair<ui32, const void *> BufferGet() const override;
-        virtual bool IsSeekSupported() const override;
-        MUST_BE_OPENED virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) override;
+        [[nodiscard]] virtual std::pair<ui32, const void *> BufferGet() const override;
+        [[nodiscard]] virtual bool IsSeekSupported() const override;
+        MUST_BE_OPENED [[nodiscard]] virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) override;
         MUST_BE_OPENED virtual Result<i64> OffsetSet(FileOffsetMode offsetMode, i64 offset) override;
-        MUST_BE_OPENED virtual Result<ui64> SizeGet() override;
+        MUST_BE_OPENED [[nodiscard]] virtual Result<ui64> SizeGet() override;
         MUST_BE_OPENED virtual Error<> SizeSet(ui64 newSize) override;
-        MUST_BE_OPENED virtual FileProcMode ProcMode() const override;
-        MUST_BE_OPENED virtual FileCacheMode CacheMode() const override;
+        MUST_BE_OPENED [[nodiscard]]virtual FileProcMode ProcMode() const override;
+        MUST_BE_OPENED [[nodiscard]]virtual FileCacheMode CacheMode() const override;
 
     private:
         void FlushSystemCaches();
@@ -94,3 +94,9 @@ namespace StdLib
 
 #undef MUST_BE_OPENED
 }
+
+#if ENABLE_FILE_STATS
+    #pragma detect_mismatch("ENABLE_FILE_STATS", "1")
+#else
+    #pragma detect_mismatch("ENABLE_FILE_STATS", "0")
+#endif

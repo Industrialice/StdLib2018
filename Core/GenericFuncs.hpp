@@ -54,7 +54,7 @@ namespace StdLib::Funcs
         return (R)1 << pos;
     }
 
-    template <typename T> [[nodiscard]] ui32 MostSignificantNonZeroBit(T value)
+    template <typename T> [[nodiscard]] ui32 IndexOfMostSignificantNonZeroBit(T value)
     {
         static_assert(std::is_integral_v<T>, "Cannot operate on non-integral types");
         ui32 result;
@@ -72,7 +72,7 @@ namespace StdLib::Funcs
         return result;
     }
 
-    template <typename T> [[nodiscard]] ui32 LeastSignificantNonZeroBit(T value)
+    template <typename T> [[nodiscard]] ui32 IndexOfLeastSignificantNonZeroBit(T value)
     {
         static_assert(std::is_integral_v<T>, "Cannot operate on non-integral types");
         ui32 result;
@@ -87,6 +87,8 @@ namespace StdLib::Funcs
         }
         return result;
     }
+
+    // TODO: IndexOfMostSignificantZeroBit and IndexOfLeastSignificantZeroBit
 
     template <typename T> [[nodiscard]] T ChangeEndianness(T value)
     {

@@ -2,6 +2,7 @@
 
 #include "CoreHeader.hpp"
 #include "Allocators.hpp"
+#include "DataHolder.hpp"
 
 namespace StdLib
 {
@@ -10,7 +11,8 @@ namespace StdLib
         virtual ~IMemoryStream() = default;
 
         [[nodiscard]] virtual uiw Size() const = 0;
-        [[nodiscard]] virtual uiw Resize(uiw newSize) = 0; // returns final size, it can be lower than newSize if the stream had failed to allocate enough memory
+        [[nodiscard]] virtual uiw Resize(uiw newSize) = 0; // returns final size, it can be lower than newSize if the stream had failed to allocate enough memory; memory address and size might change after this call
+        virtual void Flush() = 0; // memory address and size might change after this call
         [[nodiscard]] virtual ui8 *Memory() = 0;
         [[nodiscard]] virtual const ui8 *Memory() const = 0;
         [[nodiscard]] virtual const ui8 *CMemory() const = 0;
@@ -42,6 +44,9 @@ namespace StdLib
             return _currentSize;
         }
 
+        virtual void Flush() override
+        {}
+
         [[nodiscard]] virtual ui8 *Memory() override
         {
             return _buffer;
@@ -69,7 +74,7 @@ namespace StdLib
     };
 
     // uses an externally provided buffer
-    class MemoryStreamFixedExt final : public IMemoryStream
+    class MemoryStreamFixedExternal final : public IMemoryStream
     {
         ui8 *_writeBuffer = nullptr;
         const ui8 *_readBuffer = nullptr;
@@ -77,12 +82,12 @@ namespace StdLib
         uiw _currentSize = 0;
 
     public:
-        MemoryStreamFixedExt() = default;
+        MemoryStreamFixedExternal() = default;
 
-        MemoryStreamFixedExt(void *buffer, uiw maxSize, uiw currentSize = 0) : _writeBuffer((ui8 *)buffer), _readBuffer((ui8 *)buffer), _maxSize(maxSize), _currentSize(currentSize)
+        MemoryStreamFixedExternal(void *buffer, uiw maxSize, uiw currentSize = 0) : _writeBuffer((ui8 *)buffer), _readBuffer((ui8 *)buffer), _maxSize(maxSize), _currentSize(currentSize)
         {}
 
-        MemoryStreamFixedExt(const void *buffer, uiw maxSize, uiw currentSize = 0) : _writeBuffer(nullptr), _readBuffer((ui8 *)buffer), _maxSize(maxSize), _currentSize(currentSize)
+        MemoryStreamFixedExternal(const void *buffer, uiw maxSize, uiw currentSize = 0) : _writeBuffer(nullptr), _readBuffer((ui8 *)buffer), _maxSize(maxSize), _currentSize(currentSize)
         {}
 
         void SetBuffer(void *buffer, uiw maxSize, uiw currentSize = 0)
@@ -115,6 +120,9 @@ namespace StdLib
             _currentSize = newSize;
             return _currentSize;
         }
+
+        virtual void Flush() override
+        {}
 
         [[nodiscard]] virtual ui8 *Memory() override
         {
@@ -173,6 +181,9 @@ namespace StdLib
             return _currentSize;
         }
 
+        virtual void Flush() override
+        {}
+
         [[nodiscard]] virtual ui8 *Memory() override
         {
             return _buffer;
@@ -196,6 +207,100 @@ namespace StdLib
         [[nodiscard]] virtual bool IsWritable() const override
         {
             return true;
+        }
+    };
+
+    template <uiw LocalSize> class MemoryStreamFromDataHolder final : public IMemoryStream
+    {
+        using holderType = DataHolder<LocalSize>;
+
+        holderType _data;
+        const ui8 *(*_provide)(const holderType &data);
+        void(*_flush)(holderType &data);
+        void(*_destroy)(holderType &data);
+        uiw _size;
+
+    private:
+        MemoryStreamFromDataHolder() = delete;
+        MemoryStreamFromDataHolder(holderType &&data, uiw size, decltype(_provide) provide, decltype(_flush) flush, decltype(_destroy) destroy) : _data(std::move(data)), _size(size), _provide(provide), _flush(flush), _destroy(destroy) {}
+
+    public:
+        static constexpr uiw localSize = LocalSize;
+
+        virtual ~MemoryStreamFromDataHolder() override
+        {
+            if (_destroy)
+            {
+                _destroy(_data);
+            }
+        }
+
+        MemoryStreamFromDataHolder(MemoryStreamFromDataHolder &&other) : _data(move(other._data)), _size(other._size), _provide(other._provide), _destroy(other._destroy)
+        {
+            other._destroy = nullptr;
+        }
+
+        MemoryStreamFromDataHolder &operator = (MemoryStreamFromDataHolder &&other)
+        {
+            _data = move(other._data);
+            _size = other._size;
+            _provide = other._provide;
+            _destroy = other._destroy;
+            other._destroy = nullptr;
+        }
+
+        [[nodiscard]] virtual uiw Size() const override
+        {
+            return _size;
+        }
+
+        [[nodiscard]] virtual uiw Resize(uiw newSize) override
+        {
+            return _size;
+        }
+
+        virtual void Flush() override
+        {
+            _flush(_data);
+        }
+
+        [[nodiscard]] virtual ui8 *Memory() override
+        {
+            SOFTBREAK;
+            return nullptr;
+        }
+
+        [[nodiscard]] virtual const ui8 *Memory() const override
+        {
+            return _provide(_data);
+        }
+
+        [[nodiscard]] virtual const ui8 *CMemory() const override
+        {
+            return _provide(_data);
+        }
+
+        [[nodiscard]] virtual bool IsReadable() const override
+        {
+            return true;
+        }
+
+        [[nodiscard]] virtual bool IsWritable() const override
+        {
+            return false;
+        }
+
+        template <typename T> static MemoryStreamFromDataHolder New(holderType &&data, uiw size, decltype(_provide) provide, decltype(_flush) flush = nullptr)
+        {
+            auto destroy = [](holderType &data)
+            {
+                data.template Destroy<T>();
+            };
+            if (!flush)
+            {
+                flush = [](holderType &) {};
+            }
+            return MemoryStreamFromDataHolder(std::move(data), size, provide, flush, destroy);
         }
     };
 

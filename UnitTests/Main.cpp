@@ -28,7 +28,7 @@ using namespace Funcs;
 enum UnitTestType
 {
     LeftLesser,
-    LeftLessEqual,
+    LeftLesserEqual,
     Equal,
     LeftGreaterEqual,
     LeftGreater,
@@ -47,7 +47,7 @@ template <typename T> void Assume(T &&condition, const char *condStr, const char
 template <UnitTestType testType, typename T, typename E> void UnitTest(T &&left, E &&right, const char *condStr, const char *argsStr, int line, const char *file)
 {
     if constexpr (testType == LeftLesser) Assume(left < right, condStr, argsStr, line, file);
-    else if constexpr (testType == LeftLessEqual) Assume(left <= right, condStr, argsStr, line, file);
+    else if constexpr (testType == LeftLesserEqual) Assume(left <= right, condStr, argsStr, line, file);
     else if constexpr (testType == Equal) Assume(left == right, condStr, argsStr, line, file);
     else if constexpr (testType == LeftGreaterEqual) Assume(left >= right, condStr, argsStr, line, file);
     else if constexpr (testType == LeftGreater) Assume(left > right, condStr, argsStr, line, file);
@@ -84,32 +84,32 @@ static void SetBitTests()
 static void SignificantBitTests()
 {
     ui64 ui64value = 16384;
-    UTest(Equal, MostSignificantNonZeroBit(ui64value), 14u);
-    UTest(Equal, LeastSignificantNonZeroBit(ui64value), 14u);
+    UTest(Equal, IndexOfMostSignificantNonZeroBit(ui64value), 14u);
+    UTest(Equal, IndexOfLeastSignificantNonZeroBit(ui64value), 14u);
     ui64value = 1ULL << 63;
-    UTest(Equal, MostSignificantNonZeroBit(ui64value), 63u);
-    UTest(Equal, LeastSignificantNonZeroBit(ui64value), 63u);
+    UTest(Equal, IndexOfMostSignificantNonZeroBit(ui64value), 63u);
+    UTest(Equal, IndexOfLeastSignificantNonZeroBit(ui64value), 63u);
 
     i64 i64value = i64_min;
-    UTest(Equal, MostSignificantNonZeroBit(i64value), 63u);
-    UTest(Equal, LeastSignificantNonZeroBit(i64value), 63u);
+    UTest(Equal, IndexOfMostSignificantNonZeroBit(i64value), 63u);
+    UTest(Equal, IndexOfLeastSignificantNonZeroBit(i64value), 63u);
     i64value = 15;
-    UTest(Equal, MostSignificantNonZeroBit(i64value), 3u);
-    UTest(Equal, LeastSignificantNonZeroBit(i64value), 0u);
+    UTest(Equal, IndexOfMostSignificantNonZeroBit(i64value), 3u);
+    UTest(Equal, IndexOfLeastSignificantNonZeroBit(i64value), 0u);
 
     ui8 ui8value = 128;
-    UTest(Equal, MostSignificantNonZeroBit(ui8value), 7u);
-    UTest(Equal, LeastSignificantNonZeroBit(ui8value), 7u);
+    UTest(Equal, IndexOfMostSignificantNonZeroBit(ui8value), 7u);
+    UTest(Equal, IndexOfLeastSignificantNonZeroBit(ui8value), 7u);
     ui8value = 15;
-    UTest(Equal, MostSignificantNonZeroBit(ui8value), 3u);
-    UTest(Equal, LeastSignificantNonZeroBit(ui8value), 0u);
+    UTest(Equal, IndexOfMostSignificantNonZeroBit(ui8value), 3u);
+    UTest(Equal, IndexOfLeastSignificantNonZeroBit(ui8value), 0u);
 
     i8 i8value = -128;
-    UTest(Equal, MostSignificantNonZeroBit(i8value), 7u);
-    UTest(Equal, LeastSignificantNonZeroBit(i8value), 7u);
+    UTest(Equal, IndexOfMostSignificantNonZeroBit(i8value), 7u);
+    UTest(Equal, IndexOfLeastSignificantNonZeroBit(i8value), 7u);
     i8value = 15;
-    UTest(Equal, MostSignificantNonZeroBit(i8value), 3u);
-    UTest(Equal, LeastSignificantNonZeroBit(i8value), 0u);
+    UTest(Equal, IndexOfMostSignificantNonZeroBit(i8value), 3u);
+    UTest(Equal, IndexOfLeastSignificantNonZeroBit(i8value), 0u);
 
     PRINTLOG("finished significant bit tests\n");
 }
@@ -168,11 +168,11 @@ static void ErrorTests()
     UTest(Equal, unknownFormatWithAttachment, DefaultError::UnknownFormat());
     UTest(Equal, unknownFormatWithAttachment.Attachment(), "MPEG");
 
-    auto busyWithCustomDescription = Error<void, std::string>(DefaultError::Busy(), "Bus was handling "s + std::to_string(284) + " other requrests"s);
+    auto busyWithCustomDescription = Error<void, std::string>(DefaultError::Busy(), "Bus was handling "s + std::to_string(284) + " other requests"s);
     UTest(false, busyWithCustomDescription.IsOk());
     UTest(true, busyWithCustomDescription);
     UTest(Equal, busyWithCustomDescription, DefaultError::Busy());
-    UTest(Equal, busyWithCustomDescription.Description(), "Bus was handling "s + std::to_string(284) + " other requrests"s);
+    UTest(Equal, busyWithCustomDescription.Description(), "Bus was handling "s + std::to_string(284) + " other requests"s);
 
     struct Canceller {};
     auto canceller = std::make_shared<Canceller>();
@@ -693,6 +693,118 @@ static void TimeMomentTests()
     PRINTLOG("finished time moment tests\n");
 }
 
+static void DataHolderTests()
+{
+    using Holder64 = DataHolder<64>;
+    using Holder16 = DataHolder<16>;
+
+    struct NonCopyable
+    {
+        i32 _value = 17;
+        i32 _moveCalledTimes = 0;
+
+        NonCopyable() = default;
+        NonCopyable(NonCopyable &&)
+        {
+            ++_moveCalledTimes;
+        }
+        NonCopyable &operator = (NonCopyable &&)
+        {
+            ++_moveCalledTimes;
+            return *this;
+        }
+    };
+
+    struct NonCopyable2 : NonCopyable
+    {
+        ui8 _crap[56];
+    };
+
+    struct NonCopyable3 : NonCopyable2
+    {
+        i32 _extra0, _extra1;
+    };
+
+    Holder64 holder = Holder64(NonCopyable());
+    UTest(true, holder.IsPlacedLocally<NonCopyable>());
+    UTest(true, holder.IsPlacedLocally<NonCopyable2>());
+    UTest(false, holder.IsPlacedLocally<NonCopyable3>());
+
+    Holder64 holder2 = std::move(holder);
+
+    NonCopyable &data = holder2.Get<NonCopyable>();
+    UTest(Equal, data._value, 17);
+    UTest(LeftGreater, data._moveCalledTimes, 0);
+    holder2.Destroy<NonCopyable>();
+    //holder.Destroy<NonCopyable>();
+
+    Holder16 holder3 = Holder16(NonCopyable3());
+    UTest(false, holder3.IsPlacedLocally<NonCopyable3>());
+    auto &dataInH3 = holder3.Get<NonCopyable3>();
+    UTest(Equal, dataInH3._value, 17);
+    UTest(LeftGreaterEqual, dataInH3._moveCalledTimes, 0);
+    Holder16 holder4 = std::move(holder3);
+    NonCopyable3 &data2 = holder4.Get<NonCopyable3>();
+    UTest(Equal, data2._value, 17);
+    UTest(LeftGreater, data2._moveCalledTimes, 0);
+    holder4.Destroy<NonCopyable>();
+    //holder3.Destroy<NonCopyable>();
+
+    PRINTLOG("finished data holder tests\n");
+}
+
+static void MemoryStreamTests()
+{
+    std::string_view test0 = "Luna";
+    std::string_view test1 = "Celestia";
+
+    auto checkContent = [test0, test1](IMemoryStream &ms)
+    {
+        UTest(true, ms.IsReadable());
+        UTest(Equal, ms.Size(), test0.length() + test1.length());
+        UTest(true, !memcmp(ms.CMemory(), test0.data(), test0.length()));
+        UTest(true, !memcmp(ms.CMemory() + test0.length(), test1.data(), test1.length()));
+    };
+
+    auto writeAndCheck = [test0, test1, checkContent](IMemoryStream &ms)
+    {
+        UTest(true, ms.IsReadable());
+        UTest(Equal, ms.Resize(test0.length()), test0.length());
+        memcpy(ms.Memory(), test0.data(), test0.length());
+        UTest(Equal, ms.Resize(ms.Size() + test1.size()), test0.length() + test1.length());
+        memcpy(ms.Memory() + test0.length(), test1.data(), test1.size());
+        checkContent(ms);
+    };
+
+    MemoryStreamFixed<128> fixedTest;
+    writeAndCheck(fixedTest);
+
+    MemoryStreamAllocator<> allocatorTest;
+    writeAndCheck(allocatorTest);
+
+    char buf[128];
+    MemoryStreamFixedExternal externalTest = MemoryStreamFixedExternal(buf, Funcs::CountOf(buf));
+    writeAndCheck(externalTest);
+
+    struct HolderTestData
+    {
+        char str[13] = "LunaCelestia";
+    } holderTestData;
+
+    using holderType = DataHolder<32>;
+    holderType data = holderType(holderTestData);
+
+    auto holderTestDataProvide = [](const holderType &data) -> const ui8 *
+    {
+        return (ui8 *)&data.Get<HolderTestData>().str;
+    };
+
+    auto dataHolderMS = MemoryStreamFromDataHolder<32>::New<HolderTestData>(std::move(data), test0.length() + test1.length(), holderTestDataProvide);
+    checkContent(dataHolderMS);
+
+    PRINTLOG("finished memory stream tests\n");
+}
+
 int main(int argc, const char **argv)
 {
     std::string filesTestFolder = "FileTestsFolder";
@@ -728,6 +840,8 @@ int main(int argc, const char **argv)
     TestFileSystem(folderForTests);
     TestMemoryMappedFile(folderForTests);
     TimeMomentTests();
+    DataHolderTests();
+    MemoryStreamTests();
 
     Error<> folderForTestsRemove = FileSystem::Remove(folderForTests);
     printf("%s\n", folderForTestsRemove.Description());

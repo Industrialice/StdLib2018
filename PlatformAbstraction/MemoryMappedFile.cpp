@@ -70,7 +70,7 @@ uiw MemoryMappedFile::Size()
     return _size;
 }
 
-MemoryStreamFixedExt MemoryMappedFile::ToMemoryStream()
+MemoryStreamFixedExternal MemoryMappedFile::ToMemoryStream()
 {
     ASSUME(IsOpened());
     if (_isWritable)
@@ -80,13 +80,13 @@ MemoryStreamFixedExt MemoryMappedFile::ToMemoryStream()
     return {CMemory(), _size, _size};
 }
 
-MemoryStreamFixedExt MemoryMappedFile::ToMemoryStream() const
+MemoryStreamFixedExternal MemoryMappedFile::ToMemoryStream() const
 {
     ASSUME(IsOpened());
     return {CMemory(), _size, _size};
 }
 
-MemoryStreamFixedExt MemoryMappedFile::ToCMemoryStream() const
+MemoryStreamFixedExternal MemoryMappedFile::ToCMemoryStream() const
 {
     ASSUME(IsOpened());
     return {CMemory(), _size, _size};

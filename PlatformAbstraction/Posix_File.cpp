@@ -139,12 +139,8 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
         }
         _offsetToStart = seekResult;
     }
-    else
-    {
-        _offsetToStart = 0;
-    }
 
-#ifdef ENABLE_FILE_STATS
+#if ENABLE_FILE_STATS
     _stats = {};
 #endif
     _openMode = openMode;
@@ -301,7 +297,7 @@ bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
     ASSUME(IsOpened());
     ASSUME(source || len == 0);
 
-#ifdef ENABLE_FILE_STATS
+#if ENABLE_FILE_STATS
     ++_stats.writesToFileCount;
 #endif
 
@@ -312,7 +308,7 @@ bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
         return false;
     }
 
-#ifdef ENABLE_FILE_STATS
+#if ENABLE_FILE_STATS
     _stats.bytesToFileWritten += sswritten;
 #endif
 
@@ -325,7 +321,7 @@ bool File::ReadFromFile(void *target, ui32 len, ui32 *readRet)
     ASSUME(IsOpened());
     ASSUME(target || len == 0);
 
-#ifdef ENABLE_FILE_STATS
+#if ENABLE_FILE_STATS
     ++_stats.readsFromFileCount;
 #endif
 
@@ -336,7 +332,7 @@ bool File::ReadFromFile(void *target, ui32 len, ui32 *readRet)
         return false;
     }
 
-#ifdef ENABLE_FILE_STATS
+#if ENABLE_FILE_STATS
     _stats.bytesFromFileRead += actuallyRead;
 #endif
 

@@ -21,7 +21,7 @@ namespace StdLib
     public:
         ~MemoryMappedFile();
         MemoryMappedFile() = default;
-        MemoryMappedFile(File &file, uiw offset, uiw size, bool isCopyOnWrite, bool isPrecommitSpace, Error<> *error = nullptr);
+        MemoryMappedFile(File &file, uiw offset = 0, uiw size = uiw_max, bool isCopyOnWrite = false, bool isPrecommitSpace = false, Error<> *error = nullptr);
         MemoryMappedFile(MemoryMappedFile &&source);
         MemoryMappedFile &operator = (MemoryMappedFile &&source);
         Error<> Open(File &file, uiw offset, uiw size, bool isCopyOnWrite, bool isPrecommitSpace);
@@ -33,8 +33,8 @@ namespace StdLib
         const ui8 *Memory() const;
         const ui8 *CMemory() const;
         uiw Size();
-        MemoryStreamFixedExt ToMemoryStream();
-        MemoryStreamFixedExt ToMemoryStream() const;
-        MemoryStreamFixedExt ToCMemoryStream() const;
+        MemoryStreamFixedExternal ToMemoryStream();
+        MemoryStreamFixedExternal ToMemoryStream() const;
+        MemoryStreamFixedExternal ToCMemoryStream() const;
     };
 }

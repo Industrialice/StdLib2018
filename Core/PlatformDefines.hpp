@@ -2,7 +2,7 @@
 
 #include "CoreTypes.hpp"    
 
-#if __has_include(<Windows.h>) && !defined(PLATFORM_WINDOWS)
+#if (defined(_MSC_VER) || __has_include(<Windows.h>)) && !defined(PLATFORM_WINDOWS)
     #define PLATFORM_WINDOWS
 #endif
 

@@ -152,17 +152,13 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
         }
         _offsetToStart = curPos.QuadPart;
     }
-    else
-    {
-        _offsetToStart = 0;
-    }
 
     _openMode = openMode;
     _procMode = procMode;
     _cacheMode = cacheMode;
     _handle = hfile;
     _bufferPos = 0;
-#ifdef ENABLE_FILE_STATS
+#if ENABLE_FILE_STATS
     _stats = {};
 #endif
     _readBufferCurrentSize = 0;
@@ -350,7 +346,7 @@ bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
     ASSUME(IsOpened());
     ASSUME(source || len == 0);
 
-#ifdef ENABLE_FILE_STATS
+#if ENABLE_FILE_STATS
     ++_stats.writesToFileCount;
 #endif
 
@@ -361,7 +357,7 @@ bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
         return false;
     }
 
-#ifdef ENABLE_FILE_STATS
+#if ENABLE_FILE_STATS
     _stats.bytesToFileWritten += len;
 #endif
 
@@ -374,7 +370,7 @@ bool File::ReadFromFile(void *target, ui32 len, ui32 *read)
     ASSUME(IsOpened());
     ASSUME(target || len == 0);
 
-#ifdef ENABLE_FILE_STATS
+#if ENABLE_FILE_STATS
     ++_stats.readsFromFileCount;
 #endif
 
@@ -385,7 +381,7 @@ bool File::ReadFromFile(void *target, ui32 len, ui32 *read)
         return false;
     }
 
-#ifdef ENABLE_FILE_STATS
+#if ENABLE_FILE_STATS
     _stats.bytesFromFileRead += wapiRead;
 #endif
 
