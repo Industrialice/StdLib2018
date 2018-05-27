@@ -7,7 +7,7 @@
     #pragma warning(1 : 4800) /* type' : forcing value to bool 'true' or 'false' (performance warning) */
 
     #define RSTR __restrict
-    #define ALLOCA(size) _alloca(size)
+    #define ALLOCA(count, sizeOfElement) _alloca((count) * (sizeOfElement))
     #define UNIQUEPTRRETURN __declspec(restrict)
     #define ALLOCATORFUNC __declspec(allocator)
     #define NOINLINE __declspec(noinline)
@@ -43,7 +43,7 @@
 #elif defined(__GNUC__)
 
     #define RSTR __restrict__
-    #define ALLOCA(size) __builtin_alloca(size)
+    #define ALLOCA(count, sizeOfElement) __builtin_alloca((count) * (sizeOfElement))
     #define UNIQUEPTRRETURN /* TODO: find out */
     #define ALLOCATORFUNC
     #define NOINLINE __attribute__((noinline))

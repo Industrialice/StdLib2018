@@ -35,24 +35,17 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
         return fileSizeResult.GetError();
     }
 
-    _size = std::min(size, fileSize);
+    uiw systemMappingSize = std::min(size, fileSize);
 
     DWORD protection = (isCopyOnWrite || !(file._procMode && FileProcMode::Write)) ? PAGE_WRITECOPY : PAGE_READWRITE; // for memory mapped files PAGE_WRITECOPY is equivalent to PAGE_READONLY
     DWORD commitMode = isPrecommitSpace ? SEC_COMMIT : SEC_RESERVE;
     LARGE_INTEGER sizeToMap;
-    sizeToMap.QuadPart = (LONGLONG)_size;
+    sizeToMap.QuadPart = (LONGLONG)systemMappingSize;
     _mappingHandle = CreateFileMappingW(file._handle, nullptr, protection | commitMode, sizeToMap.HighPart, sizeToMap.LowPart, nullptr);
     if (_mappingHandle == NULL)
     {
         return StdLib_FileError();
     }
-
-    if (file._procMode && FileProcMode::WriteAppend)
-    {
-        offset += file._offsetToStart;
-    }
-    LARGE_INTEGER fileOffset;
-    fileOffset.QuadPart = (LONGLONG)offset;
 
     DWORD desiredAccess;
     if (isCopyOnWrite)
@@ -74,12 +67,26 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
         }
     }
 
-    _memory = MapViewOfFile(_mappingHandle, desiredAccess, fileOffset.HighPart, fileOffset.LowPart, _size);
+    _memory = MapViewOfFile(_mappingHandle, desiredAccess, 0, 0, systemMappingSize);
     if (_memory == nullptr)
     {
         BOOL result = CloseHandle(_mappingHandle);
         ASSUME(result);
         return DefaultError::UnknownError("MapViewOfFile failed");
+    }
+
+    _offset = offset;
+    _size = size;
+
+    uiw accessibleFileSize = fileSize - file._offsetToStart;
+    if (_size > accessibleFileSize)
+    {
+        _size = accessibleFileSize;
+    }
+
+    if (file._procMode && FileProcMode::WriteAppend)
+    {
+        _offset += file._offsetToStart;
     }
 
     return DefaultError::Ok();

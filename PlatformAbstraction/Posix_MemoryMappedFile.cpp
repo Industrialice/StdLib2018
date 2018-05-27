@@ -34,7 +34,7 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
         return fileSizeResult.GetError();
     }
 
-    _size = std::min(size, fileSize);
+    _systemMappingSize = std::min(size, fileSize);
 
     int prot = PROT_READ;
     if (file._procMode && FileProcMode::Write)
@@ -50,10 +50,24 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
     int flags = isCopyOnWrite ? MAP_PRIVATE : MAP_SHARED;
     flags |= isPrecommitSpace ? MAP_POPULATE : MAP_NORESERVE;
 
-    _memory = mmap(nullptr, _size, prot, flags, file._handle, offset);
+    _memory = mmap(nullptr, _systemMappingSize, prot, flags, file._handle, 0);
     if (!_memory)
     {
         return DefaultError::UnknownError("mmap failed");
+    }
+
+    _offset = offset;
+    _size = size;
+
+    uiw accessibleFileSize = fileSize - file._offsetToStart;
+    if (_size > accessibleFileSize)
+    {
+        _size = accessibleFileSize;
+    }
+
+    if (file._procMode && FileProcMode::WriteAppend)
+    {
+        _offset += file._offsetToStart;
     }
 
     return DefaultError::Ok();
@@ -63,7 +77,7 @@ void MemoryMappedFile::Close()
 {
     if (_memory)
     {
-        int result = munmap(_memory, _size);
+        int result = munmap(_memory, _systemMappingSize);
         ASSUME(result == 0);
     }
 }
@@ -71,6 +85,6 @@ void MemoryMappedFile::Close()
 void MemoryMappedFile::Flush() const
 {
     ASSUME(IsOpened());
-    int result = msync(_memory, _size, MS_ASYNC | MS_INVALIDATE);
+    int result = msync(_memory, _systemMappingSize, MS_ASYNC | MS_INVALIDATE);
     ASSUME(result == 0);
 }

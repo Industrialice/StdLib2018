@@ -628,10 +628,20 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
 
     Error<> error = DefaultError::Ok();
     MemoryMappedFile mapping = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
-    UTest(true, !error && mapping.IsOpened());
+    UTest(false, error);
+    UTest(true, mapping.IsOpened());
     UTest(Equal, mapping.Size(), crapString.length());
     UTest(Equal, mapping.IsWritable(), true);
     UTest(true, !memcmp(crapString.data(), mapping.Memory(), crapString.size()));
+
+    MemoryMappedFile mappingDuplicate = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
+    UTest(false, error);
+    UTest(true, mappingDuplicate.IsOpened());
+    UTest(NotEqual, mapping.Memory(), mappingDuplicate.Memory());
+
+    MemoryMappedFile mappingOffsetted = MemoryMappedFile(file, 2, uiw_max, false, false, &error);
+    UTest(false, error);
+    UTest(true, mappingOffsetted.IsOpened());
 
     std::reverse(crapString.begin(), crapString.end());
     UTest(false, !memcmp(crapString.data(), mapping.Memory(), crapString.size()));
@@ -653,15 +663,34 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     file.Close();
     UTest(true, !memcmp(crapString.data(), mapping.Memory(), crapString.size()));
 
+    UTest(true, !memcmp(mapping.Memory(), mappingDuplicate.Memory(), crapString.size())); // different mapping should be coherent
+
+    UTest(true, !memcmp(mapping.Memory() + 2, mappingOffsetted.Memory(), crapString.size() - 2));
+
     file = File(folderForTests / TSTR("memMapped2.txt"), FileOpenMode::CreateAlways, FileProcMode::Read + FileProcMode::Write);
     UTest(true, file.IsOpened());
     FileWrite(file);
-    mapping = MemoryMappedFile(file, 0, uiw_max, false, false);
+    mapping = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
+    UTest(false, error);
     UTest(true, mapping.IsOpened());
     auto memoryStream = mapping.ToMemoryStream();
     FileToMemoryStream memoryStreamFile = FileToMemoryStream(memoryStream, FileProcMode::Read);
     UTest(true, memoryStreamFile.IsOpened());
     FileRead(memoryStreamFile);
+
+    file = File(folderForTests / TSTR("appendTest.txt"), FileOpenMode::CreateAlways, FileProcMode::Write);
+    UTest(true, file.IsOpened());
+    std::string_view invisiblePartStr = "invisible part";
+    UTest(true, file.Write(invisiblePartStr.data(), (ui32)invisiblePartStr.length()));
+    file.Close();
+    file = File(folderForTests / TSTR("appendTest.txt"), FileOpenMode::OpenExisting, FileProcMode::WriteAppend + FileProcMode::Read);
+    std::string_view currentPartStr = "current part";
+    UTest(true, file.Write(currentPartStr.data(), (ui32)currentPartStr.length()));
+
+    MemoryMappedFile appendedFileMapping = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
+    UTest(false, error);
+    UTest(true, appendedFileMapping.IsOpened());
+    UTest(true, !memcmp(appendedFileMapping.Memory(), currentPartStr.data(), currentPartStr.size()));
 
     PRINTLOG("finished memory mapped file tests\n");
 }

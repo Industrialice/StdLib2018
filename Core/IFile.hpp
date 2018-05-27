@@ -8,7 +8,7 @@ namespace StdLib
     ENUM_COMBINABLE(FileProcMode, ui8,
         Read = Funcs::BitPos(0),
         Write = Funcs::BitPos(1),
-        WriteAppend = Funcs::BitPos(1) | Funcs::BitPos(2)); // makes existing part of the file virtually invisible (isn't reported with Size calls, isn't accessible through offset sets)
+        WriteAppend = Funcs::BitPos(1) | Funcs::BitPos(2)); // makes existing part of the file virtually invisible (isn't reported with Size calls, isn't accessible through set offset)
 
     // these constraints aren't strictly enforced, so you should not rely on them only
     ENUM_COMBINABLE(FileShareMode, ui8,
@@ -18,7 +18,7 @@ namespace StdLib
         Delete = Funcs::BitPos(2));
 
     // mode                already exists        doesn't exist
-    // ***                 ***                   ***
+    // ===                 ===                   ===
     // CreateIfNotExist    opens                 creates new & opens
     // CreateAlways        truncates & opens     creates new & opens
     // CreateNew           fails                 creates new & opens

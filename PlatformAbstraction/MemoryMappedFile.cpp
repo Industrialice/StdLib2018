@@ -49,19 +49,19 @@ bool MemoryMappedFile::IsWritable() const
 ui8 *MemoryMappedFile::Memory()
 {
     ASSUME(IsOpened());
-    return (ui8 *)_memory;
+    return (ui8 *)_memory + _offset;
 }
 
 const ui8 *MemoryMappedFile::Memory() const
 {
     ASSUME(IsOpened());
-    return (ui8 *)_memory;
+    return (ui8 *)_memory + _offset;
 }
 
 const ui8 *MemoryMappedFile::CMemory() const
 {
     ASSUME(IsOpened());
-    return (ui8 *)_memory;
+    return (ui8 *)_memory + _offset;
 }
 
 uiw MemoryMappedFile::Size()
