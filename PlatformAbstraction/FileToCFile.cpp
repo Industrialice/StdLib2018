@@ -22,9 +22,9 @@ FileToCFile::~FileToCFile()
     this->Close();
 }
 
-FileToCFile::FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode, FileShareMode shareMode, Error<> *error)
+FileToCFile::FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, uiw offset, FileCacheMode cacheMode, FileShareMode shareMode, Error<> *error)
 {
-    auto result = this->Open(path, openMode, procMode, cacheMode, shareMode);
+    auto result = this->Open(path, openMode, procMode, offset, cacheMode, shareMode);
     if (error) *error = result;
 }
 
@@ -49,7 +49,7 @@ FileToCFile &FileToCFile::operator = (FileToCFile &&source)
     return *this;
 }
 
-Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode, FileShareMode shareMode)
+Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, uiw offset, FileCacheMode cacheMode, FileShareMode shareMode)
 {
     this->Close();
 
@@ -109,34 +109,32 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
         }
     }
 
-    pathString procModeStr;
+    const pathChar *procModeStr;
 
-    if (procMode && FileProcMode::WriteAppend)
+    if (offset)
     {
-        procModeStr += TSTR("a");
+        procModeStr = TSTR("a+");
     }
     else if ((procMode && FileProcMode::Read) && (procMode && FileProcMode::Write))
     {
         if (isFileFound)
         {
-            procModeStr += TSTR("r+");
+            procModeStr = TSTR("r+");
         }
         else
         {
-            procModeStr += TSTR("w+");
+            procModeStr = TSTR("w+");
         }
     }
     else if (procMode && FileProcMode::Read)
     {
-        procModeStr += TSTR("r");
+        procModeStr = TSTR("r");
     }
     else
     {
         ASSUME(procMode && FileProcMode::Write);
-        procModeStr += TSTR("w");
+        procModeStr = TSTR("w");
     }
-
-    procModeStr += TSTR("b");
 
     if (shareMode && FileShareMode::Read)
     {
@@ -158,9 +156,15 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
         _SH_DENYNO  // FileShareMode::Read + FileShareMode::Write
     };
     int sharingOption = sharingArray[shareMode._value & 0b11];
-    _file = _wfsopen(path.PlatformPath().data(), procModeStr.c_str(), sharingOption);
+    wchar_t binaryProcModeStr[4];
+    wcscpy(binaryProcModeStr, procModeStr);
+    wcscat(binaryProcModeStr, L"b");
+    _file = _wfsopen(path.PlatformPath().data(), binaryProcModeStr, sharingOption);
 #else
-    _file = fopen(path.PlatformPath().data(), procModeStr.c_str()); // TODO: process shareMode
+    char binaryProcModeStr[4];
+    strcpy(binaryProcModeStr, procModeStr);
+    strcat(binaryProcModeStr, "b");
+    _file = fopen(path.PlatformPath().data(), procModeStr); // TODO: process shareMode
 #endif
     if (!_file)
     {
@@ -184,7 +188,7 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
     _bufferSize = 0;
     _customBufferPtr = 0;
 
-    if (procMode && FileProcMode::WriteAppend)
+    if (offset)
     {
         if (fseek(_file, 0, SEEK_END) != 0)
         {
@@ -193,12 +197,21 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
             return DefaultError::UnknownError("fseek failed");
         }
 
-        _offsetToStart = ftell(_file);
-        if (_offsetToStart == -1)
+        auto fileSize = ftell(_file);
+        if (fileSize == -1)
         {
             fclose(_file);
             _file = nullptr;
             return DefaultError::UnknownError("ftell failed");
+        }
+
+        _offsetToStart = std::min<uiw>(offset, fileSize);
+
+        if (fseek(_file, _offsetToStart, SEEK_SET) != 0)
+        {
+            fclose(_file);
+            _file = nullptr;
+            return DefaultError::UnknownError("fseek failed");
         }
     }
 
@@ -334,35 +347,52 @@ Result<i64> FileToCFile::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 {
     ASSUME(IsOpened());
 
-    offset += _offsetToStart;
+    int moveMethod;
 
     if (offsetMode == FileOffsetMode::FromBegin)
     {
-        ASSUME(offset >= 0);
-        if (fseek(_file, offset, SEEK_SET) == 0)
+        if (offset < 0)
         {
-            return ftell(_file);
+            return DefaultError::InvalidArgument("Negative offset value cannot be used with FileOffsetMode::FromBegin");
         }
+        moveMethod = SEEK_SET;
+        offset += _offsetToStart;
     }
-
-    if (offsetMode == FileOffsetMode::FromCurrent)
+    else if (offsetMode == FileOffsetMode::FromCurrent)
     {
-        if (fseek(_file, offset, SEEK_CUR) == 0)
-        {
-            return ftell(_file);
-        }
+        moveMethod = SEEK_CUR;
     }
-
-    if (offsetMode == FileOffsetMode::FromEnd) // we need this check if an error occured in prior conditions
+    else
     {
-        ASSUME(offset <= 0);
-        if (fseek(_file, offset, SEEK_END) == 0)
+        ASSUME(offsetMode == FileOffsetMode::FromEnd);
+        if (offset > 0)
         {
-            return ftell(_file);
+            return DefaultError::InvalidArgument("Positive offset value cannot be used with FileOffsetMode::FromEnd");
+        }
+        moveMethod = SEEK_END;
+    }
+
+    if (fseek(_file, offset, moveMethod) != 0)
+    {
+        return DefaultError::UnknownError("fseek failed");
+    }
+
+    i64 curPos = ftell(_file);
+    if (curPos == -1)
+    {
+        return DefaultError::UnknownError("ftell failed");
+    }
+
+    if (curPos < _offsetToStart)
+    {
+        curPos = _offsetToStart;
+        if (fseek(_file, _offsetToStart, SEEK_SET) != 0)
+        {
+            return DefaultError::UnknownError("fseek failed");
         }
     }
 
-    return DefaultError::UnknownError();
+    return curPos - _offsetToStart;
 }
 
 Result<ui64> FileToCFile::SizeGet()

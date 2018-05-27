@@ -11,11 +11,13 @@ namespace
 
 extern NOINLINE Error<> StdLib_FileError();
 
-Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode, FileShareMode shareMode)
+Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, uiw offset, FileCacheMode cacheMode, FileShareMode shareMode)
 {
     Close();
 
     ASSUME(_handle == INVALID_HANDLE_VALUE);
+
+    offset = std::min<uiw>(offset, iw_max);
 
     DWORD dwDesiredAccess = 0;
     DWORD dwCreationDisposition = 0;
@@ -32,10 +34,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
         _pnn = pnn.ToAbsolute();
     }
 
-    if (!(procMode && FileProcMode::Read) && !(procMode && FileProcMode::Write))
-    {
-        return DefaultError::InvalidArgument("Neither read, nor write proc mode was requested");
-    }
+    ASSUME((procMode && FileProcMode::Read) || (procMode && FileProcMode::Write));
 
     if (procMode && FileProcMode::Write)
     {
@@ -53,9 +52,9 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
     }
     else if (openMode == FileOpenMode::CreateAlways || openMode == FileOpenMode::CreateNew)
     {
-        if (procMode && FileProcMode::WriteAppend)
+        if (offset > 0)
         {
-            return DefaultError::InvalidArgument("FileProcMode::WriteAppend can't be used with OpenMode::CreateAlways or OpenMode::CreateNew");
+            return DefaultError::InvalidArgument("'offset' can't be more than 0 when OpenMode::CreateAlways or OpenMode::CreateNew is used");
         }
 
         if (openMode == FileOpenMode::CreateAlways)
@@ -141,16 +140,28 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
         return StdLib_FileError();
     }
 
-    if (procMode && FileProcMode::WriteAppend)
+    if (offset > 0)
     {
-        LARGE_INTEGER curPos = {};
-        if (!SetFilePointerEx(hfile, {}, &curPos, FILE_END))
+        LARGE_INTEGER size;
+        if (!GetFileSizeEx(hfile, &size))
         {
             BOOL result = CloseHandle(hfile);
             ASSUME(result);
             return StdLib_FileError();
         }
-        _offsetToStart = curPos.QuadPart;
+        offset = std::min<uiw>(offset, size.QuadPart);
+        size.QuadPart = std::min<i64>(size.QuadPart, offset);
+        if (!SetFilePointerEx(hfile, size, nullptr, FILE_BEGIN))
+        {
+            BOOL result = CloseHandle(hfile);
+            ASSUME(result);
+            return StdLib_FileError();
+        }
+        _offsetToStart = size.QuadPart;
+    }
+    else
+    {
+        _offsetToStart = 0;
     }
 
     _openMode = openMode;
@@ -167,7 +178,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
     return DefaultError::Ok();
 }
 
-Error<> File::Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership)
+Error<> File::Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, uiw offset)
 {
     NOIMPL;
     return DefaultError::NotImplemented();
@@ -223,7 +234,10 @@ Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 
     if (offsetMode == FileOffsetMode::FromBegin)
     {
-        ASSUME(offset >= 0);
+        if (offset < 0)
+        {
+            return DefaultError::InvalidArgument("Negative offset value cannot be used with FileOffsetMode::FromBegin");
+        }
         moveMethod = FILE_BEGIN;
         offset += _offsetToStart;
     }
@@ -233,8 +247,11 @@ Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
     }
     else
     {
-        ASSUME(offset <= 0);
         ASSUME(offsetMode == FileOffsetMode::FromEnd);
+        if (offset > 0)
+        {
+            return DefaultError::InvalidArgument("Positive offset value cannot be used with FileOffsetMode::FromEnd");
+        }
         moveMethod = FILE_END;
     }
 
@@ -246,24 +263,17 @@ Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
         return StdLib_FileError();
     }
 
-    if (_procMode && FileProcMode::WriteAppend)
+    if (move.QuadPart < _offsetToStart)
     {
-        if (offsetMode != FileOffsetMode::FromBegin)
+        move.QuadPart = _offsetToStart;
+        if (!SetFilePointerEx(_handle, move, &move, FILE_BEGIN))
         {
-            if (move.QuadPart < (i64)_offsetToStart)
-            {
-                move.QuadPart = _offsetToStart;
-                if (!SetFilePointerEx(_handle, move, &move, FILE_BEGIN))
-                {
-                    return StdLib_FileError();
-                }
-            }
+            return StdLib_FileError();
         }
-        ASSUME(move.QuadPart >= (i64)_offsetToStart);
-        move.QuadPart -= _offsetToStart;
     }
 
-    return move.QuadPart;
+    ASSUME(move.QuadPart >= _offsetToStart);
+    return move.QuadPart - _offsetToStart;
 }
 
 Result<ui64> File::SizeGet()
@@ -282,7 +292,7 @@ Result<ui64> File::SizeGet()
     {
         size.QuadPart += (i64)_bufferPos;
     }
-    ASSUME(size.QuadPart >= (i64)_offsetToStart);
+    ASSUME(size.QuadPart >= _offsetToStart);
     return size.QuadPart - _offsetToStart;
 }
 
@@ -295,8 +305,8 @@ Error<> File::SizeSet(ui64 newSize)
         return DefaultError::UnknownError();
     }
 
-    newSize += _offsetToStart;
-    if (newSize < _offsetToStart) // overflow
+    newSize += (ui64)_offsetToStart;
+    if (newSize < (ui64)_offsetToStart) // overflow
     {
         newSize = ui64_max;
     }
@@ -306,7 +316,7 @@ Error<> File::SizeSet(ui64 newSize)
     {
         return StdLib_FileError();
     }
-    ASSUME(currentOffset.QuadPart >= (i64)_offsetToStart);
+    ASSUME(currentOffset.QuadPart >= _offsetToStart);
 
     if (currentOffset.QuadPart != newSize)
     {
@@ -413,7 +423,7 @@ Result<i64> File::CurrentFileOffset() const
     {
         return StdLib_FileError();
     }
-    ASSUME(currentOffset.QuadPart >= (i64)_offsetToStart);
+    ASSUME(currentOffset.QuadPart >= _offsetToStart);
     return currentOffset.QuadPart;
 }
 

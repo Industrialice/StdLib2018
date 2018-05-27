@@ -11,14 +11,11 @@ using namespace StdLib;
 
 extern NOINLINE Error<> StdLib_FileError();
 
-Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode, FileShareMode shareMode)
+Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, uiw offset, FileCacheMode cacheMode, FileShareMode shareMode)
 {
     Close();
 
-    if (!pnn.IsValid())
-    {
-        return DefaultError::InvalidArgument("Path is invalid");
-    }
+    offset = std::min<uiw>(offset, iw_max);
 
     int flags = 0;
 
@@ -45,9 +42,9 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
     }
     else if (openMode == FileOpenMode::CreateAlways || openMode == FileOpenMode::CreateNew)
     {
-        if (procMode && FileProcMode::WriteAppend)
+        if (offset > 0)
         {
-            return DefaultError::InvalidArgument("FileProcMode::Append can't be used with FileOpenMode::CreateAlways or FileOpenMode::CreateNew");
+            return DefaultError::InvalidArgument("'offset' can't be more than 0 when OpenMode::CreateAlways or OpenMode::CreateNew is used");
         }
 
         if (openMode == FileOpenMode::CreateAlways)
@@ -129,15 +126,24 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
     #endif
     }
 
-    if (procMode && FileProcMode::WriteAppend)
+    if (offset > 0)
     {
-        int seekResult = lseek64(hfile, 0, SEEK_END);
-        if (seekResult == -1)
+        struct stat64 stats;
+        if (fstat64(hfile, &stats) != 0)
         {
             close(hfile);
             return StdLib_FileError();
         }
-        _offsetToStart = seekResult;
+        _offsetToStart = std::min<i64>(stats.st_size, offset);
+        if (lseek64(hfile, _offsetToStart, SEEK_SET) == -1)
+        {
+            close(hfile);
+            return StdLib_FileError();
+        }
+    }
+    else
+    {
+        _offsetToStart = 0;
     }
 
 #if ENABLE_FILE_STATS
@@ -154,7 +160,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
     return DefaultError::Ok();
 }
 
-Error<> File::Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership)
+Error<> File::Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, uiw offset)
 {
     NOIMPL;
     return DefaultError::NotImplemented();
@@ -204,7 +210,10 @@ Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 
     if (offsetMode == FileOffsetMode::FromBegin)
     {
-        ASSUME(offset >= 0);
+        if (offset < 0)
+        {
+            return DefaultError::InvalidArgument("Negative offset value cannot be used with FileOffsetMode::FromBegin");
+        }
         offset += _offsetToStart;
         whence = SEEK_SET;
     }
@@ -214,8 +223,11 @@ Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
     }
     else
     {
-        ASSUME(offset <= 0);
         ASSUME(offsetMode == FileOffsetMode::FromEnd);
+        if (offset > 0)
+        {
+            return DefaultError::InvalidArgument("Positive offset value cannot be used with FileOffsetMode::FromEnd");
+        }
         whence = SEEK_END;
     }
 
@@ -225,25 +237,18 @@ Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
         return StdLib_FileError();
     }
 
-    if (_procMode && FileProcMode::WriteAppend)
+    if (result < _offsetToStart)
     {
-        if (offsetMode != FileOffsetMode::FromBegin)
+        result = _offsetToStart;
+        result = lseek64(_handle, _offsetToStart, SEEK_SET);
+        if (result == -1)
         {
-            if (result < _offsetToStart)
-            {
-                result = _offsetToStart;
-                result = lseek64(_handle, _offsetToStart, SEEK_SET);
-                if (result == -1)
-                {
-                    return StdLib_FileError();
-                }
-            }
+            return StdLib_FileError();
         }
-        ASSUME(result >= _offsetToStart);
-        result -= _offsetToStart;
     }
 
-    return result;
+    ASSUME(result >= _offsetToStart);
+    return result - _offsetToStart;
 }
 
 Result<ui64> File::SizeGet()
@@ -271,8 +276,8 @@ Error<> File::SizeSet(ui64 newSize)
         return DefaultError::UnknownError();
     }
 
-    newSize += _offsetToStart;
-    if (newSize < _offsetToStart) // overflow
+    newSize += (ui64)_offsetToStart;
+    if (newSize < (ui64)_offsetToStart) // overflow
     {
         newSize = ui64_max;
     }
@@ -361,7 +366,7 @@ Result<i64> File::CurrentFileOffset() const
     {
         return StdLib_FileError();
     }
-    ASSUME(offset >= (i64)_offsetToStart);
+    ASSUME(offset >= _offsetToStart);
     return offset;
 }
 

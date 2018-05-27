@@ -75,18 +75,13 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
         return DefaultError::UnknownError("MapViewOfFile failed");
     }
 
-    _offset = offset;
+    _offset = offset + file._offsetToStart;
     _size = size;
 
     uiw accessibleFileSize = fileSize - file._offsetToStart;
     if (_size > accessibleFileSize)
     {
         _size = accessibleFileSize;
-    }
-
-    if (file._procMode && FileProcMode::WriteAppend)
-    {
-        _offset += file._offsetToStart;
     }
 
     return DefaultError::Ok();

@@ -19,12 +19,12 @@ namespace StdLib
     public:
         ~FileToCFile();
         FileToCFile() = default;
-        FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None, Error<> *error = 0);
+        FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, uiw offset = 0, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None, Error<> *error = 0);
 
         FileToCFile(FileToCFile &&source);
         FileToCFile &operator = (FileToCFile &&source);
 
-        Error<> Open(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None);
+        Error<> Open(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, uiw offset = 0, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None);
 
         virtual void Close() override;
         virtual bool IsOpened() const override;

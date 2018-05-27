@@ -2,9 +2,9 @@
 
 using namespace StdLib;
 
-FileToMemoryStream::FileToMemoryStream(IMemoryStream &stream, FileProcMode procMode, Error<> *error)
+FileToMemoryStream::FileToMemoryStream(IMemoryStream &stream, FileProcMode procMode, uiw offset, Error<> *error)
 {
-    Error<> dummyError = this->Open(stream, procMode);
+    Error<> dummyError = this->Open(stream, procMode, offset);
     if (error) *error = dummyError;
 }
 
@@ -28,7 +28,7 @@ FileToMemoryStream &FileToMemoryStream::operator = (FileToMemoryStream &&source)
     return *this;
 }
 
-Error<> FileToMemoryStream::Open(IMemoryStream &stream, FileProcMode procMode)
+Error<> FileToMemoryStream::Open(IMemoryStream &stream, FileProcMode procMode, uiw offset)
 {
     _stream = 0;
     _offset = 0;
@@ -53,11 +53,8 @@ Error<> FileToMemoryStream::Open(IMemoryStream &stream, FileProcMode procMode)
             return DefaultError::AccessDenied("Requested write proc mode, but the stream is not readable");
         }
     }
-    if (procMode && FileProcMode::WriteAppend)
-    {
-        _offset = _startOffset = stream.Size();
-    }
 
+    _offset = _startOffset = std::min(offset, stream.Size());
     _stream = &stream;
     _procMode = procMode;
 

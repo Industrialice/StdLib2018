@@ -32,11 +32,11 @@ namespace StdLib::Funcs
         intType reinterpreted = *(intType *)&value;
         if (bitValue)
         {
-            reinterpreted |= 1 << bitNum;
+            reinterpreted |= intType(1) << bitNum;
         }
         else
         {
-            reinterpreted &= ~(1 << bitNum);
+            reinterpreted &= ~(intType(1) << bitNum);
         }
         return *(T *)&reinterpreted;
     }
@@ -46,7 +46,7 @@ namespace StdLib::Funcs
         ASSUME(sizeof(T) * 8 > bitNum);
         using intType = typename _NearestInt<sizeof(T)>::type;
         intType reinterpreted = *(intType *)&value;
-        return (reinterpreted & (1 << bitNum)) != 0;
+        return (reinterpreted & (intType(1) << bitNum)) != 0;
     }
 
     template <typename T, typename R = T> [[nodiscard]] constexpr R BitPos(T pos)

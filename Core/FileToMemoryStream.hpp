@@ -14,10 +14,10 @@ namespace StdLib
 
     public:
         FileToMemoryStream() = default;
-        FileToMemoryStream(IMemoryStream &stream, FileProcMode procMode, Error<> *error = nullptr);
+        FileToMemoryStream(IMemoryStream &stream, FileProcMode procMode, uiw offset = 0, Error<> *error = nullptr);
         FileToMemoryStream(FileToMemoryStream &&source);
         FileToMemoryStream &operator = (FileToMemoryStream &&source);
-        Error<> Open(IMemoryStream &stream, FileProcMode procMode);
+        Error<> Open(IMemoryStream &stream, FileProcMode procMode, uiw offset = 0);
 
         virtual void Close() override;
         virtual bool IsOpened() const override;

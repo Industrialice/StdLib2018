@@ -8,15 +8,15 @@ File::~File()
     Close();
 }
 
-File::File(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode, FileShareMode shareMode, Error<> *error)
+File::File(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, uiw offset, FileCacheMode cacheMode, FileShareMode shareMode, Error<> *error)
 {
-    Error<> tempError = File::Open(pnn, openMode, procMode, cacheMode, shareMode);
+    Error<> tempError = File::Open(pnn, openMode, procMode, offset, cacheMode, shareMode);
     if (error) *error = tempError;
 }
 
-File::File(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, Error<> *error)
+File::File(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, uiw offset, Error<> *error)
 {
-    Error<> tempError = File::Open(osFileDescriptor, isGettingFileDescriptorOwnership);
+    Error<> tempError = File::Open(osFileDescriptor, isGettingFileDescriptorOwnership, offset);
     if (error) *error = tempError;
 }
 

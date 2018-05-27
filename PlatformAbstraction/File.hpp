@@ -37,7 +37,7 @@ namespace StdLib
     #if ENABLE_FILE_STATS
         FileStats _stats{};
     #endif
-        ui64 _offsetToStart = 0; // used only when you're using ProcMode::Append, the file will be opened as usual, then the offset will be added so you can't work with the existing part of the file
+        i64 _offsetToStart;
         bufferType _internalBuffer = {nullptr, nullptr};
         ui32 _bufferSize = 0;
         ui32 _bufferPos = 0;
@@ -54,12 +54,12 @@ namespace StdLib
     public:
         ~File();
         File() = default;
-        File(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None, Error<> *error = nullptr);
-        File(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, Error<> *error = nullptr);
+        File(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, uiw offset = 0, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None, Error<> *error = nullptr);
+        File(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, uiw offset = 0, Error<> *error = nullptr);
         File(File &&other);
         File &operator = (File &&other);
-        [[nodiscard]] Error<> Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None);
-        [[nodiscard]] Error<> Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership);
+        [[nodiscard]] Error<> Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, uiw offset = 0, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None);
+        [[nodiscard]] Error<> Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, uiw offset = 0);
     #if ENABLE_FILE_STATS
         MUST_BE_OPENED [[nodiscard]] FileStats StatsGet() const;
         MUST_BE_OPENED void StatsReset();

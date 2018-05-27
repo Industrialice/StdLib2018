@@ -77,6 +77,8 @@ static void SetBitTests()
     UTest(false, IsBitSet(value, 13u));
     value = SetBit(value, 14u, false);
     UTest(Equal, value, 0u);
+    ui64 value64 = SetBit<ui64>(0, 63, 1);
+    UTest(Equal, value64, 0x8000'0000'0000'0000ULL);
 
     PRINTLOG("finished set bit tests\n");
 }
@@ -404,9 +406,37 @@ static void FileRead(IFile &file)
     }
 }
 
+static void FileReadOffsetted(IFile &file, uiw offset)
+{
+    UTest(Equal, file.ProcMode(), FileProcMode::Read);
+    UTest(Equal, file.OffsetGet().Unwrap(), 0);
+
+    std::string_view str = (file.IsSeekSupported() ? "test0123456789 trat" : "test0123456789 star") + offset;
+    UTest(LeftGreaterEqual, file.SizeGet().Unwrap(), str.length());
+    ui32 read = 0;
+    std::string target(str.length(), '\0');
+    UTest(true, file.Read(target.data(), (ui32)target.length(), &read));
+    UTest(Equal, read, str.length());
+    UTest(Equal, str, target);
+    UTest(Equal, file.OffsetGet().Unwrap(), str.length());
+    UTest(true, file.Read(nullptr, 0, &read));
+    UTest(Equal, read, 0);
+    UTest(Equal, file.OffsetGet().Unwrap(), str.length());
+
+    if (file.IsSeekSupported())
+    {
+        UTest(true, file.OffsetSet(FileOffsetMode::FromCurrent, -4));
+        str = file.IsSeekSupported() ? "trat" : "star";
+        target.resize(str.length());
+        UTest(true, file.Read(target.data(), (ui32)target.length(), &read));
+        UTest(Equal, read, str.length());
+        UTest(Equal, target, str);
+    }
+}
+
 static void FileAppendWrite(IFile &file)
 {
-    UTest(Equal, (file.ProcMode() + FileProcMode::WriteAppend), file.ProcMode());
+    UTest(Equal, (file.ProcMode() + FileProcMode::Write), file.ProcMode());
     UTest(Equal, file.OffsetGet().Unwrap(), 0);
     std::string_view str = "9184";
     ui32 written = 0;
@@ -490,23 +520,27 @@ static void TestFileToMemoryStream()
     MemoryStreamAllocator<> memoryStream;
     
     Error<> fileError = DefaultError::Ok();
-    FileToMemoryStream file = FileToMemoryStream(memoryStream, FileProcMode::Write, &fileError);
+    FileToMemoryStream file = FileToMemoryStream(memoryStream, FileProcMode::Write, 0, &fileError);
     UTest(true, !fileError && file.IsOpened());
     FileWrite(file);
 
-    file = FileToMemoryStream(memoryStream, FileProcMode::Read, &fileError);
+    file = FileToMemoryStream(memoryStream, FileProcMode::Read, 0, &fileError);
     UTest(true, !fileError && file.IsOpened());
     FileRead(file);
 
-    file = FileToMemoryStream(memoryStream, FileProcMode::WriteAppend, &fileError);
+    file = FileToMemoryStream(memoryStream, FileProcMode::Read, 2, &fileError);
+    UTest(true, !fileError && file.IsOpened());
+    FileReadOffsetted(file, 2);
+
+    file = FileToMemoryStream(memoryStream, FileProcMode::Write, uiw_max, &fileError);
     UTest(true, !fileError && file.IsOpened());
     FileAppendWrite(file);
 
-    file = FileToMemoryStream(memoryStream, FileProcMode::Read, &fileError);
+    file = FileToMemoryStream(memoryStream, FileProcMode::Read, 0, &fileError);
     UTest(true, !fileError && file.IsOpened());
     FileAppendRead(file);
 
-    file = FileToMemoryStream(memoryStream, FileProcMode::Read + FileProcMode::Write, &fileError);
+    file = FileToMemoryStream(memoryStream, FileProcMode::Read + FileProcMode::Write, 0, &fileError);
     UTest(true, !fileError && file.IsOpened());
     FileWriteRead(file);
 
@@ -518,31 +552,37 @@ template <typename T> void TestFile(const FilePath &folderForTests)
     auto internalTest = [folderForTests](ui32 bufferSize, File::bufferType &&buffer)
     {
         Error<> fileError = DefaultError::Ok();
-        T file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::CreateAlways, FileProcMode::Write, FileCacheMode::Default, FileShareMode::None, &fileError);
+        T file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::CreateAlways, FileProcMode::Write, 0, FileCacheMode::Default, FileShareMode::None, &fileError);
         UTest(true, !fileError && file.IsOpened());
         file.BufferSet(bufferSize, move(buffer));
         FileWrite(file);
         file.Close();
 
-        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, FileCacheMode::Default, FileShareMode::Read, &fileError);
+        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, 0, FileCacheMode::Default, FileShareMode::Read, &fileError);
         UTest(true, !fileError && file.IsOpened());
         file.BufferSet(bufferSize, move(buffer));
         FileRead(file);
         file.Close();
 
-        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::WriteAppend, FileCacheMode::Default, FileShareMode::None, &fileError);
+        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, 2, FileCacheMode::Default, FileShareMode::Read, &fileError);
+        UTest(true, !fileError && file.IsOpened());
+        file.BufferSet(bufferSize, move(buffer));
+        FileReadOffsetted(file, 2);
+        file.Close();
+
+        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::Write, uiw_max, FileCacheMode::Default, FileShareMode::None, &fileError);
         UTest(true, !fileError && file.IsOpened());
         file.BufferSet(bufferSize, move(buffer));
         FileAppendWrite(file);
         file.Close();
 
-        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, FileCacheMode::Default, FileShareMode::Read, &fileError);
+        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, 0, FileCacheMode::Default, FileShareMode::Read, &fileError);
         UTest(true, !fileError && file.IsOpened());
         file.BufferSet(bufferSize, move(buffer));
         FileAppendRead(file);
         file.Close();
 
-        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::CreateAlways, FileProcMode::Read + FileProcMode::Write, FileCacheMode::Default, FileShareMode::Read + FileShareMode::Write, &fileError);
+        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::CreateAlways, FileProcMode::Read + FileProcMode::Write, 0, FileCacheMode::Default, FileShareMode::Read + FileShareMode::Write, &fileError);
         UTest(true, !fileError && file.IsOpened());
         file.BufferSet(bufferSize, move(buffer));
         FileWriteRead(file);
@@ -559,18 +599,18 @@ template <typename T> void TestFile(const FilePath &folderForTests)
 template <typename T> void TestFileSharing(const FilePath &folderForTests)
 {
     Error<> fileError = DefaultError::Ok();
-    T file = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::CreateAlways, FileProcMode::Write, FileCacheMode::Default, FileShareMode::None, &fileError);
+    T file = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::CreateAlways, FileProcMode::Write, 0, FileCacheMode::Default, FileShareMode::None, &fileError);
     UTest(true, !fileError && file.IsOpened());
 
-    T file2 = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, FileCacheMode::Default, FileShareMode::None, &fileError);
+    T file2 = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, 0, FileCacheMode::Default, FileShareMode::None, &fileError);
     UTest(true, fileError && !file2.IsOpened());
 
     file.Close();
-    file2 = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, FileCacheMode::Default, FileShareMode::Read, &fileError);
+    file2 = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, 0, FileCacheMode::Default, FileShareMode::Read, &fileError);
     UTest(true, !fileError && file2.IsOpened());
 
     file2.Close();
-    file = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, FileCacheMode::Default, FileShareMode::Write, &fileError);
+    file = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, 0, FileCacheMode::Default, FileShareMode::Write, &fileError);
     UTest(true, !fileError && file.IsOpened());
 
     PRINTLOG("finished template file sharing tests\n");
@@ -591,7 +631,7 @@ static void TestFileSystem(const FilePath &folderForTests)
     Error<> fileError = DefaultError::Ok();
     FilePath tempFilePath = dirTestPath / TSTR("tempFile.txt");
     UTest(Equal, FileSystem::Classify(tempFilePath).GetError(), DefaultError::NotFound());
-    FileToCFile(tempFilePath, FileOpenMode::CreateAlways, FileProcMode::Write, FileCacheMode::Default, FileShareMode::None, &fileError);
+    FileToCFile(tempFilePath, FileOpenMode::CreateAlways, FileProcMode::Write, 0, FileCacheMode::Default, FileShareMode::None, &fileError);
     UTest(false, fileError);
     UTest(Equal, FileSystem::IsFolderEmpty(dirTestPath).Unwrap(), false);
     UTest(Equal, FileSystem::Classify(tempFilePath).Unwrap(), FileSystem::ObjectType::File);
@@ -683,7 +723,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     std::string_view invisiblePartStr = "invisible part";
     UTest(true, file.Write(invisiblePartStr.data(), (ui32)invisiblePartStr.length()));
     file.Close();
-    file = File(folderForTests / TSTR("appendTest.txt"), FileOpenMode::OpenExisting, FileProcMode::WriteAppend + FileProcMode::Read);
+    file = File(folderForTests / TSTR("appendTest.txt"), FileOpenMode::OpenExisting, FileProcMode::Write + FileProcMode::Read, uiw_max);
     std::string_view currentPartStr = "current part";
     UTest(true, file.Write(currentPartStr.data(), (ui32)currentPartStr.length()));
 

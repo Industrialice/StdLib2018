@@ -7,8 +7,7 @@ namespace StdLib
 {
     ENUM_COMBINABLE(FileProcMode, ui8,
         Read = Funcs::BitPos(0),
-        Write = Funcs::BitPos(1),
-        WriteAppend = Funcs::BitPos(1) | Funcs::BitPos(2)); // makes existing part of the file virtually invisible (isn't reported with Size calls, isn't accessible through set offset)
+        Write = Funcs::BitPos(1));
 
     // these constraints aren't strictly enforced, so you should not rely on them only
     ENUM_COMBINABLE(FileShareMode, ui8,
