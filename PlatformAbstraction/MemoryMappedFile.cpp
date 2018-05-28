@@ -15,8 +15,11 @@ MemoryMappedFile::MemoryMappedFile(MemoryMappedFile &&source)
     source._memory = nullptr;
     _size = source._size;
     _isWritable = source._isWritable;
+    _offset = source._offset;
 #ifdef PLATFORM_WINDOWS
     _mappingHandle = source._mappingHandle;
+#else
+    _systemMappingSize = source._systemMappingSize;
 #endif
 }
 
@@ -28,8 +31,11 @@ MemoryMappedFile &MemoryMappedFile::operator = (MemoryMappedFile &&source)
     source._memory = nullptr;
     _size = source._size;
     _isWritable = source._isWritable;
+    _offset = source._offset;
 #ifdef PLATFORM_WINDOWS
     _mappingHandle = source._mappingHandle;
+#else
+    _systemMappingSize = source._systemMappingSize;
 #endif
 
     return *this;

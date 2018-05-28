@@ -76,6 +76,8 @@ namespace StdLib
         bool operator != (const FilePath &path) const { return _path != path._path; }
         bool operator != (const pathString &path) const { return _path != path; }
 
+        bool operator < (const FilePath &other) const { return _path < other._path; } // so it can be used in containers
+
         FilePath &AddLevel(); // ignored if the path ends with a path delimiter
         FilePath &RemoveLevel(); /* does nothing if empty, C:/Pictures/ becomes C:/, C:/Pictures becomes C:/ */
 
