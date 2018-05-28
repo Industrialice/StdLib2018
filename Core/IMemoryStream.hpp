@@ -235,18 +235,19 @@ namespace StdLib
             }
         }
 
-        MemoryStreamFromDataHolder(MemoryStreamFromDataHolder &&other) : _data(move(other._data)), _size(other._size), _provide(other._provide), _destroy(other._destroy)
+        MemoryStreamFromDataHolder(MemoryStreamFromDataHolder &&other) : _data(std::move(other._data)), _size(other._size), _provide(other._provide), _destroy(other._destroy)
         {
             other._destroy = nullptr;
         }
 
         MemoryStreamFromDataHolder &operator = (MemoryStreamFromDataHolder &&other)
         {
-            _data = move(other._data);
+            _data = std::move(other._data);
             _size = other._size;
             _provide = other._provide;
             _destroy = other._destroy;
             other._destroy = nullptr;
+            return *this;
         }
 
         [[nodiscard]] virtual uiw Size() const override

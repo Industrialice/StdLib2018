@@ -195,36 +195,36 @@ TimeMoment &TimeMoment::operator -= (const TimeDifference &difference)
 
 bool TimeMoment::operator < (const TimeMoment &other) const
 {
-    ASSUME(HasValue() && other.HasValue());
+    //ASSUME(HasValue() && other.HasValue());
     return _counter < other._counter;
 }
 
 bool TimeMoment::operator <= (const TimeMoment &other) const
 {
-    ASSUME(HasValue() && other.HasValue());
+    //ASSUME(HasValue() && other.HasValue());
     return _counter <= other._counter;
 }
 
 bool TimeMoment::operator > (const TimeMoment &other) const
 {
-    ASSUME(HasValue() && other.HasValue());
+    //ASSUME(HasValue() && other.HasValue());
     return _counter > other._counter;
 }
 
 bool TimeMoment::operator >= (const TimeMoment &other) const
 {
-    ASSUME(HasValue() && other.HasValue());
+    //ASSUME(HasValue() && other.HasValue());
     return _counter >= other._counter;
 }
 
 bool TimeMoment::operator == (const TimeMoment &other) const
 {
-    ASSUME(HasValue() && other.HasValue());
+    //ASSUME(HasValue() && other.HasValue());
     return _counter == other._counter;
 }
 
 bool TimeMoment::operator != (const TimeMoment &other) const
 {
-    ASSUME(HasValue() && other.HasValue());
+    //ASSUME(HasValue() && other.HasValue());
     return _counter != other._counter;
 }

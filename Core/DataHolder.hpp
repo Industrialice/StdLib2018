@@ -35,26 +35,38 @@ namespace StdLib
             if constexpr (sizeof(clearT) <= size)
             {
                 new (_local) clearT(std::forward<T>(source));
-                _onMoving = [](DataHolder &target, DataHolder &source)
+                _onMoving = [](DataHolder &target, DataHolder &sourceHolder)
                 {
-                    new (target._local) clearT(std::move(source.Get<clearT>()));
-                    ((clearT *)source._local)->~clearT();
-                    target._onMoving = source._onMoving;
                 #ifdef DEBUG
-                    source._isMovedFrom = true;
+                    ASSUME(!sourceHolder._isDestroyed);
+                    ASSUME(!sourceHolder._isMovedFrom);
+                #endif
+                    new (target._local) clearT(std::move(sourceHolder.Get<clearT>()));
+                    ((clearT *)sourceHolder._local)->~clearT();
+                    target._onMoving = sourceHolder._onMoving;
+                #ifdef DEBUG
+                    target._isDestroyed = false;
+                    target._isMovedFrom = false;
+                    sourceHolder._isMovedFrom = true;
                 #endif
                 };
             }
             else
             {
                 _address = new clearT(std::forward<T>(source));
-                _onMoving = [](DataHolder &target, DataHolder &source)
+                _onMoving = [](DataHolder &target, DataHolder &sourceHolder)
                 {
-                    target._address = source._address;
-                    source._address = nullptr;
-                    target._onMoving = source._onMoving;
                 #ifdef DEBUG
-                    source._isMovedFrom = true;
+                    ASSUME(!sourceHolder._isDestroyed);
+                    ASSUME(!sourceHolder._isMovedFrom);
+                #endif
+                    target._address = sourceHolder._address;
+                    sourceHolder._address = nullptr;
+                    target._onMoving = sourceHolder._onMoving;
+                #ifdef DEBUG
+                    target._isDestroyed = false;
+                    target._isMovedFrom = false;
+                    sourceHolder._isMovedFrom = true;
                 #endif
                 };
             }

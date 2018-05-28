@@ -63,8 +63,9 @@ namespace StdLib
         explicit operator TimeDifference64() const;
     };
 
-    // note that TimeMoment is undefined after the default contructor had been called
-    // using undefined TimeMoment is an error and will trigger an exception in debug mode
+    // note that TimeMoment is undefined after the default contructor had 
+    // been called using undefined TimeMoment for anything but operator <=>
+    // is an error and will trigger an exception in debug mode
     // use TimeMoment::New() to create a TimeMoment for the current moment
     class TimeMoment
     {

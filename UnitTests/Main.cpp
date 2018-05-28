@@ -871,6 +871,24 @@ static void MemoryStreamTests()
     auto dataHolderMS = MemoryStreamFromDataHolder<32>::New<HolderTestData>(std::move(data), test0.length() + test1.length(), holderTestDataProvide);
     checkContent(dataHolderMS);
 
+    auto dataHolderMSMovedInfo = std::move(dataHolderMS);
+    checkContent(dataHolderMSMovedInfo);
+
+    {
+        std::vector<MemoryStreamFromDataHolder<32>> streams;
+
+        for (uiw index = 0; index < 25; ++index)
+        {
+            holderType tempData = holderType(holderTestData);
+            auto stream = MemoryStreamFromDataHolder<32>::New<HolderTestData>(std::move(tempData), test0.length() + test1.length(), holderTestDataProvide);
+            streams.push_back(std::move(stream));
+        }
+
+        streams.erase(streams.begin() + 5);
+
+        std::exchange(streams, {});
+    }
+
     PRINTLOG("finished memory stream tests\n");
 }
 
