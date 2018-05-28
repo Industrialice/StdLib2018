@@ -31,7 +31,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
 
     if (!StdLib_GetFinalPathNameByHandleW)
     {
-        _pnn = pnn.ToAbsolute();
+        _pnn = pnn.GetAbsolute();
     }
 
     ASSUME((procMode && FileProcMode::Read) || (procMode && FileProcMode::Write));

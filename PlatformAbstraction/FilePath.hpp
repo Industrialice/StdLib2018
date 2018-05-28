@@ -84,11 +84,11 @@ namespace StdLib
         bool IsEmpty() const;
         uiw Length() const;
         FilePath &Normalize();
-        FilePath ToNormalized() const;
+        FilePath GetNormalized() const;
         bool IsValid() const; // false if too big or isn't supported by the platform
 
         void MakeAbsolute();
-        FilePath ToAbsolute() const;
+        FilePath GetAbsolute() const;
         bool IsAbsolute() const;
 
         // without extension

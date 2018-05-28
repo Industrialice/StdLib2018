@@ -63,7 +63,7 @@ FilePath &FilePath::Normalize()
     return *this;
 }
 
-FilePath FilePath::ToNormalized() const
+FilePath FilePath::GetNormalized() const
 {
     auto normalized = *this;
     normalized.Normalize();
@@ -93,7 +93,7 @@ void FilePath::MakeAbsolute()
     }
 }
 
-FilePath FilePath::ToAbsolute() const
+FilePath FilePath::GetAbsolute() const
 {
     wchar_t tempBuf[maxPathLength];
     DWORD result = ::GetFullPathNameW(_path.c_str(), maxPathLength, tempBuf, 0);
@@ -192,7 +192,7 @@ void FilePath::MakeAbsolute()
     NOIMPL;
 }
 
-FilePath FilePath::ToAbsolute() const
+FilePath FilePath::GetAbsolute() const
 {
     NOIMPL;
     return {};
