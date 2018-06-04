@@ -339,7 +339,7 @@ namespace StdLib
 
     template <typename Basis> inline void _Vector<Basis>::Normalize()
     {
-        f32 revLength = ApproxMath::RSqrtF1(LengthSquare());
+        f32 revLength = ApproxMath::RSqrt<ApproxMath::Precision::High>(LengthSquare());
         for (uiw index = 0; index < dim; ++index)
         {
             operator[](index) *= revLength;
@@ -349,7 +349,7 @@ namespace StdLib
     template <typename Basis> inline auto _Vector<Basis>::GetNormalized() const -> VectorType
     {
         VectorType result;
-        f32 revLength = ApproxMath::RSqrtF1(LengthSquare());
+        f32 revLength = ApproxMath::RSqrt<ApproxMath::Precision::High>(LengthSquare());
         for (uiw index = 0; index < dim; ++index)
         {
             result[index] = operator[](index) * revLength;

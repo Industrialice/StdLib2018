@@ -506,7 +506,7 @@ Vector3 Quaternion::RotateVector(const Vector3 &source) const
 void Quaternion::Normalize()
 {
     f32 lengthSquare = x * x + y * y + z * z + w * w;
-    f32 r = ApproxMath::RSqrtF1(lengthSquare);
+    f32 r = ApproxMath::RSqrt<ApproxMath::Precision::High>(lengthSquare);
     x *= r;
     y *= r;
     z *= r;
@@ -516,7 +516,7 @@ void Quaternion::Normalize()
 Quaternion Quaternion::GetNormalized() const
 {
     f32 lengthSquare = x * x + y * y + z * z + w * w;
-    f32 r = ApproxMath::RSqrtF1(lengthSquare);
+    f32 r = ApproxMath::RSqrt<ApproxMath::Precision::High>(lengthSquare);
     return {x * r, y * r, z * r, w * r};
 }
 
@@ -545,7 +545,7 @@ f32 Quaternion::GetAngle() const
 
 Vector3 Quaternion::GetRotationAxis() const
 {
-    f32 r = ApproxMath::RSqrtF1(std::max(1.0f - (w * w), DefaultF32Epsilon));
+    f32 r = ApproxMath::RSqrt<ApproxMath::Precision::High>(std::max(1.0f - (w * w), DefaultF32Epsilon));
     return {x * r, y * r, z * r};
 }
 
