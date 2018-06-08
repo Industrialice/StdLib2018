@@ -202,6 +202,29 @@ namespace StdLib::Funcs
         temp = _ROTATE8R(temp, shift);
         return *(T *)&temp;
     }
+
+    template <typename T> std::shared_ptr<typename T::element_type> SharedPtrFromUniquePtr(T &&unique)
+    {
+        return std::shared_ptr<typename T::element_type>(unique.release(), unique.get_deleter());
+    }
+
+    template <typename T> std::shared_ptr<typename T::element_type> MakeSharedFromUniquePtr(T &&unique)
+    {
+        using type = typename T::element_type;
+        static_assert(std::is_same_v<std::remove_reference_t<decltype(unique.get_deleter())>, std::default_delete<type>>);
+        if constexpr(std::is_move_constructible_v<type>)
+        {
+            auto shared = std::make_shared<type>(std::move(*unique));
+            unique.reset();
+            return shared;
+        }
+        else
+        {
+            auto shared = std::make_shared<type>(*unique);
+            unique.reset();
+            return shared;
+        }
+    }
 }
 
 namespace StdLib::MemOps

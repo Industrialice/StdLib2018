@@ -97,3 +97,8 @@ MemoryStreamFixedExternal MemoryMappedFile::ToCMemoryStream() const
     ASSUME(IsOpened());
     return {CMemory(), _size, _size};
 }
+
+MemoryMappedFile::operator bool() const
+{
+    return IsOpened();
+}

@@ -62,8 +62,18 @@ namespace StdLib::ApproxMath
         }
     }
 
-    template <Precision precision>[[nodiscard]] f32 Sqrt(f32 input)
+    template <Precision precision> [[nodiscard]] f64 RSqrt(f64 input)
+    {
+        return 1.0 / sqrt(input);
+    }
+
+    template <Precision precision> [[nodiscard]] f32 Sqrt(f32 input)
     {
         return input * RSqrt<precision>(input);
+    }
+
+    template <Precision precision> [[nodiscard]] f64 Sqrt(f64 input)
+    {
+        return sqrt(input);
     }
 }

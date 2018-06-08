@@ -7,18 +7,17 @@ using namespace StdLib;
 // TimeDifference64 //
 //////////////////////
 
+TimeDifference64::TimeDifference64(i64 counter) : _counter(counter)
+{}
+
 TimeDifference64 TimeDifference64::operator - (const TimeDifference64 &other) const
 {
-    TimeDifference64 ret;
-    ret._counter = _counter - other._counter;
-    return ret;
+    return TimeDifference64{_counter - other._counter};
 }
 
 TimeDifference64 TimeDifference64::operator + (const TimeDifference64 &other) const
 {
-    TimeDifference64 ret;
-    ret._counter = _counter + other._counter;
-    return ret;
+    return TimeDifference64{_counter + other._counter};
 }
 
 TimeDifference64 &TimeDifference64::operator -= (const TimeDifference64 &other)
@@ -65,9 +64,7 @@ bool TimeDifference64::operator != (const TimeDifference64 &other) const
 
 TimeDifference TimeDifference64::As32() const
 {
-    TimeDifference ret;
-    ret._counter = _counter;
-    return ret;
+    return TimeDifference{_counter};
 }
 
 TimeDifference64::operator TimeDifference() const
@@ -79,18 +76,17 @@ TimeDifference64::operator TimeDifference() const
 // TimeDifference //
 ////////////////////
 
+TimeDifference::TimeDifference(i64 counter) : _counter(counter)
+{}
+
 TimeDifference TimeDifference::operator - (const TimeDifference &other) const
 {
-    TimeDifference ret;
-    ret._counter = _counter - other._counter;
-    return ret;
+    return TimeDifference{_counter - other._counter};
 }
 
 TimeDifference TimeDifference::operator + (const TimeDifference &other) const
 {
-    TimeDifference ret;
-    ret._counter = _counter + other._counter;
-    return ret;
+    return TimeDifference{_counter + other._counter};
 }
 
 TimeDifference &TimeDifference::operator -= (const TimeDifference &other)
@@ -137,9 +133,7 @@ bool TimeDifference::operator != (const TimeDifference &other) const
 
 TimeDifference64 TimeDifference::As64() const
 {
-    TimeDifference64 ret;
-    ret._counter = _counter;
-    return ret;
+    return TimeDifference64{_counter};
 }
 
 TimeDifference::operator TimeDifference64() const
@@ -151,6 +145,9 @@ TimeDifference::operator TimeDifference64() const
 // TimeMoment //
 ////////////////
 
+TimeMoment::TimeMoment(i64 counter) : _counter(counter)
+{}
+
 bool TimeMoment::HasValue() const
 {
     return _counter > i64_min;
@@ -159,17 +156,13 @@ bool TimeMoment::HasValue() const
 TimeDifference TimeMoment::operator - (const TimeMoment &other) const
 {
     ASSUME(HasValue());
-    TimeDifference ret;
-    ret._counter = _counter - other._counter;
-    return ret;
+    return TimeDifference{_counter - other._counter};
 }
 
 TimeMoment TimeMoment::operator + (const TimeDifference &difference) const
 {
     ASSUME(HasValue());
-    TimeMoment ret;
-    ret._counter = _counter + difference._counter;
-    return ret;
+    return TimeMoment{_counter + difference._counter};
 }
 
 TimeMoment &TimeMoment::operator += (const TimeDifference &difference)
@@ -182,9 +175,7 @@ TimeMoment &TimeMoment::operator += (const TimeDifference &difference)
 TimeMoment TimeMoment::operator - (const TimeDifference &difference) const
 {
     ASSUME(HasValue());
-    TimeMoment ret;
-    ret._counter = _counter - difference._counter;
-    return ret;
+    return TimeMoment{_counter - difference._counter};
 }
 
 TimeMoment &TimeMoment::operator -= (const TimeDifference &difference)
@@ -222,4 +213,9 @@ bool TimeMoment::operator == (const TimeMoment &other) const
 bool TimeMoment::operator != (const TimeMoment &other) const
 {
     return _counter != other._counter;
+}
+
+TimeMoment::operator bool() const
+{
+    return HasValue();
 }

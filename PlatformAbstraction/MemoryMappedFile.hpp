@@ -29,15 +29,16 @@ namespace StdLib
         MemoryMappedFile &operator = (MemoryMappedFile &&source);
         Error<> Open(File &file, uiw offset, uiw size, bool isCopyOnWrite, bool isPrecommitSpace);
         void Close();
-        bool IsOpened() const;
+        [[nodiscard]] bool IsOpened() const;
         void Flush() const;
-        bool IsWritable() const;
-        ui8 *Memory();
-        const ui8 *Memory() const;
-        const ui8 *CMemory() const;
-        uiw Size();
-        MemoryStreamFixedExternal ToMemoryStream();
-        MemoryStreamFixedExternal ToMemoryStream() const;
-        MemoryStreamFixedExternal ToCMemoryStream() const;
+        [[nodiscard]] bool IsWritable() const;
+        [[nodiscard]] ui8 *Memory();
+        [[nodiscard]] const ui8 *Memory() const;
+        [[nodiscard]] const ui8 *CMemory() const;
+        [[nodiscard]] uiw Size();
+        [[nodiscard]] MemoryStreamFixedExternal ToMemoryStream();
+        [[nodiscard]] MemoryStreamFixedExternal ToMemoryStream() const;
+        [[nodiscard]] MemoryStreamFixedExternal ToCMemoryStream() const;
+        [[nodiscard]] explicit operator bool() const;
     };
 }

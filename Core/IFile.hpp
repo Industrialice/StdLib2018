@@ -79,5 +79,10 @@ namespace StdLib
 
         virtual FileProcMode ProcMode() const = 0;
         virtual FileCacheMode CacheMode() const = 0;
+
+        [[nodiscard]] explicit operator bool() const
+        {
+            return IsOpened();
+        }
     };
 }
