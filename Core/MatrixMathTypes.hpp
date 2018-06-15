@@ -18,6 +18,14 @@ namespace StdLib
     struct Vector3;
     struct Vector4;
 
+    struct i32Vector2;
+    struct i32Vector3;
+    struct i32Vector4;
+
+    struct ui32Vector2;
+    struct ui32Vector3;
+    struct ui32Vector4;
+
     template <uiw Rows, uiw Columns> struct _Matrix;
 
     struct Matrix4x3;
@@ -35,6 +43,14 @@ namespace StdLib
     template <> struct _ChooseVectorType<f32, 2> { using Type = Vector2; };
     template <> struct _ChooseVectorType<f32, 3> { using Type = Vector3; };
     template <> struct _ChooseVectorType<f32, 4> { using Type = Vector4; };
+
+    template <> struct _ChooseVectorType<i32, 2> { using Type = i32Vector2; };
+    template <> struct _ChooseVectorType<i32, 3> { using Type = i32Vector3; };
+    template <> struct _ChooseVectorType<i32, 4> { using Type = i32Vector4; };
+
+    template <> struct _ChooseVectorType<ui32, 2> { using Type = ui32Vector2; };
+    template <> struct _ChooseVectorType<ui32, 3> { using Type = ui32Vector3; };
+    template <> struct _ChooseVectorType<ui32, 4> { using Type = ui32Vector4; };
 
     template <typename ScalarType> struct _ChooseVectorType<ScalarType, 2> { using Type = Vector2Base<ScalarType>; };
     template <typename ScalarType> struct _ChooseVectorType<ScalarType, 3> { using Type = Vector3Base<ScalarType>; };
@@ -237,7 +253,7 @@ namespace StdLib
         using Vector3Base::Vector3Base;
     };
 
-    struct ei32Vector4 : Vector4Base<ui32>
+    struct ui32Vector4 : Vector4Base<ui32>
     {
         using Vector4Base::Vector4Base;
     };

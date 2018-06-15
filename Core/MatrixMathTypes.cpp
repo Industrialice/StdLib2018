@@ -7,6 +7,18 @@ using namespace StdLib;
 
 namespace StdLib
 {
+    template struct _VectorBase<f32, 2>;
+    template struct _VectorBase<f32, 3>;
+    template struct _VectorBase<f32, 4>;
+
+    template struct _VectorBase<i32, 2>;
+    template struct _VectorBase<i32, 3>;
+    template struct _VectorBase<i32, 4>;
+
+    template struct _VectorBase<ui32, 2>;
+    template struct _VectorBase<ui32, 3>;
+    template struct _VectorBase<ui32, 4>;
+
     template struct Vector2Base<f32>;
     template struct Vector3Base<f32>;
     template struct Vector4Base<f32>;
