@@ -147,7 +147,7 @@ namespace StdLib
         [[nodiscard]] VectorTypeByDimension<ScalarType, 3> ToVector3() const;
     };
 
-    template <typename Basis> struct _Vector : Basis
+    template <typename Basis> struct _VectorFP : Basis
     {
         using Basis::Basis;
         using Basis::operator[];
@@ -171,10 +171,10 @@ namespace StdLib
         [[nodiscard]] f32 Length() const;
         [[nodiscard]] f32 LengthSquare() const;
 
-        [[nodiscard]] f32 Distance(const _Vector &other) const;
-        [[nodiscard]] f32 DistanceSquare(const _Vector &other) const;
+        [[nodiscard]] f32 Distance(const _VectorFP &other) const;
+        [[nodiscard]] f32 DistanceSquare(const _VectorFP &other) const;
 
-        [[nodiscard]] f32 Dot(const _Vector &other) const;
+        [[nodiscard]] f32 Dot(const _VectorFP &other) const;
 
         [[nodiscard]] f32 Average() const;
 
@@ -182,34 +182,64 @@ namespace StdLib
         [[nodiscard]] VectorType GetNormalized() const;
         [[nodiscard]] bool IsNormalized(f32 epsilon = DefaultF32Epsilon) const;
 
-        [[nodiscard]] bool EqualsWithEpsilon(const _Vector &other, f32 epsilon = DefaultF32Epsilon) const;
+        [[nodiscard]] bool EqualsWithEpsilon(const _VectorFP &other, f32 epsilon = DefaultF32Epsilon) const;
 
-        void Lerp(const _Vector &other, f32 interpolant);
-        [[nodiscard]] VectorType GetLerped(const _Vector &other, f32 interpolant) const;
+        void Lerp(const _VectorFP &other, f32 interpolant);
+        [[nodiscard]] VectorType GetLerped(const _VectorFP &other, f32 interpolant) const;
 
         template <uiw Rows, uiw Columns> [[nodiscard]] VectorTypeByDimension<f32, Columns> operator * (const _Matrix<Rows, Columns> &matrix) const;
         template <uiw Rows, uiw Columns> VectorType &operator *= (const _Matrix<Rows, Columns> &matrix);
     };
 
-    struct Vector2 : _Vector<Vector2Base<f32>>
+    struct Vector2 : _VectorFP<Vector2Base<f32>>
     {
-        using _Vector::_Vector;
+        using _VectorFP::_VectorFP;
 
         [[nodiscard]] Vector2 GetLeftNormal() const; // no normalization
         [[nodiscard]] Vector2 GetRightNormal() const; // no normalization
     };
 
-    struct Vector3 : _Vector<Vector3Base<f32>>
+    struct Vector3 : _VectorFP<Vector3Base<f32>>
     {
-        using _Vector::_Vector;
+        using _VectorFP::_VectorFP;
 
         void Cross(const Vector3 &other);
         [[nodiscard]] Vector3 GetCrossed(const Vector3 &other) const;
     };
 
-    struct Vector4 : _Vector<Vector4Base<f32>>
+    struct Vector4 : _VectorFP<Vector4Base<f32>>
     {
-        using _Vector::_Vector;
+        using _VectorFP::_VectorFP;
+    };
+
+    struct i32Vector2 : Vector2Base<i32>
+    {
+        using Vector2Base::Vector2Base;
+    };
+
+    struct i32Vector3 : Vector3Base<i32>
+    {
+        using Vector3Base::Vector3Base;
+    };
+
+    struct i32Vector4 : Vector4Base<i32>
+    {
+        using Vector4Base::Vector4Base;
+    };
+
+    struct ui32Vector2 : Vector2Base<ui32>
+    {
+        using Vector2Base::Vector2Base;
+    };
+
+    struct ui32Vector3 : Vector3Base<ui32>
+    {
+        using Vector3Base::Vector3Base;
+    };
+
+    struct ei32Vector4 : Vector4Base<ui32>
+    {
+        using Vector4Base::Vector4Base;
     };
 
     template <uiw Rows, uiw Columns> struct _Matrix
@@ -454,7 +484,7 @@ namespace StdLib
 
     template<typename Basis>
     template<uiw Rows, uiw Columns>
-    inline auto _Vector<Basis>::operator*(const _Matrix<Rows, Columns> &matrix) const -> VectorTypeByDimension<f32, Columns>
+    inline auto _VectorFP<Basis>::operator*(const _Matrix<Rows, Columns> &matrix) const -> VectorTypeByDimension<f32, Columns>
     {
         static_assert(dim == Rows, "Cannot multiply vector and matrix, matrix's rows number and vector dimension must be equal");
 
@@ -470,7 +500,7 @@ namespace StdLib
 
     template<typename Basis>
     template<uiw Rows, uiw Columns>
-    inline auto _Vector<Basis>::operator*=(const _Matrix<Rows, Columns> &matrix) -> VectorType &
+    inline auto _VectorFP<Basis>::operator*=(const _Matrix<Rows, Columns> &matrix) -> VectorType &
     {
         *this = *this * matrix;
         return *this;

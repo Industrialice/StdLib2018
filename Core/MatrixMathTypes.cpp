@@ -11,9 +11,17 @@ namespace StdLib
     template struct Vector3Base<f32>;
     template struct Vector4Base<f32>;
 
-    template struct _Vector<Vector2Base<f32>>;
-    template struct _Vector<Vector3Base<f32>>;
-    template struct _Vector<Vector4Base<f32>>;
+    template struct Vector2Base<i32>;
+    template struct Vector3Base<i32>;
+    template struct Vector4Base<i32>;
+
+    template struct Vector2Base<ui32>;
+    template struct Vector3Base<ui32>;
+    template struct Vector4Base<ui32>;
+
+    template struct _VectorFP<Vector2Base<f32>>;
+    template struct _VectorFP<Vector3Base<f32>>;
+    template struct _VectorFP<Vector4Base<f32>>;
 
     template struct _Matrix<2, 2>;
     template struct _Matrix<3, 2>;

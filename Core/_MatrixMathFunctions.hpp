@@ -290,12 +290,12 @@ namespace StdLib
     // _Vector //
     /////////////
         
-    template <typename Basis> inline f32 _Vector<Basis>::Length() const
+    template <typename Basis> inline f32 _VectorFP<Basis>::Length() const
     {
         return sqrt(LengthSquare());
     }
 
-    template <typename Basis> inline f32 _Vector<Basis>::LengthSquare() const
+    template <typename Basis> inline f32 _VectorFP<Basis>::LengthSquare() const
     {
         f32 sum = x * x;
         for (uiw index = 1; index < dim; ++index)
@@ -305,12 +305,12 @@ namespace StdLib
         return sum;
     }
 
-    template <typename Basis> inline f32 _Vector<Basis>::Distance(const _Vector &other) const
+    template <typename Basis> inline f32 _VectorFP<Basis>::Distance(const _VectorFP &other) const
     {
         return sqrt(DistanceSquare(other));
     }
 
-    template <typename Basis> inline f32 _Vector<Basis>::DistanceSquare(const _Vector &other) const
+    template <typename Basis> inline f32 _VectorFP<Basis>::DistanceSquare(const _VectorFP &other) const
     {
         f32 dist = x - other.x;
         f32 sum = dist * dist;
@@ -322,7 +322,7 @@ namespace StdLib
         return sum;
     }
 
-    template <typename Basis> inline f32 _Vector<Basis>::Dot(const _Vector &other) const
+    template <typename Basis> inline f32 _VectorFP<Basis>::Dot(const _VectorFP &other) const
     {
         f32 sum = x * other.x;
         for (uiw index = 1; index < dim; ++index)
@@ -332,12 +332,12 @@ namespace StdLib
         return sum;
     }
 
-    template <typename Basis> inline f32 _Vector<Basis>::Average() const
+    template <typename Basis> inline f32 _VectorFP<Basis>::Average() const
     {
         return Accumulate() / dim;
     }
 
-    template <typename Basis> inline void _Vector<Basis>::Normalize()
+    template <typename Basis> inline void _VectorFP<Basis>::Normalize()
     {
         f32 revLength = ApproxMath::RSqrt<ApproxMath::Precision::High>(LengthSquare());
         for (uiw index = 0; index < dim; ++index)
@@ -346,7 +346,7 @@ namespace StdLib
         }
     }
 
-    template <typename Basis> inline auto _Vector<Basis>::GetNormalized() const -> VectorType
+    template <typename Basis> inline auto _VectorFP<Basis>::GetNormalized() const -> VectorType
     {
         VectorType result;
         f32 revLength = ApproxMath::RSqrt<ApproxMath::Precision::High>(LengthSquare());
@@ -357,13 +357,13 @@ namespace StdLib
         return result;
     }
 
-    template<typename Basis> inline bool _Vector<Basis>::IsNormalized(f32 epsilon) const
+    template<typename Basis> inline bool _VectorFP<Basis>::IsNormalized(f32 epsilon) const
     {
         f32 length = Length();
         return (length >= 1.0f - epsilon) && (length <= 1.0f + epsilon);
     }
 
-    template <typename Basis> inline bool _Vector<Basis>::EqualsWithEpsilon(const _Vector &other, f32 epsilon) const
+    template <typename Basis> inline bool _VectorFP<Basis>::EqualsWithEpsilon(const _VectorFP &other, f32 epsilon) const
     {
         for (uiw index = 0; index < dim; ++index)
         {
@@ -375,12 +375,12 @@ namespace StdLib
         return true;
     }
 
-    template <typename Basis> inline void _Vector<Basis>::Lerp(const _Vector &other, f32 interpolant)
+    template <typename Basis> inline void _VectorFP<Basis>::Lerp(const _VectorFP &other, f32 interpolant)
     {
         *this += interpolant * (other - *this);
     }
 
-    template <typename Basis> inline auto _Vector<Basis>::GetLerped(const _Vector &other, f32 interpolant) const -> VectorType
+    template <typename Basis> inline auto _VectorFP<Basis>::GetLerped(const _VectorFP &other, f32 interpolant) const -> VectorType
     {
         return *this + interpolant * (other - *this);
     }

@@ -17,7 +17,6 @@ namespace StdLib::Funcs
         return std::extent_v<T>;
     }
     #define CountOf(a) CountOf<decltype(a)>()
-    #define CountOf32(a) ((ui32)CountOf<decltype(a)>())
 
     template <ui32 size> struct _NearestInt;
     template <> struct _NearestInt<1> { using type = ui8; };
@@ -56,7 +55,7 @@ namespace StdLib::Funcs
 
     template <typename T> [[nodiscard]] ui32 IndexOfMostSignificantNonZeroBit(T value)
     {
-        static_assert(std::is_integral_v<T>, "Cannot operate on non-integral types");
+        static_assert(std::is_integral_v<T> || std::is_enum_v<T>, "Cannot operate on non-integral types");
         ui32 result;
         if constexpr (sizeof(T) > 4)
         {
@@ -74,7 +73,7 @@ namespace StdLib::Funcs
 
     template <typename T> [[nodiscard]] ui32 IndexOfLeastSignificantNonZeroBit(T value)
     {
-        static_assert(std::is_integral_v<T>, "Cannot operate on non-integral types");
+        static_assert(std::is_integral_v<T> || std::is_enum_v<T>, "Cannot operate on non-integral types");
         ui32 result;
         if constexpr (sizeof(T) > 4)
         {
