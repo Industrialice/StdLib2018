@@ -794,7 +794,7 @@ static void MemoryStreamTests()
     writeAndCheck(allocatorTest);
 
     char buf[128];
-    MemoryStreamFixedExternal externalTest = MemoryStreamFixedExternal(buf, Funcs::CountOf(buf));
+    MemoryStreamFixedExternal externalTest = MemoryStreamFixedExternal(buf, CountOf(buf));
     writeAndCheck(externalTest);
 
     struct HolderTestData
