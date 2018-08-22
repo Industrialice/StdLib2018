@@ -9,14 +9,13 @@ namespace StdLib::Funcs
         return left.owner_before(right) == false && right.owner_before(left) == false;
     }
 
-    template <typename Tin> [[nodiscard]] constexpr uiw CountOf()
+    template <typename Tin> [[nodiscard]] constexpr uiw _CountOf()
     {
         using T = typename std::remove_reference_t<Tin>;
         static_assert(std::is_array_v<T>, "CountOf() requires an array argument");
         static_assert(std::extent_v<T> > 0, "zero- or unknown-size array");
         return std::extent_v<T>;
     }
-    #define CountOf(a) CountOf<decltype(a)>()
 
     template <ui32 size> struct _NearestInt;
     template <> struct _NearestInt<1> { using type = ui8; };
@@ -225,6 +224,8 @@ namespace StdLib::Funcs
         }
     }
 }
+
+#define CountOf(a) Funcs::_CountOf<decltype(a)>()
 
 namespace StdLib::MemOps
 {

@@ -519,6 +519,6 @@ namespace StdLib
     inline auto _VectorFP<Basis>::operator*=(const _Matrix<Rows, Columns> &matrix) -> VectorType &
     {
         *this = *this * matrix;
-        return *this;
+        return (VectorType &)*this;
     }
 }

@@ -16,5 +16,12 @@ void MathLibTests()
     i32Vector2 iv2 = iv0 + iv1;
     UTest(true, iv2.x == 4 && iv2.y == 6);
 
+    Vector3 rotTest(1.0f, 2.0f, 3.0f);
+    auto rotMatrix = Matrix3x3::CreateRS(Vector3{1.0f, 2.0f, 3.0f});
+    rotTest *= rotMatrix;
+    rotMatrix.Transpose();
+    rotTest *= rotMatrix;
+    UTest(true, EqualsWithEpsilon(rotTest.x, 1.0f) && EqualsWithEpsilon(rotTest.y, 2.0f) && EqualsWithEpsilon(rotTest.z, 3.0f));
+
     PRINTLOG("finished math lib tests\n");
 }
