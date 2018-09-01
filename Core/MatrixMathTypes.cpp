@@ -48,6 +48,18 @@ namespace StdLib
     template struct Rectangle<i32>;
 }
 
+template <typename T> T CreateOrthographicMarix(const Vector3 &min, const Vector3 &max)
+{
+    T m;
+    m[0][0] = 2.0f / (max.x - min.x);
+    m[3][0] = -((max.x + min.x) / (max.x - min.x));
+    m[1][1] = 2.0f / (max.y - min.y);
+    m[3][1] = -((max.y + min.y) / (max.y - min.y));
+    m[2][2] = 2.0f / (max.z - min.z);
+    m[3][2] = -((max.z + min.z) / (max.z - min.z));
+    return m;
+}
+
 /////////////
 // Vector2 //
 /////////////
@@ -87,24 +99,8 @@ Vector3 Vector3::GetCrossed(const Vector3 &other) const
 }
 
 ///////////////
-// Matrix2x2 //
-///////////////
-
-Matrix2x2::Matrix2x2(f32 e00, f32 e01, f32 e10, f32 e11) : _Matrix(e00, e01, e10, e11)
-{}
-
-Matrix2x2::Matrix2x2(const Vector2 &row0, const Vector2 &row1) : _Matrix(row0.x, row0.y, row1.x, row1.y)
-{}
-
-///////////////
 // Matrix3x2 //
 ///////////////
-
-Matrix3x2::Matrix3x2(f32 e00, f32 e01, f32 e10, f32 e11, f32 e20, f32 e21) : _Matrix(e00, e01, e10, e11, e20, e21)
-{}
-
-Matrix3x2::Matrix3x2(const Vector2 &row0, const Vector2 &row1, const Vector2 &row2) : _Matrix(row0.x, row0.y, row1.x, row1.y, row2.x, row2.y)
-{}
 
 Matrix3x3 Matrix3x2::GetInversed() const
 {
@@ -176,24 +172,8 @@ Matrix3x2 Matrix3x2::CreateRTS(const optional<f32> &rotation, const optional<Vec
 }
 
 ///////////////
-// Matrix2x3 //
-///////////////
-
-Matrix2x3::Matrix2x3(f32 e00, f32 e01, f32 e02, f32 e10, f32 e11, f32 e12) : _Matrix(e00, e01, e02, e10, e11, e12)
-{}
-
-Matrix2x3::Matrix2x3(const Vector3 &row0, const Vector3 &row1) : _Matrix(row0.x, row0.y, row0.z, row1.x, row1.y, row1.z)
-{}
-
-///////////////
 // Matrix4x3 //
 ///////////////
-
-Matrix4x3::Matrix4x3(f32 e00, f32 e01, f32 e02, f32 e10, f32 e11, f32 e12, f32 e20, f32 e21, f32 e22, f32 e30, f32 e31, f32 e32) : _Matrix(e00, e01, e02, e10, e11, e12, e20, e21, e22, e30, e31, e32)
-{}
-
-Matrix4x3::Matrix4x3(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2, const Vector3 &row3) : _Matrix(row0.x, row0.y, row0.z, row1.x, row1.y, row1.z, row2.x, row2.y, row2.z, row3.x, row3.y, row3.z)
-{}
 
 Matrix4x4 Matrix4x3::operator*(const Matrix4x4 &other) const
 {
@@ -230,15 +210,14 @@ Matrix4x3 Matrix4x3::CreateRTS(const optional<Quaternion> &rotation, const optio
     return StdLib::CreateRTS<Matrix4x3, true>(rotation, translation, scale);
 }
 
+Matrix4x3 Matrix4x3::CreateOrthographicProjection(const Vector3 &min, const Vector3 &max)
+{
+    return CreateOrthographicMarix<Matrix4x3>(min, max);
+}
+
 ///////////////
 // Matrix3x4 //
 ///////////////
-
-Matrix3x4::Matrix3x4(f32 e00, f32 e01, f32 e02, f32 e03, f32 e10, f32 e11, f32 e12, f32 e13, f32 e20, f32 e21, f32 e22, f32 e23) : _Matrix(e00, e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23)
-{}
-
-Matrix3x4::Matrix3x4(const Vector4 &row0, const Vector4 &row1, const Vector4 &row2) : _Matrix(row0.x, row0.y, row0.z, row0.w, row1.x, row1.y, row1.z, row1.w, row2.x, row2.y, row2.z, row2.w)
-{}
 
 Matrix3x4 Matrix3x4::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
 {
@@ -258,12 +237,6 @@ Matrix3x4 Matrix3x4::CreateRS(const optional<Quaternion> &rotation, const option
 ///////////////
 // Matrix4x4 //
 ///////////////
-
-Matrix4x4::Matrix4x4(f32 e00, f32 e01, f32 e02, f32 e03, f32 e10, f32 e11, f32 e12, f32 e13, f32 e20, f32 e21, f32 e22, f32 e23, f32 e30, f32 e31, f32 e32, f32 e33) : _Matrix(e00, e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23, e30, e31, e32, e33)
-{}
-
-Matrix4x4::Matrix4x4(const Vector4 &row0, const Vector4 &row1, const Vector4 &row2, const Vector4 &row3) : _Matrix(row0.x, row0.y, row0.z, row0.w, row1.x, row1.y, row1.z, row1.w, row2.x, row2.y, row2.z, row2.w, row3.x, row3.y, row3.z, row3.w)
-{}
 
 Matrix4x4 Matrix4x4::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
 {
@@ -300,15 +273,16 @@ Matrix4x4 Matrix4x4::CreatePerspectiveProjection(f32 horizontalFOV, f32 aspectRa
     return result;
 }
 
+Matrix4x4 Matrix4x4::CreateOrthographicProjection(const Vector3 &min, const Vector3 &max)
+{
+    auto m = CreateOrthographicMarix<Matrix4x4>(min, max);
+    m[3][3] = 1.0f;
+    return m;
+}
+
 ///////////////
 // Matrix3x3 //
 ///////////////
-
-Matrix3x3::Matrix3x3(f32 e00, f32 e01, f32 e02, f32 e10, f32 e11, f32 e12, f32 e20, f32 e21, f32 e22) : _Matrix(e00, e01, e02, e10, e11, e12, e20, e21, e22)
-{}
-
-Matrix3x3::Matrix3x3(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2) : _Matrix(row0.x, row0.y, row0.z, row1.x, row1.y, row1.z, row2.x, row2.y, row2.z)
-{}
 
 Matrix3x3 Matrix3x3::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
 {

@@ -72,7 +72,7 @@ namespace StdLib
             }
         }
 
-        DataHolder(DataHolder &&source)
+        DataHolder(DataHolder &&source) noexcept
         {
             source._onMoving(*this, source);
         }

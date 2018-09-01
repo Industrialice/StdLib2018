@@ -715,7 +715,7 @@ static void DataHolderTests()
         i32 _moveCalledTimes = 0;
 
         NonCopyable() = default;
-        NonCopyable(NonCopyable &&)
+        NonCopyable(NonCopyable &&) noexcept
         {
             ++_moveCalledTimes;
         }

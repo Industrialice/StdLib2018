@@ -9,9 +9,6 @@ namespace StdLib
     // _VectorBase //
     /////////////////
 
-    template<typename _ScalarType, uiw Dim> inline _VectorBase<_ScalarType, Dim>::_VectorBase(ScalarType x, ScalarType y) : x(x), y(y)
-    {}
-
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator + (const _VectorBase &other) const -> VectorType
     {
         VectorType result;
@@ -194,9 +191,6 @@ namespace StdLib
     // Vector2Base //
     /////////////////
 
-    template<typename ScalarType> inline Vector2Base<ScalarType>::Vector2Base(ScalarType x, ScalarType y) : _VectorBase<ScalarType, 2>(x, y)
-    {}
-
     template<typename ScalarType> inline ScalarType &Vector2Base<ScalarType>::operator[](uiw index)
     {
         if (index == 0) return x;
@@ -214,12 +208,6 @@ namespace StdLib
     /////////////////
     // Vector3Base //
     /////////////////
-
-    template<typename ScalarType> inline Vector3Base<ScalarType>::Vector3Base(ScalarType x, ScalarType y, ScalarType z) : _VectorBase<ScalarType, 3>(x, y), z(z)
-    {}
-
-    template<typename ScalarType> inline Vector3Base<ScalarType>::Vector3Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z) : _VectorBase<ScalarType, 3>(vec.x, vec.y), z(z)
-    {}
 
     template<typename ScalarType> inline ScalarType &Vector3Base<ScalarType>::operator[](uiw index)
     {
@@ -245,18 +233,6 @@ namespace StdLib
     /////////////////
     // Vector4Base //
     /////////////////
-
-    template<typename ScalarType> inline Vector4Base<ScalarType>::Vector4Base(ScalarType x, ScalarType y, ScalarType z, ScalarType w) : _VectorBase<ScalarType, 4>(x, y), z(z), w(w)
-    {}
-
-    template<typename ScalarType> inline Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z, ScalarType w) : _VectorBase<ScalarType, 4>(vec.x, vec.y), z(z), w(w)
-    {}
-
-    template<typename ScalarType> inline Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 3> &vec, ScalarType w) : _VectorBase<ScalarType, 4>(vec.x, vec.y), z(vec.z), w(w)
-    {}
-
-    template<typename ScalarType> inline Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &v0, const VectorTypeByDimension<ScalarType, 2> &v1) : _VectorBase<ScalarType, 4>(v0.x, v0.y), z(v1.x), w(v1.y)
-    {}
 
     template<typename ScalarType> inline ScalarType &Vector4Base<ScalarType>::operator[](uiw index)
     {
@@ -624,24 +600,6 @@ namespace StdLib
         return true;
     }
 
-    template<uiw Rows, uiw Columns> inline _Matrix<Rows, Columns>::_Matrix()
-    {
-        for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
-        {
-            for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
-            {
-                if (rowIndex == columnIndex)
-                {
-                    elements[rowIndex][columnIndex] = 1.0f;
-                }
-                else
-                {
-                    elements[rowIndex][columnIndex] = 0.0f;
-                }
-            }
-        }
-    }
-
     template <typename MatrixType, bool isAllowTranslation> inline MatrixType CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt)
     {
         static_assert(MatrixType::rows >= (isAllowTranslation ? 4 : 3));
@@ -759,11 +717,6 @@ namespace StdLib
     ///////////////
     // Rectangle //
     ///////////////
-
-    template <typename T, bool isTopLessThanBottom> inline auto Rectangle<T, isTopLessThanBottom>::FromPoint(T x, T y) -> Rectangle
-    {
-        return {x, x, y, y};
-    }
 
     template <typename T, bool isTopLessThanBottom> inline bool Rectangle<T, isTopLessThanBottom>::IsIntersected(const Rectangle &other) const
     {
