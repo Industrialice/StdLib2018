@@ -13,6 +13,20 @@
     #define fseek _fseeki64_nolock
 #else
     #include <unistd.h>
+    #include <sys/stat.h>
+    #if (defined(PLATFORM_ANDROID) && (__ANDROID_API__ < 24))
+        #define _DEFINE_CUSTOM_FSEEKO
+        int Custom_fseeko(FILE *stream, off_t offset, int whence);
+
+        #define _DEFINE_CUSTOM_FTELLO
+        off_t Custom_ftello(FILE *stream);
+
+        #define fseek Custom_fseeko
+        #define ftell Custom_ftello
+    #else
+        #define fseek fseeko
+        #define ftell ftello
+    #endif
 #endif
 
 using namespace StdLib;
@@ -399,6 +413,26 @@ Result<ui64> FileToCFile::SizeGet()
 {
     ASSUME(IsOpened());
 
+#ifdef PLATFORM_WINDOWS
+
+    fflush(_file);
+    i64 endOfFile = _filelengthi64(_fileno(_file));
+    if (endOfFile == -1)
+    {
+        return DefaultError::UnknownError("_filelengthi64 failed");
+    }
+
+#elif defined(PLATFORM_POSIX)
+
+    struct stat64 stat;
+    if (fstat64(fileno(_file), &stat) != 0)
+    {
+        return DefaultError::UnknownError("fstat64 failed");
+    }
+    i64 endOfFile = stat.st_size;
+
+#else
+
     i64 currentOffset = ftell(_file);
     if (currentOffset == -1)
     {
@@ -420,6 +454,8 @@ Result<ui64> FileToCFile::SizeGet()
     {
         return DefaultError::UnknownError("fseek failed");
     }
+
+#endif
 
     return (ui64)(endOfFile - _offsetToStart);
 }
@@ -464,3 +500,20 @@ FileOpenMode FileToCFile::OpenModeGet() const
     ASSUME(IsOpened());
     return _openMode;
 }
+
+#ifdef _DEFINE_CUSTOM_FSEEKO
+    int Custom_fseeko(FILE *stream, off_t offset, int whence)
+    {
+        fflush(stream);
+        off_t result = lseek64(fileno(stream), offset, whence);
+        return result == (off_t)-1 ? -1 : 0;
+    }
+#endif
+
+#ifdef _DEFINE_CUSTOM_FTELLO
+    off_t Custom_ftello(FILE *stream)
+    {
+        fflush(stream);
+        return lseek64(fileno(stream), 0L, SEEK_CUR);
+    }
+#endif

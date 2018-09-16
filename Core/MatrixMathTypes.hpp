@@ -72,9 +72,9 @@ namespace StdLib
 
     template <typename _ScalarType, uiw Dim> struct _VectorBase
     {
-        static constexpr uiw dim = Dim;
+        static_assert(Dim > 1);
 
-        static_assert(dim > 1);
+        static constexpr uiw dim = Dim;
 
         using ScalarType = _ScalarType;
         using VectorType = VectorTypeByDimension<ScalarType, dim>;
@@ -261,10 +261,10 @@ namespace StdLib
 
     template <uiw Rows, uiw Columns> struct _Matrix
     {
-        using MatrixType = MatrixTypeByDimensions<Rows, Columns>;
-
         static_assert(Rows > 1);
         static_assert(Columns > 1);
+
+        using MatrixType = MatrixTypeByDimensions<Rows, Columns>;
 
         static constexpr uiw rows = Rows;
         static constexpr uiw columns = Columns;

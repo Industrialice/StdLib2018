@@ -170,7 +170,7 @@ Result<FilePath> File::PNN() const
 {
     ASSUME(IsOpened());
     char proc[MaxPathLength];
-    snprintf(proc, Funcs::CountOf(proc), "/proc/self/fd/%i", _handle);
+    snprintf(proc, CountOf(proc), "/proc/self/fd/%i", _handle);
     char buf[MaxPathLength];
     ssize_t len = readlink(proc, buf, MaxPathLength - 1);
     if (len == -1)

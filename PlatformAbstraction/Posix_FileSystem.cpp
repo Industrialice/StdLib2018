@@ -6,7 +6,9 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <dirent.h>
-#include <sys/sendfile.h>
+
+#undef __USE_FILE_OFFSET64
+#include <sys/sendfile.h> /* using 64 bit offsets will pick sendfile64 which isn't available for APIs below 21 */
 
 using namespace StdLib;
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#define _FILE_OFFSET_BITS 64
+
 #include <memory>
 #include <type_traits>
 #include <functional>
