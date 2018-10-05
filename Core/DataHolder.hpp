@@ -2,13 +2,20 @@
 
 namespace StdLib
 {
-    template <uiw Size> class DataHolder
+	// TODO: using template parameters can be made movable, copyable and RAII-destructible
+    template <uiw Size, uiw Alignment = 16> class DataHolder
     {
-        static constexpr uiw size = (Size & 15) ? ((Size & ~15) + 16) : Size;
+		static_assert(Funcs::IsPowerOf2(Alignment), "alignment is not of power of 2");
+
+	public:
+        static constexpr uiw size = (Size + (Alignment - 1)) & ~(Alignment - 1);
+		static constexpr uiw alignment = Alignment;
+
+	private:
         union
         {
             void *_address;
-            alignas(16) ui8 _local[size];
+            alignas(Alignment) ui8 _local[size];
         };
         void (*_onMoving)(DataHolder &target, DataHolder &source);
     #ifdef DEBUG
@@ -30,7 +37,7 @@ namespace StdLib
         {
             using clearT = std::remove_reference_t<T>;
 
-            static_assert(alignof(clearT) <= 16, "Objects with pecular alignment requirements are not allowed");
+            static_assert(alignof(clearT) <= Alignment, "Cannot satisfy alignment requirement with provided type");
 
             if constexpr (sizeof(clearT) <= size)
             {

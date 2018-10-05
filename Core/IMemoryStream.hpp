@@ -210,9 +210,9 @@ namespace StdLib
         }
     };
 
-    template <uiw LocalSize> class MemoryStreamFromDataHolder final : public IMemoryStream
+    template <uiw LocalSize, uiw LocalAlignment = 16> class MemoryStreamFromDataHolder final : public IMemoryStream
     {
-        using holderType = DataHolder<LocalSize>;
+        using holderType = DataHolder<LocalSize, LocalAlignment>;
 
         holderType _data;
         const ui8 *(*_provide)(const holderType &data);
@@ -226,6 +226,7 @@ namespace StdLib
 
     public:
         static constexpr uiw localSize = LocalSize;
+		static constexpr uiw localAlignment = LocalAlignment;
 
         virtual ~MemoryStreamFromDataHolder() override
         {

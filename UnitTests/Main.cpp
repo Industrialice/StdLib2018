@@ -10,6 +10,18 @@ using namespace Funcs;
 
 void MathLibTests();
 
+static void IntegerPropertiesTest()
+{
+	UTest(false, IsPowerOf2(0));
+	UTest(true, IsPowerOf2(16u));
+	UTest(false, IsPowerOf2(15u));
+	UTest(true, IsPowerOf2(16));
+	UTest(false, IsPowerOf2(15));
+	UTest(false, IsPowerOf2(-5));
+
+	PRINTLOG("finished integer properties tests\n");
+}
+
 static void SetBitTests()
 {
     ui32 value = 0;
@@ -852,6 +864,7 @@ int main(int argc, const char **argv)
     FilePath folderForTests = FilePath::FromChar(filesTestFolder);
     UTest(false, FileSystem::CreateNewFolder(folderForTests, {}, true));
 
+	IntegerPropertiesTest();
     SetBitTests();
     SignificantBitTests();
     ChangeEndiannessTests();

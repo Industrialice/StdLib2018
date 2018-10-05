@@ -134,6 +134,7 @@
     <ClInclude Include="FileToMemoryStream.hpp" />
     <ClInclude Include="IFile.hpp" />
     <ClInclude Include="IMemoryStream.hpp" />
+    <ClInclude Include="ListenerHandle.hpp" />
     <ClInclude Include="Result.hpp" />
     <ClInclude Include="_ErrorCodes.hpp" />
     <ClInclude Include="GenericFuncs.hpp" />

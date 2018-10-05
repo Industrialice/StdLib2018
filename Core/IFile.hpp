@@ -31,7 +31,7 @@ namespace StdLib
         OpenExisting
     };
 
-    // sometimes disabling write cache you'll also disable read cache and vise versa
+    // sometimes when you disable write cache you'll also get read cache disabled and vise versa
     ENUM_COMBINABLE(FileCacheMode, ui8,
         Default = 0,
         LinearRead = Funcs::BitPos(0), /* requires ProcMode::Read, can't be used with RandomRead */
