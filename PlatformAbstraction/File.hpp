@@ -16,19 +16,19 @@ namespace StdLib
     #if ENABLE_FILE_STATS
         struct FileStats
         {
-            using counter_t = ui64;
-            counter_t writesToBufferCount;
-            counter_t writesToFileCount;
-            counter_t readsFromBufferCount;
-            counter_t readsFromFileCount;
-            counter_t bytesFromBufferRead;
-            counter_t bytesFromFileRead;
-            counter_t bytesToBufferWritten;
-            counter_t bytesToFileWritten;
-            counter_t bufferedWrites;
-            counter_t unbufferedWrites;
-            counter_t bufferedReads;
-            counter_t unbufferedReads;
+            using countert = ui64;
+            countert writesToBufferCount;
+            countert writesToFileCount;
+            countert readsFromBufferCount;
+            countert readsFromFileCount;
+            countert bytesFromBufferRead;
+            countert bytesFromFileRead;
+            countert bytesToBufferWritten;
+            countert bytesToFileWritten;
+            countert bufferedWrites;
+            countert unbufferedWrites;
+            countert bufferedReads;
+            countert unbufferedReads;
         };
     #endif
 

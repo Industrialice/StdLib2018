@@ -41,10 +41,10 @@ namespace StdLib
         DisableSystemWriteCache = Funcs::BitPos(4), /* requires ProcMode::Write */
         DisableSystemReadCache = Funcs::BitPos(5) /* requires ProcMode::Read */);
 
-    // file content: ....#.....
-    // OffsetGet(FileOffsetMode::FromBegin) == 4
+    // position in file: ..#...
+    // OffsetGet(FileOffsetMode::FromBegin) == 2
     // OffsetGet(FileOffsetMode::FromCurrent) == 0 (always zero)
-    // OffsetGet(FileOffsetMode::FromEnd) == -5
+    // OffsetGet(FileOffsetMode::FromEnd) == -3
 
     enum class FileOffsetMode : ui8
     {
@@ -67,7 +67,7 @@ namespace StdLib
 
         virtual bool Flush() = 0;
         virtual bool IsBufferingSupported() const = 0;
-        virtual bool BufferSet(ui32 size, bufferType &&buffer = {nullptr, nullptr}) = 0; // will reject this call if buffering isn't supported, pass null as a buffer to use an auto allocated buffer, pass 0 as a size to disable buffering
+        virtual bool BufferSet(ui32 size, bufferType &&buffer = {nullptr, nullptr}) = 0; // will reject this call if buffering isn't supported, pass nullptr as a buffer to use an auto allocated buffer, pass 0 as size to disable buffering
         virtual std::pair<ui32, const void *> BufferGet() const = 0; // will return nullptr if there's no buffer
 
         virtual bool IsSeekSupported() const = 0;
