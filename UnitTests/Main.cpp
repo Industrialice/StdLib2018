@@ -235,21 +235,21 @@ static void AllocatorsTests()
 
 #ifndef PLATFORM_ANDROID
     blockSize = Allocator::MallocBased::MemorySize(memory);
-    UTest(LeftGreaterEqual, blockSize, 100);
+    UTest(LeftGreaterEqual, blockSize, 100u);
 #endif
 
     bool expandResult = Allocator::MallocBased::ReallocateInplace(memory, 200);
     if (expandResult)
     {
         blockSize = Allocator::MallocBased::MemorySize(memory);
-        UTest(LeftGreaterEqual, blockSize, 200);
+        UTest(LeftGreaterEqual, blockSize, 200u);
     }
-    memory = Allocator::MallocBased::Reallocate(memory, 300);
+    memory = Allocator::MallocBased::Reallocate(memory, 300u);
     UTest(true, memory);
 
 #ifndef PLATFORM_ANDROID
     blockSize = Allocator::MallocBased::MemorySize(memory);
-    UTest(LeftGreaterEqual, blockSize, 300);
+    UTest(LeftGreaterEqual, blockSize, 300u);
 #endif
 
     Allocator::MallocBased::Free(memory);

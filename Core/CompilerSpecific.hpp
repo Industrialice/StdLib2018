@@ -4,7 +4,10 @@
 
     #pragma warning(1 : 4062) /* The enumerate has no associated handler in a switch statement, and there is no default label. */
     //#pragma warning(1 : 4265) /* class has virtual functions, but destructor is not virtual */
-    #pragma warning(1 : 4800) /* type' : forcing value to bool 'true' or 'false' (performance warning) */
+    #pragma warning(1 : 4800) /* 'type' : forcing value to bool 'true' or 'false' (performance warning) */
+    #pragma warning(1 : 4263) /* 'function': member function does not override any base class virtual member function */
+    #pragma warning(1 : 4264) /* 'virtual_function' : no override available for virtual member function from base 'class'; function is hidden */
+    #pragma warning(1 : 4266) /* 'function': no override available for virtual member function from base 'type'; function is hidden */
 
     #define RSTR __restrict
     #define ALLOCA(count, sizeOfElement) _alloca((count) * (sizeOfElement))
