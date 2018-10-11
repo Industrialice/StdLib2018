@@ -69,6 +69,8 @@
     #define _BYTESWAP32(value) __builtin_bswap32(value)
     #define _BYTESWAP64(value) __builtin_bswap64(value)
 
+    // TODO: rotate intrinsics
+
 #else
 
     #error unknown compiler
@@ -101,14 +103,14 @@
 #endif
 
 #ifndef _MSNZB32
-    #define _MSNZB32(tosearch, result) for (ui32 index = 31; ; --index) { ASSUME(tosearch != 0); if (tosearch & 1 << index) return index; }
+    #define _MSNZB32(tosearch, result) do { ASSUME(tosearch != 0); for (ui32 index = 31; ; --index) { if (tosearch & 1 << index) { *result = index; break; } } } while(0)
 #endif
 #ifndef _LSNZB32
-    #define _LSNZB32(tosearch, result) for (ui32 index = 0; ; ++index) { ASSUME(tosearch != 0); if (tosearch & 1 << index) return index; }
+    #define _LSNZB32(tosearch, result) do { ASSUME(tosearch != 0); for (ui32 index = 0; ; ++index) { if (tosearch & 1 << index) { *result = index; break; } } } while(0)
 #endif
 #ifndef _MSNZB64
-    #define _MSNZB64(tosearch, result) for (ui32 index = 63; ; --index) { ASSUME(tosearch != 0); if (tosearch & 1ULL << index) return index; }
+    #define _MSNZB64(tosearch, result) do { ASSUME(tosearch != 0); auto casted = *(unsigned long long *)&tosearch; unsigned highPart = unsigned(casted >> 32); unsigned lowPart = unsigned(casted & 0xFFFFFFFF); unsigned int tempResult; if (highPart) { _MSNZB32(highPart, &tempResult); tempResult += 32; } else _MSNZB32(lowPart, &tempResult); *result = tempResult; } while(0)
 #endif
 #ifndef _LSNZB64
-    #define _LSNZB64(tosearch, result) for (ui32 index = 0; ; ++index) { ASSUME(tosearch != 0); if (tosearch & 1ULL << index) return index; }
+    #define _LSNZB64(tosearch, result) do { ASSUME(tosearch != 0); auto casted = *(unsigned long long *)&tosearch; unsigned highPart = unsigned(casted >> 32); unsigned lowPart = (unsigned)(casted & 0xFFFFFFFF); unsigned int tempResult; if (lowPart) _LSNZB32(lowPart, &tempResult); else { _LSNZB32(highPart, &tempResult); tempResult += 32; } *result = tempResult; } while(0)
 #endif

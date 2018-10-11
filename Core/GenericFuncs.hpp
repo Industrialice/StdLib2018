@@ -54,6 +54,7 @@ namespace StdLib::Funcs
 
     template <typename T> [[nodiscard]] ui32 IndexOfMostSignificantNonZeroBit(T value)
     {
+        ASSUME(value != 0);
         static_assert(std::is_integral_v<T> || std::is_enum_v<T>, "Cannot operate on non-integral types");
         ui32 result;
         if constexpr (sizeof(T) > 4)
@@ -72,6 +73,7 @@ namespace StdLib::Funcs
 
     template <typename T> [[nodiscard]] ui32 IndexOfLeastSignificantNonZeroBit(T value)
     {
+        ASSUME(value != 0);
         static_assert(std::is_integral_v<T> || std::is_enum_v<T>, "Cannot operate on non-integral types");
         ui32 result;
         if constexpr (sizeof(T) > 4)
