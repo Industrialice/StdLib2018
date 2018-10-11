@@ -36,7 +36,7 @@ FileToCFile::~FileToCFile()
     this->Close();
 }
 
-FileToCFile::FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, uiw offset, FileCacheMode cacheMode, FileShareMode shareMode, Error<> *error)
+FileToCFile::FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, ui64 offset, FileCacheMode cacheMode, FileShareMode shareMode, Error<> *error)
 {
     auto result = this->Open(path, openMode, procMode, offset, cacheMode, shareMode);
     if (error) *error = result;
@@ -63,8 +63,10 @@ FileToCFile &FileToCFile::operator = (FileToCFile &&source)
     return *this;
 }
 
-Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, uiw offset, FileCacheMode cacheMode, FileShareMode shareMode)
+Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, ui64 offset, FileCacheMode cacheMode, FileShareMode shareMode)
 {
+    offset = std::min<ui64>(i64_max, offset);
+
     this->Close();
 
     bool isFileFound = false;
@@ -219,7 +221,7 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
             return DefaultError::UnknownError("ftell failed");
         }
 
-        _offsetToStart = std::min<uiw>(offset, fileSize);
+        _offsetToStart = std::min<i64>(offset, fileSize);
 
         if (fseek(_file, _offsetToStart, SEEK_SET) != 0)
         {

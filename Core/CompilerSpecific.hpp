@@ -43,6 +43,19 @@
     #define _ROTATE8R(val, shift) _rotr8(val, shift)
     #define _ROTATE8L(val, shift) _rotl8(val, shift)
 
+    // works, but shows worse performance
+    /*#define _BITTEST32(value, position) _bittest((long *)value, (long)position)
+    #if defined(_WIN64) || defined(_M_ARM)
+        #define _BITTEST64(value, position) _bittest64((__int64 *)value, (__int64)position)
+    #endif
+
+    #define _BITTESTANDRESET32(value, position) _bittestandreset((long *)value, (long)position)
+    #define _BITTESTANDSET32(value, position) _bittestandset((long *)value, (long)position)
+    #if defined(_M_AMD64)
+        #define _BITTESTANDRESET64(value, position) _bittestandreset64((__int64 *)value, (__int64)position)
+        #define _BITTESTANDSET64(value, position) _bittestandset64((__int64 *)value, (__int64)position)
+    #endif*/
+
 #elif defined(__GNUC__)
 
     #define RSTR __restrict__
@@ -70,12 +83,41 @@
     #define _BYTESWAP64(value) __builtin_bswap64(value)
 
     // TODO: rotate intrinsics
+    // TODO: bit tests and sets
 
 #else
 
     #error unknown compiler
 
 #endif
+
+inline bool __BitTestAndReset32(long *value, long position)
+{
+    bool isSet = (*value & ((long)1 << position)) != 0;
+    *value &= ~((long)1 << position);
+    return isSet;
+}
+
+inline bool __BitTestAndSet32(long *value, long position)
+{
+    bool isSet = (*value & ((long)1 << position)) != 0;
+    *value |= (long)1 << position;
+    return isSet;
+}
+
+inline bool __BitTestAndReset64(long long *value, long long position)
+{
+    bool isSet = (*value & ((long long)1 << position)) != 0;
+    *value &= ~((long long)1 << position);
+    return isSet;
+}
+
+inline bool __BitTestAndSet64(long long *value, long long position)
+{
+    bool isSet = (*value & ((long long)1 << position)) != 0;
+    *value |= (long long)1 << position;
+    return isSet;
+}
 
 #ifndef _ROTATE64R
     #define _ROTATE64R(val, shift) ((ui64)((ui64)(val) >> (shift)) | (ui64)((ui64)(val) << (64 - (shift))))
@@ -113,4 +155,22 @@
 #endif
 #ifndef _LSNZB64
     #define _LSNZB64(tosearch, result) do { ASSUME(tosearch != 0); auto casted = *(unsigned long long *)&tosearch; unsigned highPart = unsigned(casted >> 32); unsigned lowPart = (unsigned)(casted & 0xFFFFFFFF); unsigned int tempResult; if (lowPart) _LSNZB32(lowPart, &tempResult); else { _LSNZB32(highPart, &tempResult); tempResult += 32; } *result = tempResult; } while(0)
+#endif
+#ifndef _BITTEST32
+    #define _BITTEST32(value, position) (*value & ((long)1 << position)) != 0
+#endif
+#ifndef _BITTEST64
+    #define _BITTEST64(value, position) (*value & ((long long)1 << position)) != 0
+#endif
+#ifndef _BITTESTANDRESET32
+    #define _BITTESTANDRESET32(value, position) __BitTestAndReset32((long *)value, (long)position)
+#endif
+#ifndef _BITTESTANDSET32
+    #define _BITTESTANDSET32(value, position) __BitTestAndSet32((long *)value, (long)position)
+#endif
+#ifndef _BITTESTANDRESET64
+    #define _BITTESTANDRESET64(value, position) __BitTestAndReset64((long long *)value, (long)position)
+#endif
+#ifndef _BITTESTANDSET64
+    #define _BITTESTANDSET64(value, position) __BitTestAndSet64((long long *)value, (long)position)
 #endif

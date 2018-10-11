@@ -11,13 +11,13 @@ namespace
 
 extern NOINLINE Error<> StdLib_FileError();
 
-Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, uiw offset, FileCacheMode cacheMode, FileShareMode shareMode)
+Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, ui64 offset, FileCacheMode cacheMode, FileShareMode shareMode)
 {
     Close();
 
     ASSUME(_handle == INVALID_HANDLE_VALUE);
 
-    offset = std::min<uiw>(offset, iw_max);
+    offset = std::min<ui64>(offset, i64_max);
 
     DWORD dwDesiredAccess = 0;
     DWORD dwCreationDisposition = 0;
@@ -149,7 +149,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
             ASSUME(result);
             return StdLib_FileError();
         }
-        offset = std::min<uiw>(offset, size.QuadPart);
+        offset = std::min<ui64>(offset, size.QuadPart);
         size.QuadPart = std::min<i64>(size.QuadPart, offset);
         if (!SetFilePointerEx(hfile, size, nullptr, FILE_BEGIN))
         {
@@ -178,7 +178,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
     return DefaultError::Ok();
 }
 
-Error<> File::Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, uiw offset)
+Error<> File::Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset)
 {
     NOIMPL;
     return DefaultError::NotImplemented();

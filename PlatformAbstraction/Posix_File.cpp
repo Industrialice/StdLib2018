@@ -11,11 +11,11 @@ using namespace StdLib;
 
 extern NOINLINE Error<> StdLib_FileError();
 
-Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, uiw offset, FileCacheMode cacheMode, FileShareMode shareMode)
+Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, ui64 offset, FileCacheMode cacheMode, FileShareMode shareMode)
 {
     Close();
 
-    offset = std::min<uiw>(offset, iw_max);
+    offset = std::min<ui64>(offset, i64_max);
 
     int flags = 0;
 
@@ -160,7 +160,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
     return DefaultError::Ok();
 }
 
-Error<> File::Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, uiw offset)
+Error<> File::Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset)
 {
     NOIMPL;
     return DefaultError::NotImplemented();

@@ -4,7 +4,7 @@
 
 namespace StdLib::Funcs
 {
-    template <typename T, typename R>[[nodiscard]] bool AreSharedPointersEqual(T &&left, R &&right)
+    template <typename T, typename R> [[nodiscard]] bool AreSharedPointersEqual(T &&left, R &&right)
     {
         return left.owner_before(right) == false && right.owner_before(left) == false;
     }
@@ -23,28 +23,52 @@ namespace StdLib::Funcs
     template <> struct _NearestInt<4> { using type = ui32; };
     template <> struct _NearestInt<8> { using type = ui64; };
 
-    template <typename T> [[nodiscard]] T SetBit(T value, ui32 bitNum, bool bitValue)
+    template <typename T> [[nodiscard]] FORCEINLINE T SetBit(T value, ui32 bitNum, bool bitValue)
     {
         ASSUME(sizeof(T) * 8 > bitNum);
         using intType = typename _NearestInt<sizeof(T)>::type;
         intType reinterpreted = *(intType *)&value;
-        if (bitValue)
+        if constexpr (sizeof(T) > 4)
         {
-            reinterpreted |= intType(1) << bitNum;
+            if (bitValue)
+            {
+                _BITTESTANDSET64(&reinterpreted, bitNum);
+            }
+            else
+            {
+                _BITTESTANDRESET64(&reinterpreted, bitNum);
+            }
         }
         else
         {
-            reinterpreted &= ~(intType(1) << bitNum);
+            ui32 widened = reinterpreted;
+            if (bitValue)
+            {
+                _BITTESTANDSET64(&widened, bitNum);
+            }
+            else
+            {
+                _BITTESTANDRESET64(&widened, bitNum);
+            }
+            reinterpreted = (intType)widened;
         }
         return *(T *)&reinterpreted;
     }
 
-    template <typename T> [[nodiscard]] bool IsBitSet(T value, ui32 bitNum)
+    template <typename T> [[nodiscard]] FORCEINLINE bool IsBitSet(T value, ui32 bitNum)
     {
         ASSUME(sizeof(T) * 8 > bitNum);
         using intType = typename _NearestInt<sizeof(T)>::type;
         intType reinterpreted = *(intType *)&value;
-        return (reinterpreted & (intType(1) << bitNum)) != 0;
+        if constexpr (sizeof(T) > 4)
+        {
+            return _BITTEST64(&reinterpreted, bitNum);
+        }
+        else
+        {
+            ui32 widened = reinterpreted;
+            return _BITTEST32(&widened, bitNum);
+        }
     }
 
     template <typename T, typename R = T> [[nodiscard]] constexpr R BitPos(T pos)
@@ -52,7 +76,7 @@ namespace StdLib::Funcs
         return (R)1 << pos;
     }
 
-    template <typename T> [[nodiscard]] ui32 IndexOfMostSignificantNonZeroBit(T value)
+    template <typename T> [[nodiscard]] FORCEINLINE ui32 IndexOfMostSignificantNonZeroBit(T value)
     {
         ASSUME(value != 0);
         static_assert(std::is_integral_v<T> || std::is_enum_v<T>, "Cannot operate on non-integral types");
@@ -71,7 +95,7 @@ namespace StdLib::Funcs
         return result;
     }
 
-    template <typename T> [[nodiscard]] ui32 IndexOfLeastSignificantNonZeroBit(T value)
+    template <typename T> [[nodiscard]] FORCEINLINE ui32 IndexOfLeastSignificantNonZeroBit(T value)
     {
         ASSUME(value != 0);
         static_assert(std::is_integral_v<T> || std::is_enum_v<T>, "Cannot operate on non-integral types");
