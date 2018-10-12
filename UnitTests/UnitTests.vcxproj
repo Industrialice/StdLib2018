@@ -125,6 +125,7 @@
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MathLibTests.cpp" />
+    <ClCompile Include="UniqueIdManagerBenchmark.cpp" />
     <ClCompile Include="UniqueIdManagerTests.cpp" />
     <ClCompile Include="_PreHeader.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

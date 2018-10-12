@@ -9,6 +9,7 @@ using namespace Funcs;
 
 void MathLibTests();
 void UniqueIdManagerTests();
+void UniqueIdManagerBenchmark();
 
 static void IntegerPropertiesTest()
 {
@@ -846,7 +847,7 @@ static void MemoryStreamTests()
     PRINTLOG("finished memory stream tests\n");
 }
 
-int main(int argc, const char **argv)
+static void DoTests(int argc, const char **argv)
 {
     PRINTLOG("~~~Starting Tests~~~\n");
 
@@ -861,12 +862,10 @@ int main(int argc, const char **argv)
         filesTestFolder += "FileTestsFolder";
     }
 
-    StdLib::Initialization::MiscellaneousInitialize({});
-
     FilePath folderForTests = FilePath::FromChar(filesTestFolder);
     UTest(false, FileSystem::CreateNewFolder(folderForTests, {}, true));
 
-	IntegerPropertiesTest();
+    IntegerPropertiesTest();
     SetBitTests();
     SignificantBitTests();
     ChangeEndiannessTests();
@@ -894,6 +893,17 @@ int main(int argc, const char **argv)
     UTest(false, folderForTestsRemove);
 
     PRINTLOG("~~~Finished All Tests~~~\n");
+}
+
+int main(int argc, const char **argv)
+{
+    StdLib::Initialization::MiscellaneousInitialize({});
+
+    DoTests(argc, argv);
+
+    //UniqueIdManagerBenchmark();
+
+    PRINTLOG("~~~Finished Everything~~~\n");
 
 #ifdef PLATFORM_WINDOWS
     getchar();
