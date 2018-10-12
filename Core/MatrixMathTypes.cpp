@@ -1,3 +1,4 @@
+#include "_PreHeader.hpp"
 #include "MatrixMathTypes.hpp"
 #include "_MatrixMathFunctions.hpp"
 #include "MathFunctions.hpp"

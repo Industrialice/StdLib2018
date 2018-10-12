@@ -1,3 +1,4 @@
+#include "_PreHeader.hpp"
 #include "StdPlatformAbstractionLib.hpp"
 
 namespace StdLib::VirtualMemory

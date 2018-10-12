@@ -1,10 +1,5 @@
+#include "_PreHeader.hpp"
 #include "StdCoreLib.hpp"
-#include <set>
-#ifdef PLATFORM_WINDOWS
-    #include <Windows.h>
-#elif defined(PLATFORM_ANDROID)
-    #include <android/log.h>
-#endif
 
 using namespace StdLib;
 

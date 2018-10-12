@@ -1,4 +1,4 @@
-#include <StdCoreLib.hpp>
+#include "_PreHeader.hpp"
 #include "MemoryMappedFile.hpp"
 
 using namespace StdLib;

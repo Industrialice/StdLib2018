@@ -1,6 +1,5 @@
-#include <StdCoreLib.hpp>
+#include "_PreHeader.hpp"
 #include "File.hpp"
-#include <Windows.h>
 
 using namespace StdLib;
 

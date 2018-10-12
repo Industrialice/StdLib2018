@@ -1,3 +1,4 @@
+#include "_PreHeader.hpp"
 #include "FileToMemoryStream.hpp"
 
 using namespace StdLib;

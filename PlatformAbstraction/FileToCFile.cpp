@@ -1,9 +1,8 @@
-#include <StdCoreLib.hpp>
+#include "_PreHeader.hpp"
 #include "FileToCFile.hpp"
 #include "FileSystem.hpp"
 
 #ifdef PLATFORM_WINDOWS
-    #include <io.h>
     #define fread _fread_nolock
     #define fwrite _fwrite_nolock
     #define fputc _fputc_nolock

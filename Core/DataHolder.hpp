@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GenericFuncs.hpp"
+
 namespace StdLib
 {
 	// TODO: using template parameters can be made movable, copyable and RAII-destructible

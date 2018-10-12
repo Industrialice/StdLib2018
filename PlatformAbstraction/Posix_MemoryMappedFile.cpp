@@ -1,4 +1,4 @@
-#include <StdCoreLib.hpp>
+#include "_PreHeader.hpp"
 #include "MemoryMappedFile.hpp"
 #include <sys/mman.h>
 

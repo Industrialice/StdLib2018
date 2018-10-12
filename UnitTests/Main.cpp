@@ -1,9 +1,8 @@
-#include <StdPlatformAbstractionLib.hpp>
+#include "_PreHeader.hpp"
 #include <FileToMemoryStream.hpp>
 #include <FileToCFile.hpp>
 #include <thread>
 #include <MathFunctions.hpp>
-#include "Helpers.h"
 
 using namespace StdLib;
 using namespace Funcs;

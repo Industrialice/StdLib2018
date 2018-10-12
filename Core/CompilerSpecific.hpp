@@ -82,7 +82,15 @@
     #define _BYTESWAP32(value) __builtin_bswap32(value)
     #define _BYTESWAP64(value) __builtin_bswap64(value)
 
-    // TODO: rotate intrinsics
+    #define _ROTATE32R(val, shift) __builtin_rotateright32(val, shift)
+    #define _ROTATE32L(val, shift) __builtin_rotateleft32(val, shift)
+    #define _ROTATE64R(val, shift) __builtin_rotateright64(val, shift)
+    #define _ROTATE64L(val, shift) __builtin_rotateleft64(val, shift)
+    #define _ROTATE16R(val, shift) __builtin_rotateright16(val, shift)
+    #define _ROTATE16L(val, shift) __builtin_rotateleft16(val, shift)
+    #define _ROTATE8R(val, shift) __builtin_rotateright8(val, shift)
+    #define _ROTATE8L(val, shift) __builtin_rotateleft8(val, shift)
+
     // TODO: bit tests and sets
 
 #else

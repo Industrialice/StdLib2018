@@ -1,5 +1,5 @@
+#include "_PreHeader.hpp"
 #include "VirtualMemory.hpp"
-#include <Windows.h>
 
 using namespace StdLib;
 

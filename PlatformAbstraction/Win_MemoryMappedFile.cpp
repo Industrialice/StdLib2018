@@ -1,7 +1,5 @@
-#include <StdCoreLib.hpp>
+#include "_PreHeader.hpp"
 #include "MemoryMappedFile.hpp"
-#define NOMINMAX
-#include <Windows.h>
 
 using namespace StdLib;
 

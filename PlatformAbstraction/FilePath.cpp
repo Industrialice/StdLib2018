@@ -1,10 +1,9 @@
+#include "_PreHeader.hpp"
 #include "FilePath.hpp"
 
 using namespace StdLib;
 
 #ifdef PLATFORM_WINDOWS
-
-#include <Windows.h>
 
 FilePath FilePath::FromChar(std::string_view path)
 {
