@@ -235,7 +235,7 @@ namespace StdLib::Funcs
     template <typename T> [[nodiscard]] std::shared_ptr<typename T::element_type> MakeSharedFromUniquePtr(T &&unique)
     {
         using type = typename T::element_type;
-        static_assert(std::is_same_v<std::remove_reference_t<decltype(unique.get_deleter())>, std::default_delete<type>>);
+        static_assert(std::is_same_v<std::remove_reference_t<decltype(unique.get_deleter())>, std::default_delete<type>>, "make_shared cannot be used with custom deleters");
         if constexpr(std::is_move_constructible_v<type>)
         {
             auto shared = std::make_shared<type>(std::move(*unique));
