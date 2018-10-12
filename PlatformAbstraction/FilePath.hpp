@@ -1,6 +1,5 @@
 #pragma once
 
-#include <StdCoreLib.hpp>
 #include "PlatformAbstractionCoreTypes.hpp"
 
 namespace StdLib

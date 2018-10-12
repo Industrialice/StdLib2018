@@ -13,13 +13,13 @@ if(NOT DEFINED ${ENABLE_DEBUG})
     endif()
 endif()
 
-#if(${ENABLE_DEBUG} MATCHES "TRUE")
-#    add_compile_options(-O0)
-#    add_definitions(-DDEBUG -D_DEBUG)
-#else()
+if(${ENABLE_DEBUG} MATCHES "TRUE")
+    add_compile_options(-O0)
+    add_definitions(-DDEBUG -D_DEBUG)
+else()
     add_compile_options(-Ofast -fno-rtti)
     add_definitions(-DNDEBUG -D_NDEBUG)
-#endif()
+endif()
 
 add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++1z> $<$<COMPILE_LANGUAGE:C>:-std=c99>)
 add_compile_options(-Wno-missing-braces -Wno-inconsistent-missing-override -Wpessimizing-move -Wlarge-by-value-copy -Winstantiation-after-specialization -Wself-assign)
@@ -29,6 +29,7 @@ add_definitions(-DPLATFORM_ANDROID)
 
 file(GLOB CORE_FILES "../../Core/*.cpp")
 file(GLOB PLATFORMABSTRACTION_FILES "../../PlatformAbstraction/*.cpp")
+file(GLOB MISCELLANEOUS_FILES "../../Miscellaneous/*.cpp")
 file(GLOB UNITTEST_FILES "../../UnitTests/*.cpp")
 
 foreach(item ${PLATFORMABSTRACTION_FILES})
@@ -53,12 +54,14 @@ add_library(
     src/main/cpp/native-lib.cpp
     ${CORE_FILES}
     ${PLATFORMABSTRACTION_FILES}
+    ${MISCELLANEOUS_FILES}
     ${UNITTEST_FILES}
 )
 
 include_directories(
     ../../Core/
     ../../PlatformAbstraction/
+    ../../Miscellaneous/
     ../../UnitTests/
 )
 

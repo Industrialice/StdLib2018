@@ -1,5 +1,6 @@
 #pragma once
 
+#include <StdCoreLib.hpp>
 #include <string>
 #include <string_view>
 

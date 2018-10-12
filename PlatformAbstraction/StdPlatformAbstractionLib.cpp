@@ -18,7 +18,7 @@ namespace StdLib::TimeMomentInitialization
 
 void StdLib::Initialization::PlatformAbstractionInitialize(const PlatformAbstractionParameters &parameters)
 {
-    CoreInitialize(parameters.coreParameters);
+    CoreInitialize(parameters);
 
     VirtualMemory::Initialize();
     FileInitialization::Initialize();

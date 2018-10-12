@@ -9,9 +9,8 @@
 
 namespace StdLib::Initialization
 {
-    struct PlatformAbstractionParameters
+    struct PlatformAbstractionParameters : CoreParameters
     {
-        CoreParameters coreParameters{};
     };
 
     void PlatformAbstractionInitialize(const PlatformAbstractionParameters &parameters);

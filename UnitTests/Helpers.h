@@ -1,7 +1,8 @@
 #pragma once
 
 #include <cstdio>
-#include <StdPlatformAbstractionLib.hpp>
+#include <unordered_set>
+#include <StdMiscellaneousLib.hpp>
 
 #ifdef PLATFORM_WINDOWS
     #define NOGDICAPMASKS

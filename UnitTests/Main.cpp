@@ -8,6 +8,7 @@ using namespace StdLib;
 using namespace Funcs;
 
 void MathLibTests();
+void UniqueIdManagerTests();
 
 static void IntegerPropertiesTest()
 {
@@ -847,6 +848,8 @@ static void MemoryStreamTests()
 
 int main(int argc, const char **argv)
 {
+    PRINTLOG("~~~Starting Tests~~~\n");
+
     std::string filesTestFolder = "FileTestsFolder";
     if (argc >= 2)
     {
@@ -858,7 +861,7 @@ int main(int argc, const char **argv)
         filesTestFolder += "FileTestsFolder";
     }
 
-    StdLib::Initialization::PlatformAbstractionInitialize({});
+    StdLib::Initialization::MiscellaneousInitialize({});
 
     FilePath folderForTests = FilePath::FromChar(filesTestFolder);
     UTest(false, FileSystem::CreateNewFolder(folderForTests, {}, true));
@@ -884,10 +887,13 @@ int main(int argc, const char **argv)
     DataHolderTests();
     MemoryStreamTests();
     MathLibTests();
+    UniqueIdManagerTests();
 
     Error<> folderForTestsRemove = FileSystem::Remove(folderForTests);
     printf("%s\n", folderForTestsRemove.Description());
     UTest(false, folderForTestsRemove);
+
+    PRINTLOG("~~~Finished All Tests~~~\n");
 
 #ifdef PLATFORM_WINDOWS
     getchar();

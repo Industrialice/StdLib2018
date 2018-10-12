@@ -47,9 +47,9 @@
     /*#define _BITTEST32(value, position) _bittest((long *)value, (long)position)
     #if defined(_WIN64) || defined(_M_ARM)
         #define _BITTEST64(value, position) _bittest64((__int64 *)value, (__int64)position)
-    #endif
+    #endif*/
 
-    #define _BITTESTANDRESET32(value, position) _bittestandreset((long *)value, (long)position)
+    /*#define _BITTESTANDRESET32(value, position) _bittestandreset((long *)value, (long)position)
     #define _BITTESTANDSET32(value, position) _bittestandset((long *)value, (long)position)
     #if defined(_M_AMD64)
         #define _BITTESTANDRESET64(value, position) _bittestandreset64((__int64 *)value, (__int64)position)
@@ -82,14 +82,15 @@
     #define _BYTESWAP32(value) __builtin_bswap32(value)
     #define _BYTESWAP64(value) __builtin_bswap64(value)
 
-    #define _ROTATE32R(val, shift) __builtin_rotateright32(val, shift)
-    #define _ROTATE32L(val, shift) __builtin_rotateleft32(val, shift)
-    #define _ROTATE64R(val, shift) __builtin_rotateright64(val, shift)
-    #define _ROTATE64L(val, shift) __builtin_rotateleft64(val, shift)
-    #define _ROTATE16R(val, shift) __builtin_rotateright16(val, shift)
-    #define _ROTATE16L(val, shift) __builtin_rotateleft16(val, shift)
-    #define _ROTATE8R(val, shift) __builtin_rotateright8(val, shift)
-    #define _ROTATE8L(val, shift) __builtin_rotateleft8(val, shift)
+    // TODO: doesn't compile
+    //#define _ROTATE32R(val, shift) __builtin_rotateright32(val, shift)
+    //#define _ROTATE32L(val, shift) __builtin_rotateleft32(val, shift)
+    //#define _ROTATE64R(val, shift) __builtin_rotateright64(val, shift)
+    //#define _ROTATE64L(val, shift) __builtin_rotateleft64(val, shift)
+    //#define _ROTATE16R(val, shift) __builtin_rotateright16(val, shift)
+    //#define _ROTATE16L(val, shift) __builtin_rotateleft16(val, shift)
+    //#define _ROTATE8R(val, shift) __builtin_rotateright8(val, shift)
+    //#define _ROTATE8L(val, shift) __builtin_rotateleft8(val, shift)
 
     // TODO: bit tests and sets
 
