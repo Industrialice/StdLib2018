@@ -25,6 +25,8 @@ namespace StdLib
         std::array<ui64, 4> _level0Masks{ui64_max, ui64_max, ui64_max, ui64_max};
         std::array<std::array<Level1, 64>, 4> _level0Levels{};
 
+		template <typename T> NOINLINE void AllocateLevel(T &level);
+
     public:
         static constexpr ui32 invalidId = ui32_max;
 

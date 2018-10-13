@@ -2,6 +2,8 @@
 #include "UniqueIdManager.hpp"
 
 using namespace StdLib;
+using std::array;
+using std::make_unique;
 
 template <ui32 level> [[nodiscard]] static FORCEINLINE ui32 IDToLevelIndex(ui32 id)
 {
@@ -35,8 +37,22 @@ template <ui32 level> [[nodiscard]] static FORCEINLINE ui32 IDToLevelIndex(ui32 
     }
 }
 
-using std::array;
-using std::make_unique;
+template <typename T> NOINLINE void UniqueIdManager::AllocateLevel(T &level)
+{
+	if constexpr (std::is_same_v<T, Level1>)
+	{
+		level.level = make_unique<array<Level2, 64>>();
+	}
+	else if constexpr (std::is_same_v<T, Level2>)
+	{
+		level.level = make_unique<array<Level3, 64>>();
+	}
+	else if constexpr (std::is_same_v<T, Level3>)
+	{
+		level.level = make_unique<array<ui64, 64>>();
+		level.level->fill(ui64_max);
+	}
+}
 
 ui32 UniqueIdManager::Allocate()
 {
@@ -59,7 +75,7 @@ ui32 UniqueIdManager::Allocate()
 
         if (level1.level == nullptr)
         {
-            level1.level = make_unique<array<Level2, 64>>();
+			AllocateLevel(level1);
         }
         ui32 level2Index = Funcs::IndexOfLeastSignificantNonZeroBit(level1.mask);
         Level2 &level2 = level1.level->operator[](level2Index);
@@ -68,7 +84,7 @@ ui32 UniqueIdManager::Allocate()
 
         if (level2.level == nullptr)
         {
-            level2.level = make_unique<array<Level3, 64>>();
+			AllocateLevel(level2);
         }
         ui32 level3Index = Funcs::IndexOfLeastSignificantNonZeroBit(level2.mask);
         Level3 &level3 = level2.level->operator[](level3Index);
@@ -77,8 +93,7 @@ ui32 UniqueIdManager::Allocate()
 
         if (level3.level == nullptr)
         {
-            level3.level = make_unique<array<ui64, 64>>();
-            level3.level->fill(ui64_max);
+			AllocateLevel(level3);
         }
         ui32 level4Index = Funcs::IndexOfLeastSignificantNonZeroBit(level3.mask);
         ui64 &level4 = level3.level->operator[](level4Index);
@@ -122,20 +137,19 @@ bool UniqueIdManager::Allocate(ui32 id)
     Level1 &level1 = level0Levels[level1Index];
     if (level1.level == nullptr)
     {
-        level1.level = make_unique<array<Level2, 64>>();
+		AllocateLevel(level1);
     }
     ui32 level2Index = IDToLevelIndex<2>(id);
     Level2 &level2 = level1.level->operator[](level2Index);
     if (level2.level == nullptr)
     {
-        level2.level = make_unique<array<Level3, 64>>();
+		AllocateLevel(level2);
     }
     ui32 level3Index = IDToLevelIndex<3>(id);
     Level3 &level3 = level2.level->operator[](level3Index);
     if (level3.level == nullptr)
     {
-        level3.level = make_unique<array<ui64, 64>>();
-        level3.level->fill(ui64_max);
+		AllocateLevel(level3);
     }
     ui32 level4Index = IDToLevelIndex<4>(id);
     ui64 &level4 = level3.level->operator[](level4Index);

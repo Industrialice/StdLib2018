@@ -900,7 +900,7 @@ int main(int argc, const char **argv)
 
     DoTests(argc, argv);
 
-    //UniqueIdManagerBenchmark();
+    UniqueIdManagerBenchmark();
 
     PRINTLOG("~~~Finished Everything~~~\n");
 
