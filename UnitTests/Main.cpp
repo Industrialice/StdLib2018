@@ -889,7 +889,6 @@ static void DoTests(int argc, const char **argv)
     UniqueIdManagerTests();
 
     Error<> folderForTestsRemove = FileSystem::Remove(folderForTests);
-    printf("%s\n", folderForTestsRemove.Description());
     UTest(false, folderForTestsRemove);
 
     PRINTLOG("~~~Finished All Tests~~~\n");
@@ -897,7 +896,7 @@ static void DoTests(int argc, const char **argv)
 
 int main(int argc, const char **argv)
 {
-    StdLib::Initialization::MiscellaneousInitialize({});
+    StdLib::Initialization::Initialize({});
 
     DoTests(argc, argv);
 

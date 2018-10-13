@@ -21,7 +21,7 @@ void _Private::SoftBreak(const char *file, i32 line, i32 counter)
     SoftBreakCallback(file, line, counter);
 }
 
-void Initialization::CoreInitialize(const CoreParameters &parameters)
+void Initialization::Initialize(const CoreParameters &parameters)
 {
     SoftBreakCallback = parameters.softBreakCallback;
     if (!SoftBreakCallback)

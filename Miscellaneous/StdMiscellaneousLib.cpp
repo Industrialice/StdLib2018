@@ -3,7 +3,12 @@
 
 using namespace StdLib;
 
-void Initialization::MiscellaneousInitialize(const MiscellaneousParameters &parameters)
+namespace StdLib::Initialization
 {
-    PlatformAbstractionInitialize(parameters);
+	void Initialize(const PlatformAbstractionParameters &parameters);
+}
+
+void Initialization::Initialize(const MiscellaneousParameters &parameters)
+{
+    Initialize((const PlatformAbstractionParameters &)parameters);
 }
