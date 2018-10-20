@@ -11,6 +11,21 @@ void MathLibTests();
 void UniqueIdManagerTests();
 void UniqueIdManagerBenchmark();
 
+static void HashFuncsTest()
+{
+	ui32 value = 23534;
+
+	ui32 fnv32 = Hash::FNVHash<ui32>(value);
+	UTest(NotEqual, fnv32, value);
+
+	ui64 fnv64 = Hash::FNVHash<ui64>(value);
+	UTest(NotEqual, fnv64, value);
+
+	UTest(NotEqual, fnv32, fnv64);
+
+	PRINTLOG("finished hash tests\n");
+}
+
 static void IntegerPropertiesTest()
 {
 	UTest(false, IsPowerOf2(0));
@@ -865,6 +880,7 @@ static void DoTests(int argc, const char **argv)
     FilePath folderForTests = FilePath::FromChar(filesTestFolder);
     UTest(false, FileSystem::CreateNewFolder(folderForTests, {}, true));
 
+	HashFuncsTest();
     IntegerPropertiesTest();
     SetBitTests();
     SignificantBitTests();

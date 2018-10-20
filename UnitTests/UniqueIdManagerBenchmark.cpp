@@ -17,9 +17,9 @@ static std::pair<f32, f32> Benchmark(const std::vector<std::pair<ui32, ui32>> &s
 {
     ui32 requestSize = (ui32)ids.size();
 
-    auto startRandomGenerating = TimeMoment::Now();
+	UniqueIdManager manager;
 
-    UniqueIdManager manager;
+    auto startRandomGenerating = TimeMoment::Now();
 
     for (ui32 index = 0; index < requestSize; ++index)
     {
@@ -51,9 +51,9 @@ static void PrepareShuffler(uiw requestSize, std::vector<std::pair<ui32, ui32>> 
 {
     shuffleIndexes.clear();
 
-    std::random_device rd;     // only used once to initialise (seed) engine
-    std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
-    std::uniform_int_distribution<ui32> uni(0, (ui32)requestSize - 1); // guaranteed unbiased
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<ui32> uni(0, (ui32)requestSize - 1);
 
     shuffleIndexes.reserve(requestSize);
     for (uiw index = 0; index < requestSize; ++index)

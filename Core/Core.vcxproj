@@ -136,6 +136,7 @@
     <ClInclude Include="DataHolder.hpp" />
     <ClInclude Include="Error.hpp" />
     <ClInclude Include="FileToMemoryStream.hpp" />
+    <ClInclude Include="HashFuncs.hpp" />
     <ClInclude Include="IFile.hpp" />
     <ClInclude Include="IMemoryStream.hpp" />
     <ClInclude Include="ListenerHandle.hpp" />

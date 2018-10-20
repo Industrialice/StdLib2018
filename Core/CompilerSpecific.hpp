@@ -15,6 +15,7 @@
     #define ALLOCATORFUNC __declspec(allocator)
     #define NOINLINE __declspec(noinline)
     #define FORCEINLINE __forceinline
+	#define UNALIGNED __unaligned
 
     #define _UNREACHABLE __assume(0)
 
@@ -56,14 +57,17 @@
         #define _BITTESTANDSET64(value, position) _bittestandset64((__int64 *)value, (__int64)position)
     #endif*/
 
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) || defined(__clang__) || defined(__EMSCRIPTEN__) || defined(__MINGW32__) || defined(__MINGW32__) || defined(__MINGW64__)
 
     #define RSTR __restrict__
     #define ALLOCA(count, sizeOfElement) __builtin_alloca((count) * (sizeOfElement))
     #define UNIQUEPTRRETURN /* TODO: find out */
-    #define ALLOCATORFUNC
+    #define ALLOCATORFUNC /* TODO: find out */
     #define NOINLINE __attribute__((noinline))
     #define FORCEINLINE __attribute__((always_inline)) inline
+#ifdef __clang__
+	#define UNALIGNED __unaligned /* It seems there's no alternative for GCC */
+#endif
 
     #define _UNREACHABLE __builtin_unreachable()
 

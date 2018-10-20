@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GenericFuncs.hpp"
+#include "HashFuncs.hpp"
 #include "Result.hpp"
 #include "Allocators.hpp"
 #include "IMemoryStream.hpp"

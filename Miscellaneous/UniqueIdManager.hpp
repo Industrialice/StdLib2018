@@ -34,7 +34,7 @@ namespace StdLib
         [[nodiscard]] bool Allocate(ui32 id);
         bool Free(ui32 id);
         [[nodiscard]] bool IsAllocated(ui32 id) const;
-        // TODO: shink_to_fit
+        // TODO: shrink_to_fit
         // TODO: enumerate allocated ids
     };
 }
