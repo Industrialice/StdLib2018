@@ -2,12 +2,14 @@
 
 #ifdef _MSC_VER
 
-    #pragma warning(1 : 4062) /* The enumerate has no associated handler in a switch statement, and there is no default label. */
-    //#pragma warning(1 : 4265) /* class has virtual functions, but destructor is not virtual */
-    #pragma warning(1 : 4800) /* 'type' : forcing value to bool 'true' or 'false' (performance warning) */
-    #pragma warning(1 : 4263) /* 'function': member function does not override any base class virtual member function */
-    #pragma warning(1 : 4264) /* 'virtual_function' : no override available for virtual member function from base 'class'; function is hidden */
-    #pragma warning(1 : 4266) /* 'function': no override available for virtual member function from base 'type'; function is hidden */
+	#ifndef STDLIB_DISABLE_DIAGNOSTIC_OVERRIDES
+		#pragma warning(1 : 4062) /* The enumerate has no associated handler in a switch statement, and there is no default label. */
+		//#pragma warning(1 : 4265) /* class has virtual functions, but destructor is not virtual */
+		#pragma warning(1 : 4800) /* 'type' : forcing value to bool 'true' or 'false' (performance warning) */
+		#pragma warning(1 : 4263) /* 'function': member function does not override any base class virtual member function */
+		#pragma warning(1 : 4264) /* 'virtual_function' : no override available for virtual member function from base 'class'; function is hidden */
+		#pragma warning(1 : 4266) /* 'function': no override available for virtual member function from base 'type'; function is hidden */
+	#endif
 
     #define RSTR __restrict
     #define ALLOCA(count, sizeOfElement) _alloca((count) * (sizeOfElement))
@@ -73,8 +75,27 @@
 
     #define _ASSUME(condition) do { if (!(condition)) { __builtin_unreachable(); } } while(0)
 
-    // won't work with clang?
-    #pragma GCC diagnostic error "-Wswitch"
+	#ifndef STDLIB_DISABLE_DIAGNOSTIC_OVERRIDES
+		#ifdef __clang__
+			#pragma clang diagnostic error "-Wswitch"
+			#pragma clang diagnostic error "-Wswitch-enum"
+			#pragma clang diagnostic error "-Wundef"
+			#pragma clang diagnostic warning "-Wshadow"
+			#pragma clang diagnostic warning "-Wpointer-arith"
+			#pragma clang diagnostic warning "-Wcast-align"
+			#pragma clang diagnostic warning "-Wstrict-prototypes"
+			#pragma clang diagnostic error "-Wwrite-strings"
+		#else
+			#pragma GCC diagnostic error "-Wswitch"
+			#pragma GCC diagnostic error "-Wswitch-enum"
+			#pragma GCC diagnostic error "-Wundef"
+			#pragma GCC diagnostic warning "-Wshadow"
+			#pragma GCC diagnostic warning "-Wpointer-arith"
+			#pragma GCC diagnostic warning "-Wcast-align"
+			#pragma GCC diagnostic warning "-Wstrict-prototypes"
+			#pragma GCC diagnostic error "-Wwrite-strings"
+		#endif
+	#endif
 
     #define _MSNZB32(tosearch, result) do { ASSUME(*(unsigned int *)&tosearch != 0); *result = (31 - __builtin_clz(*(unsigned int *)&tosearch)); } while(0)
     #define _LSNZB32(tosearch, result) do { ASSUME(*(unsigned int *)&tosearch != 0); *result = __builtin_ctz(*(unsigned int *)&tosearch); } while(0)

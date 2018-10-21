@@ -13,7 +13,7 @@ namespace StdLib
 
     public:
 
-    #if ENABLE_FILE_STATS
+    #if STDLIB_ENABLE_FILE_STATS
         struct FileStats
         {
             using countert = ui64;
@@ -34,7 +34,7 @@ namespace StdLib
 
     private:
         fileHandle _handle = fileHandle_undefined;
-    #if ENABLE_FILE_STATS
+    #if STDLIB_ENABLE_FILE_STATS
         FileStats _stats{};
     #endif
         i64 _offsetToStart;
@@ -60,7 +60,7 @@ namespace StdLib
         File &operator = (File &&other);
         [[nodiscard]] Error<> Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, ui64 offset = 0, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None);
         [[nodiscard]] Error<> Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset = 0);
-    #if ENABLE_FILE_STATS
+    #if STDLIB_ENABLE_FILE_STATS
         MUST_BE_OPENED [[nodiscard]] FileStats StatsGet() const;
         MUST_BE_OPENED void StatsReset();
     #endif
@@ -95,8 +95,8 @@ namespace StdLib
 #undef MUST_BE_OPENED
 }
 
-#if ENABLE_FILE_STATS
-    #pragma detect_mismatch("ENABLE_FILE_STATS", "1")
+#if STDLIB_ENABLE_FILE_STATS
+    #pragma detect_mismatch("STDLIB_ENABLE_FILE_STATS", "1")
 #else
-    #pragma detect_mismatch("ENABLE_FILE_STATS", "0")
+    #pragma detect_mismatch("STDLIB_ENABLE_FILE_STATS", "0")
 #endif

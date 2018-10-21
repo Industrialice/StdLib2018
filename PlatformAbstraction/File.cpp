@@ -33,7 +33,7 @@ File::File(File &&other)
     _openMode = other._openMode;
     _procMode = other._procMode;
     _cacheMode = other._cacheMode;
-#if ENABLE_FILE_STATS
+#if STDLIB_ENABLE_FILE_STATS
     _stats = other._stats;
 #endif
 #ifdef PLATFORM_WINDOWS
@@ -56,7 +56,7 @@ File &File::operator = (File &&other)
     _openMode = other._openMode;
     _procMode = other._procMode;
     _cacheMode = other._cacheMode;
-#if ENABLE_FILE_STATS
+#if STDLIB_ENABLE_FILE_STATS
     _stats = other._stats;
 #endif
 #ifdef PLATFORM_WINDOWS
@@ -66,7 +66,7 @@ File &File::operator = (File &&other)
     return *this;
 }
 
-#if ENABLE_FILE_STATS
+#if STDLIB_ENABLE_FILE_STATS
 auto File::StatsGet() const -> FileStats
 {
     ASSUME(IsOpened());
@@ -116,7 +116,7 @@ NOINLINE bool File::Read(void *target, ui32 len, ui32 *read)
     {
         memcpy(target, _internalBuffer.get() + _bufferPos, len);
         _bufferPos += len;
-    #if ENABLE_FILE_STATS
+    #if STDLIB_ENABLE_FILE_STATS
         ++_stats.readsFromBufferCount;
         _stats.bytesFromBufferRead += len;
     #endif
@@ -126,7 +126,7 @@ NOINLINE bool File::Read(void *target, ui32 len, ui32 *read)
 
     if (_bufferSize)
     {
-    #if ENABLE_FILE_STATS
+    #if STDLIB_ENABLE_FILE_STATS
         ++_stats.bufferedReads;
     #endif
 
@@ -164,7 +164,7 @@ NOINLINE bool File::Read(void *target, ui32 len, ui32 *read)
 
         return true;
     }
-#if ENABLE_FILE_STATS
+#if STDLIB_ENABLE_FILE_STATS
     ++_stats.unbufferedReads;
 #endif
     return ReadFromFile(target, len, read);
@@ -181,7 +181,7 @@ NOINLINE bool File::Write(const void *source, ui32 len, ui32 *written)
 
     if (_bufferSize)
     {
-    #if ENABLE_FILE_STATS
+    #if STDLIB_ENABLE_FILE_STATS
         ++_stats.bufferedWrites;
     #endif
 
@@ -201,7 +201,7 @@ NOINLINE bool File::Write(const void *source, ui32 len, ui32 *written)
 
         memcpy(_internalBuffer.get() + _bufferPos, source, len);
         _bufferPos += len;
-    #if ENABLE_FILE_STATS
+    #if STDLIB_ENABLE_FILE_STATS
         ++_stats.writesToBufferCount;
         _stats.bytesToBufferWritten += len;
     #endif
@@ -210,7 +210,7 @@ NOINLINE bool File::Write(const void *source, ui32 len, ui32 *written)
         return true;
     }
 
-#if ENABLE_FILE_STATS
+#if STDLIB_ENABLE_FILE_STATS
     ++_stats.unbufferedWrites;
 #endif
     return WriteToFile(source, len, written);
