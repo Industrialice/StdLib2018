@@ -4,7 +4,7 @@
 
 namespace StdLib::Hash
 {
-	template <typename T> T FNVHash(const void *source, uiw length)
+	template <typename T> [[nodiscard]] T FNVHash(const void *source, uiw length)
 	{
 		const ui8 *p = static_cast<const ui8 *>(source);
 		if constexpr (std::is_same_v<T, ui32>)
@@ -29,17 +29,17 @@ namespace StdLib::Hash
 		}
 	}
 
-	template <typename T> T FNVHash(std::string_view str)
+	template <typename T> [[nodiscard]] T FNVHash(std::string_view str)
 	{
 		return FNVHash<T>(str.data(), str.length());
 	}
 
-	template <typename T> T FNVHash(const std::string &str)
+	template <typename T> [[nodiscard]] T FNVHash(const std::string &str)
 	{
 		return FNVHash<T>(str.data(), str.length());
 	}
 
-	template <typename T, typename U> T FNVHash(const U &value)
+	template <typename T, typename U> [[nodiscard]] T FNVHash(const U &value)
 	{
 		return FNVHash<T>(&value, sizeof(U));
 	}
