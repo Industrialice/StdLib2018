@@ -250,10 +250,13 @@ NOINLINE bool File::BufferSet(ui32 size, bufferType &&buffer)
     {
         return true;
     }
-    if (!File::Flush() || !File::CancelCachedRead())
-    {
-        return false;
-    }
+	if (File::IsOpened())
+	{
+		if (!File::Flush() || !File::CancelCachedRead())
+		{
+			return false;
+		}
+	}
     if (buffer)
     {
         _internalBuffer = std::move(buffer);

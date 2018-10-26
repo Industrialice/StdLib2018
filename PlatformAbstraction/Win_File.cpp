@@ -436,6 +436,7 @@ namespace StdLib::FileInitialization
             HARDBREAK;
             return;
         }
-        *(uiw *)&StdLib_GetFinalPathNameByHandleW = (uiw)GetProcAddress(k32, "GetFinalPathNameByHandleW");
+		using type = decltype(StdLib_GetFinalPathNameByHandleW);
+        StdLib_GetFinalPathNameByHandleW = (type)GetProcAddress(k32, "GetFinalPathNameByHandleW");
     }
 }
