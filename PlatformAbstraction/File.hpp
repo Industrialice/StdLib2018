@@ -56,33 +56,48 @@ namespace StdLib
         File() = default;
         File(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, ui64 offset = 0, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None, Error<> *error = nullptr);
         File(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset = 0, Error<> *error = nullptr);
-        File(File &&other);
+        
+		File(File &&other);
         File &operator = (File &&other);
-        [[nodiscard]] Error<> Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, ui64 offset = 0, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None);
+        
+		[[nodiscard]] Error<> Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, ui64 offset = 0, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None);
         [[nodiscard]] Error<> Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset = 0);
+    
     #if STDLIB_ENABLE_FILE_STATS
         MUST_BE_OPENED [[nodiscard]] FileStats StatsGet() const;
         MUST_BE_OPENED void StatsReset();
     #endif
-        MUST_BE_OPENED [[nodiscard]] FileOpenMode OpenMode() const;
-        MUST_BE_OPENED [[nodiscard]] Result<FilePath> PNN() const;
-        MUST_BE_OPENED [[nodiscard]] fileHandle OsFileDescriptor() const;
-        MUST_BE_OPENED [[nodiscard]] fileHandle CloseAndGetOsFileDescriptor();
-        virtual void Close() override;
+        
+		MUST_BE_OPENED [[nodiscard]] FileOpenMode OpenMode() const;
+        
+		MUST_BE_OPENED [[nodiscard]] Result<FilePath> PNN() const;
+        
+		MUST_BE_OPENED [[nodiscard]] fileHandle OsFileDescriptor() const;
+        
+		MUST_BE_OPENED [[nodiscard]] fileHandle CloseAndGetOsFileDescriptor();
+        
+		virtual void Close() override;
         [[nodiscard]] virtual bool IsOpened() const override;
-        MUST_BE_OPENED virtual bool Read(void *target, ui32 len, ui32 *read = 0) override;
+        
+		MUST_BE_OPENED virtual bool Read(void *target, ui32 len, ui32 *read = 0) override;
         MUST_BE_OPENED virtual bool Write(const void *source, ui32 len, ui32 *written = 0) override;
-        MUST_BE_OPENED virtual bool Flush() override;
-        [[nodiscard]] virtual bool IsBufferingSupported() const override;
-        virtual bool BufferSet(ui32 size, bufferType &&buffer = {nullptr, nullptr}) override;
-        [[nodiscard]] virtual std::pair<ui32, const void *> BufferGet() const override;
-        [[nodiscard]] virtual bool IsSeekSupported() const override;
-        MUST_BE_OPENED [[nodiscard]] virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) override;
+        
+		MUST_BE_OPENED virtual bool Flush() override;
+        
+		[[nodiscard]] virtual bool IsBufferingSupported() const override;
+		MUST_BE_OPENED virtual bool BufferSet(ui32 size, bufferType &&buffer = {nullptr, nullptr}) override;
+		MUST_BE_OPENED [[nodiscard]] virtual std::pair<ui32, const void *> BufferGet() const override;
+        
+		[[nodiscard]] virtual bool IsSeekSupported() const override;
+        
+		MUST_BE_OPENED [[nodiscard]] virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) override;
         MUST_BE_OPENED virtual Result<i64> OffsetSet(FileOffsetMode offsetMode, i64 offset) override;
-        MUST_BE_OPENED [[nodiscard]] virtual Result<ui64> SizeGet() override;
+        
+		MUST_BE_OPENED [[nodiscard]] virtual Result<ui64> SizeGet() override;
         MUST_BE_OPENED virtual Error<> SizeSet(ui64 newSize) override;
-        MUST_BE_OPENED [[nodiscard]]virtual FileProcMode ProcMode() const override;
-        MUST_BE_OPENED [[nodiscard]]virtual FileCacheMode CacheMode() const override;
+        
+		MUST_BE_OPENED [[nodiscard]] virtual FileProcMode ProcMode() const override;
+        MUST_BE_OPENED [[nodiscard]] virtual FileCacheMode CacheMode() const override;
 
     private:
         void FlushSystemCaches();
@@ -92,7 +107,7 @@ namespace StdLib
         Result<i64> CurrentFileOffset() const;
     };
 
-#undef MUST_BE_OPENED
+	#undef MUST_BE_OPENED
 }
 
 #if STDLIB_ENABLE_FILE_STATS

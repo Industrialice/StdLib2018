@@ -233,6 +233,12 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
     return DefaultError::Ok();
 }
 
+FileOpenMode FileToCFile::OpenModeGet() const
+{
+	ASSUME(IsOpened());
+	return _openMode;
+}
+
 void FileToCFile::Close()
 {
     if (_file)
@@ -305,13 +311,12 @@ bool FileToCFile::BufferSet(ui32 size, bufferType &&buffer)
 
 std::pair<ui32, const void *> FileToCFile::BufferGet() const
 {
-    ASSUME(IsOpened());
+	ASSUME(IsOpened());
     return {_bufferSize, _customBufferPtr.get()};
 }
 
 bool FileToCFile::IsSeekSupported() const
 {
-    ASSUME(IsOpened());
     return true;
 }
 
@@ -494,12 +499,6 @@ FileCacheMode FileToCFile::CacheMode() const
 {
     ASSUME(IsOpened());
     return FileCacheMode::Default;
-}
-
-FileOpenMode FileToCFile::OpenModeGet() const
-{
-    ASSUME(IsOpened());
-    return _openMode;
 }
 
 #ifdef _DEFINE_CUSTOM_FSEEKO

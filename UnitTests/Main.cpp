@@ -519,49 +519,59 @@ static void TestFileToMemoryStream()
 
 template <typename T> void TestFile(const FilePath &folderForTests)
 {
-    auto internalTest = [folderForTests](ui32 bufferSize, File::bufferType &&buffer)
+    auto internalTest = [folderForTests](ui32 bufferSize, std::function<File::bufferType()> allocBufFunc)
     {
         Error<> fileError = DefaultError::Ok();
         T file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::CreateAlways, FileProcMode::Write, 0, FileCacheMode::Default, FileShareMode::None, &fileError);
         UTest(true, !fileError && file.IsOpened());
-        file.BufferSet(bufferSize, move(buffer));
+        file.BufferSet(bufferSize, allocBufFunc());
         FileWrite(file);
         file.Close();
 
         file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, 0, FileCacheMode::Default, FileShareMode::Read, &fileError);
         UTest(true, !fileError && file.IsOpened());
-        file.BufferSet(bufferSize, move(buffer));
+        file.BufferSet(bufferSize, allocBufFunc());
         FileRead(file);
         file.Close();
 
         file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, 2, FileCacheMode::Default, FileShareMode::Read, &fileError);
         UTest(true, !fileError && file.IsOpened());
-        file.BufferSet(bufferSize, move(buffer));
+        file.BufferSet(bufferSize, allocBufFunc());
         FileReadOffsetted(file, 2);
         file.Close();
 
         file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::Write, uiw_max, FileCacheMode::Default, FileShareMode::None, &fileError);
         UTest(true, !fileError && file.IsOpened());
-        file.BufferSet(bufferSize, move(buffer));
+        file.BufferSet(bufferSize, allocBufFunc());
         FileAppendWrite(file);
         file.Close();
 
         file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcMode::Read, 0, FileCacheMode::Default, FileShareMode::Read, &fileError);
         UTest(true, !fileError && file.IsOpened());
-        file.BufferSet(bufferSize, move(buffer));
+        file.BufferSet(bufferSize, allocBufFunc());
         FileAppendRead(file);
         file.Close();
 
         file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::CreateAlways, FileProcMode::Read + FileProcMode::Write, 0, FileCacheMode::Default, FileShareMode::Read + FileShareMode::Write, &fileError);
         UTest(true, !fileError && file.IsOpened());
-        file.BufferSet(bufferSize, move(buffer));
+        file.BufferSet(bufferSize, allocBufFunc());
         FileWriteRead(file);
     };
 
-    internalTest(0, {nullptr, nullptr});
-    internalTest(10, {nullptr, nullptr});
-    internalTest(2, {nullptr, nullptr});
-    internalTest(10, File::bufferType{new ui8[10], [](ui8 *ptr) { delete[] ptr; }});
+	auto allocNullBuff = []() -> File::bufferType
+	{
+		return {nullptr, nullptr};
+	};
+
+	auto allocSizedBuff = [](uiw size) -> File::bufferType
+	{
+		return {new ui8[10], [](ui8 *ptr) { delete[] ptr; }};
+	};
+
+    internalTest(0, allocNullBuff);
+    internalTest(10, allocNullBuff);
+    internalTest(2, allocNullBuff);
+    internalTest(10, std::bind(allocSizedBuff, 10));
 
     PRINTLOG("finished template file tests\n");
 }
@@ -916,7 +926,7 @@ int main(int argc, const char **argv)
 
     DoTests(argc, argv);
 
-    UniqueIdManagerBenchmark();
+    //UniqueIdManagerBenchmark();
 
     PRINTLOG("~~~Finished Everything~~~\n");
 

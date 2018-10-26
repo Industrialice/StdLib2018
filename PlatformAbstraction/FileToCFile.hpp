@@ -6,7 +6,9 @@
 
 namespace StdLib
 {
-    class FileToCFile final : public IFile
+	#define MUST_BE_OPENED
+
+	class FileToCFile final : public IFile
     {
         FILE *_file = nullptr;
         FileOpenMode _openMode;
@@ -26,27 +28,29 @@ namespace StdLib
 
         Error<> Open(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, ui64 offset = 0, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None);
 
+		MUST_BE_OPENED[[nodiscard]] FileOpenMode OpenModeGet() const;
+
         virtual void Close() override;
-        virtual bool IsOpened() const override;
+		[[nodiscard]] virtual bool IsOpened() const override;
 
-        virtual bool Read(void *target, ui32 len, ui32 *read = 0) override;
-        virtual bool Write(const void *source, ui32 len, ui32 *written = 0) override;
+		MUST_BE_OPENED virtual bool Read(void *target, ui32 len, ui32 *read = 0) override;
+		MUST_BE_OPENED virtual bool Write(const void *source, ui32 len, ui32 *written = 0) override;
 
-        virtual bool Flush() override;
-        virtual bool IsBufferingSupported() const override;
-        virtual bool BufferSet(ui32 size, bufferType &&buffer = {nullptr, nullptr}) override;
-        virtual std::pair<ui32, const void *> BufferGet() const override;
+		MUST_BE_OPENED [[nodiscard]] virtual bool Flush() override;
+		[[nodiscard]] virtual bool IsBufferingSupported() const override;
+		MUST_BE_OPENED virtual bool BufferSet(ui32 size, bufferType &&buffer = {nullptr, nullptr}) override;
+		MUST_BE_OPENED [[nodiscard]] virtual std::pair<ui32, const void *> BufferGet() const override;
 
-        virtual bool IsSeekSupported() const override;
-        virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) override;
-        virtual Result<i64> OffsetSet(FileOffsetMode offsetMode, i64 offset) override;
+		[[nodiscard]] virtual bool IsSeekSupported() const override;
+		MUST_BE_OPENED [[nodiscard]] virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) override;
+		MUST_BE_OPENED virtual Result<i64> OffsetSet(FileOffsetMode offsetMode, i64 offset) override;
 
-        virtual Result<ui64> SizeGet() override;
-        virtual Error<> SizeSet(ui64 newSize) override;
+		MUST_BE_OPENED [[nodiscard]] virtual Result<ui64> SizeGet() override;
+		MUST_BE_OPENED virtual Error<> SizeSet(ui64 newSize) override;
 
-        virtual FileProcMode ProcMode() const override;
-        virtual FileCacheMode CacheMode() const override;
-
-        FileOpenMode OpenModeGet() const;
+		MUST_BE_OPENED [[nodiscard]] virtual FileProcMode ProcMode() const override;
+		MUST_BE_OPENED [[nodiscard]] virtual FileCacheMode CacheMode() const override;
     };
+
+	#undef MUST_BE_OPENED
 }

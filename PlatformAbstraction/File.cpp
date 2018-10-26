@@ -244,18 +244,16 @@ bool File::IsBufferingSupported() const
 
 NOINLINE bool File::BufferSet(ui32 size, bufferType &&buffer)
 {
+	ASSUME(IsOpened());
     ASSUME(size || buffer.get() == nullptr);
 
     if (buffer.get() == _internalBuffer.get() && buffer.get_deleter() == _internalBuffer.get_deleter() && size == _bufferSize)
     {
         return true;
     }
-	if (File::IsOpened())
+	if (!File::Flush() || !File::CancelCachedRead())
 	{
-		if (!File::Flush() || !File::CancelCachedRead())
-		{
-			return false;
-		}
+		return false;
 	}
     if (buffer)
     {
@@ -280,6 +278,7 @@ NOINLINE bool File::BufferSet(ui32 size, bufferType &&buffer)
 
 std::pair<ui32, const void *> File::BufferGet() const
 {
+	ASSUME(IsOpened());
     return {_bufferSize, _internalBuffer.get()};
 }
 
