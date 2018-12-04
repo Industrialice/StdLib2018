@@ -4,7 +4,7 @@
 
 namespace StdLib::VirtualMemory
 {
-    ENUM_COMBINABLE(PageMode, ui32,
+	ENUM_COMBINABLE_WITH_OPS(PageMode, ui32,
         Write = Funcs::BitPos(0),
         Read = Funcs::BitPos(1),
         Execute = Funcs::BitPos(2));

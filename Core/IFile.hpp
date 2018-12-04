@@ -5,12 +5,12 @@
 
 namespace StdLib
 {
-    ENUM_COMBINABLE(FileProcMode, ui8,
+	ENUM_COMBINABLE_WITH_OPS(FileProcMode, ui8,
         Read = Funcs::BitPos(0),
         Write = Funcs::BitPos(1));
 
     // these constraints aren't strictly enforced, so you should not rely on them only
-    ENUM_COMBINABLE(FileShareMode, ui8,
+	ENUM_COMBINABLE_WITH_OPS(FileShareMode, ui8,
         None = 0,
         Read = Funcs::BitPos(0),
         Write = Funcs::BitPos(1),
@@ -32,7 +32,7 @@ namespace StdLib
     };
 
     // sometimes when you disable write cache you'll also get read cache disabled and vise versa
-    ENUM_COMBINABLE(FileCacheMode, ui8,
+	ENUM_COMBINABLE_WITH_OPS(FileCacheMode, ui8,
         Default = 0,
         LinearRead = Funcs::BitPos(0), /* requires ProcMode::Read, can't be used with RandomRead */
         LinearWrite = Funcs::BitPos(1), /* requires ProcMode::Write, can't be used with RandomWrite */

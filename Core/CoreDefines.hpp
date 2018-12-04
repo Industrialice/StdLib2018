@@ -51,7 +51,11 @@ namespace StdLib::_Private
         bool operator == (Name other) const { return _value == other._value; } \
         bool operator != (_type other) const { return _value != other; } \
         bool operator != (Name other) const { return _value != other._value; } \
-    }; \
+    };
+
+#define ENUM_COMBINABLE_OPS(Name, Type) \
     inline Name operator - (Name::_type left, Name::_type right) { return Name(Name::_type(Type(left) & ~Type(right))); } \
     inline Name operator + (Name::_type left, Name::_type right) { return Name(Name::_type(Type(left) | Type(right))); } \
     inline bool operator && (Name::_type left, Name::_type right) { return Name(Name::_type(Type(left) & Type(right)))._value == right; }
+
+#define ENUM_COMBINABLE_WITH_OPS(Name, Type, ...) ENUM_COMBINABLE(Name, Type, __VA_ARGS__) ENUM_COMBINABLE_OPS(Name, Type)
