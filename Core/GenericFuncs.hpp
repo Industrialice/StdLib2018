@@ -258,6 +258,18 @@ namespace StdLib::Funcs
 		}
 		return (value & (value - 1)) == 0;
 	}
+
+    template <typename T> void Reinitialize(T &target)
+    {
+        target.~T();
+        new (&target) T();
+    }
+
+    template <typename T> void Reinitialize(T &target, T &&newValue)
+    {
+        target.~T();
+        new (&target) T(std::move(newValue));
+    }
 }
 
 #define CountOf(a) Funcs::_CountOf<decltype(a)>()
