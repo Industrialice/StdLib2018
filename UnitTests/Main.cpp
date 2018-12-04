@@ -840,7 +840,9 @@ static void MemoryStreamTests()
         char str[13] = "LunaCelestia";
     } holderTestData;
 
-    using holderType = DataHolder<32>;
+    using memoryStreamType = MemoryStreamFromDataHolder<32>;
+
+    using holderType = DataHolder<memoryStreamType::localSize, memoryStreamType::localAlignment>;
     holderType data = holderType(holderTestData);
 
     auto holderTestDataProvide = [](const holderType &data) -> const ui8 *
@@ -848,19 +850,19 @@ static void MemoryStreamTests()
         return (ui8 *)&data.Get<HolderTestData>().str;
     };
 
-    auto dataHolderMS = MemoryStreamFromDataHolder<32>::New<HolderTestData>(std::move(data), test0.length() + test1.length(), holderTestDataProvide);
+    auto dataHolderMS = memoryStreamType::New<HolderTestData>(std::move(data), test0.length() + test1.length(), holderTestDataProvide);
     checkContent(dataHolderMS);
 
     auto dataHolderMSMovedInfo = std::move(dataHolderMS);
     checkContent(dataHolderMSMovedInfo);
 
     {
-        std::vector<MemoryStreamFromDataHolder<32>> streams;
+        std::vector<memoryStreamType> streams;
 
         for (uiw index = 0; index < 25; ++index)
         {
             holderType tempData = holderType(holderTestData);
-            auto stream = MemoryStreamFromDataHolder<32>::New<HolderTestData>(std::move(tempData), test0.length() + test1.length(), holderTestDataProvide);
+            auto stream = memoryStreamType::New<HolderTestData>(std::move(tempData), test0.length() + test1.length(), holderTestDataProvide);
             streams.push_back(std::move(stream));
         }
 

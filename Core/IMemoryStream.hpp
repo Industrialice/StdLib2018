@@ -210,7 +210,7 @@ namespace StdLib
         }
     };
 
-    template <uiw LocalSize, uiw LocalAlignment = 16> class MemoryStreamFromDataHolder final : public IMemoryStream
+    template <uiw LocalSize, uiw LocalAlignment = 8> class MemoryStreamFromDataHolder final : public IMemoryStream
     {
         using holderType = DataHolder<LocalSize, LocalAlignment>;
 

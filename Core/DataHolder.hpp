@@ -5,9 +5,9 @@
 namespace StdLib
 {
 	// TODO: using template parameters can be made movable, copyable and RAII-destructible
-    template <uiw Size, uiw Alignment = 16> class DataHolder
+    template <uiw Size, uiw Alignment = 8> class DataHolder
     {
-		static_assert(Funcs::IsPowerOf2(Alignment), "alignment is not of power of 2");
+		static_assert(Funcs::IsPowerOf2(Alignment), "alignment is not power of 2");
 
 	public:
         static constexpr uiw size = (Size + (Alignment - 1)) & ~(Alignment - 1);
