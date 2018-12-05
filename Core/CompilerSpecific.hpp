@@ -18,6 +18,7 @@
     #define NOINLINE __declspec(noinline)
     #define FORCEINLINE __forceinline
 	#define UNALIGNED __unaligned
+    #define EMPTY_BASES __declspec(empty_bases)
 
     #define _UNREACHABLE __assume(0)
 
@@ -70,6 +71,7 @@
 #ifdef __clang__
 	#define UNALIGNED __unaligned /* It seems there's no alternative for GCC */
 #endif
+    #define EMPTY_BASES /* TODO: do these compilers have something similar */
 
     #define _UNREACHABLE __builtin_unreachable()
 
