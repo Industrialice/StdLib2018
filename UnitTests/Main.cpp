@@ -11,17 +11,45 @@ void MathLibTests();
 void UniqueIdManagerTests();
 void UniqueIdManagerBenchmark();
 
+static void TypeIdentifiableTests()
+{
+	constexpr TypeId ui32Id = TypeIdentifiable<ui32>::GetTypeId();
+	constexpr TypeId ui8Id = TypeIdentifiable<ui8>::GetTypeId();
+	UTest(NotEqual, ui32Id, ui8Id);
+	ui64 ui32Hash = ui32Id.Hash();
+	ui64 ui8Hash = ui8Id.Hash();
+	UTest(NotEqual, ui32Hash, ui8Hash);
+
+	constexpr StableTypeId stableId = StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf("Test"), true>("Test")>::GetTypeId();
+	constexpr StableTypeId stableId2 = StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf("Test2"), true>("Test2")>::GetTypeId();
+	UTest(NotEqual, stableId, stableId2);
+	constexpr ui64 stableIdHash = stableId.Hash();
+	constexpr ui64 stableId2Hash = stableId2.Hash();
+	UTest(NotEqual, stableIdHash, stableId2Hash);
+
+	PRINTLOG("finished type identifiable tests\n");
+}
+
 static void HashFuncsTest()
 {
-	ui32 value = 23534;
+	constexpr ui32 value = 23534;
 
-	ui32 fnv32 = Hash::FNVHash<ui32>(value);
+	constexpr ui32 fnv32 = Hash::FNVHash<Hash::Precision::P32>(value);
 	UTest(NotEqual, fnv32, value);
 
-	ui64 fnv64 = Hash::FNVHash<ui64>(value);
+	constexpr ui64 fnv64 = Hash::FNVHash<Hash::Precision::P64>(value);
 	UTest(NotEqual, fnv64, value);
 
 	UTest(NotEqual, fnv32, fnv64);
+
+	constexpr ui32 valuect[1] = {23534};
+	constexpr ui32 fnv32ct = Hash::FNVHashCT<Hash::Precision::P32>(valuect);
+	UTest(Equal, fnv32ct, Hash::FNVHash<Hash::Precision::P32>(23534));
+
+	constexpr ui8 name[] = "Test Name";
+	constexpr ui64 nameHashedCT = Hash::FNVHashCT<Hash::Precision::P64>(name);
+	ui64 nameHashed = Hash::FNVHash<Hash::Precision::P64>(name, CountOf(name));
+	UTest(Equal, nameHashedCT, nameHashed);
 
 	PRINTLOG("finished hash tests\n");
 }
@@ -757,7 +785,7 @@ static void DataHolderTests()
         {
             ++_moveCalledTimes;
         }
-        NonCopyable &operator = (NonCopyable &&)
+        NonCopyable &operator = (NonCopyable &&) noexcept
         {
             ++_moveCalledTimes;
             return *this;
@@ -892,6 +920,7 @@ static void DoTests(int argc, const char **argv)
     FilePath folderForTests = FilePath::FromChar(filesTestFolder);
     UTest(false, FileSystem::CreateNewFolder(folderForTests, {}, true));
 
+	TypeIdentifiableTests();
 	HashFuncsTest();
     IntegerPropertiesTest();
     SetBitTests();

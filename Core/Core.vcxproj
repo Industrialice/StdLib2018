@@ -141,6 +141,7 @@
     <ClInclude Include="IMemoryStream.hpp" />
     <ClInclude Include="ListenerHandle.hpp" />
     <ClInclude Include="Result.hpp" />
+    <ClInclude Include="TypeIdentifiable.hpp" />
     <ClInclude Include="_ErrorCodes.hpp" />
     <ClInclude Include="GenericFuncs.hpp" />
     <ClInclude Include="MathFunctions.hpp" />

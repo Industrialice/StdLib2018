@@ -15,8 +15,8 @@ namespace StdLib
     public:
         FileToMemoryStream() = default;
         FileToMemoryStream(IMemoryStream &stream, FileProcMode procMode, uiw offset = 0, Error<> *error = nullptr);
-        FileToMemoryStream(FileToMemoryStream &&source);
-        FileToMemoryStream &operator = (FileToMemoryStream &&source);
+        FileToMemoryStream(FileToMemoryStream &&source) noexcept;
+        FileToMemoryStream &operator = (FileToMemoryStream &&source) noexcept;
         Error<> Open(IMemoryStream &stream, FileProcMode procMode, uiw offset = 0);
 
         virtual void Close() override;

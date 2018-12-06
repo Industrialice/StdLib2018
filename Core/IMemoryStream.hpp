@@ -241,7 +241,7 @@ namespace StdLib
             other._destroy = nullptr;
         }
 
-        MemoryStreamFromDataHolder &operator = (MemoryStreamFromDataHolder &&other)
+        MemoryStreamFromDataHolder &operator = (MemoryStreamFromDataHolder &&other) noexcept
         {
             _data = std::move(other._data);
             _size = other._size;

@@ -9,7 +9,7 @@ FileToMemoryStream::FileToMemoryStream(IMemoryStream &stream, FileProcMode procM
     if (error) *error = dummyError;
 }
 
-FileToMemoryStream::FileToMemoryStream(FileToMemoryStream &&source)
+FileToMemoryStream::FileToMemoryStream(FileToMemoryStream &&source) noexcept
 {
     this->_stream = source._stream;
     source._stream = 0;
@@ -18,7 +18,7 @@ FileToMemoryStream::FileToMemoryStream(FileToMemoryStream &&source)
     this->_startOffset = source._startOffset;
 }
 
-FileToMemoryStream &FileToMemoryStream::operator = (FileToMemoryStream &&source)
+FileToMemoryStream &FileToMemoryStream::operator = (FileToMemoryStream &&source) noexcept
 {
     ASSUME(this != &source);
     this->_stream = source._stream;

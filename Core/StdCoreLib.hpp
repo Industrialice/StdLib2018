@@ -2,6 +2,7 @@
 
 #include "GenericFuncs.hpp"
 #include "HashFuncs.hpp"
+#include "TypeIdentifiable.hpp"
 #include "Result.hpp"
 #include "Allocators.hpp"
 #include "IMemoryStream.hpp"
