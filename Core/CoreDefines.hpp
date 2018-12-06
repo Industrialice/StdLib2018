@@ -51,6 +51,8 @@ namespace StdLib::_Private
         bool operator == (Name other) const { return _value == other._value; } \
         bool operator != (_type other) const { return _value != other; } \
         bool operator != (Name other) const { return _value != other._value; } \
+        bool Contains(_type other) const { return (Type(_value) & Type(other)) != 0; } \
+        bool Contains(Name other) const { return (Type(_value) & Type(other._value)) != 0; } \
     };
 
 #define ENUM_COMBINABLE_OPS(Name, Type) \
