@@ -6,13 +6,15 @@ namespace StdLib
 {
     namespace CompileTimeStrings
     {
+        constexpr uiw CharsPerNumber = 9;
+
         [[nodiscard]] static constexpr ui64 EncodeASCII(const char *source, uiw length, uiw start)
         {
             ui64 encoded = 0;
             if (start < length)
             {
                 uiw offset = 56;
-                for (uiw index = 0; index < 7; ++index, offset -= 7)
+                for (uiw index = 0; index < 9; ++index, offset -= 7)
                 {
                     char sym = source[start + index];
                     if (!sym)
@@ -31,7 +33,7 @@ namespace StdLib
             auto decodeNumber = [](ui64 number, char *target, uiw length, uiw &start) constexpr
             {
                 uiw offset = 56;
-                for (uiw index = 0; index < 7; ++index, offset -= 7)
+                for (uiw index = 0; index < 9; ++index, offset -= 7)
                 {
                     char sym = (char)((number >> offset) & 0x7F);
                     if (start < length)

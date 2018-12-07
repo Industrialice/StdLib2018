@@ -10,8 +10,8 @@ namespace StdLib
     #ifdef DEBUG
         union
         {
-            std::array<char, 22> name;
-            char displayName[22];
+            std::array<char, 28> name;
+            char displayName[28];
         } _u{};
     #endif
 
@@ -24,7 +24,7 @@ namespace StdLib
         {}
 
     #ifdef DEBUG
-        constexpr TypeId(InternalIdType id, std::array<char, 22> name) : _id(id), _u{name}
+        constexpr TypeId(InternalIdType id, std::array<char, 28> name) : _id(id), _u{name}
         {}
     #endif
 
@@ -67,7 +67,7 @@ namespace StdLib
     public:
         [[nodiscard]] static constexpr TypeId GetTypeId()
         {
-            std::array<char, 22> name{};
+            std::array<char, 28> name{};
             CompileTimeStrings::DecodeASCII<encoded0, encoded1, encoded2>(name.data(), name.size());
             return {&var, name};
         }
@@ -91,8 +91,8 @@ namespace StdLib
     #ifdef DEBUG
         union
         {
-            std::array<char, 22> name;
-            char displayName[22];
+            std::array<char, 28> name;
+            char displayName[28];
         } _u{};
     #endif
 
@@ -105,7 +105,7 @@ namespace StdLib
 		{}
 
     #ifdef DEBUG
-        constexpr StableTypeId(InternalIdType id, std::array<char, 22> name) : _id(id), _u{name}
+        constexpr StableTypeId(InternalIdType id, std::array<char, 28> name) : _id(id), _u{name}
         {}
     #endif
 
@@ -141,7 +141,7 @@ namespace StdLib
     public:
         [[nodiscard]] static constexpr StableTypeId GetTypeId()
         {
-            std::array<char, 22> name{};
+            std::array<char, 28> name{};
             CompileTimeStrings::DecodeASCII<encoded0, encoded1, encoded2>(name.data(), name.size());
             return {stableId, name};
         }

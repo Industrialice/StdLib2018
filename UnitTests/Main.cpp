@@ -11,12 +11,15 @@ void MathLibTests();
 void UniqueIdManagerTests();
 void UniqueIdManagerBenchmark();
 
-static constexpr std::array<char, 22> _CompileTimeStringsTestsConstexpr()
+static constexpr std::array<char, 28> _CompileTimeStringsTestsConstexpr()
 {
     constexpr const char testString[] = "CompileTimeStringsTests";
-    constexpr ui64 encoded[] = {CompileTimeStrings::EncodeASCII(testString, CountOf(testString), 0), CompileTimeStrings::EncodeASCII(testString, CountOf(testString), 7), CompileTimeStrings::EncodeASCII(testString, CountOf(testString), 14)};
+    constexpr ui64 encoded[] = {
+        CompileTimeStrings::EncodeASCII(testString, CountOf(testString), CompileTimeStrings::CharsPerNumber * 0), 
+        CompileTimeStrings::EncodeASCII(testString, CountOf(testString), CompileTimeStrings::CharsPerNumber * 1), 
+        CompileTimeStrings::EncodeASCII(testString, CountOf(testString), CompileTimeStrings::CharsPerNumber * 2)};
 
-    std::array<char, 22> decoded{};
+    std::array<char, 28> decoded{};
     CompileTimeStrings::DecodeASCII<encoded[0], encoded[1], encoded[2]>(decoded.data(), decoded.size());
 
     return decoded;
@@ -24,7 +27,9 @@ static constexpr std::array<char, 22> _CompileTimeStringsTestsConstexpr()
 
 static void CompileTimeStringsTests()
 {
-    constexpr std::array<char, 22> result = _CompileTimeStringsTestsConstexpr(); // make sure the func is conseval
+    constexpr std::array<char, 28> result = _CompileTimeStringsTestsConstexpr(); // make sure the func is conseval
+    constexpr std::array<char, 28> ref = {"CompileTimeStringsTests"};
+    UTest(Equal, result, ref);
 
     //printf("decoded string is %s\n", result.data());
 
