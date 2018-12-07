@@ -129,11 +129,13 @@
   <ItemGroup>
     <ClInclude Include="Allocators.hpp" />
     <ClInclude Include="ApproxMath.hpp" />
+    <ClInclude Include="CompileTimeStrings.hpp" />
     <ClInclude Include="CoreDefines.hpp" />
     <ClInclude Include="CoreHeader.hpp" />
     <ClInclude Include="CoreTypes.hpp" />
     <ClInclude Include="CompilerSpecific.hpp" />
     <ClInclude Include="DataHolder.hpp" />
+    <ClInclude Include="EnumCombinable.hpp" />
     <ClInclude Include="Error.hpp" />
     <ClInclude Include="FileToMemoryStream.hpp" />
     <ClInclude Include="HashFuncs.hpp" />

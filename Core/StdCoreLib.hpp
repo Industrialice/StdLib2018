@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EnumCombinable.hpp"
+#include "CompileTimeStrings.hpp"
 #include "GenericFuncs.hpp"
 #include "HashFuncs.hpp"
 #include "TypeIdentifiable.hpp"

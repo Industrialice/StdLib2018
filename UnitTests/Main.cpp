@@ -11,6 +11,58 @@ void MathLibTests();
 void UniqueIdManagerTests();
 void UniqueIdManagerBenchmark();
 
+static constexpr std::array<char, 22> _CompileTimeStringsTestsConstexpr()
+{
+    constexpr const char testString[] = "CompileTimeStringsTests";
+    constexpr ui64 encoded[] = {CompileTimeStrings::EncodeASCII(testString, CountOf(testString), 0), CompileTimeStrings::EncodeASCII(testString, CountOf(testString), 7), CompileTimeStrings::EncodeASCII(testString, CountOf(testString), 14)};
+
+    std::array<char, 22> decoded{};
+    CompileTimeStrings::DecodeASCII<encoded[0], encoded[1], encoded[2]>(decoded.data(), decoded.size());
+
+    return decoded;
+}
+
+static void CompileTimeStringsTests()
+{
+    constexpr std::array<char, 22> result = _CompileTimeStringsTestsConstexpr(); // make sure the func is conseval
+
+    //printf("decoded string is %s\n", result.data());
+
+    PRINTLOG("finished compile time strings tests\n");
+}
+
+static void EnumCombinableTests()
+{
+    constexpr ui64 hash = Hash::FNVHashCT<Hash::Precision::P64, char, 5>([]() constexpr { return "Test"; }());
+
+    /*struct Test
+    {
+        struct Values : EnumCombinable<Values>
+        {
+            enum
+            {
+                One = Funcs::BitPos(0),
+                Two = Funcs::BitPos(1)
+            } value;
+
+            Values() = default;
+
+            Values(decltype(value) value) : value(value) 
+            {}
+
+            decltype(value) Value() const
+            {
+                return _value;
+            }
+        };
+    };
+
+    Test::Values value = Test::Values::Two;
+    printf("%i\n", (i32)value.AsInteger());*/
+
+    PRINTLOG("finished enum combinable tests\n");
+}
+
 static void TypeIdentifiableTests()
 {
 	constexpr TypeId ui32Id = TypeIdentifiable<ui32>::GetTypeId();
@@ -26,6 +78,11 @@ static void TypeIdentifiableTests()
 	constexpr ui64 stableIdHash = stableId.Hash();
 	constexpr ui64 stableId2Hash = stableId2.Hash();
 	UTest(NotEqual, stableIdHash, stableId2Hash);
+
+#ifdef DEBUG
+    constexpr ui64 encoded = CompileTimeStrings::EncodeASCII("Test", CountOf("Test"), 0);
+    constexpr StableTypeId stableIdDebug = StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf("Test"), true>("Test"), encoded>::GetTypeId();
+#endif
 
 	PRINTLOG("finished type identifiable tests\n");
 }
@@ -920,6 +977,8 @@ static void DoTests(int argc, const char **argv)
     FilePath folderForTests = FilePath::FromChar(filesTestFolder);
     UTest(false, FileSystem::CreateNewFolder(folderForTests, {}, true));
 
+    CompileTimeStringsTests();
+    EnumCombinableTests();
 	TypeIdentifiableTests();
 	HashFuncsTest();
     IntegerPropertiesTest();
