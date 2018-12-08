@@ -3,7 +3,7 @@
 
 using namespace StdLib;
 
-FileToMemoryStream::FileToMemoryStream(IMemoryStream &stream, FileProcMode procMode, uiw offset, Error<> *error)
+FileToMemoryStream::FileToMemoryStream(IMemoryStream &stream, FileProcModes::FileProcMode procMode, uiw offset, Error<> *error)
 {
     Error<> dummyError = this->Open(stream, procMode, offset);
     if (error) *error = dummyError;
@@ -29,25 +29,25 @@ FileToMemoryStream &FileToMemoryStream::operator = (FileToMemoryStream &&source)
     return *this;
 }
 
-Error<> FileToMemoryStream::Open(IMemoryStream &stream, FileProcMode procMode, uiw offset)
+Error<> FileToMemoryStream::Open(IMemoryStream &stream, FileProcModes::FileProcMode procMode, uiw offset)
 {
     _stream = 0;
     _offset = 0;
     _startOffset = 0;
 
-    if (!(procMode && FileProcMode::Read) && !(procMode && FileProcMode::Write))
+    if (!procMode.Contains(FileProcModes::Read) && !procMode.Contains(FileProcModes::Write))
     {
-        return DefaultError::InvalidArgument("Neither FileProcMode::Read, nor FileProcMode::Write is set");
+        return DefaultError::InvalidArgument("Neither FileProcModes::Read, nor FileProcModes::Write is set");
     }
 
-    if (procMode && FileProcMode::Read)
+    if (procMode.Contains(FileProcModes::Read))
     {
         if (stream.IsReadable() == false)
         {
             return DefaultError::AccessDenied("Requested read proc mode, but the stream is not readable");
         }
     }
-    if (procMode && FileProcMode::Write)
+    if (procMode.Contains(FileProcModes::Write))
     {
         if (stream.IsWritable() == false)
         {
@@ -74,7 +74,7 @@ bool FileToMemoryStream::IsOpened() const
 
 bool FileToMemoryStream::Read(void *target, ui32 len, ui32 *read)
 {
-    ASSUME(_stream && (_procMode && FileProcMode::Read));
+    ASSUME(_stream && _procMode.Contains(FileProcModes::Read));
     ASSUME(len == 0 || target);
     uiw diff = _offset <= _stream->Size() ? _stream->Size() - _offset : 0;
     len = std::min(len, (ui32)diff);
@@ -90,7 +90,7 @@ bool FileToMemoryStream::Read(void *target, ui32 len, ui32 *read)
 
 bool FileToMemoryStream::Write(const void *source, ui32 len, ui32 *written)
 {
-    ASSUME(_stream && (_procMode && FileProcMode::Write));
+    ASSUME(_stream && _procMode.Contains(FileProcModes::Write));
     ASSUME(len == 0 || source);
     uiw writeEnd = _offset + len;
     if (writeEnd < _offset)  //  overflow
@@ -261,14 +261,14 @@ Error<> FileToMemoryStream::SizeSet(ui64 newSize)
     return DefaultError::OutOfMemory();
 }
 
-FileProcMode FileToMemoryStream::ProcMode() const
+FileProcModes::FileProcMode FileToMemoryStream::ProcMode() const
 {
     ASSUME(_stream);
     return _procMode;
 }
 
-FileCacheMode FileToMemoryStream::CacheMode() const
+FileCacheModes::FileCacheMode FileToMemoryStream::CacheMode() const
 {
     ASSUME(_stream);
-    return FileCacheMode::Default;
+    return FileCacheModes::Default;
 }

@@ -2,19 +2,26 @@
 
 #include "Result.hpp"
 #include "GenericFuncs.hpp"
+#include "EnumCombinable.hpp"
 
 namespace StdLib
 {
-	ENUM_COMBINABLE_WITH_OPS(FileProcMode, ui8,
-        Read = Funcs::BitPos(0),
-        Write = Funcs::BitPos(1));
+    struct FileProcModes
+    {
+        static constexpr struct FileProcMode : EnumCombinable<FileProcMode, ui8>
+        {} Read = FileProcMode::Create(1 << 0),
+            Write = FileProcMode::Create(1 << 1);
+    };
 
     // these constraints aren't strictly enforced, so you should not rely on them only
-	ENUM_COMBINABLE_WITH_OPS(FileShareMode, ui8,
-        None = 0,
-        Read = Funcs::BitPos(0),
-        Write = Funcs::BitPos(1),
-        Delete = Funcs::BitPos(2));
+    struct FileShareModes
+    {
+        static constexpr struct FileShareMode : EnumCombinable<FileShareMode, ui8, true>
+        {} None = FileShareMode::Create(0),
+            Read = FileShareMode::Create(1 << 0),
+            Write = FileShareMode::Create(1 << 1),
+            Delete = FileShareMode::Create(1 << 2);
+    };
 
     // mode                already exists        doesn't exist
     // ===                 ===                   ===
@@ -32,14 +39,17 @@ namespace StdLib
     };
 
     // sometimes when you disable write cache you'll also get read cache disabled and vise versa
-	ENUM_COMBINABLE_WITH_OPS(FileCacheMode, ui8,
-        Default = 0,
-        LinearRead = Funcs::BitPos(0), /* requires ProcMode::Read, can't be used with RandomRead */
-        LinearWrite = Funcs::BitPos(1), /* requires ProcMode::Write, can't be used with RandomWrite */
-        RandomRead = Funcs::BitPos(2), /* requires ProcMode::Read, can't be used with LinearRead */
-        RandomWrite = Funcs::BitPos(3), /* requires ProcMode::Write, can't be used with LinearWrite */
-        DisableSystemWriteCache = Funcs::BitPos(4), /* requires ProcMode::Write */
-        DisableSystemReadCache = Funcs::BitPos(5) /* requires ProcMode::Read */);
+    struct FileCacheModes
+    {
+        static constexpr struct FileCacheMode : EnumCombinable<FileCacheMode, ui8, true>
+        {} Default = FileCacheMode::Create(0),
+            LinearRead = FileCacheMode::Create(1 << 0), /* requires ProcMode::Read, can't be used with RandomRead */
+            LinearWrite = FileCacheMode::Create(1 << 1), /* requires ProcMode::Write, can't be used with RandomWrite */
+            RandomRead = FileCacheMode::Create(1 << 2), /* requires ProcMode::Read, can't be used with LinearRead */
+            RandomWrite = FileCacheMode::Create(1 << 3), /* requires ProcMode::Write, can't be used with LinearWrite */
+            DisableSystemWriteCache = FileCacheMode::Create(1 << 4), /* requires ProcMode::Write */
+            DisableSystemReadCache = FileCacheMode::Create(1 << 5) /* requires ProcMode::Read */;
+    };
 
     // position in file: ..#...
     // OffsetGet(FileOffsetMode::FromBegin) == 2
@@ -77,8 +87,8 @@ namespace StdLib
         virtual Result<ui64> SizeGet() = 0;
         virtual Error<> SizeSet(ui64 newSize) = 0; // if the file is extended, the extended part's content is undefined
 
-        virtual FileProcMode ProcMode() const = 0;
-        virtual FileCacheMode CacheMode() const = 0;
+        virtual FileProcModes::FileProcMode ProcMode() const = 0;
+        virtual FileCacheModes::FileCacheMode CacheMode() const = 0;
 
         [[nodiscard]] explicit operator bool() const
         {

@@ -11,7 +11,7 @@ using namespace StdLib;
 
 extern NOINLINE Error<> StdLib_FileError();
 
-Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, ui64 offset, FileCacheMode cacheMode, FileShareMode shareMode)
+Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode)
 {
     Close();
 
@@ -19,15 +19,15 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
 
     int flags = 0;
 
-    if ((procMode && FileProcMode::Read) && (procMode && FileProcMode::Write))
+    if (procMode.Contains(FileProcModes::Read) && procMode.Contains(FileProcModes::Write))
     {
         flags |= O_RDWR;
     }
-    else if (procMode && FileProcMode::Read)
+    else if (procMode.Contains(FileProcModes::Read))
     {
         flags |= O_RDONLY;
     }
-    else if (procMode && FileProcMode::Write)
+    else if (procMode.Contains(FileProcModes::Write))
     {
         flags |= O_WRONLY;
     }
@@ -49,7 +49,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
 
         if (openMode == FileOpenMode::CreateAlways)
         {
-            if (!(procMode && FileProcMode::Write)) // we need to truncate file, but we can't do it if we can't write to it, so we just remove it
+            if (!procMode.Contains(FileProcModes::Write)) // we need to truncate file, but we can't do it if we can't write to it, so we just remove it
             {
                 auto removeResult = FileSystem::Remove(pnn);
                 if (removeResult)
@@ -73,19 +73,19 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
         ASSUME(openMode == FileOpenMode::OpenExisting);
     }
 
-    if (cacheMode && FileCacheMode::DisableSystemWriteCache)
+    if (cacheMode.Contains(FileCacheModes::DisableSystemWriteCache))
     {
-        if (!(procMode && FileProcMode::Write))
+        if (!procMode.Contains(FileProcModes::Write))
         {
-            return DefaultError::InvalidArgument("FileCacheMode::DisableSystemWriteCache must be used only when FileProcMode::Write is specified");
+            return DefaultError::InvalidArgument("FileCacheModes::DisableSystemWriteCache must be used only when FileProcModes::Write is specified");
         }
         flags |= O_DIRECT;
     }
-    if (cacheMode && FileCacheMode::DisableSystemReadCache)
+    if (cacheMode.Contains(FileCacheModes::DisableSystemReadCache))
     {
-        if (!(procMode && FileProcMode::Read))
+        if (!procMode.Contains(FileProcModes::Read))
         {
-            return DefaultError::InvalidArgument("FileCacheMode::DisableSystemReadCache must be used only when FileProcMode::Read is specified");
+            return DefaultError::InvalidArgument("FileCacheModes::DisableSystemReadCache must be used only when FileProcModes::Read is specified");
         }
         flags |= O_DIRECT;
     }
@@ -98,22 +98,22 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
         return StdLib_FileError();
     }
 
-    if ((cacheMode && FileCacheMode::LinearRead) || (cacheMode &&FileCacheMode::RandomRead))
+    if (cacheMode.Contains(FileCacheModes::LinearRead) || cacheMode.Contains(FileCacheModes::RandomRead))
     {
-        if (cacheMode && (FileCacheMode::LinearRead + FileCacheMode::RandomRead))
+        if (cacheMode.Contains(FileCacheModes::LinearRead.Combined(FileCacheModes::RandomRead)))
         {
             close(hfile);
-            return DefaultError::InvalidArgument("Both FileCacheMode::LinearRead and FileCacheMode::RandomRead are specified");
+            return DefaultError::InvalidArgument("Both FileCacheModes::LinearRead and FileCacheModes::RandomRead are specified");
         }
 
-        if (!(procMode && FileProcMode::Read))
+        if (!procMode.Contains(FileProcModes::Read))
         {
             close(hfile);
-            return DefaultError::InvalidArgument("FileCacheMode::LinearRead or FileCacheMode::RandomRead must be used only when FileProcMode::Read is specified");
+            return DefaultError::InvalidArgument("FileCacheModes::LinearRead or FileCacheModes::RandomRead must be used only when FileProcModes::Read is specified");
         }
 
-    #if _XOPEN_SOURCE >= 600 || _POSIX_C_SOURCE >= 200112L
-        if (cacheMode && FileCacheMode::LinearRead)
+    #if (defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 600)) || (defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200112L))
+        if (cacheMode.Contains(FileCacheModes::LinearRead))
         {
             int adviceResult = posix_fadvise(hfile, 0, 0, POSIX_FADV_SEQUENTIAL);
             ASSUME(adviceResult == 0);
@@ -146,7 +146,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
         _offsetToStart = 0;
     }
 
-#if STDLIB_ENABLE_FILE_STATS
+#ifdef STDLIB_ENABLE_FILE_STATS
     _stats = {};
 #endif
     _openMode = openMode;
@@ -302,7 +302,7 @@ bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
     ASSUME(IsOpened());
     ASSUME(source || len == 0);
 
-#if STDLIB_ENABLE_FILE_STATS
+#ifdef STDLIB_ENABLE_FILE_STATS
     ++_stats.writesToFileCount;
 #endif
 
@@ -313,7 +313,7 @@ bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
         return false;
     }
 
-#if STDLIB_ENABLE_FILE_STATS
+#ifdef STDLIB_ENABLE_FILE_STATS
     _stats.bytesToFileWritten += sswritten;
 #endif
 
@@ -326,7 +326,7 @@ bool File::ReadFromFile(void *target, ui32 len, ui32 *readRet)
     ASSUME(IsOpened());
     ASSUME(target || len == 0);
 
-#if STDLIB_ENABLE_FILE_STATS
+#ifdef STDLIB_ENABLE_FILE_STATS
     ++_stats.readsFromFileCount;
 #endif
 
@@ -337,7 +337,7 @@ bool File::ReadFromFile(void *target, ui32 len, ui32 *readRet)
         return false;
     }
 
-#if STDLIB_ENABLE_FILE_STATS
+#ifdef STDLIB_ENABLE_FILE_STATS
     _stats.bytesFromFileRead += actuallyRead;
 #endif
 

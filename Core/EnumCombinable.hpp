@@ -4,63 +4,106 @@
 
 namespace StdLib
 {
-    template <typename T> struct EnumCombinable
+    template <bool hasDefaultConstructor> struct _OptionalDefaultConstructior
     {
-    private:
-        T &As()
-        {
-            return *((T *)this);
-        }
+    protected:
+        constexpr _OptionalDefaultConstructior() = default;
+    };
 
-        const T &As() const
-        {
-            return *((const T *)this);
-        }
+    template <> struct _OptionalDefaultConstructior<true>
+    {
+    public:
+        constexpr _OptionalDefaultConstructior() = default;
+    };
 
-        const T &As(const T &other) const
-        {
-            return (const T &)other;
-        }
+    template <typename WrapperType, typename ValueType, bool hasDefaultValue = false> class EnumCombinable : _OptionalDefaultConstructior<hasDefaultValue>
+    {
+        static_assert(std::is_integral_v<ValueType>, "ValueType must be integral");
+
+        ValueType _value;
+
+        constexpr EnumCombinable(ValueType value) : _value(value)
+        {}
 
     public:
-        explicit operator bool() const
+
+        constexpr EnumCombinable() = default;
+
+        static constexpr WrapperType Create(ValueType value)
         {
-            return As().Value() != 0;
+            return {value};
         }
 
-        auto AsInteger() const
+        constexpr explicit operator bool() const
         {
-            static constexpr uiw sizeOf = sizeof(decltype(std::declval<T>().Value()));
-            if constexpr (sizeOf == 1) return (ui8)As().Value();
-            if constexpr (sizeOf == 2) return (ui16)As().Value();
-            if constexpr (sizeOf == 4) return (ui32)As().Value();
-            if constexpr (sizeOf == 8) return (ui64)As().Value();
+            return _value != 0;
         }
 
-        bool operator == (const T &other) const
+        constexpr bool operator == (const EnumCombinable &other) const
         {
-            return As().Value() == As(other).Value();
+            return _value == other._value;
         }
 
-        bool operator != (const T &other) const
+        constexpr bool operator != (const EnumCombinable &other) const
         {
-            return !operator=(other);
+            return !operator==(other);
         }
 
-        bool operator < (const T &other) const
+        constexpr bool operator < (const EnumCombinable &other) const
         {
-            return As().Value() < As(other).Value();
+            return _value < other._value;
         }
 
-        bool operator > (const T &other) const
+        constexpr bool operator <= (const EnumCombinable &other) const
         {
-            return As().Value() > As(other).Value();
+            return _value <= other._value;
         }
 
-        auto Combined(const T &other) const
+        constexpr bool operator > (const EnumCombinable &other) const
         {
-            using finalType = decltype(std::declval<T>().Value());
-            return finalType(AsInteger() | other.AsInteger());
+            return _value > other._value;
+        }
+
+        constexpr bool operator >= (const EnumCombinable &other) const
+        {
+            return _value >= other._value;
+        }
+
+        constexpr WrapperType Combined(const EnumCombinable &other) const
+        {
+            return {(ValueType)(_value | other._value)};
+        }
+
+        constexpr WrapperType &Add(const EnumCombinable &other)
+        {
+            _value |= other._value;
+            return (WrapperType &)*this;
+        }
+
+        constexpr WrapperType &Remove(const EnumCombinable &other)
+        {
+            _value &= ~other._value;
+            return (WrapperType &)*this;
+        }
+
+        constexpr bool Contains(const EnumCombinable &other) const
+        {
+            return (_value & other._value) == other._value;
+        }
+
+        constexpr bool Intersects(const EnumCombinable &other) const
+        {
+            return (_value & other._value) != 0;
+        }
+
+        constexpr ValueType &AsInteger()
+        {
+            return _value;
+        }
+
+        constexpr const ValueType &AsInteger() const
+        {
+            return _value;
         }
     };
 }

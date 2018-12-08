@@ -10,7 +10,7 @@ namespace
 
 extern NOINLINE Error<> StdLib_FileError();
 
-Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, ui64 offset, FileCacheMode cacheMode, FileShareMode shareMode)
+Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode)
 {
     Close();
 
@@ -33,14 +33,14 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
         _pnn = pnn.GetAbsolute();
     }
 
-    ASSUME((procMode && FileProcMode::Read) || (procMode && FileProcMode::Write));
+    ASSUME(procMode.Contains(FileProcModes::Read) || procMode.Contains(FileProcModes::Write));
 
-    if (procMode && FileProcMode::Write)
+    if (procMode.Contains(FileProcModes::Write))
     {
         dwDesiredAccess |= GENERIC_WRITE;
     }
 
-    if (procMode && FileProcMode::Read)
+    if (procMode.Contains(FileProcModes::Read))
     {
         dwDesiredAccess |= GENERIC_READ;
     }
@@ -71,19 +71,19 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
         dwCreationDisposition = OPEN_EXISTING;
     }
 
-    if ((cacheMode && FileCacheMode::LinearRead) || (cacheMode && FileCacheMode::RandomRead))
+    if (cacheMode.Contains(FileCacheModes::LinearRead) || cacheMode.Contains(FileCacheModes::RandomRead))
     {
-        if (cacheMode && (FileCacheMode::LinearRead + FileCacheMode::RandomRead))
+        if (cacheMode.Contains(FileCacheModes::LinearRead.Combined(FileCacheModes::RandomRead)))
         {
-            return DefaultError::InvalidArgument("Both FileCacheMode::LinearRead and FileCacheMode::RandomRead are specified");
+            return DefaultError::InvalidArgument("Both FileCacheModes::LinearRead and FileCacheModes::RandomRead are specified");
         }
 
-        if (!(procMode && FileProcMode::Read))
+        if (!procMode.Contains(FileProcModes::Read))
         {
-            return DefaultError::InvalidArgument("FileCacheMode::LinearRead or FileCacheMode::RandomRead only can be used when FileProcMode::Read is specified");
+            return DefaultError::InvalidArgument("FileCacheModes::LinearRead or FileCacheModes::RandomRead only can be used when FileProcModes::Read is specified");
         }
 
-        if (cacheMode && FileCacheMode::LinearRead)
+        if (cacheMode.Contains(FileCacheModes::LinearRead))
         {
             dwFlagsAndAttributes |= FILE_FLAG_SEQUENTIAL_SCAN;
         }
@@ -93,42 +93,42 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcMode proc
         }
     }
 
-    if (cacheMode && FileCacheMode::DisableSystemReadCache)
+    if (cacheMode.Contains(FileCacheModes::DisableSystemReadCache))
     {
-        if (!(procMode && FileProcMode::Read))
+        if (!procMode.Contains(FileProcModes::Read))
         {
-            return DefaultError::InvalidArgument("FileCacheMode::DisableSystemReadCache only can be used when FileProcMode::Read is specified");
+            return DefaultError::InvalidArgument("FileCacheModes::DisableSystemReadCache only can be used when FileProcModes::Read is specified");
         }
 
         dwFlagsAndAttributes |= FILE_FLAG_NO_BUFFERING;
     }
 
-    if (cacheMode && FileCacheMode::DisableSystemWriteCache)
+    if (cacheMode.Contains(FileCacheModes::DisableSystemWriteCache))
     {
-        if (!(procMode && FileProcMode::Write))
+        if (!procMode.Contains(FileProcModes::Write))
         {
-            return DefaultError::InvalidArgument("FileCacheMode::DisableSystemWriteCache only can be used when FileProcMode::Write is specified");
+            return DefaultError::InvalidArgument("FileCacheModes::DisableSystemWriteCache only can be used when FileProcModes::Write is specified");
         }
 
         dwFlagsAndAttributes |= FILE_FLAG_WRITE_THROUGH;
     }
 
-    if (shareMode && FileShareMode::Delete)
+    if (shareMode.Contains(FileShareModes::Delete))
     {
         dwShareMode |= FILE_SHARE_DELETE;
     }
-    if (shareMode && FileShareMode::Read)
+    if (shareMode.Contains(FileShareModes::Read))
     {
-        if (procMode && FileProcMode::Write)
+        if (procMode.Contains(FileProcModes::Write))
         {
-            if (!(shareMode && FileShareMode::Write))
+            if (!shareMode.Contains(FileShareModes::Write))
             {
-                return DefaultError::InvalidArgument("FileShareMode::Read without FileShareMode::Write is not a valid sharable option for a file that is opened for write");
+                return DefaultError::InvalidArgument("FileShareModes::Read without FileShareModes::Write is not a valid sharable option for a file that is opened for write");
             }
         }
         dwShareMode |= FILE_SHARE_READ;
     }
-    if (shareMode && FileShareMode::Write)
+    if (shareMode.Contains(FileShareModes::Write))
     {
         dwShareMode |= FILE_SHARE_WRITE;
     }
@@ -343,7 +343,7 @@ Error<> File::SizeSet(ui64 newSize)
 void File::FlushSystemCaches()
 {
     ASSUME(IsOpened());
-    if (_procMode && FileProcMode::Write)
+    if (_procMode.Contains(FileProcModes::Write))
     {
         BOOL result = FlushFileBuffers(_handle);
         ASSUME(result);

@@ -8,7 +8,7 @@ File::~File()
     Close();
 }
 
-File::File(const FilePath &pnn, FileOpenMode openMode, FileProcMode procMode, ui64 offset, FileCacheMode cacheMode, FileShareMode shareMode, Error<> *error)
+File::File(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode, Error<> *error)
 {
     Error<> tempError = File::Open(pnn, openMode, procMode, offset, cacheMode, shareMode);
     if (error) *error = tempError;
@@ -33,7 +33,7 @@ File::File(File &&other)
     _openMode = other._openMode;
     _procMode = other._procMode;
     _cacheMode = other._cacheMode;
-#if STDLIB_ENABLE_FILE_STATS
+#ifdef STDLIB_ENABLE_FILE_STATS
     _stats = other._stats;
 #endif
 #ifdef PLATFORM_WINDOWS
@@ -56,7 +56,7 @@ File &File::operator = (File &&other)
     _openMode = other._openMode;
     _procMode = other._procMode;
     _cacheMode = other._cacheMode;
-#if STDLIB_ENABLE_FILE_STATS
+#ifdef STDLIB_ENABLE_FILE_STATS
     _stats = other._stats;
 #endif
 #ifdef PLATFORM_WINDOWS
@@ -66,7 +66,7 @@ File &File::operator = (File &&other)
     return *this;
 }
 
-#if STDLIB_ENABLE_FILE_STATS
+#ifdef STDLIB_ENABLE_FILE_STATS
 auto File::StatsGet() const -> FileStats
 {
     ASSUME(IsOpened());
@@ -110,13 +110,13 @@ NOINLINE bool File::Read(void *target, ui32 len, ui32 *read)
 {
     ASSUME(IsOpened());
     ASSUME(target || len == 0);
-    ASSUME(_procMode && FileProcMode::Read);
+    ASSUME(_procMode.Contains(FileProcModes::Read));
 
     auto readFromBuffer = [this](void *target, ui32 len)
     {
         memcpy(target, _internalBuffer.get() + _bufferPos, len);
         _bufferPos += len;
-    #if STDLIB_ENABLE_FILE_STATS
+    #ifdef STDLIB_ENABLE_FILE_STATS
         ++_stats.readsFromBufferCount;
         _stats.bytesFromBufferRead += len;
     #endif
@@ -126,7 +126,7 @@ NOINLINE bool File::Read(void *target, ui32 len, ui32 *read)
 
     if (_bufferSize)
     {
-    #if STDLIB_ENABLE_FILE_STATS
+    #ifdef STDLIB_ENABLE_FILE_STATS
         ++_stats.bufferedReads;
     #endif
 
@@ -164,7 +164,7 @@ NOINLINE bool File::Read(void *target, ui32 len, ui32 *read)
 
         return true;
     }
-#if STDLIB_ENABLE_FILE_STATS
+#ifdef STDLIB_ENABLE_FILE_STATS
     ++_stats.unbufferedReads;
 #endif
     return ReadFromFile(target, len, read);
@@ -174,14 +174,14 @@ NOINLINE bool File::Write(const void *source, ui32 len, ui32 *written)
 {
     ASSUME(IsOpened());
     ASSUME(source || len == 0);
-    ASSUME(_procMode && FileProcMode::Write);
+    ASSUME(_procMode.Contains(FileProcModes::Write));
     ASSUME(_bufferPos <= _bufferSize);
 
     if (written) *written = 0;
 
     if (_bufferSize)
     {
-    #if STDLIB_ENABLE_FILE_STATS
+    #ifdef STDLIB_ENABLE_FILE_STATS
         ++_stats.bufferedWrites;
     #endif
 
@@ -201,7 +201,7 @@ NOINLINE bool File::Write(const void *source, ui32 len, ui32 *written)
 
         memcpy(_internalBuffer.get() + _bufferPos, source, len);
         _bufferPos += len;
-    #if STDLIB_ENABLE_FILE_STATS
+    #ifdef STDLIB_ENABLE_FILE_STATS
         ++_stats.writesToBufferCount;
         _stats.bytesToBufferWritten += len;
     #endif
@@ -210,7 +210,7 @@ NOINLINE bool File::Write(const void *source, ui32 len, ui32 *written)
         return true;
     }
 
-#if STDLIB_ENABLE_FILE_STATS
+#ifdef STDLIB_ENABLE_FILE_STATS
     ++_stats.unbufferedWrites;
 #endif
     return WriteToFile(source, len, written);
@@ -340,13 +340,13 @@ Result<i64> File::OffsetGet(FileOffsetMode offsetMode)
     }
 }
 
-FileProcMode File::ProcMode() const
+FileProcModes::FileProcMode File::ProcMode() const
 {
     ASSUME(IsOpened());
     return _procMode;
 }
 
-FileCacheMode File::CacheMode() const
+FileCacheModes::FileCacheMode File::CacheMode() const
 {
     ASSUME(IsOpened());
     return _cacheMode;

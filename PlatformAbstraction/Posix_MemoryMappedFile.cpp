@@ -19,7 +19,7 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
     {
         return DefaultError::InvalidArgument("File isn't opened");
     }
-    if (!(file._procMode && FileProcMode::Read))
+    if (!file._procMode.Contains(FileProcModes::Read))
     {
         return DefaultError::InvalidArgument("File isn't readable");
     }
@@ -37,7 +37,7 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
     _systemMappingSize = std::min(size, fileSize);
 
     int prot = PROT_READ;
-    if (file._procMode && FileProcMode::Write)
+    if (file._procMode.Contains(FileProcModes::Write))
     {
         prot |= PROT_WRITE;
         _isWritable = true;

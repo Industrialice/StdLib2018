@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CoreDefines.hpp"
+
 namespace StdLib::_ErrorCodes
 {
     class ErrorCodeBase

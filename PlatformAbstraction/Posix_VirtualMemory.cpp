@@ -19,7 +19,7 @@ namespace
     };
 }
 
-static constexpr int PageModeToPosix(VirtualMemory::PageMode pageMode);
+static constexpr int PageModeToPosix(VirtualMemory::PageModes::PageMode pageMode);
 
 void *VirtualMemory::Reserve(uiw size)
 {
@@ -27,7 +27,7 @@ void *VirtualMemory::Reserve(uiw size)
     return mmap(0, size, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 }
 
-Error<> VirtualMemory::Commit(void *memory, uiw size, PageMode pageMode)
+Error<> VirtualMemory::Commit(void *memory, uiw size, PageModes::PageMode pageMode)
 {
     ASSUME(memory && size);
     int protection = PageModeToPosix(pageMode);
@@ -43,7 +43,7 @@ Error<> VirtualMemory::Commit(void *memory, uiw size, PageMode pageMode)
     return DefaultError::UnknownError("mprotect failed");
 }
 
-void *VirtualMemory::Alloc(uiw size, PageMode pageMode)
+void *VirtualMemory::Alloc(uiw size, PageModes::PageMode pageMode)
 {
     ASSUME(size);
     int protection = PageModeToPosix(pageMode);
@@ -61,12 +61,12 @@ bool VirtualMemory::Free(void *memory, uiw memorySize)
     return munmap(memory, memorySize) == 0;
 }
 
-auto VirtualMemory::PageModeGet(const void *memory, uiw size) -> Result<PageMode>
+auto VirtualMemory::PageModeGet(const void *memory, uiw size) -> Result<PageModes::PageMode>
 {
     return DefaultError::Unsupported();
 }
 
-Error<> VirtualMemory::PageModeSet(void *memory, uiw size, PageMode pageMode)
+Error<> VirtualMemory::PageModeSet(void *memory, uiw size, PageModes::PageMode pageMode)
 {
     ASSUME(memory && size);
     int protection = PageModeToPosix(pageMode);
@@ -87,9 +87,9 @@ uiw VirtualMemory::PageSize()
     return 4096;
 }
 
-constexpr int PageModeToPosix(VirtualMemory::PageMode pageMode)
+constexpr int PageModeToPosix(VirtualMemory::PageModes::PageMode pageMode)
 {
-    return PageProtectionMapping[(ui32)pageMode._value];
+    return PageProtectionMapping[pageMode.AsInteger()];
 }
 
 namespace StdLib::VirtualMemory

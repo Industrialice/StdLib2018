@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "com.stdlib.industrialice.stdlib"
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 26
         multiDexEnabled true
         versionCode 1
@@ -15,7 +15,7 @@ android {
         }
         externalNativeBuild {
             cmake {
-                arguments '-DANDROID_PLATFORM=android-14',
+                arguments '-DANDROID_PLATFORM=android-16',
                         '-DANDROID_TOOLCHAIN=clang',
                         '-DANDROID_STL=c++_static',
                         '-DANDROID_ARM_NEON=TRUE',

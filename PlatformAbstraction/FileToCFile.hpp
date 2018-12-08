@@ -12,8 +12,8 @@ namespace StdLib
     {
         FILE *_file = nullptr;
         FileOpenMode _openMode;
-        FileProcMode _procMode;
-        FileCacheMode _cacheMode;
+        FileProcModes::FileProcMode _procMode = FileProcModes::Read;
+        FileCacheModes::FileCacheMode _cacheMode;
         i64 _offsetToStart; // used only when you're using ProcMode::Append, the file will be opened as usual, then the offset will be added so you can't work with the existing part of the file
         ui32 _bufferSize;
         bufferType _customBufferPtr = {nullptr, nullptr};
@@ -21,12 +21,12 @@ namespace StdLib
     public:
         ~FileToCFile();
         FileToCFile() = default;
-        FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, ui64 offset = 0, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None, Error<> *error = 0);
+        FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, FileShareModes::FileShareMode shareMode = FileShareModes::None, Error<> *error = 0);
 
         FileToCFile(FileToCFile &&source);
         FileToCFile &operator = (FileToCFile &&source);
 
-        Error<> Open(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, ui64 offset = 0, FileCacheMode cacheMode = FileCacheMode::Default, FileShareMode shareMode = FileShareMode::None);
+        Error<> Open(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, FileShareModes::FileShareMode shareMode = FileShareModes::None);
 
 		MUST_BE_OPEN[[nodiscard]] FileOpenMode OpenModeGet() const;
 
@@ -48,8 +48,8 @@ namespace StdLib
 		MUST_BE_OPEN [[nodiscard]] virtual Result<ui64> SizeGet() override;
 		MUST_BE_OPEN virtual Error<> SizeSet(ui64 newSize) override;
 
-		MUST_BE_OPEN [[nodiscard]] virtual FileProcMode ProcMode() const override;
-		MUST_BE_OPEN [[nodiscard]] virtual FileCacheMode CacheMode() const override;
+		MUST_BE_OPEN [[nodiscard]] virtual FileProcModes::FileProcMode ProcMode() const override;
+		MUST_BE_OPEN [[nodiscard]] virtual FileCacheModes::FileCacheMode CacheMode() const override;
     };
 
 	#undef MUST_BE_OPEN

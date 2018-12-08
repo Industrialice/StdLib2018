@@ -20,14 +20,14 @@ namespace
     uiw Static_PageSize{};
 }
 
-static constexpr DWORD PageModeToWinAPI(VirtualMemory::PageMode pageMode);
+static constexpr DWORD PageModeToWinAPI(VirtualMemory::PageModes::PageMode pageMode);
 
 void *VirtualMemory::Reserve(uiw size)
 {
     return VirtualAlloc(0, size, MEM_RESERVE, PAGE_NOACCESS);
 }
 
-Error<> VirtualMemory::Commit(void *memory, uiw size, PageMode pageMode)
+Error<> VirtualMemory::Commit(void *memory, uiw size, PageModes::PageMode pageMode)
 {
     ASSUME(memory && size);
     DWORD protection = PageModeToWinAPI(pageMode);
@@ -43,7 +43,7 @@ Error<> VirtualMemory::Commit(void *memory, uiw size, PageMode pageMode)
     return DefaultError::UnknownError("VirtualAlloc failed");
 }
 
-void *VirtualMemory::Alloc(uiw size, PageMode pageMode)
+void *VirtualMemory::Alloc(uiw size, PageModes::PageMode pageMode)
 {
     ASSUME(size);
     DWORD protection = PageModeToWinAPI(pageMode);
@@ -61,7 +61,7 @@ bool VirtualMemory::Free(void *memory, uiw memorySize)
     return VirtualFree(memory, 0, MEM_RELEASE) != 0;
 }
 
-auto VirtualMemory::PageModeGet(const void *memory, uiw size) -> Result<PageMode>
+auto VirtualMemory::PageModeGet(const void *memory, uiw size) -> Result<PageModes::PageMode>
 {
     if ((size % PageSize()) != 0)
     {
@@ -82,14 +82,14 @@ auto VirtualMemory::PageModeGet(const void *memory, uiw size) -> Result<PageMode
     {
         if (PageProtectionMapping[index] == mbi.Protect)
         {
-            return PageMode((PageMode::_type)index);
+            return PageModes::PageMode::Create(index);
         }
     }
     SOFTBREAK;
     return DefaultError::UnknownError("Encountered unknown WinAPI protection mode");
 }
 
-Error<> VirtualMemory::PageModeSet(void *memory, uiw size, PageMode pageMode)
+Error<> VirtualMemory::PageModeSet(void *memory, uiw size, PageModes::PageMode pageMode)
 {
     ASSUME(memory && size);
     DWORD oldProtect;
@@ -112,9 +112,9 @@ uiw VirtualMemory::PageSize()
     return Static_PageSize;
 }
 
-constexpr DWORD PageModeToWinAPI(VirtualMemory::PageMode pageMode)
+constexpr DWORD PageModeToWinAPI(VirtualMemory::PageModes::PageMode pageMode)
 {
-    return PageProtectionMapping[(ui32)pageMode._value];
+    return PageProtectionMapping[pageMode.AsInteger()];
 }
 
 namespace StdLib::VirtualMemory

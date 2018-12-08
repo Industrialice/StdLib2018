@@ -18,7 +18,7 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
     {
         return DefaultError::InvalidArgument("File isn't opened");
     }
-    if (!(file._procMode && FileProcMode::Read))
+    if (!file._procMode.Contains(FileProcModes::Read))
     {
         return DefaultError::InvalidArgument("File isn't readable");
     }
@@ -35,7 +35,7 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
 
     uiw systemMappingSize = std::min(size, fileSize);
 
-    DWORD protection = (isCopyOnWrite || !(file._procMode && FileProcMode::Write)) ? PAGE_WRITECOPY : PAGE_READWRITE; // for memory mapped files PAGE_WRITECOPY is equivalent to PAGE_READONLY
+    DWORD protection = (isCopyOnWrite || !file._procMode.Contains(FileProcModes::Write)) ? PAGE_WRITECOPY : PAGE_READWRITE; // for memory mapped files PAGE_WRITECOPY is equivalent to PAGE_READONLY
     DWORD commitMode = isPrecommitSpace ? SEC_COMMIT : SEC_RESERVE;
     LARGE_INTEGER sizeToMap;
     sizeToMap.QuadPart = (LONGLONG)systemMappingSize;
@@ -53,7 +53,7 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
     }
     else
     {
-        if (file._procMode && FileProcMode::Write)
+        if (file._procMode.Contains(FileProcModes::Write))
         {
             desiredAccess = FILE_MAP_WRITE;
             _isWritable = true;

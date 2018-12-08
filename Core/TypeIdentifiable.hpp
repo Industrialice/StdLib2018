@@ -43,10 +43,20 @@ namespace StdLib
 			return _id < other._id;
 		}
 
+        [[nodiscard]] constexpr bool operator <= (const TypeId &other) const
+        {
+            return _id <= other._id;
+        }
+
 		[[nodiscard]] constexpr bool operator > (const TypeId &other) const
 		{
 			return _id > other._id;
 		}
+
+        [[nodiscard]] constexpr bool operator >= (const TypeId &other) const
+        {
+            return _id >= other._id;
+        }
 
 		[[nodiscard]] constexpr InternalIdType InternalId() const
 		{
@@ -124,10 +134,20 @@ namespace StdLib
 			return _id < other._id;
 		}
 
+        [[nodiscard]] constexpr bool operator <= (const StableTypeId &other) const
+        {
+            return _id <= other._id;
+        }
+
 		[[nodiscard]] constexpr bool operator > (const StableTypeId &other) const
 		{
 			return _id > other._id;
 		}
+
+        [[nodiscard]] constexpr bool operator >= (const StableTypeId &other) const
+        {
+            return _id >= other._id;
+        }
 
 		[[nodiscard]] constexpr ui64 Hash() const
 		{

@@ -35,7 +35,7 @@ FileToCFile::~FileToCFile()
     this->Close();
 }
 
-FileToCFile::FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, ui64 offset, FileCacheMode cacheMode, FileShareMode shareMode, Error<> *error)
+FileToCFile::FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode, Error<> *error)
 {
     auto result = this->Open(path, openMode, procMode, offset, cacheMode, shareMode);
     if (error) *error = result;
@@ -62,7 +62,7 @@ FileToCFile &FileToCFile::operator = (FileToCFile &&source)
     return *this;
 }
 
-Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcMode procMode, ui64 offset, FileCacheMode cacheMode, FileShareMode shareMode)
+Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode)
 {
     offset = std::min<ui64>(i64_max, offset);
 
@@ -92,35 +92,35 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
 
     if (openMode == FileOpenMode::CreateAlways)
     {
-        if (!(procMode && FileProcMode::Write))
+        if (!procMode.Contains(FileProcModes::Write))
         {
-            return DefaultError::InvalidArgument("FileOpenMode::CreateAlways cannot be used without FileProcMode::Write");
+            return DefaultError::InvalidArgument("FileOpenMode::CreateAlways cannot be used without FileProcModes::Write");
         }
     }
 
     bool isDisableCache = false;
 
-    if (cacheMode && FileCacheMode::DisableSystemWriteCache)
+    if (cacheMode.Contains(FileCacheModes::DisableSystemWriteCache))
     {
-        if (procMode && FileProcMode::Write)
+        if (procMode.Contains(FileProcModes::Write))
         {
             isDisableCache = true;
         }
         else
         {
-            return DefaultError::InvalidArgument("FileCacheMode::DisableSystemWriteCache is used without FileProcMode::Write");
+            return DefaultError::InvalidArgument("FileCacheModes::DisableSystemWriteCache is used without FileProcModes::Write");
         }
     }
 
-    if (cacheMode && FileCacheMode::DisableSystemReadCache)
+    if (cacheMode.Contains(FileCacheModes::DisableSystemReadCache))
     {
-        if (procMode && FileProcMode::Read)
+        if (procMode.Contains(FileProcModes::Read))
         {
             isDisableCache = true;
         }
         else
         {
-            return DefaultError::InvalidArgument("FileCacheMode::DisableSystemReadCache is used without FileProcMode::Read");
+            return DefaultError::InvalidArgument("FileCacheModes::DisableSystemReadCache is used without FileProcModes::Read");
         }
     }
 
@@ -130,7 +130,7 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
     {
         procModeStr = TSTR("a+");
     }
-    else if ((procMode && FileProcMode::Read) && (procMode && FileProcMode::Write))
+    else if (procMode.Contains(FileProcModes::Read) && procMode.Contains(FileProcModes::Write))
     {
         if (isFileFound)
         {
@@ -141,23 +141,23 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
             procModeStr = TSTR("w+");
         }
     }
-    else if (procMode && FileProcMode::Read)
+    else if (procMode.Contains(FileProcModes::Read))
     {
         procModeStr = TSTR("r");
     }
     else
     {
-        ASSUME(procMode && FileProcMode::Write);
+        ASSUME(procMode.Contains(FileProcModes::Write));
         procModeStr = TSTR("w");
     }
 
-    if (shareMode && FileShareMode::Read)
+    if (shareMode.Contains(FileShareModes::Read))
     {
-        if (procMode && FileProcMode::Write)
+        if (procMode.Contains(FileProcModes::Write))
         {
-            if (!(shareMode && FileShareMode::Write))
+            if (!shareMode.Contains(FileShareModes::Write))
             {
-                return DefaultError::InvalidArgument("FileShareMode::Read without FileShareMode::Write is not a valid sharable option for a file that is opened for write");
+                return DefaultError::InvalidArgument("FileShareModes::Read without FileShareModes::Write is not a valid sharable option for a file that is opened for write");
             }
         }
     }
@@ -165,12 +165,12 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
 #ifdef PLATFORM_WINDOWS
     static constexpr std::array<int, 4> sharingArray
     {
-        _SH_DENYRW, // FileShareMode::None
-        _SH_DENYWR, // FileShareMode::Read
-        _SH_DENYRD, // FileShareMode::Write
-        _SH_DENYNO  // FileShareMode::Read + FileShareMode::Write
+        _SH_DENYRW, // FileShareModes::None
+        _SH_DENYWR, // FileShareModes::Read
+        _SH_DENYRD, // FileShareModes::Write
+        _SH_DENYNO  // FileShareModes::Read + FileShareModes::Write
     };
-    int sharingOption = sharingArray[shareMode._value & 0b11];
+    int sharingOption = sharingArray[shareMode.AsInteger() & 0b11];
     wchar_t binaryProcModeStr[4];
     wcscpy(binaryProcModeStr, procModeStr);
     wcscat(binaryProcModeStr, L"b");
@@ -279,7 +279,7 @@ bool FileToCFile::IsBufferingSupported() const
 {
     ASSUME(IsOpened());
 
-    bool isCachingDisabled = (_cacheMode && FileCacheMode::DisableSystemWriteCache) || (_cacheMode && FileCacheMode::DisableSystemReadCache);
+    bool isCachingDisabled = _cacheMode.Contains(FileCacheModes::DisableSystemWriteCache) || _cacheMode.Contains(FileCacheModes::DisableSystemReadCache);
 
     return !isCachingDisabled;
 }
@@ -489,16 +489,16 @@ Error<> FileToCFile::SizeSet(ui64 newSize)
     return DefaultError::Ok();
 }
 
-FileProcMode FileToCFile::ProcMode() const
+FileProcModes::FileProcMode FileToCFile::ProcMode() const
 {
     ASSUME(IsOpened());
     return _procMode;
 }
 
-FileCacheMode FileToCFile::CacheMode() const
+FileCacheModes::FileCacheMode FileToCFile::CacheMode() const
 {
     ASSUME(IsOpened());
-    return FileCacheMode::Default;
+    return FileCacheModes::Default;
 }
 
 #ifdef _DEFINE_CUSTOM_FSEEKO
