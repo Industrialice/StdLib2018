@@ -990,7 +990,7 @@ static void DoTests(int argc, const char **argv)
     RotateBitsTests();
     ErrorTests();
     ResultTests();
-    VirtualMemoryTests();
+    //VirtualMemoryTests();
     AllocatorsTests();
     FilePathTests();
     TestFileToMemoryStream();

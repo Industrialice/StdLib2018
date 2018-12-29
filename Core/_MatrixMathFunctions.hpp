@@ -129,6 +129,19 @@ namespace StdLib
         return *(VectorType *)this;
     }
 
+	template<typename _ScalarType, uiw Dim>	inline bool _VectorBase<_ScalarType, Dim>::operator == (const _VectorBase &other) const
+	{
+		for (uiw index = 0; index < Dim; ++index)
+			if (Data()[index] != other.Data()[index])
+				return false;
+		return true;
+	}
+
+	template<typename _ScalarType, uiw Dim>	inline bool _VectorBase<_ScalarType, Dim>::operator != (const _VectorBase &other) const
+	{
+		return !operator==(other);
+	}
+
     template<typename ScalarType, uiw Dim> inline ScalarType *_VectorBase<ScalarType, Dim>::Data()
     {
         return &x;
@@ -335,7 +348,7 @@ namespace StdLib
 
     template<typename Basis> inline bool _VectorFP<Basis>::IsNormalized(f32 epsilon) const
     {
-        f32 length = Length();
+        f32 length = LengthSquare();
         return (length >= 1.0f - epsilon) && (length <= 1.0f + epsilon);
     }
 

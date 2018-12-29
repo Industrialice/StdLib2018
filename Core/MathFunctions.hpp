@@ -6,21 +6,27 @@ namespace StdLib
 {
     template <typename T> [[nodiscard]] constexpr inline T MathPi()
     {
-        constexpr T pi = T(3.14159265358979323846);
-        return pi;
+		if constexpr (std::is_same_v<T, f32>) return 3.14159265358979323846f;
+		return T(3.14159265358979323846);
     }
 
     template <typename T> [[nodiscard]] constexpr inline T MathPiHalf()
     {
-        constexpr T pi = T(1.57079632679489661923);
-        return pi;
+		if constexpr (std::is_same_v<T, f32>) return 1.57079632679489661923f;
+		return T(1.57079632679489661923);
     }
 
     template <typename T> [[nodiscard]] constexpr inline T MathPiQuarter()
     {
-        constexpr T pi = T(0.785398163397448309616);
-        return pi;
+		if constexpr (std::is_same_v<T, f32>) return 0.785398163397448309616f;
+		return T(0.785398163397448309616);
     }
+
+	template <typename T> [[nodiscard]] constexpr inline T MathPiDouble()
+	{
+		if constexpr (std::is_same_v<T, f32>) return 6.283185307179586476925f;
+		return T(6.283185307179586476925);
+	}
 
     [[nodiscard]] constexpr inline f32 DegToRad(f32 deg)
     {
@@ -44,7 +50,7 @@ namespace StdLib
 
     template <typename T> [[nodiscard]] constexpr inline T RadNormalize(T rad)
     {
-        constexpr T pi2 = MathPi<T>() * 2;
+        constexpr T pi2 = MathPiDouble<T>();
 
         if (rad >= 0 && rad < pi2)
         {
@@ -59,12 +65,11 @@ namespace StdLib
             return rad - pi2;
         }
 
-        rad = (T)std::fmod(rad, 1) * pi2;
-        if (rad < 0)
-        {
-            rad += pi2;
-        }
-
+        rad = (T)std::fmod(rad, pi2);
+		if (rad < 0)
+		{
+			rad += pi2;
+		}
         return rad;
     }
 
@@ -77,7 +82,7 @@ namespace StdLib
             ASSUME(rad + pi2 >= 0);
             return rad + pi2;
         }
-        if (rad > pi2)
+        if (rad >= pi2)
         {
             ASSUME(rad - pi2 < pi2);
             return rad - pi2;
@@ -150,7 +155,7 @@ namespace StdLib
 
     [[nodiscard]] inline bool EqualsWithEpsilon(f32 left, f32 right, f32 epsilon = DefaultF32Epsilon)
     {
-        return abs(left - right) < epsilon;
+        return abs(left - right) <= epsilon;
     }
 
     [[nodiscard]] inline bool EqualsWithEpsilon(Vector2 left, Vector2 right, f32 epsilon = DefaultF32Epsilon)

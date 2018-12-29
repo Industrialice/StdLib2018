@@ -99,4 +99,4 @@ template <bool isTrue, typename T> void UnitTest(T &&value, const char *condStr,
     }
 }
 
-#define UTest(cond, ...) UnitTest<cond>(__VA_ARGS__, TOSTR(cond), /*TOSTR(__VA_ARGS__)**/"", __LINE__, __FILE__)
+#define UTest(cond, ...) UnitTest<cond>(__VA_ARGS__, TOSTR(cond), TOSTR(__VA_ARGS__), __LINE__, __FILE__)

@@ -72,7 +72,7 @@ Vector2 Vector2::GetLeftNormal() const
 
 Vector2 Vector2::GetRightNormal() const
 {
-    return {y, x};
+    return {y, -x};
 }
 
 /////////////

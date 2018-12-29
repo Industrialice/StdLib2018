@@ -111,6 +111,9 @@ namespace StdLib
         VectorType &operator /= (const _VectorBase &other);
         VectorType &operator /= (ScalarType scalar);
 
+		[[nodiscard]] bool operator == (const _VectorBase &other) const;
+		[[nodiscard]] bool operator != (const _VectorBase &other) const;
+
         [[nodiscard]] ScalarType *Data();
         [[nodiscard]] const ScalarType *Data() const;
         
