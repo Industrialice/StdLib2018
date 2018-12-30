@@ -152,25 +152,11 @@ namespace StdLib
         return &x;
     }
 
-    template <typename ScalarType, uiw Dim> inline bool _VectorBase<ScalarType, Dim>::Equals(const _VectorBase &other) const
-    {
-        for (uiw index = 0; index < Dim; ++index)
-        {
-            if (Data()[index] != other.Data()[index])
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
     template <typename ScalarType, uiw Dim> inline ScalarType _VectorBase<ScalarType, Dim>::Accumulate() const
     {
         ScalarType sum = x;
         for (uiw index = 1; index < dim; ++index)
-        {
             sum += Data()[index];
-        }
         return sum;
     }
 
@@ -178,12 +164,8 @@ namespace StdLib
     {
         ScalarType max = x;
         for (uiw index = 1; index < dim; ++index)
-        {
             if (Data()[index] > max)
-            {
                 max = Data()[index];
-            }
-        }
         return max;
     }
 
@@ -191,12 +173,8 @@ namespace StdLib
     {
         ScalarType min = x;
         for (uiw index = 1; index < dim; ++index)
-        {
             if (Data()[index] < min)
-            {
                 min = Data()[index];
-            }
-        }
         return min;
     }
 
@@ -288,9 +266,7 @@ namespace StdLib
     {
         f32 sum = x * x;
         for (uiw index = 1; index < dim; ++index)
-        {
             sum += operator[](index) * operator[](index);
-        }
         return sum;
     }
 
@@ -315,9 +291,7 @@ namespace StdLib
     {
         f32 sum = x * other.x;
         for (uiw index = 1; index < dim; ++index)
-        {
             sum += operator[](index) * other[index];
-        }
         return sum;
     }
 
@@ -330,9 +304,7 @@ namespace StdLib
     {
         f32 revLength = ApproxMath::RSqrt<ApproxMath::Precision::High>(LengthSquare());
         for (uiw index = 0; index < dim; ++index)
-        {
             operator[](index) *= revLength;
-        }
     }
 
     template <typename Basis> inline auto _VectorFP<Basis>::GetNormalized() const -> VectorType
@@ -340,9 +312,7 @@ namespace StdLib
         VectorType result;
         f32 revLength = ApproxMath::RSqrt<ApproxMath::Precision::High>(LengthSquare());
         for (uiw index = 0; index < dim; ++index)
-        {
             result[index] = operator[](index) * revLength;
-        }
         return result;
     }
 
@@ -355,12 +325,8 @@ namespace StdLib
     template <typename Basis> inline bool _VectorFP<Basis>::EqualsWithEpsilon(const _VectorFP &other, f32 epsilon) const
     {
         for (uiw index = 0; index < dim; ++index)
-        {
             if (abs(operator[](index) - other[index]) > epsilon)
-            {
                 return false;
-            }
-        }
         return true;
     }
 
@@ -382,24 +348,16 @@ namespace StdLib
     {
         MatrixType result;
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
-        {
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
-            {
                 result[rowIndex][columnIndex] = elements[rowIndex][columnIndex] + other[rowIndex][columnIndex];
-            }
-        }
         return result;
     }
 
     template<uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator+=(const _Matrix &other) -> MatrixType &
     {
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
-        {
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
-            {
                 elements[rowIndex][columnIndex] += other[rowIndex][columnIndex];
-            }
-        }
         return *(MatrixType *)this;
     }
 
@@ -407,24 +365,16 @@ namespace StdLib
     {
         MatrixType result;
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
-        {
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
-            {
                 result[rowIndex][columnIndex] = elements[rowIndex][columnIndex] - other[rowIndex][columnIndex];
-            }
-        }
         return result;
     }
 
     template<uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator-=(const _Matrix &other) -> MatrixType &
     {
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
-        {
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
-            {
                 elements[rowIndex][columnIndex] -= other[rowIndex][columnIndex];
-            }
-        }
         return *(MatrixType *)this;
     }
 
@@ -452,24 +402,16 @@ namespace StdLib
     {
         MatrixType result;
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
-        {
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
-            {
                 result[rowIndex][columnIndex] = elements[rowIndex][columnIndex] * scalar;
-            }
-        }
         return result;
     }
 
     template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator*=(f32 scalar) -> MatrixType &
     {
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
-        {
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
-            {
                 elements[rowIndex][columnIndex] *= scalar;
-            }
-        }
         return *(MatrixType *)this;
     }
 
@@ -499,28 +441,12 @@ namespace StdLib
         return elements.data()->data();
     }
 
-    template<uiw Rows, uiw Columns> inline void _Matrix<Rows, Columns>::Transpose()
-    {
-        //static_assert(Rows == Columns, "Only a matrix with equal number of rows and columns can be transposed, use GetTransposed() instead");
-        for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
-        {
-            for (uiw columnIndex = rowIndex + 1; columnIndex < Columns; ++columnIndex)
-            {
-                std::swap(elements[rowIndex][columnIndex], elements[columnIndex][rowIndex]);
-            }
-        }
-    }
-
     template<uiw Rows, uiw Columns> inline MatrixTypeByDimensions<Columns, Rows> _Matrix<Rows, Columns>::GetTransposed() const
     {
         MatrixTypeByDimensions<Columns, Rows> result;
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
-        {
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
-            {
                 result[columnIndex][rowIndex] = elements[rowIndex][columnIndex];
-            }
-        }
         return result;
     }
 
@@ -528,90 +454,62 @@ namespace StdLib
     {
         VectorTypeByDimension<f32, Columns> result;
         for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
-        {
             result[columnIndex] = elements[rowIndex][columnIndex];
-        }
         return result;
     }
 
     template<uiw Rows, uiw Columns> inline void _Matrix<Rows, Columns>::SetRow(uiw rowIndex, const VectorTypeByDimension<f32, Columns> &row)
     {
-        //static_assert(RowVectorType::dim == Columns);
         for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
-        {
             elements[rowIndex][columnIndex] = row[columnIndex];
-        }
     }
 
     template<uiw Rows, uiw Columns> inline VectorTypeByDimension<f32, Rows> _Matrix<Rows, Columns>::GetColumn(uiw columnIndex) const
     {
         VectorTypeByDimension<f32, Rows> result;
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
-        {
             result[rowIndex] = elements[rowIndex][columnIndex];
-        }
         return result;
     }
 
     template<uiw Rows, uiw Columns> inline void _Matrix<Rows, Columns>::SetColumn(uiw columnIndex, const VectorTypeByDimension<f32, Rows> &column)
     {
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
-        {
             elements[rowIndex][columnIndex] = column[rowIndex];
-        }
     }
 
     template<uiw Rows, uiw Columns> inline f32 _Matrix<Rows, Columns>::FetchValueBoundless(uiw rowIndex, uiw columnIndex) const
     {
         if (rowIndex < Rows && columnIndex < Columns)
-        {
             return elements[rowIndex][columnIndex];
-        }
         if (rowIndex == columnIndex)
-        {
             return 1.0f;
-        }
         return 0.0f;
     }
 
     template<uiw Rows, uiw Columns> inline void _Matrix<Rows, Columns>::StoreValueBoundless(uiw rowIndex, uiw columnIndex, f32 value)
     {
         if (rowIndex >= Rows || columnIndex >= Columns)
-        {
             return;
-        }
         elements[rowIndex][columnIndex] = value;
-    }
-
-    template<uiw Rows, uiw Columns> inline bool _Matrix<Rows, Columns>::Equals(const _Matrix &other) const
-    {
-        for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
-        {
-            for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
-            {
-                if (elements[rowIndex][columnIndex] != other[rowIndex][columnIndex])
-                {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     template<uiw Rows, uiw Columns> inline bool _Matrix<Rows, Columns>::EqualsWithEpsilon(const _Matrix &other, f32 epsilon) const
     {
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
-        {
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
-            {
                 if (abs(elements[rowIndex][columnIndex] - other[rowIndex][columnIndex]) > epsilon)
-                {
                     return false;
-                }
-            }
-        }
         return true;
     }
+
+	template<uiw Rows, uiw Columns> inline void TransposeSquareMatrix(_Matrix<Rows, Columns> &matrix)
+	{
+		static_assert(Rows == Columns, "Only a matrix with equal number of rows and columns can be transposed, use GetTransposed() instead");
+		for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
+			for (uiw columnIndex = rowIndex + 1; columnIndex < Columns; ++columnIndex)
+				std::swap(matrix.elements[rowIndex][columnIndex], matrix.elements[columnIndex][rowIndex]);
+	}
 
     template <typename MatrixType, bool isAllowTranslation> inline MatrixType CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt)
     {
@@ -737,14 +635,11 @@ namespace StdLib
         ASSUME(isTopLessThanBottom ? (top <= bottom) : (bottom <= top));
 
         if (right < other.left || left > other.right)
-        {
             return false;
-        }
 
         if (isTopLessThanBottom)
-        {
             return bottom >= other.top && top <= other.bottom;
-        }
+
         return top >= other.bottom && bottom <= other.top;
     }
 

@@ -239,6 +239,11 @@ Matrix3x4 Matrix3x4::CreateRS(const optional<Quaternion> &rotation, const option
 // Matrix4x4 //
 ///////////////
 
+void Matrix4x4::Transpose()
+{
+	TransposeSquareMatrix(*this);
+}
+
 Matrix4x4 Matrix4x4::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
 {
     return StdLib::CreateRotationAroundAxis<Matrix4x4>(axis, angle);
@@ -282,8 +287,22 @@ Matrix4x4 Matrix4x4::CreateOrthographicProjection(const Vector3 &min, const Vect
 }
 
 ///////////////
+// Matrix2x2 //
+///////////////
+
+void Matrix2x2::Transpose()
+{
+	TransposeSquareMatrix(*this);
+}
+
+///////////////
 // Matrix3x3 //
 ///////////////
+
+void Matrix3x3::Transpose()
+{
+	TransposeSquareMatrix(*this);
+}
 
 Matrix3x3 Matrix3x3::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
 {
@@ -614,11 +633,6 @@ Matrix3x3 Quaternion::ToMatrix() const
     result[2][2] = 1.0f - doubleSQX - doubleSQY;
 
     return result;
-}
-
-bool Quaternion::Equals(const Quaternion &other) const
-{
-    return x == other.x && y == other.y && z == other.z && w == other.w;
 }
 
 bool Quaternion::EqualsWithEpsilon(const Quaternion &other, f32 epsilon) const

@@ -117,8 +117,6 @@ namespace StdLib
         [[nodiscard]] ScalarType *Data();
         [[nodiscard]] const ScalarType *Data() const;
         
-        [[nodiscard]] bool Equals(const _VectorBase &other) const;
-
         [[nodiscard]] ScalarType Accumulate() const;
         [[nodiscard]] ScalarType Max() const;
         [[nodiscard]] ScalarType Min() const;
@@ -292,7 +290,6 @@ namespace StdLib
         [[nodiscard]] f32 *Data();
         [[nodiscard]] const f32 *Data() const;
 
-        void Transpose();
         [[nodiscard]] MatrixTypeByDimensions<Columns, Rows> GetTransposed() const;
 
         [[nodiscard]] VectorTypeByDimension<f32, Columns> GetRow(uiw rowIndex) const;
@@ -304,7 +301,6 @@ namespace StdLib
         [[nodiscard]] f32 FetchValueBoundless(uiw rowIndex, uiw columnIndex) const;
         void StoreValueBoundless(uiw rowIndex, uiw columnIndex, f32 value);
 
-        [[nodiscard]] bool Equals(const _Matrix &other) const;
         [[nodiscard]] bool EqualsWithEpsilon(const _Matrix &other, f32 epsilon = DefaultF32Epsilon) const;
 
     protected:
@@ -356,6 +352,8 @@ namespace StdLib
             f32 e30, f32 e31, f32 e32, f32 e33);
 
         constexpr Matrix4x4(const Vector4 &row0, const Vector4 &row1, const Vector4 &row2, const Vector4 &row3);
+		
+		void Transpose();
 
         [[nodiscard]] static Matrix4x4 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
         [[nodiscard]] static Matrix4x4 CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt);
@@ -399,7 +397,9 @@ namespace StdLib
             f32 e10, f32 e11);
 
         constexpr Matrix2x2(const Vector2 &row0, const Vector2 &row1);
-    };
+		
+		void Transpose();
+	};
 
     struct Matrix3x3 : _Matrix<3, 3>
     {
@@ -410,11 +410,13 @@ namespace StdLib
             f32 e20, f32 e21, f32 e22);
 
         constexpr Matrix3x3(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2);
+		
+		void Transpose();
 
         [[nodiscard]] static Matrix3x3 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
         [[nodiscard]] static Matrix3x3 CreateRS(const optional<Vector3> &rotation, const optional<Vector3> &scale = nullopt);
         [[nodiscard]] static Matrix3x3 CreateRS(const optional<Quaternion> &rotation, const optional<Vector3> &scale = nullopt);
-    };
+	};
 
     // Addition and subtraction are a component-wise operation; composing quaternions should be done via multiplication.
     // Order matters when composing quaternions : C = A * B will yield a quaternion C that logically
@@ -467,7 +469,6 @@ namespace StdLib
         [[nodiscard]] std::tuple<Vector3, f32> ToAxisAndAngle() const;
         [[nodiscard]] Matrix3x3 ToMatrix() const;
 
-        [[nodiscard]] bool Equals(const Quaternion &other) const;
         [[nodiscard]] bool EqualsWithEpsilon(const Quaternion &other, f32 epsilon = DefaultF32Epsilon) const;
     };
 

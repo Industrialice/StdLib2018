@@ -234,11 +234,25 @@ static void Vector4Tests()
 
 template <typename T> void MathFuncsTests()
 {
+	T epsilon = (T)DefaultF32Epsilon;
+	static constexpr T zero = T(0);
+
+	UTest(true, EqualsWithEpsilon(zero, zero, zero));
+	UTest(true, EqualsWithEpsilon(zero, zero, epsilon));
+	UTest(true, EqualsWithEpsilon(std::numeric_limits<T>::min(), std::numeric_limits<T>::min(), zero));
+	UTest(true, EqualsWithEpsilon(-std::numeric_limits<T>::min(), -std::numeric_limits<T>::min(), zero));
+	UTest(true, EqualsWithEpsilon(std::numeric_limits<T>::min(), std::numeric_limits<T>::min(), epsilon));
+	UTest(true, EqualsWithEpsilon(-std::numeric_limits<T>::min(), -std::numeric_limits<T>::min(), epsilon));
+	UTest(true, EqualsWithEpsilon(std::numeric_limits<T>::max(), std::numeric_limits<T>::max(), zero));
+	UTest(true, EqualsWithEpsilon(-std::numeric_limits<T>::max(), -std::numeric_limits<T>::max(), zero));
+	UTest(true, EqualsWithEpsilon(std::numeric_limits<T>::max(), std::numeric_limits<T>::max(), epsilon));
+	UTest(true, EqualsWithEpsilon(-std::numeric_limits<T>::max(), -std::numeric_limits<T>::max(), epsilon));
+
 	for (ui32 index = 0; index < TestIterations; ++index)
 	{
 		T value = rand() * T(0.01);
-		UTest(true, EqualsWithEpsilon(value, value, 0));
-		UTest(true, EqualsWithEpsilon(value, value, DefaultF32Epsilon));
+		UTest(true, EqualsWithEpsilon(value, value, zero));
+		UTest(true, EqualsWithEpsilon(value, value, epsilon));
 
 		UTest(true, EqualsWithEpsilon(DegToRad(T(180.0)), MathPi<T>()));
 		UTest(true, EqualsWithEpsilon(DegToRad(T(90.0)), MathPiHalf<T>()));
@@ -253,15 +267,22 @@ template <typename T> void MathFuncsTests()
 		UTest(true, EqualsWithEpsilon(RadNormalize(MathPi<T>() + MathPiDouble<T>() * 10), MathPi<T>(), radEpsilon));
 		UTest(true, EqualsWithEpsilon(RadNormalize(MathPi<T>()), MathPi<T>(), radEpsilon));
 		UTest(true, EqualsWithEpsilon(RadNormalize(-MathPi<T>()), MathPi<T>(), radEpsilon));
-		UTest(true, EqualsWithEpsilon(RadNormalize(0), 0, radEpsilon));
-		UTest(true, EqualsWithEpsilon(RadNormalize(MathPiDouble<T>()), 0, radEpsilon));
+		UTest(true, EqualsWithEpsilon(RadNormalize(zero), zero, radEpsilon));
+		UTest(true, EqualsWithEpsilon(RadNormalize(MathPiDouble<T>()), zero, radEpsilon));
 		UTest(true, EqualsWithEpsilon(RadNormalize(-MathPi<T>() - MathPiDouble<T>() * 10), MathPi<T>(), radEpsilon));
 
 		UTest(true, EqualsWithEpsilon(RadNormalizeFast(MathPi<T>() + MathPiDouble<T>()), MathPi<T>(), radEpsilon));
 		UTest(true, EqualsWithEpsilon(RadNormalizeFast(MathPi<T>()), MathPi<T>(), radEpsilon));
 		UTest(true, EqualsWithEpsilon(RadNormalizeFast(-MathPi<T>()), MathPi<T>(), radEpsilon));
-		UTest(true, EqualsWithEpsilon(RadNormalizeFast(0), 0, radEpsilon));
-		UTest(true, EqualsWithEpsilon(RadNormalizeFast(MathPiDouble<T>()), 0, radEpsilon));
+		UTest(true, EqualsWithEpsilon(RadNormalizeFast(zero), zero, radEpsilon));
+		UTest(true, EqualsWithEpsilon(RadNormalizeFast(MathPiDouble<T>()), zero, radEpsilon));
+	}
+}
+
+template <typename T> void MatrixTestsHelper()
+{
+	for (ui32 index = 0; index < TestIterations; ++index)
+	{
 	}
 }
 
@@ -298,6 +319,13 @@ static void FP32VectorTests()
 
 static void MatrixTests()
 {
+	MatrixTestsHelper<Matrix2x2>();
+	MatrixTestsHelper<Matrix2x3>();
+	MatrixTestsHelper<Matrix3x2>();
+	MatrixTestsHelper<Matrix3x3>();
+	MatrixTestsHelper<Matrix3x4>();
+	MatrixTestsHelper<Matrix4x3>();
+	MatrixTestsHelper<Matrix4x4>();
 }
 
 void MathLibTests()
