@@ -5,6 +5,42 @@
 
 namespace StdLib
 {
+	template <uiw count> void __ValidateValuesArray(const f32 *values)
+	{
+		for (uiw index = 0; index < count; ++index)
+		{
+			int c = std::fpclassify(values[index]);
+			ASSUME(c != FP_INFINITE);
+			ASSUME(c != FP_NAN);
+			ASSUME(c != FP_SUBNORMAL);
+		}
+	}
+
+	template <typename ScalarType, uiw Dim> constexpr bool __IsVector(_VectorBase<ScalarType, Dim>) { return true; }
+	template <typename ScalarType = void, uiw Dim = 0> constexpr bool __IsVector(f32) { return false; }
+
+	template <typename T> void __ValidateValues(const T &v)
+	{
+		if constexpr (__IsVector(T()))
+		{
+			if constexpr (std::is_same_v<T::ScalarType, f32>)
+			{
+				__ValidateValuesArray<T::dim>(&v.x);
+			}
+		}
+		else if constexpr (std::is_same_v<T, f32>)
+		{
+			__ValidateValuesArray<1>(&v);
+		}
+	}
+
+	template <typename T0, typename T1 = i32, typename T2 = i32> void _ValidateValues(const T0 &v0, const T1 &v1 = {}, const T2 &v2 = {})
+	{
+		__ValidateValues(v0);
+		__ValidateValues(v1);
+		__ValidateValues(v2);
+	}
+
     /////////////////
     // _VectorBase //
     /////////////////
@@ -14,6 +50,7 @@ namespace StdLib
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
             result.Data()[index] = Data()[index] + other.Data()[index];
+		_ValidateValues(*this, other, result);
         return result;
     }
 
@@ -22,6 +59,7 @@ namespace StdLib
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
             result.Data()[index] = Data()[index] + scalar;
+		_ValidateValues(*this, scalar, result);
         return result;
     }
 
@@ -29,7 +67,8 @@ namespace StdLib
     {
         for (uiw index = 0; index < Dim; ++index)
             Data()[index] += other.Data()[index];
-        return *(VectorType *)this;
+		_ValidateValues(*this, other);
+		return *(VectorType *)this;
     }
 
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator += (ScalarType scalar) -> VectorType &
@@ -44,6 +83,7 @@ namespace StdLib
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
             result.Data()[index] = Data()[index] - other.Data()[index];
+		_ValidateValues(*this, other, result);
         return result;
     }
 
@@ -52,6 +92,7 @@ namespace StdLib
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
             result.Data()[index] = Data()[index] - scalar;
+		_ValidateValues(*this, scalar, result);
         return result;
     }
 
@@ -59,6 +100,7 @@ namespace StdLib
     {
         for (uiw index = 0; index < Dim; ++index)
             Data()[index] -= other.Data()[index];
+		_ValidateValues(*this, other);
         return *(VectorType *)this;
     }
 
@@ -66,6 +108,7 @@ namespace StdLib
     {
         for (uiw index = 0; index < Dim; ++index)
             Data()[index] -= scalar;
+		_ValidateValues(*this, scalar);
         return *(VectorType *)this;
     }
 
@@ -74,6 +117,7 @@ namespace StdLib
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
             result.Data()[index] = Data()[index] * other.Data()[index];
+		_ValidateValues(*this, other, result);
         return result;
     }
 
@@ -82,6 +126,7 @@ namespace StdLib
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
             result.Data()[index] = Data()[index] * scalar;
+		_ValidateValues(*this, scalar, result);
         return result;
     }
 
@@ -89,6 +134,7 @@ namespace StdLib
     {
         for (uiw index = 0; index < Dim; ++index)
             Data()[index] *= other.Data()[index];
+		_ValidateValues(*this, other);
         return *(VectorType *)this;
     }
 
@@ -96,6 +142,7 @@ namespace StdLib
     {
         for (uiw index = 0; index < Dim; ++index)
             Data()[index] *= scalar;
+		_ValidateValues(*this, scalar);
         return *(VectorType *)this;
     }
 
@@ -104,6 +151,7 @@ namespace StdLib
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
             result.Data()[index] = Data()[index] / other.Data()[index];
+		_ValidateValues(*this, other, result);
         return result;
     }
 
@@ -112,6 +160,7 @@ namespace StdLib
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
             result.Data()[index] = Data()[index] / scalar;
+		_ValidateValues(*this, scalar, result);
         return result;
     }
 
@@ -119,6 +168,7 @@ namespace StdLib
     {
         for (uiw index = 0; index < Dim; ++index)
             Data()[index] /= other.Data()[index];
+		_ValidateValues(*this, other);
         return *(VectorType *)this;
     }
 
@@ -126,11 +176,13 @@ namespace StdLib
     {
         for (uiw index = 0; index < Dim; ++index)
             Data()[index] /= scalar;
+		_ValidateValues(*this, scalar);
         return *(VectorType *)this;
     }
 
 	template<typename _ScalarType, uiw Dim>	inline bool _VectorBase<_ScalarType, Dim>::operator == (const _VectorBase &other) const
 	{
+		_ValidateValues(*this, other);
 		for (uiw index = 0; index < Dim; ++index)
 			if (Data()[index] != other.Data()[index])
 				return false;
@@ -144,11 +196,13 @@ namespace StdLib
 
     template<typename ScalarType, uiw Dim> inline ScalarType *_VectorBase<ScalarType, Dim>::Data()
     {
+		_ValidateValues(*this);
         return &x;
     }
 
     template<typename ScalarType, uiw Dim> inline const ScalarType *_VectorBase<ScalarType, Dim>::Data() const
     {
+		_ValidateValues(*this);
         return &x;
     }
 
@@ -157,6 +211,7 @@ namespace StdLib
         ScalarType sum = x;
         for (uiw index = 1; index < dim; ++index)
             sum += Data()[index];
+		_ValidateValues(*this, sum);
         return sum;
     }
 
@@ -166,6 +221,7 @@ namespace StdLib
         for (uiw index = 1; index < dim; ++index)
             if (Data()[index] > max)
                 max = Data()[index];
+		_ValidateValues(*this, max);
         return max;
     }
 
@@ -175,6 +231,7 @@ namespace StdLib
         for (uiw index = 1; index < dim; ++index)
             if (Data()[index] < min)
                 min = Data()[index];
+		_ValidateValues(*this, min);
         return min;
     }
 
@@ -184,6 +241,7 @@ namespace StdLib
 
     template<typename ScalarType> inline ScalarType &Vector2Base<ScalarType>::operator[](uiw index)
     {
+		_ValidateValues(*this);
         if (index == 0) return x;
         ASSUME(index == 1);
         return y;
@@ -191,6 +249,7 @@ namespace StdLib
 
     template<typename ScalarType> inline const ScalarType &Vector2Base<ScalarType>::operator[](uiw index) const
     {
+		_ValidateValues(*this);
         if (index == 0) return x;
         ASSUME(index == 1);
         return y;
@@ -202,6 +261,7 @@ namespace StdLib
 
     template<typename ScalarType> inline ScalarType &Vector3Base<ScalarType>::operator[](uiw index)
     {
+		_ValidateValues(*this);
         if (index == 0) return x;
         if (index == 1) return y;
         ASSUME(index == 2);
@@ -210,6 +270,7 @@ namespace StdLib
 
     template<typename ScalarType> inline const ScalarType &Vector3Base<ScalarType>::operator[](uiw index) const
     {
+		_ValidateValues(*this);
         if (index == 0) return x;
         if (index == 1) return y;
         ASSUME(index == 2);
@@ -218,6 +279,7 @@ namespace StdLib
 
     template<typename ScalarType> inline VectorTypeByDimension<ScalarType, 2> Vector3Base<ScalarType>::ToVector2() const
     {
+		_ValidateValues(*this);
         return {x, y};
     }
 
@@ -227,6 +289,7 @@ namespace StdLib
 
     template<typename ScalarType> inline ScalarType &Vector4Base<ScalarType>::operator[](uiw index)
     {
+		_ValidateValues(*this);
         if (index == 0) return x;
         if (index == 1) return y;
         if (index == 2) return z;
@@ -236,6 +299,7 @@ namespace StdLib
 
     template<typename ScalarType> inline const ScalarType &Vector4Base<ScalarType>::operator[](uiw index) const
     {
+		_ValidateValues(*this);
         if (index == 0) return x;
         if (index == 1) return y;
         if (index == 2) return z;
@@ -245,11 +309,13 @@ namespace StdLib
 
     template<typename ScalarType> inline VectorTypeByDimension<ScalarType, 2> Vector4Base<ScalarType>::ToVector2() const
     {
+		_ValidateValues(*this);
         return {x, y};
     }
 
     template<typename ScalarType> inline VectorTypeByDimension<ScalarType, 3> Vector4Base<ScalarType>::ToVector3() const
     {
+		_ValidateValues(*this);
         return {x, y, z};
     }
 
@@ -259,7 +325,9 @@ namespace StdLib
         
     template <typename Basis> inline f32 _VectorFP<Basis>::Length() const
     {
-        return sqrt(LengthSquare());
+        f32 len = sqrt(LengthSquare());
+		_ValidateValues(len);
+		return len;
     }
 
     template <typename Basis> inline f32 _VectorFP<Basis>::LengthSquare() const
@@ -267,12 +335,15 @@ namespace StdLib
         f32 sum = x * x;
         for (uiw index = 1; index < dim; ++index)
             sum += operator[](index) * operator[](index);
+		_ValidateValues(*this, sum);
         return sum;
     }
 
     template <typename Basis> inline f32 _VectorFP<Basis>::Distance(const _VectorFP &other) const
     {
-        return sqrt(DistanceSquare(other));
+        f32 dist = sqrt(DistanceSquare(other));
+		_ValidateValues(dist);
+		return dist;
     }
 
     template <typename Basis> inline f32 _VectorFP<Basis>::DistanceSquare(const _VectorFP &other) const
@@ -284,6 +355,7 @@ namespace StdLib
             dist = operator[](index) - other[index];
             sum += dist * dist;
         }
+		_ValidateValues(*this, sum);
         return sum;
     }
 
@@ -292,12 +364,15 @@ namespace StdLib
         f32 sum = x * other.x;
         for (uiw index = 1; index < dim; ++index)
             sum += operator[](index) * other[index];
+		_ValidateValues(*this, sum);
         return sum;
     }
 
     template <typename Basis> inline f32 _VectorFP<Basis>::Average() const
     {
-        return Accumulate() / dim;
+        f32 avg = Accumulate() / dim;
+		_ValidateValues(avg);
+		return avg;
     }
 
     template <typename Basis> inline void _VectorFP<Basis>::Normalize()
@@ -305,6 +380,7 @@ namespace StdLib
         f32 revLength = ApproxMath::RSqrt<ApproxMath::Precision::High>(LengthSquare());
         for (uiw index = 0; index < dim; ++index)
             operator[](index) *= revLength;
+		_ValidateValues(*this);
     }
 
     template <typename Basis> inline auto _VectorFP<Basis>::GetNormalized() const -> VectorType
@@ -313,6 +389,7 @@ namespace StdLib
         f32 revLength = ApproxMath::RSqrt<ApproxMath::Precision::High>(LengthSquare());
         for (uiw index = 0; index < dim; ++index)
             result[index] = operator[](index) * revLength;
+		_ValidateValues(*this, result);
         return result;
     }
 
@@ -324,6 +401,7 @@ namespace StdLib
 
     template <typename Basis> inline bool _VectorFP<Basis>::EqualsWithEpsilon(const _VectorFP &other, f32 epsilon) const
     {
+		_ValidateValues(*this, other);
         for (uiw index = 0; index < dim; ++index)
             if (abs(operator[](index) - other[index]) > epsilon)
                 return false;
@@ -332,11 +410,15 @@ namespace StdLib
 
     template <typename Basis> inline void _VectorFP<Basis>::Lerp(const _VectorFP &other, f32 interpolant)
     {
+		_ValidateValues(*this, other, interpolant);
+		ASSUME(interpolant >= 0.0f && interpolant <= 1.0f);
         *this += interpolant * (other - *this);
     }
 
     template <typename Basis> inline auto _VectorFP<Basis>::GetLerped(const _VectorFP &other, f32 interpolant) const -> VectorType
     {
+		_ValidateValues(*this, other, interpolant);
+		ASSUME(interpolant >= 0.0f && interpolant <= 1.0f);
         return *this + interpolant * (other - *this);
     }
 

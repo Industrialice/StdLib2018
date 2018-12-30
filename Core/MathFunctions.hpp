@@ -7,25 +7,25 @@ namespace StdLib
 	template <typename T> [[nodiscard]] constexpr inline T MathPi()
 	{
 		if constexpr (std::is_same_v<T, f32>) return 3.14159265358979323846f;
-		return T(3.14159265358979323846);
+		else if constexpr (std::is_same_v<T, f64>) return 3.14159265358979323846;
 	}
 
 	template <typename T> [[nodiscard]] constexpr inline T MathPiHalf()
 	{
 		if constexpr (std::is_same_v<T, f32>) return 1.57079632679489661923f;
-		return T(1.57079632679489661923);
+		else if constexpr (std::is_same_v<T, f64>) return 1.57079632679489661923;
 	}
 
 	template <typename T> [[nodiscard]] constexpr inline T MathPiQuarter()
 	{
 		if constexpr (std::is_same_v<T, f32>) return 0.785398163397448309616f;
-		return T(0.785398163397448309616);
+		else if constexpr (std::is_same_v<T, f64>) return 0.785398163397448309616;
 	}
 
 	template <typename T> [[nodiscard]] constexpr inline T MathPiDouble()
 	{
 		if constexpr (std::is_same_v<T, f32>) return 6.283185307179586476925f;
-		return T(6.283185307179586476925);
+		else if constexpr (std::is_same_v<T, f64>) return 6.283185307179586476925;
 	}
 
 	[[nodiscard]] constexpr inline f32 DegToRad(f32 deg)
@@ -83,7 +83,7 @@ namespace StdLib
 		return _RadNormalize(rad);
 	}
 
-	template <typename T> [[nodiscard]] constexpr inline T _RadNormalizeFast(T rad)
+	template <typename T> [[nodiscard]] constexpr inline T _RadNormalizeClose(T rad)
 	{
 		constexpr T pi2 = MathPiDouble<T>();
 
@@ -101,14 +101,14 @@ namespace StdLib
 		return rad;
 	}
 
-	[[nodiscard]] constexpr inline f32 RadNormalizeFast(f32 rad)
+	[[nodiscard]] constexpr inline f32 RadNormalizeClose(f32 rad)
 	{
-		return _RadNormalizeFast(rad);
+		return _RadNormalizeClose(rad);
 	}
 
-	[[nodiscard]] constexpr inline f64 RadNormalizeFast(f64 rad)
+	[[nodiscard]] constexpr inline f64 RadNormalizeClose(f64 rad)
 	{
-		return _RadNormalizeFast(rad);
+		return _RadNormalizeClose(rad);
 	}
 
 	[[nodiscard]] inline f32 DistanceSquare(f32 left, f32 right)
@@ -143,6 +143,11 @@ namespace StdLib
 		return std::abs(left - right);
 	}
 
+	[[nodiscard]] inline f64 Distance(f64 left, f64 right)
+	{
+		return std::abs(left - right);
+	}
+
 	[[nodiscard]] inline f32 Distance(Vector2 left, Vector2 right)
 	{
 		return std::sqrt(DistanceSquare(left, right));
@@ -159,6 +164,12 @@ namespace StdLib
 	}
 
 	[[nodiscard]] inline f32 Lerp(f32 left, f32 right, f32 interpolant)
+	{
+		ASSUME(interpolant >= -DefaultF32Epsilon && interpolant <= 1 + DefaultF32Epsilon);
+		return left + ((right - left) * interpolant);
+	}
+
+	[[nodiscard]] inline f64 Lerp(f64 left, f64 right, f64 interpolant)
 	{
 		ASSUME(interpolant >= -DefaultF32Epsilon && interpolant <= 1 + DefaultF32Epsilon);
 		return left + ((right - left) * interpolant);

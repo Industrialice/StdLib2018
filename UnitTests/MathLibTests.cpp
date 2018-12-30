@@ -11,19 +11,8 @@ namespace
 
 template <uiw index, typename T> typename T::ScalarType Get(T vec)
 {
-	if constexpr (index == 0) return vec.x;
-	if constexpr (index == 1) return vec.y;
-	if constexpr (index == 2)
-	{
-		if constexpr (T::dim > 2) return vec.z;
-		return 0;
-	}
-	if constexpr (index == 3)
-	{
-		if constexpr (T::dim > 3) return vec.w;
-		return 0;
-	}
-	return 0;
+	if constexpr (index >= T::dim) return 0;
+	return vec[index];
 }
 
 template <typename T> void Compare(T v2, T v0, T v1, typename T::ScalarType transform(typename T::ScalarType, typename T::ScalarType))
@@ -271,11 +260,16 @@ template <typename T> void MathFuncsTests()
 		UTest(true, EqualsWithEpsilon(RadNormalize(MathPiDouble<T>()), zero, radEpsilon));
 		UTest(true, EqualsWithEpsilon(RadNormalize(-MathPi<T>() - MathPiDouble<T>() * 10), MathPi<T>(), radEpsilon));
 
-		UTest(true, EqualsWithEpsilon(RadNormalizeFast(MathPi<T>() + MathPiDouble<T>()), MathPi<T>(), radEpsilon));
-		UTest(true, EqualsWithEpsilon(RadNormalizeFast(MathPi<T>()), MathPi<T>(), radEpsilon));
-		UTest(true, EqualsWithEpsilon(RadNormalizeFast(-MathPi<T>()), MathPi<T>(), radEpsilon));
-		UTest(true, EqualsWithEpsilon(RadNormalizeFast(zero), zero, radEpsilon));
-		UTest(true, EqualsWithEpsilon(RadNormalizeFast(MathPiDouble<T>()), zero, radEpsilon));
+		UTest(true, EqualsWithEpsilon(RadNormalizeClose(MathPi<T>() + MathPiDouble<T>()), MathPi<T>(), radEpsilon));
+		UTest(true, EqualsWithEpsilon(RadNormalizeClose(MathPi<T>()), MathPi<T>(), radEpsilon));
+		UTest(true, EqualsWithEpsilon(RadNormalizeClose(-MathPi<T>()), MathPi<T>(), radEpsilon));
+		UTest(true, EqualsWithEpsilon(RadNormalizeClose(zero), zero, radEpsilon));
+		UTest(true, EqualsWithEpsilon(RadNormalizeClose(MathPiDouble<T>()), zero, radEpsilon));
+
+		T value2 = value + 1;
+		UTest(true, EqualsWithEpsilon(Lerp(value, value2, T(0.5)), value + T(0.5)));
+		UTest(true, EqualsWithEpsilon(Lerp(value, value2, zero), value));
+		UTest(true, EqualsWithEpsilon(Lerp(value, value2, T(1)), value2));
 	}
 }
 
