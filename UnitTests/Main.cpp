@@ -67,12 +67,22 @@ static void EnumCombinableTests()
 
 static void TypeIdentifiableTests()
 {
-	constexpr TypeId ui32Id = TypeIdentifiable<ui32>::GetTypeId();
-	constexpr TypeId ui8Id = TypeIdentifiable<ui8>::GetTypeId();
-	UTest(NotEqual, ui32Id, ui8Id);
-	ui64 ui32Hash = ui32Id.Hash();
-	ui64 ui8Hash = ui8Id.Hash();
-	UTest(NotEqual, ui32Hash, ui8Hash);
+	//struct S1 {};
+	//struct S2 {};
+
+	//constexpr TypeId s1Id = TypeIdentifiable<S1>::GetTypeId();
+	//constexpr TypeId s2Id = TypeIdentifiable<S2>::GetTypeId();
+	//UTest(NotEqual, s1Id, s2Id);
+	//ui64 s1Hash = s1Id.Hash();
+	//ui64 s2Hash = s2Id.Hash();
+	//UTest(NotEqual, s1Hash, s2Hash);
+
+	//constexpr TypeId ui32Id = TypeIdentifiable<ui32>::GetTypeId();
+	//constexpr TypeId ui8Id = TypeIdentifiable<ui8>::GetTypeId();
+	//UTest(NotEqual, ui32Id, ui8Id);
+	//ui64 ui32Hash = ui32Id.Hash();
+	//ui64 ui8Hash = ui8Id.Hash();
+	//UTest(NotEqual, ui32Hash, ui8Hash);
 
 	constexpr StableTypeId stableId = StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf("Test"), true>("Test")>::GetTypeId();
 	constexpr StableTypeId stableId2 = StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf("Test2"), true>("Test2")>::GetTypeId();

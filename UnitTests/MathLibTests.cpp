@@ -17,10 +17,20 @@ template <uiw index, typename T> typename T::ScalarType Get(T vec)
 
 template <typename T> void Compare(T v2, T v0, T v1, typename T::ScalarType transform(typename T::ScalarType, typename T::ScalarType))
 {
-	UTest(Equal, Get<0>(v2), transform(Get<0>(v0), Get<0>(v1)));
-	UTest(Equal, Get<1>(v2), transform(Get<1>(v0), Get<1>(v1)));
-	UTest(Equal, Get<2>(v2), transform(Get<2>(v0), Get<2>(v1)));
-	UTest(Equal, Get<3>(v2), transform(Get<3>(v0), Get<3>(v1)));
+	if constexpr (std::is_floating_point_v<T::ScalarType>)
+	{
+		UTest(true, EqualsWithEpsilon(Get<0>(v2), transform(Get<0>(v0), Get<0>(v1))));
+		UTest(true, EqualsWithEpsilon(Get<1>(v2), transform(Get<1>(v0), Get<1>(v1))));
+		UTest(true, EqualsWithEpsilon(Get<2>(v2), transform(Get<2>(v0), Get<2>(v1))));
+		UTest(true, EqualsWithEpsilon(Get<3>(v2), transform(Get<3>(v0), Get<3>(v1))));
+	}
+	else
+	{
+		UTest(Equal, Get<0>(v2), transform(Get<0>(v0), Get<0>(v1)));
+		UTest(Equal, Get<1>(v2), transform(Get<1>(v0), Get<1>(v1)));
+		UTest(Equal, Get<2>(v2), transform(Get<2>(v0), Get<2>(v1)));
+		UTest(Equal, Get<3>(v2), transform(Get<3>(v0), Get<3>(v1)));
+	}
 }
 
 template <typename T> T GenerateVec(bool isAllowZero)

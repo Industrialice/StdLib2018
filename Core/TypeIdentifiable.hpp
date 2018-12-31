@@ -69,31 +69,32 @@ namespace StdLib
 		}
 	};
     
-#ifdef DEBUG
-    template <typename T, ui64 encoded0 = 0, ui64 encoded1 = 0, ui64 encoded2 = 0> class TypeIdentifiable
-    {
-        static constexpr char var = 0;
-
-    public:
-        [[nodiscard]] static constexpr TypeId GetTypeId()
-        {
-            std::array<char, 28> name{};
-            CompileTimeStrings::DecodeASCII<encoded0, encoded1, encoded2>(name.data(), name.size());
-            return {&var, name};
-        }
-    };
-#else
-    template <typename T> class TypeIdentifiable
-    {
-        static constexpr char var = 0;
-
-    public:
-        [[nodiscard]] static constexpr TypeId GetTypeId()
-        {
-            return &var;
-        }
-    };
-#endif
+	// Doesn't work in Release in Visual C++
+//#ifdef DEBUG
+//    template <typename T, ui64 encoded0 = 0, ui64 encoded1 = 0, ui64 encoded2 = 0> class TypeIdentifiable
+//    {
+//        static constexpr char var = 0;
+//
+//    public:
+//        [[nodiscard]] static constexpr TypeId GetTypeId()
+//        {
+//            std::array<char, 28> name{};
+//            CompileTimeStrings::DecodeASCII<encoded0, encoded1, encoded2>(name.data(), name.size());
+//            return {&var, name};
+//        }
+//    };
+//#else
+//    template <typename T> class TypeIdentifiable
+//    {
+//        static constexpr char var = 0;
+//
+//    public:
+//        [[nodiscard]] static constexpr TypeId GetTypeId()
+//        {
+//            return &var;
+//        }
+//    };
+//#endif
 
 	class StableTypeId
 	{

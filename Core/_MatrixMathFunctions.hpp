@@ -5,6 +5,7 @@
 
 namespace StdLib
 {
+#ifdef DEBUG
 	template <uiw count> void __ValidateValuesArray(const f32 *values)
 	{
 		for (uiw index = 0; index < count; ++index)
@@ -40,6 +41,9 @@ namespace StdLib
 		__ValidateValues(v1);
 		__ValidateValues(v2);
 	}
+#else
+	#define _ValidateValues(...)
+#endif
 
     /////////////////
     // _VectorBase //
