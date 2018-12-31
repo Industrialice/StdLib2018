@@ -150,6 +150,7 @@
     <ClInclude Include="MatrixMathTypes.hpp" />
     <ClInclude Include="PlatformDefines.hpp" />
     <ClInclude Include="StdCoreLib.hpp" />
+    <ClInclude Include="_MathValidation.hpp" />
     <ClInclude Include="_MatrixMathFunctions.hpp" />
     <ClInclude Include="_PreHeader.hpp" />
   </ItemGroup>

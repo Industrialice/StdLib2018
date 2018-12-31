@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MatrixMathTypes.hpp"
+#include "_MathValidation.hpp"
 
 namespace StdLib
 {
@@ -30,26 +31,32 @@ namespace StdLib
 
 	[[nodiscard]] constexpr inline f32 DegToRad(f32 deg)
 	{
+		_ValidateValues(deg);
 		return deg * (MathPi<f32>() / 180.0f);
 	}
 
 	[[nodiscard]] constexpr inline f64 DegToRad(f64 deg)
 	{
+		_ValidateValues(deg);
 		return deg * (MathPi<f64>() / 180.0);
 	}
 
 	[[nodiscard]] constexpr inline f32 RadToDeg(f32 rad)
 	{
+		_ValidateValues(rad);
 		return rad * (180.0f / MathPi<f32>());
 	}
 
 	[[nodiscard]] constexpr inline f64 RadToDeg(f64 rad)
 	{
+		_ValidateValues(rad);
 		return rad * (180.0 / MathPi<f64>());
 	}
 
 	template <typename T> [[nodiscard]] constexpr inline T _RadNormalize(T rad)
 	{
+		_ValidateValues(rad);
+
 		constexpr T pi2 = MathPiDouble<T>();
 
 		if (rad >= 0 && rad < pi2)
@@ -85,6 +92,8 @@ namespace StdLib
 
 	template <typename T> [[nodiscard]] constexpr inline T _RadNormalizeClose(T rad)
 	{
+		_ValidateValues(rad);
+
 		constexpr T pi2 = MathPiDouble<T>();
 
 		if (rad < 0)
@@ -114,13 +123,17 @@ namespace StdLib
 	[[nodiscard]] inline f32 DistanceSquare(f32 left, f32 right)
 	{
 		f32 delta = left - right;
-		return delta * delta;
+		f32 deltaSquare = delta * delta;
+		_ValidateValues(left, right, delta);
+		return deltaSquare;
 	}
 
 	[[nodiscard]] inline f64 DistanceSquare(f64 left, f64 right)
 	{
 		f64 delta = left - right;
-		return delta * delta;
+		f64 deltaSquare = delta * delta;
+		_ValidateValues(left, right, delta);
+		return deltaSquare;
 	}
 
 	[[nodiscard]] inline f32 DistanceSquare(Vector2 left, Vector2 right)
@@ -140,12 +153,14 @@ namespace StdLib
 
 	[[nodiscard]] inline f32 Distance(f32 left, f32 right)
 	{
-		return std::abs(left - right);
+		f32 diff = std::abs(left - right);
+		_ValidateValues(left, right, diff);
 	}
 
 	[[nodiscard]] inline f64 Distance(f64 left, f64 right)
 	{
-		return std::abs(left - right);
+		f64 diff = std::abs(left - right);
+		_ValidateValues(left, right, diff);
 	}
 
 	[[nodiscard]] inline f32 Distance(Vector2 left, Vector2 right)
@@ -166,13 +181,17 @@ namespace StdLib
 	[[nodiscard]] inline f32 Lerp(f32 left, f32 right, f32 interpolant)
 	{
 		ASSUME(interpolant >= -DefaultF32Epsilon && interpolant <= 1 + DefaultF32Epsilon);
-		return left + ((right - left) * interpolant);
+		f32 interpolated = left + ((right - left) * interpolant);
+		_ValidateValues(left, right, interpolated);
+		return interpolated;
 	}
 
 	[[nodiscard]] inline f64 Lerp(f64 left, f64 right, f64 interpolant)
 	{
 		ASSUME(interpolant >= -DefaultF32Epsilon && interpolant <= 1 + DefaultF32Epsilon);
-		return left + ((right - left) * interpolant);
+		f64 interpolated = left + ((right - left) * interpolant);
+		_ValidateValues(left, right, interpolated);
+		return interpolated;
 	}
 
 	[[nodiscard]] inline Vector2 Lerp(Vector2 left, Vector2 right, f32 interpolant)
@@ -192,11 +211,13 @@ namespace StdLib
 
 	[[nodiscard]] inline bool EqualsWithEpsilon(f32 left, f32 right, f32 epsilon = DefaultF32Epsilon)
 	{
+		_ValidateValues(left, right, epsilon);
         return abs(left - right) <= epsilon;
     }
 
 	[[nodiscard]] inline bool EqualsWithEpsilon(f64 left, f64 right, f64 epsilon = (f64)DefaultF32Epsilon)
 	{
+		_ValidateValues(left, right, epsilon);
 		return abs(left - right) <= epsilon;
 	}
 

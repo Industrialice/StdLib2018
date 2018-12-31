@@ -2,49 +2,10 @@
 
 #include "MatrixMathTypes.hpp"
 #include "ApproxMath.hpp"
+#include "_MathValidation.hpp"
 
 namespace StdLib
 {
-#ifdef DEBUG
-	template <uiw count> void __ValidateValuesArray(const f32 *values)
-	{
-		for (uiw index = 0; index < count; ++index)
-		{
-			int c = std::fpclassify(values[index]);
-			ASSUME(c != FP_INFINITE);
-			ASSUME(c != FP_NAN);
-			ASSUME(c != FP_SUBNORMAL);
-		}
-	}
-
-	template <typename ScalarType, uiw Dim> constexpr bool __IsVector(_VectorBase<ScalarType, Dim>) { return true; }
-	template <typename ScalarType = void, uiw Dim = 0> constexpr bool __IsVector(f32) { return false; }
-
-	template <typename T> void __ValidateValues(const T &v)
-	{
-		if constexpr (__IsVector(T()))
-		{
-			if constexpr (std::is_same_v<T::ScalarType, f32>)
-			{
-				__ValidateValuesArray<T::dim>(&v.x);
-			}
-		}
-		else if constexpr (std::is_same_v<T, f32>)
-		{
-			__ValidateValuesArray<1>(&v);
-		}
-	}
-
-	template <typename T0, typename T1 = i32, typename T2 = i32> void _ValidateValues(const T0 &v0, const T1 &v1 = {}, const T2 &v2 = {})
-	{
-		__ValidateValues(v0);
-		__ValidateValues(v1);
-		__ValidateValues(v2);
-	}
-#else
-	#define _ValidateValues(...)
-#endif
-
     /////////////////
     // _VectorBase //
     /////////////////

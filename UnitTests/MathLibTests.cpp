@@ -6,7 +6,7 @@ using namespace Funcs;
 
 namespace
 {
-	static constexpr ui32 TestIterations = 10;
+	static constexpr ui32 TestIterations = 10'00;
 }
 
 template <uiw index, typename T> typename T::ScalarType Get(T vec)
@@ -149,7 +149,7 @@ template <typename T> void FP32VectorTestsHelper()
 		UTest(true, EqualsWithEpsilon(v0.Length(), sqrt(lenSquareComp)));
 		UTest(Equal, EqualsWithEpsilon(v0.Length(), 1.0f), v0.IsNormalized());
 		UTest(Equal, EqualsWithEpsilon(v0.LengthSquare(), 1.0f), v0.IsNormalized());
-		v2 = v0;
+		v2 = v0 + 1;
 		UTest(true, v2.GetNormalized().IsNormalized());
 		v2.Normalize();
 		UTest(true, v2.IsNormalized());
@@ -247,9 +247,25 @@ template <typename T> void MathFuncsTests()
 	UTest(true, EqualsWithEpsilon(std::numeric_limits<T>::max(), std::numeric_limits<T>::max(), epsilon));
 	UTest(true, EqualsWithEpsilon(-std::numeric_limits<T>::max(), -std::numeric_limits<T>::max(), epsilon));
 
+	constexpr T pi = MathPi<T>();
+	constexpr T pihalf = MathPiHalf<T>();
+	constexpr T piQuarter = MathPiQuarter<T>();
+	constexpr T piDouble = MathPiDouble<T>();
+
+	constexpr T piFromDeg = DegToRad(T(180));
+	UTest(true, EqualsWithEpsilon(piFromDeg, pi));
+	constexpr T degFromPi = RadToDeg(pi);
+	UTest(true, EqualsWithEpsilon(degFromPi, T(180)));
+
+	constexpr T piFromNormalized = RadNormalize(piDouble + pi);
+	UTest(true, EqualsWithEpsilon(piFromNormalized, pi));
+	constexpr T piFromNormalizedClose = RadNormalizeClose(piDouble + pi);
+	UTest(true, EqualsWithEpsilon(piFromNormalizedClose, pi));
+
 	for (ui32 index = 0; index < TestIterations; ++index)
 	{
 		T value = rand() * T(0.01);
+
 		UTest(true, EqualsWithEpsilon(value, value, zero));
 		UTest(true, EqualsWithEpsilon(value, value, epsilon));
 
@@ -277,9 +293,10 @@ template <typename T> void MathFuncsTests()
 		UTest(true, EqualsWithEpsilon(RadNormalizeClose(MathPiDouble<T>()), zero, radEpsilon));
 
 		T value2 = value + 1;
-		UTest(true, EqualsWithEpsilon(Lerp(value, value2, T(0.5)), value + T(0.5)));
-		UTest(true, EqualsWithEpsilon(Lerp(value, value2, zero), value));
-		UTest(true, EqualsWithEpsilon(Lerp(value, value2, T(1)), value2));
+		T lerpEpsilon = T(0.0001);
+		UTest(true, EqualsWithEpsilon(Lerp(value, value2, T(0.5)), value + T(0.5), lerpEpsilon));
+		UTest(true, EqualsWithEpsilon(Lerp(value, value2, zero), value, lerpEpsilon));
+		UTest(true, EqualsWithEpsilon(Lerp(value, value2, T(1)), value2, lerpEpsilon));
 	}
 }
 
@@ -334,11 +351,30 @@ static void MatrixTests()
 
 void MathLibTests()
 {
-	MathFuncsTests<f32>();
-	MathFuncsTests<f64>();
-	BaseVectorTests();
-	FP32VectorTests();
-	MatrixTests();
+	f32 fastest = FLT_MAX;
+	i32 it = 0;
+	for (i32 index = 0; index < 10; ++index)
+	{
+		auto start = TimeMoment::Now();
+
+		MathFuncsTests<f32>();
+		MathFuncsTests<f64>();
+		BaseVectorTests();
+		FP32VectorTests();
+		MatrixTests();
+
+		auto end = TimeMoment::Now();
+
+		auto diff = end - start;
+
+		if (fastest > diff.ToSeconds())
+		{
+			fastest = diff.ToSeconds();
+			it = index;
+		}
+
+	}
+	printf("iteration %i took %.4g\n", it, fastest);
 
     Vector3 rotTest(1.0f, 2.0f, 3.0f);
     auto rotMatrix = Matrix3x3::CreateRS(Vector3{1.0f, 2.0f, 3.0f});
