@@ -387,11 +387,11 @@ Quaternion::Quaternion(const Matrix3x3 &matrix)
     }
 }
 
-Quaternion::Quaternion(const Vector3 &axis, f32 angle)
+Quaternion::Quaternion(const Vector3 &axis, f32 angleRad)
 {
     ASSUME(axis.IsNormalized());
 
-    const f32 halfAngle = 0.5f * angle;
+    const f32 halfAngle = 0.5f * angleRad;
     const f32 s = sin(halfAngle);
 
     x = s * axis.x;

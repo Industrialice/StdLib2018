@@ -12,6 +12,7 @@
 #include "File.hpp"
 #include "FileSystem.hpp"
 #include "MemoryMappedFile.hpp"
+#include "SystemInfo.hpp"
 
 namespace StdLib::Initialization
 {

@@ -971,6 +971,44 @@ static void MemoryStreamTests()
     PRINTLOG("finished memory stream tests\n");
 }
 
+static void PrintSystemInfo()
+{
+	PRINTLOG("System info:\n");
+	PRINTLOG("  Logical CPU cores: %u\n", SystemInfo::LogicalCPUCores());
+	PRINTLOG("  Physical CPU cores: %u\n", SystemInfo::PhysicalCPUCores());
+	PRINTLOG("  Memory allocation alignment: %u\n", (ui32)SystemInfo::AllocationAlignment());
+	const char *arch = nullptr;
+	switch (SystemInfo::CPUArchitecture())
+	{
+	case SystemInfo::Arch::ARM:
+		arch = "ARM";
+		break;
+	case SystemInfo::Arch::ARM64:
+		arch = "ARM64";
+		break;
+	case SystemInfo::Arch::Itanium:
+		arch = "Itanium";
+		break;
+	case SystemInfo::Arch::MIPS64:
+		arch = "MIPS64";
+		break;
+	case SystemInfo::Arch::SH3:
+		arch = "SH3";
+		break;
+	case SystemInfo::Arch::Unwnown:
+		arch = "Unknown";
+		break;
+	case SystemInfo::Arch::x64:
+		arch = "x64";
+		break;
+	case SystemInfo::Arch::x86:
+		arch = "x86";
+		break;
+	}
+	PRINTLOG("  CPU architecture: %s\n", arch);
+	PRINTLOG("Finished printing system info\n");
+}
+
 static void DoTests(int argc, const char **argv)
 {
     PRINTLOG("~~~Starting Tests~~~\n");
@@ -1015,6 +1053,7 @@ static void DoTests(int argc, const char **argv)
     MemoryStreamTests();
     MathLibTests();
     UniqueIdManagerTests();
+	PrintSystemInfo();
 
     Error<> folderForTestsRemove = FileSystem::Remove(folderForTests);
     UTest(false, folderForTestsRemove);

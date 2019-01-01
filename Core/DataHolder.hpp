@@ -35,7 +35,7 @@ namespace StdLib
 
         DataHolder() = delete;
 
-        template <typename T> DataHolder(T &&source)
+        template <typename T> DataHolder(T &&source) noexcept
         {
             using clearT = std::remove_reference_t<T>;
 
@@ -86,7 +86,7 @@ namespace StdLib
             source._onMoving(*this, source);
         }
 
-        DataHolder &operator = (DataHolder &&source)
+        DataHolder &operator = (DataHolder &&source) noexcept
         {
             source._onMoving(*this, source);
             return *this;

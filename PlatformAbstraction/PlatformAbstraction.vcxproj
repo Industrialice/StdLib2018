@@ -134,6 +134,7 @@
     <ClInclude Include="PlatformAbstractionCoreTypes.hpp" />
     <ClInclude Include="FilePath.hpp" />
     <ClInclude Include="StdPlatformAbstractionLib.hpp" />
+    <ClInclude Include="SystemInfo.hpp" />
     <ClInclude Include="TimeMoment.hpp" />
     <ClInclude Include="VirtualMemory.hpp" />
     <ClInclude Include="_PreHeader.hpp" />
@@ -160,12 +161,19 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Posix_SystemInfo.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Posix_TimeMoment.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Win_SystemInfo.cpp" />
     <ClCompile Include="TimeMoment.cpp" />
     <ClCompile Include="Win_File.cpp" />
     <ClCompile Include="Win_FileSystem.cpp" />

@@ -6,7 +6,7 @@ using namespace Funcs;
 
 namespace
 {
-	static constexpr ui32 TestIterations = 10'00;
+	static constexpr ui32 TestIterations = 10;
 }
 
 template <uiw index, typename T> typename T::ScalarType Get(T vec)
@@ -49,6 +49,19 @@ template <typename T> T GenerateVec(bool isAllowZero)
 		}
 	}
 	return v;
+}
+
+template <typename T> T GenerateMatrix()
+{
+	T matrix;
+	for (uiw row = 0; row < T::rows; ++row)
+	{
+		for (uiw column = 0; column < T::columns; ++column)
+		{
+			matrix[row][column] = rand() * 0.001f;
+		}
+	}
+	return matrix;
 }
 
 template <typename T> void BaseVectorTestsHelper()
@@ -302,8 +315,11 @@ template <typename T> void MathFuncsTests()
 
 template <typename T> void MatrixTestsHelper()
 {
+	T m0, m1, m2;
 	for (ui32 index = 0; index < TestIterations; ++index)
 	{
+		m0 = GenerateMatrix<T>();
+		m1 = GenerateMatrix<T>();
 	}
 }
 

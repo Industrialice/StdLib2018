@@ -430,7 +430,7 @@ namespace StdLib
         constexpr Quaternion() = default;
         Quaternion(f32 x, f32 y, f32 z, f32 w);
         explicit Quaternion(const Matrix3x3 &matrix);
-        Quaternion(const Vector3 &axis, f32 angle); // axis must be normalized, angle is in radians
+        Quaternion(const Vector3 &axis, f32 angleRad); // axis must be normalized
 
         [[nodiscard]] Quaternion operator + (const Quaternion &other) const;
         Quaternion &operator += (const Quaternion &other);
@@ -506,7 +506,7 @@ namespace StdLib
 
     template<typename Basis>
     template<uiw Rows, uiw Columns>
-    inline auto _VectorFP<Basis>::operator*(const _Matrix<Rows, Columns> &matrix) const -> VectorTypeByDimension<f32, Columns>
+    inline auto _VectorFP<Basis>::operator * (const _Matrix<Rows, Columns> &matrix) const -> VectorTypeByDimension<f32, Columns>
     {
         static_assert(dim == Rows, "Cannot multiply vector and matrix, matrix's rows number and vector dimension must be equal");
 
@@ -522,7 +522,7 @@ namespace StdLib
 
     template<typename Basis>
     template<uiw Rows, uiw Columns>
-    inline auto _VectorFP<Basis>::operator*=(const _Matrix<Rows, Columns> &matrix) -> VectorType &
+    inline auto _VectorFP<Basis>::operator *= (const _Matrix<Rows, Columns> &matrix) -> VectorType &
     {
         *this = *this * matrix;
         return (VectorType &)*this;

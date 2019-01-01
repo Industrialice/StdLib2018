@@ -16,6 +16,11 @@ namespace StdLib::TimeMomentInitialization
     void Initialize();
 }
 
+namespace StdLib::SystemInfo
+{
+	void Initialize();
+}
+
 namespace StdLib::Initialization
 {
 	void Initialize(const CoreParameters &parameters);
@@ -28,4 +33,5 @@ void StdLib::Initialization::Initialize(const PlatformAbstractionParameters &par
     VirtualMemory::Initialize();
     FileInitialization::Initialize();
     TimeMomentInitialization::Initialize();
+	SystemInfo::Initialize();
 }

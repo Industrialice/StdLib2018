@@ -17,7 +17,7 @@
     #define ALLOCATORFUNC __declspec(allocator)
     #define NOINLINE __declspec(noinline)
     #define FORCEINLINE __forceinline
-	#define UNALIGNED __unaligned
+	#define UNALIGNEDPTR __unaligned
     #define EMPTY_BASES __declspec(empty_bases)
 
     #define _UNREACHABLE __assume(0)
@@ -69,7 +69,7 @@
     #define NOINLINE __attribute__((noinline))
     #define FORCEINLINE __attribute__((always_inline)) inline
 #ifdef __clang__
-	#define UNALIGNED __unaligned /* It seems there's no alternative for GCC */
+	#define UNALIGNEDPTR __unaligned /* It seems there's no alternative for GCC */
 #endif
     #define EMPTY_BASES /* TODO: do these compilers have something similar */
 

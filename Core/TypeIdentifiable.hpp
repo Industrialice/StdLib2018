@@ -4,72 +4,72 @@
 
 namespace StdLib
 {
-    class TypeId
-    {
-        const char *_id{};
-    #ifdef DEBUG
-        union
-        {
-            std::array<char, 28> name;
-            char displayName[28];
-        } _u{};
-    #endif
-
-    public:
-        using InternalIdType = decltype(_id);
-
-        constexpr TypeId() = default;
-
-        constexpr TypeId(InternalIdType id) : _id(id)
-        {}
-
-    #ifdef DEBUG
-        constexpr TypeId(InternalIdType id, std::array<char, 28> name) : _id(id), _u{name}
-        {}
-    #endif
-
-		[[nodiscard]] constexpr bool operator == (const TypeId &other) const
-		{
-			return _id == other._id;
-		}
-
-		[[nodiscard]] constexpr bool operator != (const TypeId &other) const
-		{
-			return _id != other._id;
-		}
-
-		[[nodiscard]] constexpr bool operator < (const TypeId &other) const
-		{
-			return _id < other._id;
-		}
-
-        [[nodiscard]] constexpr bool operator <= (const TypeId &other) const
-        {
-            return _id <= other._id;
-        }
-
-		[[nodiscard]] constexpr bool operator > (const TypeId &other) const
-		{
-			return _id > other._id;
-		}
-
-        [[nodiscard]] constexpr bool operator >= (const TypeId &other) const
-        {
-            return _id >= other._id;
-        }
-
-		[[nodiscard]] constexpr InternalIdType InternalId() const
-		{
-			return _id;
-		}
-
-		[[nodiscard]] ui64 Hash() const
-		{
-			return Hash::FNVHash<Hash::Precision::P64>(_id);
-		}
-	};
-    
-	// Doesn't work in Release in Visual C++
+// Doesn't work in Release in Visual C++
+//    class TypeId
+//    {
+//        const char *_id{};
+//    #ifdef DEBUG
+//        union
+//        {
+//            std::array<char, 28> name;
+//            char displayName[28];
+//        } _u{};
+//    #endif
+//
+//    public:
+//        using InternalIdType = decltype(_id);
+//
+//        constexpr TypeId() = default;
+//
+//        constexpr TypeId(InternalIdType id) : _id(id)
+//        {}
+//
+//    #ifdef DEBUG
+//        constexpr TypeId(InternalIdType id, std::array<char, 28> name) : _id(id), _u{name}
+//        {}
+//    #endif
+//
+//		[[nodiscard]] constexpr bool operator == (const TypeId &other) const
+//		{
+//			return _id == other._id;
+//		}
+//
+//		[[nodiscard]] constexpr bool operator != (const TypeId &other) const
+//		{
+//			return _id != other._id;
+//		}
+//
+//		[[nodiscard]] constexpr bool operator < (const TypeId &other) const
+//		{
+//			return _id < other._id;
+//		}
+//
+//        [[nodiscard]] constexpr bool operator <= (const TypeId &other) const
+//        {
+//            return _id <= other._id;
+//        }
+//
+//		[[nodiscard]] constexpr bool operator > (const TypeId &other) const
+//		{
+//			return _id > other._id;
+//		}
+//
+//        [[nodiscard]] constexpr bool operator >= (const TypeId &other) const
+//        {
+//            return _id >= other._id;
+//        }
+//
+//		[[nodiscard]] constexpr InternalIdType InternalId() const
+//		{
+//			return _id;
+//		}
+//
+//		[[nodiscard]] ui64 Hash() const
+//		{
+//			return Hash::FNVHash<Hash::Precision::P64>(_id);
+//		}
+//	};
+//    
 //#ifdef DEBUG
 //    template <typename T, ui64 encoded0 = 0, ui64 encoded1 = 0, ui64 encoded2 = 0> class TypeIdentifiable
 //    {
@@ -193,13 +193,13 @@ namespace StdLib
 
 namespace std
 {
-    template <> struct hash<StdLib::TypeId>
-    {
-        size_t operator()(const StdLib::TypeId &value) const
-        {
-            return (size_t)value.Hash();
-        }
-    };
+    //template <> struct hash<StdLib::TypeId>
+    //{
+    //    size_t operator()(const StdLib::TypeId &value) const
+    //    {
+    //        return (size_t)value.Hash();
+    //    }
+    //};
 
 	template <> struct hash<StdLib::StableTypeId>
 	{
