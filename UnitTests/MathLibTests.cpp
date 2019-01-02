@@ -17,7 +17,7 @@ template <uiw index, typename T> typename T::ScalarType Get(T vec)
 
 template <typename T> void Compare(T v2, T v0, T v1, typename T::ScalarType transform(typename T::ScalarType, typename T::ScalarType))
 {
-	if constexpr (std::is_floating_point_v<T::ScalarType>)
+	if constexpr (std::is_floating_point_v<typename T::ScalarType>)
 	{
 		UTest(true, EqualsWithEpsilon(Get<0>(v2), transform(Get<0>(v0), Get<0>(v1))));
 		UTest(true, EqualsWithEpsilon(Get<1>(v2), transform(Get<1>(v0), Get<1>(v1))));
@@ -295,7 +295,7 @@ template <typename T> void MathFuncsTests()
 
 	for (ui32 index = 0; index < TestIterations; ++index)
 	{
-		T value = rand() * T(0.01);
+		T value = (rand() % 1000) * T(0.01);
 
 		UTest(true, EqualsWithEpsilon(value, value, zero));
 		UTest(true, EqualsWithEpsilon(value, value, epsilon));

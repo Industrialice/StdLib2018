@@ -163,22 +163,22 @@ namespace StdLib
 
     [[nodiscard]] constexpr inline f32 RadDistance(f32 rad0, f32 rad1)
     {
-        return _RotationDistance(rad0, rad1, MathPiDouble<f32>(), DefaultF32Epsilon);
+        return _RotationDistance(rad0, rad1, MathPiDouble<f32>(), 0.00001f);
     }
 
     [[nodiscard]] constexpr inline f64 RadDistance(f64 rad0, f64 rad1)
     {
-        return _RotationDistance(rad0, rad1, MathPiDouble<f64>(), (f64)DefaultF32Epsilon);
+        return _RotationDistance(rad0, rad1, MathPiDouble<f64>(), 0.000001);
     }
 
     [[nodiscard]] constexpr inline f32 DegDistance(f32 deg0, f32 deg1)
     {
-        return _RotationDistance(deg0, deg1, 360.0f, DefaultF32Epsilon * 10.0f);
+        return _RotationDistance(deg0, deg1, 360.0f, 0.0001f);
     }
 
     [[nodiscard]] constexpr inline f64 DegDistance(f64 deg0, f64 deg1)
     {
-        return _RotationDistance(deg0, deg1, 360.0, DefaultF32Epsilon * 10.0);
+        return _RotationDistance(deg0, deg1, 360.0, 0.00001);
     }
 
 	[[nodiscard]] inline f32 DistanceSquare(f32 left, f32 right)
@@ -241,33 +241,33 @@ namespace StdLib
 		return std::sqrt(DistanceSquare(left, right));
 	}
 
-	[[nodiscard]] inline f32 Lerp(f32 left, f32 right, f32 interpolant)
+	[[nodiscard]] constexpr inline f32 Lerp(f32 left, f32 right, f32 interpolant)
 	{
-		ASSUME(interpolant >= -DefaultF32Epsilon && interpolant <= 1 + DefaultF32Epsilon);
+		ASSUME(interpolant >= -0.00001f && interpolant <= 1 + 0.00001f);
 		f32 interpolated = left + ((right - left) * interpolant);
 		_ValidateValues(left, right, interpolated);
 		return interpolated;
 	}
 
-	[[nodiscard]] inline f64 Lerp(f64 left, f64 right, f64 interpolant)
+	[[nodiscard]] constexpr inline f64 Lerp(f64 left, f64 right, f64 interpolant)
 	{
-		ASSUME(interpolant >= -DefaultF32Epsilon && interpolant <= 1 + DefaultF32Epsilon);
+		ASSUME(interpolant >= -0.000001 && interpolant <= 1 + 0.000001);
 		f64 interpolated = left + ((right - left) * interpolant);
 		_ValidateValues(left, right, interpolated);
 		return interpolated;
 	}
 
-	[[nodiscard]] inline Vector2 Lerp(Vector2 left, Vector2 right, f32 interpolant)
+	[[nodiscard]] constexpr inline Vector2 Lerp(Vector2 left, Vector2 right, f32 interpolant)
 	{
 		return {Lerp(left.x, right.x, interpolant), Lerp(left.y, right.y, interpolant)};
 	}
 
-	[[nodiscard]] inline Vector3 Lerp(Vector3 left, Vector3 right, f32 interpolant)
+	[[nodiscard]] constexpr inline Vector3 Lerp(Vector3 left, Vector3 right, f32 interpolant)
 	{
 		return {Lerp(left.x, right.x, interpolant), Lerp(left.y, right.y, interpolant), Lerp(left.z, right.z, interpolant)};
 	}
 
-	[[nodiscard]] inline Vector4 Lerp(Vector4 left, Vector4 right, f32 interpolant)
+	[[nodiscard]] constexpr inline Vector4 Lerp(Vector4 left, Vector4 right, f32 interpolant)
 	{
 		return {Lerp(left.x, right.x, interpolant), Lerp(left.y, right.y, interpolant), Lerp(left.z, right.z, interpolant), Lerp(left.w, right.w, interpolant)};
 	}

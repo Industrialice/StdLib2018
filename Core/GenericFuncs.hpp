@@ -178,23 +178,23 @@ namespace StdLib::Funcs
         ASSUME(shift < sizeof(T) * 8);
         if constexpr (sizeof(value) == 8)
         {
-            ui64 temp = *(ui64 *)&value;
+            alignas(T) ui64 temp = *(ui64 *)&value;
             temp = _ROTATE64L(temp, shift);
             return *(T *)&temp;
         }
         if constexpr (sizeof(value) == 4)
         {
-            ui32 temp = *(ui32 *)&value;
+            alignas(T) ui32 temp = *(ui32 *)&value;
             temp = _ROTATE32L(temp, shift);
             return *(T *)&temp;
         }
         if constexpr (sizeof(value) == 2)
         {
-            ui16 temp = *(ui16 *)&value;
+            alignas(T) ui16 temp = *(ui16 *)&value;
             temp = _ROTATE16L(temp, shift);
             return *(T *)&temp;
         }
-        ui8 temp = *(ui8 *)&value;
+        alignas(T) ui8 temp = *(ui8 *)&value;
         temp = _ROTATE8L(temp, shift);
         return *(T *)&temp;
     }
@@ -206,23 +206,23 @@ namespace StdLib::Funcs
         ASSUME(shift < sizeof(T) * 8);
         if constexpr (sizeof(value) == 8)
         {
-            ui64 temp = *(ui64 *)&value;
+            alignas(T) ui64 temp = *(ui64 *)&value;
             temp = _ROTATE64R(temp, shift);
             return *(T *)&temp;
         }
         if constexpr (sizeof(value) == 4)
         {
-            ui32 temp = *(ui32 *)&value;
+            alignas(T) ui32 temp = *(ui32 *)&value;
             temp = _ROTATE32R(temp, shift);
             return *(T *)&temp;
         }
         if constexpr (sizeof(value) == 2)
         {
-            ui16 temp = *(ui16 *)&value;
+            alignas(T) ui16 temp = *(ui16 *)&value;
             temp = _ROTATE16R(temp, shift);
             return *(T *)&temp;
         }
-        ui8 temp = *(ui8 *)&value;
+        alignas(T) ui8 temp = *(ui8 *)&value;
         temp = _ROTATE8R(temp, shift);
         return *(T *)&temp;
     }
