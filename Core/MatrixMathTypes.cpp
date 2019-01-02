@@ -49,15 +49,156 @@ namespace StdLib
     template struct Rectangle<i32>;
 }
 
-template <typename T> T CreateOrthographicMarix(const Vector3 &min, const Vector3 &max)
+template <uiw Rows, uiw Columns> inline void _TransposeSquareMatrix(_Matrix<Rows, Columns> &matrix)
+{
+    static_assert(Rows == Columns);
+
+    _ValidateValues(matrix);
+
+    for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
+        for (uiw columnIndex = rowIndex + 1; columnIndex < Columns; ++columnIndex)
+            std::swap(matrix.elements[rowIndex][columnIndex], matrix.elements[columnIndex][rowIndex]);
+}
+
+template <typename MatrixType, bool isAllowTranslation> inline void _SetTranslationScale(MatrixType &r, const optional<Vector3> &translation, const optional<Vector3> &scale)
+{
+    if (scale)
+    {
+        _ValidateValues(*scale);
+
+        for (uiw row = 0; row < 3; ++row)
+        {
+            for (uiw column = 0; column < 3; ++column)
+            {
+                r[row][column] *= scale->operator[](row);
+            }
+        }
+    }
+
+    if (isAllowTranslation && translation)
+    {
+        _ValidateValues(*translation);
+
+        r[3][0] = translation->x;
+        r[3][1] = translation->y;
+        r[3][2] = translation->z;
+    }
+}
+
+template <typename MatrixType, bool isAllowTranslation> inline MatrixType _CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt)
+{
+    static_assert(MatrixType::rows >= (isAllowTranslation ? 4 : 3));
+    static_assert(MatrixType::columns >= 3);
+
+    MatrixType r;
+
+    if (rotation)
+    {
+        _ValidateValues(*rotation);
+
+        f32 cx = cos(rotation->x);
+        f32 cy = cos(rotation->y);
+        f32 cz = cos(rotation->z);
+
+        f32 sx = sin(rotation->x);
+        f32 sy = sin(rotation->y);
+        f32 sz = sin(rotation->z);
+
+        r[0][0] = cy * cz;
+        r[0][1] = cy * sz;
+        r[0][2] = -sy;
+
+        r[1][0] = sx * sy * cz - cx * sz;
+        r[1][1] = sx * sy * sz + cx * cz;
+        r[1][2] = sx * cy;
+
+        r[2][0] = cx * sy * cz + sx * sz;
+        r[2][1] = cx * sy * sz - sx * cz;
+        r[2][2] = cx * cy;
+    }
+
+    _SetTranslationScale<MatrixType, isAllowTranslation>(r, translation, scale);
+
+    _ValidateValues(r);
+
+    return r;
+}
+
+template <typename MatrixType, bool isAllowTranslation> inline MatrixType _CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt)
+{
+    static_assert(MatrixType::rows >= (isAllowTranslation ? 4 : 3));
+    static_assert(MatrixType::columns >= 3);
+
+    MatrixType r;
+
+    if (rotation)
+    {
+        _ValidateValues(*rotation);
+
+        Matrix3x3 rotationMatrix = rotation->ToMatrix();
+        for (uiw row = 0; row < 3; ++row)
+        {
+            for (uiw column = 0; column < 3; ++column)
+            {
+                r[row][column] = rotationMatrix[row][column];
+            }
+        }
+    }
+
+    _SetTranslationScale<MatrixType, isAllowTranslation>(r, translation, scale);
+
+    _ValidateValues(r);
+
+    return r;
+}
+
+template <typename MatrixType> inline MatrixType _CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
+{
+    MatrixType r;
+    angle = -angle;
+
+    f32 ca = cos(angle);
+    f32 sa = sin(angle);
+
+    r[0][0] = axis.x * axis.x + (1 - axis.x * axis.x) * ca;
+    r[0][1] = axis.x * axis.y * (1 - ca) - axis.z * sa;
+    r[0][2] = axis.x * axis.z * (1 - ca) + axis.y * sa;
+
+    r[1][0] = axis.x * axis.y * (1 - ca) + axis.z * sa;
+    r[1][1] = axis.y * axis.y + (1 - axis.y * axis.y) * ca;
+    r[1][2] = axis.y * axis.z * (1 - ca) - axis.x * sa;
+
+    r[2][0] = axis.x * axis.z * (1 - ca) - axis.y * sa;
+    r[2][1] = axis.y * axis.z * (1 - ca) + axis.x * sa;
+    r[2][2] = axis.z * axis.z + (1 - axis.z * axis.z) * ca;
+
+    _ValidateValues(axis, angle, r);
+
+    return r;
+}
+
+template <typename T> T _CreateOrthographicMarix(const Vector3 &min, const Vector3 &max, ProjectionTarget target)
 {
     T m;
     m[0][0] = 2.0f / (max.x - min.x);
     m[3][0] = -((max.x + min.x) / (max.x - min.x));
     m[1][1] = 2.0f / (max.y - min.y);
     m[3][1] = -((max.y + min.y) / (max.y - min.y));
-    m[2][2] = 2.0f / (max.z - min.z);
-    m[3][2] = -((max.z + min.z) / (max.z - min.z));
+    if (target == ProjectionTarget::OGL)
+    {
+        m[2][2] = -2.0f / (max.z - min.z);
+        m[3][2] = -((max.z + min.z) / (max.z - min.z));
+    }
+    else if (target == ProjectionTarget::D3DAndMetal)
+    {
+        m[2][2] = 1.0f / (max.z - min.z);
+        m[3][2] = min.z / (min.z - max.z);
+    }
+    else
+    {
+        ASSUME(target == ProjectionTarget::Vulkan);
+        NOIMPL;
+    }
     return m;
 }
 
@@ -79,7 +220,7 @@ Vector2 Vector2::GetRightNormal() const
 // Vector3 //
 /////////////
 
-void Vector3::Cross(const Vector3 &other)
+Vector3 &Vector3::Cross(const Vector3 &other)
 {
     f32 nx = this->y * other.z - this->z * other.y;
     f32 ny = this->z * other.x - this->x * other.z;
@@ -88,6 +229,8 @@ void Vector3::Cross(const Vector3 &other)
     x = nx;
     y = ny;
     z = nz;
+
+    return *this;
 }
 
 Vector3 Vector3::GetCrossed(const Vector3 &other) const
@@ -198,22 +341,22 @@ Matrix4x4 Matrix4x3::operator*(const Matrix4x4 &other) const
 
 Matrix4x3 Matrix4x3::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
 {
-    return StdLib::CreateRotationAroundAxis<Matrix4x3>(axis, angle);
+    return _CreateRotationAroundAxis<Matrix4x3>(axis, angle);
 }
 
 Matrix4x3 Matrix4x3::CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale)
 {
-    return StdLib::CreateRTS<Matrix4x3, true>(rotation, translation, scale);
+    return _CreateRTS<Matrix4x3, true>(rotation, translation, scale);
 }
 
 Matrix4x3 Matrix4x3::CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale)
 {
-    return StdLib::CreateRTS<Matrix4x3, true>(rotation, translation, scale);
+    return _CreateRTS<Matrix4x3, true>(rotation, translation, scale);
 }
 
-Matrix4x3 Matrix4x3::CreateOrthographicProjection(const Vector3 &min, const Vector3 &max)
+Matrix4x3 Matrix4x3::CreateOrthographicProjection(const Vector3 &min, const Vector3 &max, ProjectionTarget target)
 {
-    return CreateOrthographicMarix<Matrix4x3>(min, max);
+    return _CreateOrthographicMarix<Matrix4x3>(min, max, target);
 }
 
 ///////////////
@@ -222,66 +365,79 @@ Matrix4x3 Matrix4x3::CreateOrthographicProjection(const Vector3 &min, const Vect
 
 Matrix3x4 Matrix3x4::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
 {
-    return StdLib::CreateRotationAroundAxis<Matrix3x4>(axis, angle);
+    return _CreateRotationAroundAxis<Matrix3x4>(axis, angle);
 }
 
 Matrix3x4 Matrix3x4::CreateRS(const optional<Vector3> &rotation, const optional<Vector3> &scale)
 {
-    return StdLib::CreateRTS<Matrix3x4, false>(rotation, nullopt, scale);
+    return _CreateRTS<Matrix3x4, false>(rotation, nullopt, scale);
 }
 
 Matrix3x4 Matrix3x4::CreateRS(const optional<Quaternion> &rotation, const optional<Vector3> &scale)
 {
-    return StdLib::CreateRTS<Matrix3x4, false>(rotation, nullopt, scale);
+    return _CreateRTS<Matrix3x4, false>(rotation, nullopt, scale);
 }
 
 ///////////////
 // Matrix4x4 //
 ///////////////
 
-void Matrix4x4::Transpose()
+Matrix4x4 &Matrix4x4::Transpose()
 {
-	TransposeSquareMatrix(*this);
+	_TransposeSquareMatrix(*this);
+    return *this;
 }
 
 Matrix4x4 Matrix4x4::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
 {
-    return StdLib::CreateRotationAroundAxis<Matrix4x4>(axis, angle);
+    return _CreateRotationAroundAxis<Matrix4x4>(axis, angle);
 }
 
 Matrix4x4 Matrix4x4::CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale)
 {
-    return StdLib::CreateRTS<Matrix4x4, true>(rotation, translation, scale);
+    return _CreateRTS<Matrix4x4, true>(rotation, translation, scale);
 }
 
 Matrix4x4 Matrix4x4::CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale)
 {
-    return StdLib::CreateRTS<Matrix4x4, true>(rotation, translation, scale);
+    return _CreateRTS<Matrix4x4, true>(rotation, translation, scale);
 }
 
-Matrix4x4 Matrix4x4::CreatePerspectiveProjection(f32 horizontalFOV, f32 aspectRatio, f32 nearPlane, f32 farPlane)
+Matrix4x4 Matrix4x4::CreatePerspectiveProjection(f32 horizontalFOVRad, f32 aspectRatio, f32 nearPlane, f32 farPlane, ProjectionTarget target)
 {
-    Matrix4x4 result;
+    Matrix4x4 r;
 
-    f32 fovH = horizontalFOV;
+    f32 fovH = horizontalFOVRad;
     f32 tanOfHalfFovH = tan(fovH * 0.5f);
     f32 fovV = 2.0f * atan(tanOfHalfFovH / aspectRatio);
     f32 q = farPlane / (farPlane - nearPlane);
     f32 w = 1.0f / tanOfHalfFovH;
     f32 h = 1.0f / tan(fovV * 0.5f);
     f32 l = -q * nearPlane;
+    f32 d = 1;
 
-    result[0][0] = w; result[0][1] = 0; result[0][2] = 0; result[0][3] = 0;
-    result[1][0] = 0; result[1][1] = h; result[1][2] = 0; result[1][3] = 0;
-    result[2][0] = 0; result[2][1] = 0; result[2][2] = q; result[2][3] = 1;
-    result[3][0] = 0; result[3][1] = 0; result[3][2] = l; result[3][3] = 0;
+    if (target == ProjectionTarget::Vulkan)
+    {
+        h = -h;
+    }
+    else if (target == ProjectionTarget::OGL)
+    {
+        q = -(farPlane + nearPlane) / (farPlane - nearPlane);
+        l = (-2.0f * farPlane * nearPlane) / (farPlane - nearPlane);
+        d = -1;
+    }
 
-    return result;
+    r[0][0] = w; r[0][1] = 0; r[0][2] = 0; r[0][3] = 0;
+    r[1][0] = 0; r[1][1] = h; r[1][2] = 0; r[1][3] = 0;
+    r[2][0] = 0; r[2][1] = 0; r[2][2] = q; r[2][3] = d;
+    r[3][0] = 0; r[3][1] = 0; r[3][2] = l; r[3][3] = 0;
+
+    return r;
 }
 
-Matrix4x4 Matrix4x4::CreateOrthographicProjection(const Vector3 &min, const Vector3 &max)
+Matrix4x4 Matrix4x4::CreateOrthographicProjection(const Vector3 &min, const Vector3 &max, ProjectionTarget target)
 {
-    auto m = CreateOrthographicMarix<Matrix4x4>(min, max);
+    auto m = _CreateOrthographicMarix<Matrix4x4>(min, max, target);
     m[3][3] = 1.0f;
     return m;
 }
@@ -290,48 +446,51 @@ Matrix4x4 Matrix4x4::CreateOrthographicProjection(const Vector3 &min, const Vect
 // Matrix2x2 //
 ///////////////
 
-void Matrix2x2::Transpose()
+Matrix2x2 &Matrix2x2::Transpose()
 {
-	TransposeSquareMatrix(*this);
+	_TransposeSquareMatrix(*this);
+    return *this;
 }
 
 ///////////////
 // Matrix3x3 //
 ///////////////
 
-void Matrix3x3::Transpose()
+Matrix3x3 &Matrix3x3::Transpose()
 {
-	TransposeSquareMatrix(*this);
+	_TransposeSquareMatrix(*this);
+    return *this;
 }
 
 Matrix3x3 Matrix3x3::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
 {
-    return StdLib::CreateRotationAroundAxis<Matrix3x3>(axis, angle);
+    return _CreateRotationAroundAxis<Matrix3x3>(axis, angle);
 }
 
 Matrix3x3 Matrix3x3::CreateRS(const optional<Vector3> &rotation, const optional<Vector3> &scale)
 {
-    return StdLib::CreateRTS<Matrix3x3, false>(rotation, nullopt, scale);
+    return _CreateRTS<Matrix3x3, false>(rotation, nullopt, scale);
 }
 
 Matrix3x3 Matrix3x3::CreateRS(const optional<Quaternion> &rotation, const optional<Vector3> &scale)
 {
-    return StdLib::CreateRTS<Matrix3x3, false>(rotation, nullopt, scale);
+    return _CreateRTS<Matrix3x3, false>(rotation, nullopt, scale);
 }
 
 ////////////////
 // Quaternion //
 ////////////////
 
+// based on https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 Quaternion Quaternion::FromEuler(const Vector3 &source)
 {
-    f32 cx = cos(source.x);
-    f32 cy = cos(source.y);
-    f32 cz = cos(source.z);
+    f32 cx = cos(source.x * 0.5f);
+    f32 cy = cos(source.y * 0.5f);
+    f32 cz = cos(source.z * 0.5f);
 
-    f32 sx = sin(source.x);
-    f32 sy = sin(source.y);
-    f32 sz = sin(source.z);
+    f32 sx = sin(source.x * 0.5f);
+    f32 sy = sin(source.y * 0.5f);
+    f32 sz = sin(source.z * 0.5f);
 
     f32 w = cx * cy * cz + sx * sy * sz;
     f32 x = sx * cy * cz - cx * sy * sz;
@@ -498,14 +657,14 @@ const f32 &Quaternion::operator[](uiw index) const
     return w;
 }
 
-f32 *Quaternion::Data()
+std::array<f32, 4> &Quaternion::Data()
 {
-    return &x;
+    return *(std::array<f32, 4> *)&x;
 }
 
-const f32 *Quaternion::Data() const
+const std::array<f32, 4> &Quaternion::Data() const
 {
-    return &x;
+    return *(std::array<f32, 4> *)&x;
 }
 
 Vector3 Quaternion::RotateVector(const Vector3 &source) const
@@ -517,7 +676,7 @@ Vector3 Quaternion::RotateVector(const Vector3 &source) const
     return v + ((uv * w) + uuv) * 2.0f;
 }
 
-void Quaternion::Normalize()
+Quaternion &Quaternion::Normalize()
 {
     f32 lengthSquare = x * x + y * y + z * z + w * w;
     f32 r = ApproxMath::RSqrt<ApproxMath::Precision::High>(lengthSquare);
@@ -525,6 +684,7 @@ void Quaternion::Normalize()
     y *= r;
     z *= r;
     w *= r;
+    return *this;
 }
 
 Quaternion Quaternion::GetNormalized() const
@@ -540,11 +700,12 @@ bool Quaternion::IsNormalized(f32 epsilon) const
     return (length >= 1.0f - epsilon) && (length <= 1.0f + epsilon);
 }
 
-void Quaternion::Inverse()
+Quaternion &Quaternion::Inverse()
 {
     x = -x;
     y = -y;
     z = -z;
+    return *this;
 }
 
 Quaternion Quaternion::GetInversed() const
@@ -563,36 +724,98 @@ Vector3 Quaternion::GetRotationAxis() const
     return {x * r, y * r, z * r};
 }
 
-// based on https://math.stackexchange.com/questions/1477926/quaternion-to-euler-with-some-properties
 Vector3 Quaternion::ToEuler() const
 {
+    // based on https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
     const f32 sqx = x * x;
     const f32 sqy = y * y;
     const f32 sqz = z * z;
 
-    f32 eulerX, eulerY, eulerZ;
+    f32 sinr_cosp = 2.0f * (w * x + y * z);
+    f32 cosr_cosp = 1.0f - 2.0f * (sqx + sqy);
+    f32 eulerX = atan2(sinr_cosp, cosr_cosp);
 
-    f32 singularity = x * z - y * w;
-    if (singularity > 0.4999995f)
+    f32 eulerY;
+    f32 sinp = 2.0f * (w * y - z * x);
+    if (abs(sinp) >= 1)
     {
-        eulerX = atan2(x, w);
-        eulerY = MathPiHalf<f32>();
-        eulerZ = atan2(z, w);
-    }
-    else if (singularity < -0.4999995f)
-    {
-        eulerX = atan2(x, w);
-        eulerY = -MathPiHalf<f32>();
-        eulerZ = atan2(z, w);
+        eulerY = copysign(MathPiHalf<f32>(), sinp); // use 90 degrees if out of range
     }
     else
     {
-        eulerX = atan2(y * z + x * w, 0.5f - sqy - sqx);
-        eulerY = -asin(singularity * 2.0f);
-        eulerZ = atan2(y * x + z * w, 0.5f - sqy - sqz);
+        eulerY = asin(sinp);
     }
 
+    f32 siny_cosp = 2.0f * (w * z + x * y);
+    f32 cosy_cosp = 1.0f - 2.0f * (sqy + sqz);
+    f32 eulerZ = atan2(siny_cosp, cosy_cosp);
+
+    if (eulerX < 0) eulerX += MathPiDouble<f32>();
+    if (eulerY < 0) eulerY += MathPiDouble<f32>();
+    if (eulerZ < 0) eulerZ += MathPiDouble<f32>();
+
+    ASSUME(eulerX < MathPiDouble<f32>() + DefaultF32Epsilon);
+    ASSUME(eulerY < MathPiDouble<f32>() + DefaultF32Epsilon);
+    ASSUME(eulerZ < MathPiDouble<f32>() + DefaultF32Epsilon);
+
     return {eulerX, eulerY, eulerZ};
+        
+    // based on https://math.stackexchange.com/questions/1477926/quaternion-to-euler-with-some-properties
+    //const f32 sqx = x * x;
+    //const f32 sqy = y * y;
+    //const f32 sqz = z * z;
+
+    //f32 eulerX, eulerY, eulerZ;
+
+    //f32 singularity = 2.0f * (x * z - y * w);
+    //if (singularity > 0.99995f)
+    //{
+    //    eulerX = atan2(x, w);
+    //    eulerY = -MathPiHalf<f32>();
+    //    eulerZ = atan2(z, w);
+    //}
+    //else if (singularity < -0.99995f)
+    //{
+    //    eulerX = atan2(x, w);
+    //    eulerY = MathPiHalf<f32>();
+    //    eulerZ = atan2(z, w);
+    //}
+    //else
+    //{
+    //    eulerX = atan2(y * z + x * w, 0.5f - sqy - sqx);
+    //    eulerY = -asin(singularity);
+    //    eulerZ = atan2(y * x + z * w, 0.5f - sqy - sqz);
+    //}
+
+    //if (eulerX < 0) eulerX += MathPiDouble<f32>();
+    //if (eulerY < 0) eulerY += MathPiDouble<f32>();
+    //if (eulerZ < 0) eulerZ += MathPiDouble<f32>();
+
+    //ASSUME(eulerX < MathPiDouble<f32>() + DefaultF32Epsilon);
+    //ASSUME(eulerY < MathPiDouble<f32>() + DefaultF32Epsilon);
+    //ASSUME(eulerZ < MathPiDouble<f32>() + DefaultF32Epsilon);
+
+    //return {eulerX, eulerY, eulerZ};
+
+    // based on https://www.gamedev.net/forums/topic/166424-quaternion-to-euler/
+    //f32 sqw = w * w;
+    //f32 sqx = x * x;
+    //f32 sqy = y * y;
+    //f32 sqz = z * z;
+
+    //f32 rotxrad = atan2(2.0f * (y * z + x * w), (-sqx - sqy + sqz + sqw));
+    //f32 rotyrad = asin(-2.0f * (x * z - y * w));
+    //f32 rotzrad = atan2(2.0f * (x * y + z * w), (sqx - sqy - sqz + sqw));
+
+    //if (eulerX < 0) eulerX += MathPiDouble<f32>();
+    //if (eulerY < 0) eulerY += MathPiDouble<f32>();
+    //if (eulerZ < 0) eulerZ += MathPiDouble<f32>();
+
+    //ASSUME(eulerX < MathPiDouble<f32>() + DefaultF32Epsilon);
+    //ASSUME(eulerY < MathPiDouble<f32>() + DefaultF32Epsilon);
+    //ASSUME(eulerZ < MathPiDouble<f32>() + DefaultF32Epsilon);
+
+    //return {rotxrad, rotyrad, rotzrad};
 }
 
 std::tuple<Vector3, f32> Quaternion::ToAxisAndAngle() const

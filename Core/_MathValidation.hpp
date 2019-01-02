@@ -23,6 +23,10 @@ namespace StdLib
 	template <typename ScalarType = void, uiw Dim = 0> constexpr bool __IsVector(f32) { return false; }
 	template <typename ScalarType = void, uiw Dim = 0> constexpr bool __IsVector(f64) { return false; }
 
+    template <uiw Rows, uiw Columns> constexpr bool __IsMatrix(_Matrix<Rows, Columns>) { return true; }
+    template <uiw Rows = 0, uiw Columns = 0> constexpr bool __IsMatrix(f32) { return false; }
+    template <uiw Rows = 0, uiw Columns = 0> constexpr bool __IsMatrix(f64) { return false; }
+
 	#define VALIDATE_VALUE(v) \
 		{ \
 			using t = std::remove_reference_t<std::remove_cv_t<decltype(v)>>; \
@@ -35,6 +39,10 @@ namespace StdLib
 						VALIDATE_VALUES_ARRAY(&v.x, t::dim); \
 					} \
 				} \
+                else if constexpr (__IsMatrix(t())) \
+                { \
+                    VALIDATE_VALUES_ARRAY(v.elements[0].data(), t::numElements); \
+                } \
 				else \
 				{ \
 					VALIDATE_FP_VALUE(v); \

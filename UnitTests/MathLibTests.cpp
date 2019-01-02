@@ -6,7 +6,7 @@ using namespace Funcs;
 
 namespace
 {
-	static constexpr ui32 TestIterations = 10;
+	static constexpr ui32 TestIterations = 10'00;
 }
 
 template <uiw index, typename T> typename T::ScalarType Get(T vec)
@@ -71,6 +71,11 @@ template <typename T> void BaseVectorTestsHelper()
 	{
 		v0 = GenerateVec<T>(true);
 		v1 = GenerateVec<T>(true);
+
+        for (uiw dataIndex = 0; dataIndex < v0.Data().size(); ++dataIndex)
+        {
+            UTest(Equal, v0.Data()[dataIndex], v0[dataIndex]);
+        }
 
 		auto addTransform = [](auto s0, auto s1) { return s0 + s1; };
 		auto subTransform = [](auto s0, auto s1) { return s0 - s1; };
@@ -275,6 +280,19 @@ template <typename T> void MathFuncsTests()
 	constexpr T piFromNormalizedClose = RadNormalizeClose(piDouble + pi);
 	UTest(true, EqualsWithEpsilon(piFromNormalizedClose, pi));
 
+    UTest(true, EqualsWithEpsilon(RadDistance(zero, MathPiDouble<T>()), zero));
+    UTest(true, EqualsWithEpsilon(RadDistance(zero, zero), zero));
+    UTest(true, EqualsWithEpsilon(RadDistance(MathPiDouble<T>(), MathPiDouble<T>()), zero));
+    UTest(true, EqualsWithEpsilon(RadDistance(MathPi<T>(), MathPiDouble<T>()), MathPi<T>()));
+    UTest(true, EqualsWithEpsilon(RadDistance(zero, MathPi<T>()), MathPi<T>()));
+
+    UTest(true, EqualsWithEpsilon(DegDistance(zero, T(360)), zero));
+    UTest(true, EqualsWithEpsilon(DegDistance(zero, zero), zero));
+    UTest(true, EqualsWithEpsilon(DegDistance(T(360), T(360)), zero));
+    UTest(true, EqualsWithEpsilon(DegDistance(T(180), T(360)), T(180)));
+    UTest(true, EqualsWithEpsilon(DegDistance(zero, T(180)), T(180)));
+    UTest(true, EqualsWithEpsilon(DegDistance(T(90), T(270)), T(180)));
+
 	for (ui32 index = 0; index < TestIterations; ++index)
 	{
 		T value = rand() * T(0.01);
@@ -311,16 +329,160 @@ template <typename T> void MathFuncsTests()
 		UTest(true, EqualsWithEpsilon(Lerp(value, value2, zero), value, lerpEpsilon));
 		UTest(true, EqualsWithEpsilon(Lerp(value, value2, T(1)), value2, lerpEpsilon));
 	}
+
+    if constexpr (std::is_same_v<T, f32>)
+    {
+        f32 horToVerDeg = RadToDeg(HorizontalFOVToVertical(DegToRad(90.0f), 1920.0f / 1080.0f));
+        UTest(true, EqualsWithEpsilon(horToVerDeg, 58.7f, 0.25f));
+
+        f32 verToHorDeg = RadToDeg(VerticalFOVToHorizontal(DegToRad(58.7f), 1920.0f / 1080.0f));
+        UTest(true, EqualsWithEpsilon(verToHorDeg, 90.0f, 0.25f));
+    }
+}
+
+static void QuaternionTests()
+{
+    f32 epsilon = 0.0001f;
+    Quaternion q0, q1;
+    
+    q0 = Quaternion::FromEuler(Vector3{25.0f, 40.0f, 75.0f} * DegToRadF32Const);
+    Vector3 toEuler = q0.ToEuler().ForEach(RadToDeg);
+    UTest(true, toEuler.EqualsWithEpsilon({25.0f, 40.0f, 75.0f}, epsilon));
+
+    auto mat = Matrix3x3::CreateRS(Vector3{25.0f, 40.0f, 75.0f}.ForEach(DegToRad)); // positive trace matrix
+    q0 = Quaternion(mat);
+    toEuler = q0.ToEuler().ForEach(RadToDeg);
+    UTest(true, toEuler.EqualsWithEpsilon({25.0f, 40.0f, 75.0f}, epsilon));
+
+    mat = Matrix3x3::CreateRS(Vector3{25.0f, 50.0f, 256.0f}.ForEach(DegToRad)); // negative trace matrix
+    q0 = Quaternion(mat);
+    toEuler = q0.ToEuler().ForEach(RadToDeg);
+    UTest(true, toEuler.EqualsWithEpsilon({25.0f, 50.0f, 256.0f}, epsilon));
+
+    for (ui32 index = 0; index < TestIterations; ++index)
+    {
+        /*auto radDist = [](Vector3 left, Vector3 right)
+        {
+            f32 x = RadDistance(left.x, right.x);
+            f32 y = RadDistance(left.y, right.y);
+            f32 z = RadDistance(left.z, right.z);
+            return Vector3{x, y, z};
+        };
+
+        Vector3 euler = GenerateVec<Vector3>(true).ForEach(RadNormalize);
+        q0 = Quaternion::FromEuler(euler);
+        UTest(true, q0.IsNormalized());
+        toEuler = q0.ToEuler();
+        Vector3 dist = radDist(toEuler, euler);
+        UTest(true, dist.EqualsWithEpsilon({0, 0, 0}));
+        euler = euler;*/
+    }
 }
 
 template <typename T> void MatrixTestsHelper()
 {
-	T m0, m1, m2;
+	T m0, m1, m2, m3;
 	for (ui32 index = 0; index < TestIterations; ++index)
 	{
 		m0 = GenerateMatrix<T>();
 		m1 = GenerateMatrix<T>();
-	}
+
+        for (uiw row = 0; row < T::rows; ++row)
+        {
+            for (uiw column = 0; column < T::columns; ++column)
+            {
+                UTest(Equal, m0[row][column], m0.Data()[row * T::columns + column]);
+            }
+        }
+
+        m2 = m0 + m1;
+        m3 = m0 - m1;
+        for (uiw elIndex = 0; elIndex < T::numberOfElements; ++elIndex)
+        {
+            UTest(true, EqualsWithEpsilon(m0.Data()[elIndex] + m1.Data()[elIndex], m2.Data()[elIndex]));
+            UTest(true, EqualsWithEpsilon(m0.Data()[elIndex] - m1.Data()[elIndex], m3.Data()[elIndex]));
+        }
+
+        m2 = m0;
+        m2 += m1;
+        m3 = m0;
+        m3 -= m1;
+        for (uiw elIndex = 0; elIndex < T::numberOfElements; ++elIndex)
+        {
+            UTest(true, EqualsWithEpsilon(m0.Data()[elIndex] + m1.Data()[elIndex], m2.Data()[elIndex]));
+            UTest(true, EqualsWithEpsilon(m0.Data()[elIndex] - m1.Data()[elIndex], m3.Data()[elIndex]));
+        }
+
+        auto m0Transposed = m0.GetTransposed();
+        for (uiw row = 0; row < T::rows; ++row)
+        {
+            for (uiw column = 0; column < T::columns; ++column)
+            {
+                UTest(Equal, m0[row][column], m0Transposed[column][row]);
+            }
+        }
+        UTest(Equal, m0.GetRow(1), m0Transposed.GetColumn(1));
+
+        for (uiw row = 0; row < T::rows; ++row)
+        {
+            m2.SetRow(row, m0.GetRow(row));
+            UTest(Equal, m2.GetRow(row), m0.GetRow(row));
+        }
+        UTest(Equal, m2.Data(), m0.Data());
+
+        for (uiw column = 0; column < T::columns; ++column)
+        {
+            m2.SetColumn(column, m0.GetColumn(column));
+            UTest(Equal, m2.GetColumn(column), m0.GetColumn(column));
+        }
+        UTest(Equal, m2.Data(), m0.Data());
+
+        UTest(true, m2.EqualsWithEpsilon(m2, 0));
+    }
+}
+
+static void Matrix2x2Tests()
+{}
+
+static void Matrix2x3Tests()
+{}
+
+static void Matrix3x2Tests()
+{}
+
+static void Matrix3x3Tests()
+{}
+
+static void Matrix3x4Tests()
+{}
+
+static void Matrix4x3Tests()
+{
+    auto checkRTS = [](const Matrix4x3 &m)
+    {
+        UTest(true, m.GetRow(0).EqualsWithEpsilon({0.0665462837f, 0.248354077f, -0.306417793f}));
+        UTest(true, m.GetRow(1).EqualsWithEpsilon({-0.395817429f, 0.273641407f, 0.135826901f}));
+        UTest(true, m.GetRow(2).EqualsWithEpsilon({0.352745265f, 0.336740196f, 0.349538058f}));
+        UTest(true, m.GetRow(3).EqualsWithEpsilon({10.0f, 20.0f, 30.0f}));
+    };
+
+    checkRTS(Matrix4x3::CreateRTS(Vector3{25.0f, 50.0f, 75.0f}.ForEach(DegToRad), Vector3(10, 20, 30), Vector3(0.4f, 0.5f, 0.6f)));
+    checkRTS(Matrix4x3::CreateRTS(Quaternion::FromEuler(Vector3{25.0f, 50.0f, 75.0f}.ForEach(DegToRad)), Vector3(10, 20, 30), Vector3(0.4f, 0.5f, 0.6f)));
+}
+
+static void Matrix4x4Tests()
+{
+    auto persp = Matrix4x4::CreatePerspectiveProjection(DegToRad(90.0f), 1920.0f / 1080.0f, 0.1f, 1000.0f, ProjectionTarget::OGL); // TODO: test other targets
+    UTest(true, persp.GetRow(0).EqualsWithEpsilon({1.0f, 0.0f, 0.0f, 0.0f}));
+    UTest(true, persp.GetRow(1).EqualsWithEpsilon({0.0f, 1.777777f, 0.0f, 0.0f}));
+    UTest(true, persp.GetRow(2).EqualsWithEpsilon({0.0f, 0.0f, -1.0002f, -1.0f}));
+    UTest(true, persp.GetRow(3).EqualsWithEpsilon({0.0f, 0.0f, -0.20002f, 0.0f}));
+
+    auto orto = Matrix4x4::CreateOrthographicProjection({0, 0, 0.1f}, {1920, 1080, 1000}, ProjectionTarget::OGL); // TODO: test other targets
+    UTest(true, orto.GetRow(0).EqualsWithEpsilon({0.00104f, 0.0f, 0.0f, 0.0f}));
+    UTest(true, orto.GetRow(1).EqualsWithEpsilon({0.0f, 0.00186f, 0.0f, 0.0f}));
+    UTest(true, orto.GetRow(2).EqualsWithEpsilon({0.0f, 0.0f, -0.002f, 0.0f}));
+    UTest(true, orto.GetRow(3).EqualsWithEpsilon({-1.0f, -1.0f, -1.0002f, 1.0f}));
 }
 
 static void BaseVectorTests()
@@ -363,6 +525,14 @@ static void MatrixTests()
 	MatrixTestsHelper<Matrix3x4>();
 	MatrixTestsHelper<Matrix4x3>();
 	MatrixTestsHelper<Matrix4x4>();
+
+    Matrix2x2Tests();
+    Matrix2x3Tests();
+    Matrix3x2Tests();
+    Matrix3x3Tests();
+    Matrix3x4Tests();
+    Matrix4x3Tests();
+    Matrix4x4Tests();
 }
 
 void MathLibTests()
@@ -377,6 +547,7 @@ void MathLibTests()
 		MathFuncsTests<f64>();
 		BaseVectorTests();
 		FP32VectorTests();
+        QuaternionTests();
 		MatrixTests();
 
 		auto end = TimeMoment::Now();

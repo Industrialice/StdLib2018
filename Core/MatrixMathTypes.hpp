@@ -56,7 +56,7 @@ namespace StdLib
     template <typename ScalarType> struct _ChooseVectorType<ScalarType, 2> { using Type = Vector2Base<ScalarType>; };
     template <typename ScalarType> struct _ChooseVectorType<ScalarType, 3> { using Type = Vector3Base<ScalarType>; };
     template <typename ScalarType> struct _ChooseVectorType<ScalarType, 4> { using Type = Vector4Base<ScalarType>; };
-    
+
     template <typename ScalarType, uiw Dim> using VectorTypeByDimension = typename _ChooseVectorType<ScalarType, Dim>::Type;
 
     template <uiw Rows, uiw Columns> struct _ChooseMatrixType;
@@ -86,7 +86,6 @@ namespace StdLib
 
         [[nodiscard]] VectorType operator + (const _VectorBase &other) const;
         [[nodiscard]] VectorType operator + (ScalarType scalar) const;
-        [[nodiscard]] friend VectorType operator + (ScalarType scalar, const _VectorBase &vector) { return vector + scalar; }
 
         VectorType &operator += (const _VectorBase &other);
         VectorType &operator += (ScalarType scalar);
@@ -99,27 +98,27 @@ namespace StdLib
 
         [[nodiscard]] VectorType operator * (const _VectorBase &other) const;
         [[nodiscard]] VectorType operator * (ScalarType scalar) const;
-        [[nodiscard]] friend VectorType operator * (ScalarType scalar, const _VectorBase &vector) { return vector * scalar; } // TODO: do we need this?
 
         VectorType &operator *= (const _VectorBase &other);
         VectorType &operator *= (ScalarType scalar);
 
         [[nodiscard]] VectorType operator / (const _VectorBase &other) const;
         [[nodiscard]] VectorType operator / (ScalarType scalar) const;
-        [[nodiscard]] friend VectorType operator / (ScalarType scalar, const _VectorBase &vector) { return vector / scalar; } // TODO: do we need this?
 
         VectorType &operator /= (const _VectorBase &other);
         VectorType &operator /= (ScalarType scalar);
 
-		[[nodiscard]] bool operator == (const _VectorBase &other) const;
-		[[nodiscard]] bool operator != (const _VectorBase &other) const;
+        [[nodiscard]] bool operator == (const _VectorBase &other) const;
+        [[nodiscard]] bool operator != (const _VectorBase &other) const;
 
-        [[nodiscard]] ScalarType *Data();
-        [[nodiscard]] const ScalarType *Data() const;
-        
+        [[nodiscard]] std::array<ScalarType, Dim> &Data();
+        [[nodiscard]] const std::array<ScalarType, Dim> &Data() const;
+
         [[nodiscard]] ScalarType Accumulate() const;
         [[nodiscard]] ScalarType Max() const;
         [[nodiscard]] ScalarType Min() const;
+
+        VectorType &ForEach(ScalarType func(ScalarType element));
     };
 
     template <typename ScalarType> struct Vector2Base : _VectorBase<ScalarType, 2>
@@ -196,16 +195,16 @@ namespace StdLib
 
         [[nodiscard]] f32 Average() const;
 
-        void Normalize();
+        VectorType &Normalize();
         [[nodiscard]] VectorType GetNormalized() const;
         [[nodiscard]] bool IsNormalized(f32 epsilon = DefaultF32Epsilon) const;
 
         [[nodiscard]] bool EqualsWithEpsilon(const _VectorFP &other, f32 epsilon = DefaultF32Epsilon) const;
 
-        void Lerp(const _VectorFP &other, f32 interpolant);
+        VectorType &Lerp(const _VectorFP &other, f32 interpolant);
         [[nodiscard]] VectorType GetLerped(const _VectorFP &other, f32 interpolant) const;
 
-        template <uiw Rows, uiw Columns> [[nodiscard]] VectorTypeByDimension<f32, Columns> operator * (const _Matrix<Rows, Columns> &matrix) const;
+        template <uiw Rows, uiw Columns>[[nodiscard]] VectorTypeByDimension<f32, Columns> operator * (const _Matrix<Rows, Columns> &matrix) const;
         template <uiw Rows, uiw Columns> VectorType &operator *= (const _Matrix<Rows, Columns> &matrix);
     };
 
@@ -221,7 +220,7 @@ namespace StdLib
     {
         using _VectorFP::_VectorFP;
 
-        void Cross(const Vector3 &other);
+        Vector3 &Cross(const Vector3 &other);
         [[nodiscard]] Vector3 GetCrossed(const Vector3 &other) const;
     };
 
@@ -270,6 +269,7 @@ namespace StdLib
         static constexpr uiw rows = Rows;
         static constexpr uiw columns = Columns;
         static constexpr uiw numberOfElements = Rows * Columns;
+
         std::array<std::array<f32, Columns>, Rows> elements;
 
         [[nodiscard]] MatrixType operator + (const _Matrix &other) const;
@@ -287,25 +287,32 @@ namespace StdLib
         [[nodiscard]] std::array<f32, Columns> &operator [] (uiw index);
         [[nodiscard]] const std::array<f32, Columns> &operator [] (uiw index) const;
 
-        [[nodiscard]] f32 *Data();
-        [[nodiscard]] const f32 *Data() const;
+        [[nodiscard]] std::array<f32, Rows * Columns> &Data();
+        [[nodiscard]] const std::array<f32, Rows * Columns> &Data() const;
 
         [[nodiscard]] MatrixTypeByDimensions<Columns, Rows> GetTransposed() const;
 
         [[nodiscard]] VectorTypeByDimension<f32, Columns> GetRow(uiw rowIndex) const;
-        void SetRow(uiw rowIndex, const VectorTypeByDimension<f32, Columns> &row);
+        MatrixType &SetRow(uiw rowIndex, const VectorTypeByDimension<f32, Columns> &row);
 
         [[nodiscard]] VectorTypeByDimension<f32, Rows> GetColumn(uiw columnIndex) const;
-        void SetColumn(uiw columnIndex, const VectorTypeByDimension<f32, Rows> &column);
+        MatrixType &SetColumn(uiw columnIndex, const VectorTypeByDimension<f32, Rows> &column);
 
         [[nodiscard]] f32 FetchValueBoundless(uiw rowIndex, uiw columnIndex) const;
-        void StoreValueBoundless(uiw rowIndex, uiw columnIndex, f32 value);
+        MatrixType &StoreValueBoundless(uiw rowIndex, uiw columnIndex, f32 value);
 
         [[nodiscard]] bool EqualsWithEpsilon(const _Matrix &other, f32 epsilon = DefaultF32Epsilon) const;
 
     protected:
         constexpr _Matrix(); // will create identity matrix
         template <typename... Args> constexpr _Matrix(Args &&... args) : elements{args...} {}
+    };
+
+    enum class ProjectionTarget
+    {
+        D3DAndMetal,
+        Vulkan,
+        OGL
     };
 
     struct Matrix4x3 : _Matrix<4, 3>
@@ -324,7 +331,7 @@ namespace StdLib
         [[nodiscard]] static Matrix4x3 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
         [[nodiscard]] static Matrix4x3 CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt);
         [[nodiscard]] static Matrix4x3 CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt);
-        [[nodiscard]] static Matrix4x3 CreateOrthographicProjection(const Vector3 &min, const Vector3 &max);
+        [[nodiscard]] static Matrix4x3 CreateOrthographicProjection(const Vector3 &min, const Vector3 &max, ProjectionTarget target);
     };
 
     struct Matrix3x4 : _Matrix<3, 4>
@@ -352,14 +359,14 @@ namespace StdLib
             f32 e30, f32 e31, f32 e32, f32 e33);
 
         constexpr Matrix4x4(const Vector4 &row0, const Vector4 &row1, const Vector4 &row2, const Vector4 &row3);
-		
-		void Transpose();
+
+        Matrix4x4 &Transpose();
 
         [[nodiscard]] static Matrix4x4 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
         [[nodiscard]] static Matrix4x4 CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt);
         [[nodiscard]] static Matrix4x4 CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt);
-        [[nodiscard]] static Matrix4x4 CreatePerspectiveProjection(f32 horizontalFOV, f32 aspectRatio, f32 nearPlane, f32 farPlane);
-        [[nodiscard]] static Matrix4x4 CreateOrthographicProjection(const Vector3 &min, const Vector3 &max);
+        [[nodiscard]] static Matrix4x4 CreatePerspectiveProjection(f32 horizontalFOV, f32 aspectRatio, f32 nearPlane, f32 farPlane, ProjectionTarget target);
+        [[nodiscard]] static Matrix4x4 CreateOrthographicProjection(const Vector3 &min, const Vector3 &max, ProjectionTarget target);
     };
 
     struct Matrix3x2 : _Matrix<3, 2>
@@ -397,9 +404,9 @@ namespace StdLib
             f32 e10, f32 e11);
 
         constexpr Matrix2x2(const Vector2 &row0, const Vector2 &row1);
-		
-		void Transpose();
-	};
+
+        Matrix2x2 &Transpose();
+    };
 
     struct Matrix3x3 : _Matrix<3, 3>
     {
@@ -410,13 +417,13 @@ namespace StdLib
             f32 e20, f32 e21, f32 e22);
 
         constexpr Matrix3x3(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2);
-		
-		void Transpose();
+
+        Matrix3x3 &Transpose();
 
         [[nodiscard]] static Matrix3x3 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
         [[nodiscard]] static Matrix3x3 CreateRS(const optional<Vector3> &rotation, const optional<Vector3> &scale = nullopt);
         [[nodiscard]] static Matrix3x3 CreateRS(const optional<Quaternion> &rotation, const optional<Vector3> &scale = nullopt);
-	};
+    };
 
     // Addition and subtraction are a component-wise operation; composing quaternions should be done via multiplication.
     // Order matters when composing quaternions : C = A * B will yield a quaternion C that logically
@@ -450,16 +457,16 @@ namespace StdLib
         [[nodiscard]] f32 &operator [] (uiw index);
         [[nodiscard]] const f32 &operator [] (uiw index) const;
 
-        [[nodiscard]] f32 *Data();
-        [[nodiscard]] const f32 *Data() const;
+        [[nodiscard]] std::array<f32, 4> &Data();
+        [[nodiscard]] const std::array<f32, 4> &Data() const;
 
         [[nodiscard]] Vector3 RotateVector(const Vector3 &source) const;
 
-        void Normalize();
+        Quaternion &Normalize();
         [[nodiscard]] Quaternion GetNormalized() const;
         [[nodiscard]] bool IsNormalized(f32 epsilon = DefaultF32Epsilon) const;
 
-        void Inverse();
+        Quaternion &Inverse();
         [[nodiscard]] Quaternion GetInversed() const;
 
         [[nodiscard]] f32 GetAngle() const;
@@ -499,13 +506,18 @@ namespace StdLib
     using RectangleF32 = Rectangle<f32>;
     using RectangleI32 = Rectangle<i32>;
     using RectangleUI32 = Rectangle<ui32>;
+}
 
+#include "_MathValidation.hpp"
+
+namespace StdLib
+{
     /////////////
     // _Vector //
     /////////////
 
-    template<typename Basis>
-    template<uiw Rows, uiw Columns>
+    template <typename Basis>
+    template <uiw Rows, uiw Columns>
     inline auto _VectorFP<Basis>::operator * (const _Matrix<Rows, Columns> &matrix) const -> VectorTypeByDimension<f32, Columns>
     {
         static_assert(dim == Rows, "Cannot multiply vector and matrix, matrix's rows number and vector dimension must be equal");
@@ -517,14 +529,17 @@ namespace StdLib
             result[columnIndex] = Dot(matrix.GetColumn(columnIndex));
         }
 
+        _ValidateValues(*this, matrix, result);
+
         return result;
     }
 
-    template<typename Basis>
-    template<uiw Rows, uiw Columns>
+    template <typename Basis>
+    template <uiw Rows, uiw Columns>
     inline auto _VectorFP<Basis>::operator *= (const _Matrix<Rows, Columns> &matrix) -> VectorType &
     {
         *this = *this * matrix;
+        _ValidateValues(*this, matrix);
         return (VectorType &)*this;
     }
 
@@ -534,47 +549,63 @@ namespace StdLib
     // _VectorBase //
     /////////////////
 
-    template<typename _ScalarType, uiw Dim> inline constexpr _VectorBase<_ScalarType, Dim>::_VectorBase(ScalarType x, ScalarType y) : x(x), y(y)
-    {}
+    template <typename _ScalarType, uiw Dim> inline constexpr _VectorBase<_ScalarType, Dim>::_VectorBase(ScalarType x, ScalarType y) : x(x), y(y)
+    {
+        _ValidateValues(*this);
+    }
 
     /////////////////
     // Vector2Base //
     /////////////////
 
-    template<typename ScalarType> inline constexpr Vector2Base<ScalarType>::Vector2Base(ScalarType x, ScalarType y) : _VectorBase<ScalarType, 2>(x, y)
-    {}
+    template <typename ScalarType> inline constexpr Vector2Base<ScalarType>::Vector2Base(ScalarType x, ScalarType y) : _VectorBase<ScalarType, 2>(x, y)
+    {
+        _ValidateValues(*this);
+    }
 
     /////////////////
     // Vector3Base //
     /////////////////
 
-    template<typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(ScalarType x, ScalarType y, ScalarType z) : _VectorBase<ScalarType, 3>(x, y), z(z)
-    {}
+    template <typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(ScalarType x, ScalarType y, ScalarType z) : _VectorBase<ScalarType, 3>(x, y), z(z)
+    {
+        _ValidateValues(*this);
+    }
 
-    template<typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z) : _VectorBase<ScalarType, 3>(vec.x, vec.y), z(z)
-    {}
+    template <typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z) : _VectorBase<ScalarType, 3>(vec.x, vec.y), z(z)
+    {
+        _ValidateValues(*this);
+    }
 
     /////////////////
     // Vector4Base //
     /////////////////
 
-    template<typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(ScalarType x, ScalarType y, ScalarType z, ScalarType w) : _VectorBase<ScalarType, 4>(x, y), z(z), w(w)
-    {}
+    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(ScalarType x, ScalarType y, ScalarType z, ScalarType w) : _VectorBase<ScalarType, 4>(x, y), z(z), w(w)
+    {
+        _ValidateValues(*this);
+    }
 
-    template<typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z, ScalarType w) : _VectorBase<ScalarType, 4>(vec.x, vec.y), z(z), w(w)
-    {}
+    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z, ScalarType w) : _VectorBase<ScalarType, 4>(vec.x, vec.y), z(z), w(w)
+    {
+        _ValidateValues(*this);
+    }
 
-    template<typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 3> &vec, ScalarType w) : _VectorBase<ScalarType, 4>(vec.x, vec.y), z(vec.z), w(w)
-    {}
+    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 3> &vec, ScalarType w) : _VectorBase<ScalarType, 4>(vec.x, vec.y), z(vec.z), w(w)
+    {
+        _ValidateValues(*this);
+    }
 
-    template<typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &v0, const VectorTypeByDimension<ScalarType, 2> &v1) : _VectorBase<ScalarType, 4>(v0.x, v0.y), z(v1.x), w(v1.y)
-    {}
+    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &v0, const VectorTypeByDimension<ScalarType, 2> &v1) : _VectorBase<ScalarType, 4>(v0.x, v0.y), z(v1.x), w(v1.y)
+    {
+        _ValidateValues(*this);
+    }
 
     /////////////
     // _Matrix //
     /////////////
 
-    template<uiw Rows, uiw Columns> inline constexpr _Matrix<Rows, Columns>::_Matrix()
+    template <uiw Rows, uiw Columns> inline constexpr _Matrix<Rows, Columns>::_Matrix()
     {
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
         {
@@ -597,70 +628,98 @@ namespace StdLib
     ///////////////
 
     constexpr Matrix2x2::Matrix2x2(f32 e00, f32 e01, f32 e10, f32 e11) : _Matrix(e00, e01, e10, e11)
-    {}
+    {
+        _ValidateValues(*this);
+    }
 
     constexpr Matrix2x2::Matrix2x2(const Vector2 &row0, const Vector2 &row1) : _Matrix(row0.x, row0.y, row1.x, row1.y)
-    {}
+    {
+        _ValidateValues(*this);
+    }
 
     ///////////////
     // Matrix3x2 //
     ///////////////
 
     constexpr Matrix3x2::Matrix3x2(f32 e00, f32 e01, f32 e10, f32 e11, f32 e20, f32 e21) : _Matrix(e00, e01, e10, e11, e20, e21)
-    {}
+    {
+        _ValidateValues(*this);
+    }
 
     constexpr Matrix3x2::Matrix3x2(const Vector2 &row0, const Vector2 &row1, const Vector2 &row2) : _Matrix(row0.x, row0.y, row1.x, row1.y, row2.x, row2.y)
-    {}
+    {
+        _ValidateValues(*this);
+    }
 
     ///////////////
     // Matrix2x3 //
     ///////////////
 
     constexpr Matrix2x3::Matrix2x3(f32 e00, f32 e01, f32 e02, f32 e10, f32 e11, f32 e12) : _Matrix(e00, e01, e02, e10, e11, e12)
-    {}
+    {
+        _ValidateValues(*this);
+    }
 
     constexpr Matrix2x3::Matrix2x3(const Vector3 &row0, const Vector3 &row1) : _Matrix(row0.x, row0.y, row0.z, row1.x, row1.y, row1.z)
-    {}
+    {
+        _ValidateValues(*this);
+    }
 
     ///////////////
     // Matrix4x3 //
     ///////////////
 
     constexpr Matrix4x3::Matrix4x3(f32 e00, f32 e01, f32 e02, f32 e10, f32 e11, f32 e12, f32 e20, f32 e21, f32 e22, f32 e30, f32 e31, f32 e32) : _Matrix(e00, e01, e02, e10, e11, e12, e20, e21, e22, e30, e31, e32)
-    {}
+    {
+        _ValidateValues(*this);
+    }
 
     constexpr Matrix4x3::Matrix4x3(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2, const Vector3 &row3) : _Matrix(row0.x, row0.y, row0.z, row1.x, row1.y, row1.z, row2.x, row2.y, row2.z, row3.x, row3.y, row3.z)
-    {}
+    {
+        _ValidateValues(*this);
+    }
 
     ///////////////
     // Matrix3x4 //
     ///////////////
 
     constexpr Matrix3x4::Matrix3x4(f32 e00, f32 e01, f32 e02, f32 e03, f32 e10, f32 e11, f32 e12, f32 e13, f32 e20, f32 e21, f32 e22, f32 e23) : _Matrix(e00, e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23)
-    {}
+    {
+        _ValidateValues(*this);
+    }
 
     constexpr Matrix3x4::Matrix3x4(const Vector4 &row0, const Vector4 &row1, const Vector4 &row2) : _Matrix(row0.x, row0.y, row0.z, row0.w, row1.x, row1.y, row1.z, row1.w, row2.x, row2.y, row2.z, row2.w)
-    {}
+    {
+        _ValidateValues(*this);
+    }
 
     ///////////////
     // Matrix4x4 //
     ///////////////
 
     constexpr Matrix4x4::Matrix4x4(f32 e00, f32 e01, f32 e02, f32 e03, f32 e10, f32 e11, f32 e12, f32 e13, f32 e20, f32 e21, f32 e22, f32 e23, f32 e30, f32 e31, f32 e32, f32 e33) : _Matrix(e00, e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23, e30, e31, e32, e33)
-    {}
+    {
+        _ValidateValues(*this);
+    }
 
     constexpr Matrix4x4::Matrix4x4(const Vector4 &row0, const Vector4 &row1, const Vector4 &row2, const Vector4 &row3) : _Matrix(row0.x, row0.y, row0.z, row0.w, row1.x, row1.y, row1.z, row1.w, row2.x, row2.y, row2.z, row2.w, row3.x, row3.y, row3.z, row3.w)
-    {}
+    {
+        _ValidateValues(*this);
+    }
 
     ///////////////
     // Matrix3x3 //
     ///////////////
 
     constexpr Matrix3x3::Matrix3x3(f32 e00, f32 e01, f32 e02, f32 e10, f32 e11, f32 e12, f32 e20, f32 e21, f32 e22) : _Matrix(e00, e01, e02, e10, e11, e12, e20, e21, e22)
-    {}
+    {
+        _ValidateValues(*this);
+    }
 
     constexpr Matrix3x3::Matrix3x3(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2) : _Matrix(row0.x, row0.y, row0.z, row1.x, row1.y, row1.z, row2.x, row2.y, row2.z)
-    {}
+    {
+        _ValidateValues(*this);
+    }
 
     ///////////////
     // Rectangle //

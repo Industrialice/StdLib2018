@@ -2,7 +2,6 @@
 
 #include "MatrixMathTypes.hpp"
 #include "ApproxMath.hpp"
-#include "_MathValidation.hpp"
 
 namespace StdLib
 {
@@ -40,6 +39,7 @@ namespace StdLib
     {
         for (uiw index = 0; index < Dim; ++index)
             Data()[index] += scalar;
+        _ValidateValues(*this, scalar);
         return *(VectorType *)this;
     }
 
@@ -145,7 +145,7 @@ namespace StdLib
         return *(VectorType *)this;
     }
 
-	template<typename _ScalarType, uiw Dim>	inline bool _VectorBase<_ScalarType, Dim>::operator == (const _VectorBase &other) const
+	template <typename _ScalarType, uiw Dim>	inline bool _VectorBase<_ScalarType, Dim>::operator == (const _VectorBase &other) const
 	{
 		_ValidateValues(*this, other);
 		for (uiw index = 0; index < Dim; ++index)
@@ -154,21 +154,21 @@ namespace StdLib
 		return true;
 	}
 
-	template<typename _ScalarType, uiw Dim>	inline bool _VectorBase<_ScalarType, Dim>::operator != (const _VectorBase &other) const
+	template <typename _ScalarType, uiw Dim>	inline bool _VectorBase<_ScalarType, Dim>::operator != (const _VectorBase &other) const
 	{
 		return !operator==(other);
 	}
 
-    template<typename ScalarType, uiw Dim> inline ScalarType *_VectorBase<ScalarType, Dim>::Data()
+    template <typename ScalarType, uiw Dim> inline std::array<ScalarType, Dim> &_VectorBase<ScalarType, Dim>::Data()
     {
 		_ValidateValues(*this);
-        return &x;
+        return *(std::array<ScalarType, Dim> *)&x;
     }
 
-    template<typename ScalarType, uiw Dim> inline const ScalarType *_VectorBase<ScalarType, Dim>::Data() const
+    template <typename ScalarType, uiw Dim> inline const std::array<ScalarType, Dim> &_VectorBase<ScalarType, Dim>::Data() const
     {
 		_ValidateValues(*this);
-        return &x;
+        return *(std::array<ScalarType, Dim> *)&x;
     }
 
     template <typename ScalarType, uiw Dim> inline ScalarType _VectorBase<ScalarType, Dim>::Accumulate() const
@@ -200,11 +200,19 @@ namespace StdLib
         return min;
     }
 
+    template <typename _ScalarType, uiw Dim> inline auto _VectorBase<_ScalarType, Dim>::ForEach(ScalarType func(ScalarType element)) -> VectorType &
+    {
+        for (auto &el : Data())
+            el = func(el);
+        _ValidateValues(*this);
+        return *(VectorType *)this;
+    }
+
     /////////////////
     // Vector2Base //
     /////////////////
 
-    template<typename ScalarType> inline ScalarType &Vector2Base<ScalarType>::operator[](uiw index)
+    template <typename ScalarType> inline ScalarType &Vector2Base<ScalarType>::operator[](uiw index)
     {
 		_ValidateValues(*this);
         if (index == 0) return x;
@@ -212,7 +220,7 @@ namespace StdLib
         return y;
     }
 
-    template<typename ScalarType> inline const ScalarType &Vector2Base<ScalarType>::operator[](uiw index) const
+    template <typename ScalarType> inline const ScalarType &Vector2Base<ScalarType>::operator[](uiw index) const
     {
 		_ValidateValues(*this);
         if (index == 0) return x;
@@ -224,7 +232,7 @@ namespace StdLib
     // Vector3Base //
     /////////////////
 
-    template<typename ScalarType> inline ScalarType &Vector3Base<ScalarType>::operator[](uiw index)
+    template <typename ScalarType> inline ScalarType &Vector3Base<ScalarType>::operator[](uiw index)
     {
 		_ValidateValues(*this);
         if (index == 0) return x;
@@ -233,7 +241,7 @@ namespace StdLib
         return z;
     }
 
-    template<typename ScalarType> inline const ScalarType &Vector3Base<ScalarType>::operator[](uiw index) const
+    template <typename ScalarType> inline const ScalarType &Vector3Base<ScalarType>::operator[](uiw index) const
     {
 		_ValidateValues(*this);
         if (index == 0) return x;
@@ -242,7 +250,7 @@ namespace StdLib
         return z;
     }
 
-    template<typename ScalarType> inline VectorTypeByDimension<ScalarType, 2> Vector3Base<ScalarType>::ToVector2() const
+    template <typename ScalarType> inline VectorTypeByDimension<ScalarType, 2> Vector3Base<ScalarType>::ToVector2() const
     {
 		_ValidateValues(*this);
         return {x, y};
@@ -252,7 +260,7 @@ namespace StdLib
     // Vector4Base //
     /////////////////
 
-    template<typename ScalarType> inline ScalarType &Vector4Base<ScalarType>::operator[](uiw index)
+    template <typename ScalarType> inline ScalarType &Vector4Base<ScalarType>::operator[](uiw index)
     {
 		_ValidateValues(*this);
         if (index == 0) return x;
@@ -262,7 +270,7 @@ namespace StdLib
         return w;
     }
 
-    template<typename ScalarType> inline const ScalarType &Vector4Base<ScalarType>::operator[](uiw index) const
+    template <typename ScalarType> inline const ScalarType &Vector4Base<ScalarType>::operator[](uiw index) const
     {
 		_ValidateValues(*this);
         if (index == 0) return x;
@@ -272,13 +280,13 @@ namespace StdLib
         return w;
     }
 
-    template<typename ScalarType> inline VectorTypeByDimension<ScalarType, 2> Vector4Base<ScalarType>::ToVector2() const
+    template <typename ScalarType> inline VectorTypeByDimension<ScalarType, 2> Vector4Base<ScalarType>::ToVector2() const
     {
 		_ValidateValues(*this);
         return {x, y};
     }
 
-    template<typename ScalarType> inline VectorTypeByDimension<ScalarType, 3> Vector4Base<ScalarType>::ToVector3() const
+    template <typename ScalarType> inline VectorTypeByDimension<ScalarType, 3> Vector4Base<ScalarType>::ToVector3() const
     {
 		_ValidateValues(*this);
         return {x, y, z};
@@ -340,12 +348,13 @@ namespace StdLib
 		return avg;
     }
 
-    template <typename Basis> inline void _VectorFP<Basis>::Normalize()
+    template <typename Basis> inline auto _VectorFP<Basis>::Normalize() -> VectorType &
     {
         f32 revLength = ApproxMath::RSqrt<ApproxMath::Precision::High>(LengthSquare());
         for (uiw index = 0; index < dim; ++index)
             operator[](index) *= revLength;
 		_ValidateValues(*this);
+        return *(VectorType *)this;
     }
 
     template <typename Basis> inline auto _VectorFP<Basis>::GetNormalized() const -> VectorType
@@ -358,7 +367,7 @@ namespace StdLib
         return result;
     }
 
-    template<typename Basis> inline bool _VectorFP<Basis>::IsNormalized(f32 epsilon) const
+    template <typename Basis> inline bool _VectorFP<Basis>::IsNormalized(f32 epsilon) const
     {
         f32 length = LengthSquare();
         return (length >= 1.0f - epsilon) && (length <= 1.0f + epsilon);
@@ -373,59 +382,64 @@ namespace StdLib
         return true;
     }
 
-    template <typename Basis> inline void _VectorFP<Basis>::Lerp(const _VectorFP &other, f32 interpolant)
+    template <typename Basis> inline auto _VectorFP<Basis>::Lerp(const _VectorFP &other, f32 interpolant) -> VectorType &
     {
 		_ValidateValues(*this, other, interpolant);
 		ASSUME(interpolant >= 0.0f && interpolant <= 1.0f);
-        *this += interpolant * (other - *this);
+        *this += (other - *this) * interpolant;
+        return *(VectorType *)this;
     }
 
     template <typename Basis> inline auto _VectorFP<Basis>::GetLerped(const _VectorFP &other, f32 interpolant) const -> VectorType
     {
 		_ValidateValues(*this, other, interpolant);
 		ASSUME(interpolant >= 0.0f && interpolant <= 1.0f);
-        return *this + interpolant * (other - *this);
+        return *this + (other - *this) * interpolant;
     }
 
     /////////////
     // _Matrix //
     /////////////
 
-    template<uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator+(const _Matrix &other) const -> MatrixType
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator + (const _Matrix &other) const -> MatrixType
     {
         MatrixType result;
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
                 result[rowIndex][columnIndex] = elements[rowIndex][columnIndex] + other[rowIndex][columnIndex];
+        _ValidateValues(*this, other, result);
         return result;
     }
 
-    template<uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator+=(const _Matrix &other) -> MatrixType &
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator += (const _Matrix &other) -> MatrixType &
     {
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
                 elements[rowIndex][columnIndex] += other[rowIndex][columnIndex];
+        _ValidateValues(*this, other);
         return *(MatrixType *)this;
     }
 
-    template<uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator-(const _Matrix &other) const -> MatrixType
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator - (const _Matrix &other) const -> MatrixType
     {
         MatrixType result;
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
                 result[rowIndex][columnIndex] = elements[rowIndex][columnIndex] - other[rowIndex][columnIndex];
+        _ValidateValues(*this, other);
         return result;
     }
 
-    template<uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator-=(const _Matrix &other) -> MatrixType &
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator -= (const _Matrix &other) -> MatrixType &
     {
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
                 elements[rowIndex][columnIndex] -= other[rowIndex][columnIndex];
+        _ValidateValues(*this, other);
         return *(MatrixType *)this;
     }
 
-    template<uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator*(const _Matrix &other) const -> MatrixType
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator * (const _Matrix &other) const -> MatrixType
     {
         MatrixType result;
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
@@ -442,91 +456,107 @@ namespace StdLib
                 result.StoreValueBoundless(rowIndex, columnIndex, value);
             }
         }
+        _ValidateValues(*this, other, result);
         return result;
     }
 
-    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator*(f32 scalar) const -> MatrixType
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator * (f32 scalar) const -> MatrixType
     {
         MatrixType result;
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
                 result[rowIndex][columnIndex] = elements[rowIndex][columnIndex] * scalar;
+        _ValidateValues(*this, scalar);
         return result;
     }
 
-    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator*=(f32 scalar) -> MatrixType &
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator *= (f32 scalar) -> MatrixType &
     {
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
                 elements[rowIndex][columnIndex] *= scalar;
+        _ValidateValues(*this, scalar);
         return *(MatrixType *)this;
     }
 
-    template<uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator*=(const _Matrix &other) -> MatrixType &
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator *= (const _Matrix &other) -> MatrixType &
     {
         *this = *this * other;
+        _ValidateValues(*this, other);
         return *(MatrixType *)this;
     }
 
-    template<uiw Rows, uiw Columns> inline std::array<f32, Columns> &_Matrix<Rows, Columns>::operator[](uiw index)
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator[](uiw index) -> std::array<f32, Columns> &
     {
+        _ValidateValues(*this);
         return elements[index];
     }
 
-    template<uiw Rows, uiw Columns> inline const std::array<f32, Columns> &_Matrix<Rows, Columns>::operator[](uiw index) const
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator[](uiw index) const -> const std::array<f32, Columns> &
     {
+        _ValidateValues(*this);
         return elements[index];
     }
 
-    template<uiw Rows, uiw Columns> inline f32 *_Matrix<Rows, Columns>::Data()
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::Data() -> std::array<f32, Rows * Columns> &
     {
-        return elements.data()->data();
+        _ValidateValues(*this);
+        return *(std::array<f32, Rows * Columns> *)elements.data()->data();
     }
 
-    template<uiw Rows, uiw Columns> inline const f32 *_Matrix<Rows, Columns>::Data() const
-    { 
-        return elements.data()->data();
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::Data() const -> const std::array<f32, Rows * Columns> &
+    {
+        _ValidateValues(*this);
+        return *(std::array<f32, Rows * Columns> *)elements.data()->data();
     }
 
-    template<uiw Rows, uiw Columns> inline MatrixTypeByDimensions<Columns, Rows> _Matrix<Rows, Columns>::GetTransposed() const
+    template <uiw Rows, uiw Columns> inline MatrixTypeByDimensions<Columns, Rows> _Matrix<Rows, Columns>::GetTransposed() const
     {
         MatrixTypeByDimensions<Columns, Rows> result;
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
                 result[columnIndex][rowIndex] = elements[rowIndex][columnIndex];
+        _ValidateValues(result);
         return result;
     }
 
-    template<uiw Rows, uiw Columns> inline VectorTypeByDimension<f32, Columns> _Matrix<Rows, Columns>::GetRow(uiw rowIndex) const
+    template <uiw Rows, uiw Columns> inline VectorTypeByDimension<f32, Columns> _Matrix<Rows, Columns>::GetRow(uiw rowIndex) const
     {
+        _ValidateValues(*this);
         VectorTypeByDimension<f32, Columns> result;
         for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
             result[columnIndex] = elements[rowIndex][columnIndex];
         return result;
     }
 
-    template<uiw Rows, uiw Columns> inline void _Matrix<Rows, Columns>::SetRow(uiw rowIndex, const VectorTypeByDimension<f32, Columns> &row)
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::SetRow(uiw rowIndex, const VectorTypeByDimension<f32, Columns> &row) -> MatrixType &
     {
         for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
             elements[rowIndex][columnIndex] = row[columnIndex];
+        _ValidateValues(*this);
+        return *(MatrixType *)this;
     }
 
-    template<uiw Rows, uiw Columns> inline VectorTypeByDimension<f32, Rows> _Matrix<Rows, Columns>::GetColumn(uiw columnIndex) const
+    template <uiw Rows, uiw Columns> inline VectorTypeByDimension<f32, Rows> _Matrix<Rows, Columns>::GetColumn(uiw columnIndex) const
     {
+        _ValidateValues(*this);
         VectorTypeByDimension<f32, Rows> result;
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
             result[rowIndex] = elements[rowIndex][columnIndex];
         return result;
     }
 
-    template<uiw Rows, uiw Columns> inline void _Matrix<Rows, Columns>::SetColumn(uiw columnIndex, const VectorTypeByDimension<f32, Rows> &column)
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::SetColumn(uiw columnIndex, const VectorTypeByDimension<f32, Rows> &column) -> MatrixType &
     {
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
             elements[rowIndex][columnIndex] = column[rowIndex];
+        _ValidateValues(*this);
+        return *(MatrixType *)this;
     }
 
-    template<uiw Rows, uiw Columns> inline f32 _Matrix<Rows, Columns>::FetchValueBoundless(uiw rowIndex, uiw columnIndex) const
+    template <uiw Rows, uiw Columns> inline f32 _Matrix<Rows, Columns>::FetchValueBoundless(uiw rowIndex, uiw columnIndex) const
     {
+        _ValidateValues(*this);
         if (rowIndex < Rows && columnIndex < Columns)
             return elements[rowIndex][columnIndex];
         if (rowIndex == columnIndex)
@@ -534,142 +564,23 @@ namespace StdLib
         return 0.0f;
     }
 
-    template<uiw Rows, uiw Columns> inline void _Matrix<Rows, Columns>::StoreValueBoundless(uiw rowIndex, uiw columnIndex, f32 value)
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::StoreValueBoundless(uiw rowIndex, uiw columnIndex, f32 value) -> MatrixType &
     {
+        _ValidateValues(*this, value);
         if (rowIndex >= Rows || columnIndex >= Columns)
-            return;
+            return *(MatrixType *)this;
         elements[rowIndex][columnIndex] = value;
+        return *(MatrixType *)this;
     }
 
-    template<uiw Rows, uiw Columns> inline bool _Matrix<Rows, Columns>::EqualsWithEpsilon(const _Matrix &other, f32 epsilon) const
+    template <uiw Rows, uiw Columns> inline bool _Matrix<Rows, Columns>::EqualsWithEpsilon(const _Matrix &other, f32 epsilon) const
     {
+        _ValidateValues(*this, other, epsilon);
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
                 if (abs(elements[rowIndex][columnIndex] - other[rowIndex][columnIndex]) > epsilon)
                     return false;
         return true;
-    }
-
-	template<uiw Rows, uiw Columns> inline void TransposeSquareMatrix(_Matrix<Rows, Columns> &matrix)
-	{
-		static_assert(Rows == Columns, "Only a matrix with equal number of rows and columns can be transposed, use GetTransposed() instead");
-		for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
-			for (uiw columnIndex = rowIndex + 1; columnIndex < Columns; ++columnIndex)
-				std::swap(matrix.elements[rowIndex][columnIndex], matrix.elements[columnIndex][rowIndex]);
-	}
-
-    template <typename MatrixType, bool isAllowTranslation> inline MatrixType CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt)
-    {
-        static_assert(MatrixType::rows >= (isAllowTranslation ? 4 : 3));
-        static_assert(MatrixType::columns >= 3);
-
-        MatrixType result;
-
-        if (rotation)
-        {
-            f32 cx = cos(rotation->x);
-            f32 cy = cos(rotation->y);
-            f32 cz = cos(rotation->z);
-
-            f32 sx = sin(rotation->x);
-            f32 sy = sin(rotation->y);
-            f32 sz = sin(rotation->z);
-
-            result[0][0] = cy * cz;
-            result[0][1] = cy * sz;
-            result[0][2] = -sy;
-
-            result[1][0] = sx * sy * cz - cx * sz;
-            result[1][1] = sx * sy * sz + cx * cz;
-            result[1][2] = sx * cy;
-
-            result[2][0] = cx * sy * cz + sx * sz;
-            result[2][1] = cx * sy * sz - sx * cz;
-            result[2][2] = cx * cy;
-        }
-
-        if (scale)
-        {
-            for (uiw rowIndex = 0; rowIndex < 3; ++rowIndex)
-            {
-                for (uiw columnIndex = 0; columnIndex < 3; ++columnIndex)
-                {
-                    result[rowIndex][columnIndex] *= scale->operator[](rowIndex);
-                }
-            }
-        }
-
-        if (isAllowTranslation && translation)
-        {
-            result[3][0] = translation->x;
-            result[3][1] = translation->y;
-            result[3][2] = translation->z;
-        }
-
-        return result;
-    }
-
-    template <typename MatrixType, bool isAllowTranslation> inline MatrixType CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt)
-    {
-        static_assert(MatrixType::rows >= (isAllowTranslation ? 4 : 3));
-        static_assert(MatrixType::columns >= 3);
-
-        MatrixType result;
-
-        if (rotation)
-        {
-            Matrix3x3 rotationMatrix = rotation->ToMatrix();
-            for (uiw rowIndex = 0; rowIndex < 3; ++rowIndex)
-            {
-                for (uiw columnIndex = 0; columnIndex < 3; ++columnIndex)
-                {
-                    result[rowIndex][columnIndex] = rotationMatrix[rowIndex][columnIndex];
-                }
-            }
-        }
-
-        if (scale)
-        {
-            for (uiw rowIndex = 0; rowIndex < 3; ++rowIndex)
-            {
-                for (uiw columnIndex = 0; columnIndex < 3; ++columnIndex)
-                {
-                    result[rowIndex][columnIndex] *= scale->operator[](rowIndex);
-                }
-            }
-        }
-
-        if (isAllowTranslation && translation)
-        {
-            result[3][0] = translation->x;
-            result[3][1] = translation->y;
-            result[3][2] = translation->z;
-        }
-
-        return result;
-    }
-
-    template <typename MatrixType> inline MatrixType CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
-    {
-        MatrixType result;
-        angle = -angle;
-
-        f32 ca = cos(angle);
-        f32 sa = sin(angle);
-
-        result[0][0] = axis.x * axis.x + (1 - axis.x * axis.x) * ca;
-        result[0][1] = axis.x * axis.y * (1 - ca) - axis.z * sa;
-        result[0][2] = axis.x * axis.z * (1 - ca) + axis.y * sa;
-
-        result[1][0] = axis.x * axis.y * (1 - ca) + axis.z * sa;
-        result[1][1] = axis.y * axis.y + (1 - axis.y * axis.y) * ca;
-        result[1][2] = axis.y * axis.z * (1 - ca) - axis.x * sa;
-
-        result[2][0] = axis.x * axis.z * (1 - ca) - axis.y * sa;
-        result[2][1] = axis.y * axis.z * (1 - ca) + axis.x * sa;
-        result[2][2] = axis.z * axis.z + (1 - axis.z * axis.z) * ca;
-
-        return result;
     }
 
     ///////////////
