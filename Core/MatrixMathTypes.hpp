@@ -6,7 +6,6 @@
 // TODO: determinant
 // TODO: matrix conversions (3x3 to 4x4, 4x4 to 3x3 etc.)
 // TODO: Rectangle3D
-// TODO: constexpr constructors with arguments validation
 
 namespace StdLib
 {
@@ -319,7 +318,7 @@ namespace StdLib
 
     protected:
         constexpr _Matrix(); // will create identity matrix
-        template <typename... Args> constexpr _Matrix(Args &&... args) : elements{args...} {}
+        template <typename... Args> constexpr _Matrix(Args &&... args);
     };
 
     enum class ProjectionTarget
@@ -574,10 +573,7 @@ namespace StdLib
     // Vector2Base //
     /////////////////
 
-    template <typename ScalarType> inline constexpr Vector2Base<ScalarType>::Vector2Base(ScalarType x, ScalarType y) : _VectorBase<ScalarType, 2>(x, y)
-    {
-        _ValidateValues(*this);
-    }
+    template <typename ScalarType> inline constexpr Vector2Base<ScalarType>::Vector2Base(ScalarType x, ScalarType y) : _VectorBase<ScalarType, 2>(x, y) {}
 
     /////////////////
     // Vector3Base //
@@ -589,10 +585,7 @@ namespace StdLib
         _ValidateValues(*this);
     }
 
-    template <typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z) : Vector3Base(vec.x, vec.y, z)
-    {
-        _ValidateValues(*this);
-    }
+    template <typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z) : Vector3Base(vec.x, vec.y, z) {}
 
     /////////////////
     // Vector4Base //
@@ -605,20 +598,9 @@ namespace StdLib
         _ValidateValues(*this);
     }
 
-    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z, ScalarType w) : Vector4Base(vec.x, vec.y, z, w)
-    {
-        _ValidateValues(*this);
-    }
-
-    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 3> &vec, ScalarType w) : Vector4Base(vec.x, vec.y, vec.z, w)
-    {
-        _ValidateValues(*this);
-    }
-
-    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &v0, const VectorTypeByDimension<ScalarType, 2> &v1) : Vector4Base(v0.x, v0.y, v1.x, v1.y)
-    {
-        _ValidateValues(*this);
-    }
+    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z, ScalarType w) : Vector4Base(vec.x, vec.y, z, w) {}
+    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 3> &vec, ScalarType w) : Vector4Base(vec.x, vec.y, vec.z, w) {}
+    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &v0, const VectorTypeByDimension<ScalarType, 2> &v1) : Vector4Base(v0.x, v0.y, v1.x, v1.y) {}
 
     /////////////
     // _Matrix //
@@ -642,103 +624,61 @@ namespace StdLib
         }
     }
 
+    template <uiw Rows, uiw Columns>
+    template <typename... Args>
+    inline constexpr _Matrix<Rows, Columns>::_Matrix(Args &&... args) : elements{args...}
+    {
+        _ValidateValues(*this);
+    }
+
     ///////////////
     // Matrix2x2 //
     ///////////////
 
-    constexpr Matrix2x2::Matrix2x2(f32 e00, f32 e01, f32 e10, f32 e11) : _Matrix(e00, e01, e10, e11)
-    {
-        _ValidateValues(*this);
-    }
-
-    constexpr Matrix2x2::Matrix2x2(const Vector2 &row0, const Vector2 &row1) : _Matrix(row0.x, row0.y, row1.x, row1.y)
-    {
-        _ValidateValues(*this);
-    }
+    inline constexpr Matrix2x2::Matrix2x2(f32 e00, f32 e01, f32 e10, f32 e11) : _Matrix(e00, e01, e10, e11) {}
+    inline constexpr Matrix2x2::Matrix2x2(const Vector2 &row0, const Vector2 &row1) : _Matrix(row0.x, row0.y, row1.x, row1.y) {}
 
     ///////////////
     // Matrix3x2 //
     ///////////////
 
-    constexpr Matrix3x2::Matrix3x2(f32 e00, f32 e01, f32 e10, f32 e11, f32 e20, f32 e21) : _Matrix(e00, e01, e10, e11, e20, e21)
-    {
-        _ValidateValues(*this);
-    }
-
-    constexpr Matrix3x2::Matrix3x2(const Vector2 &row0, const Vector2 &row1, const Vector2 &row2) : _Matrix(row0.x, row0.y, row1.x, row1.y, row2.x, row2.y)
-    {
-        _ValidateValues(*this);
-    }
+    inline constexpr Matrix3x2::Matrix3x2(f32 e00, f32 e01, f32 e10, f32 e11, f32 e20, f32 e21) : _Matrix(e00, e01, e10, e11, e20, e21) {}
+    inline constexpr Matrix3x2::Matrix3x2(const Vector2 &row0, const Vector2 &row1, const Vector2 &row2) : _Matrix(row0.x, row0.y, row1.x, row1.y, row2.x, row2.y) {}
 
     ///////////////
     // Matrix2x3 //
     ///////////////
 
-    constexpr Matrix2x3::Matrix2x3(f32 e00, f32 e01, f32 e02, f32 e10, f32 e11, f32 e12) : _Matrix(e00, e01, e02, e10, e11, e12)
-    {
-        _ValidateValues(*this);
-    }
-
-    constexpr Matrix2x3::Matrix2x3(const Vector3 &row0, const Vector3 &row1) : _Matrix(row0.x, row0.y, row0.z, row1.x, row1.y, row1.z)
-    {
-        _ValidateValues(*this);
-    }
+    inline constexpr Matrix2x3::Matrix2x3(f32 e00, f32 e01, f32 e02, f32 e10, f32 e11, f32 e12) : _Matrix(e00, e01, e02, e10, e11, e12) {}
+    inline constexpr Matrix2x3::Matrix2x3(const Vector3 &row0, const Vector3 &row1) : _Matrix(row0.x, row0.y, row0.z, row1.x, row1.y, row1.z) {}
 
     ///////////////
     // Matrix4x3 //
     ///////////////
 
-    constexpr Matrix4x3::Matrix4x3(f32 e00, f32 e01, f32 e02, f32 e10, f32 e11, f32 e12, f32 e20, f32 e21, f32 e22, f32 e30, f32 e31, f32 e32) : _Matrix(e00, e01, e02, e10, e11, e12, e20, e21, e22, e30, e31, e32)
-    {
-        _ValidateValues(*this);
-    }
-
-    constexpr Matrix4x3::Matrix4x3(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2, const Vector3 &row3) : _Matrix(row0.x, row0.y, row0.z, row1.x, row1.y, row1.z, row2.x, row2.y, row2.z, row3.x, row3.y, row3.z)
-    {
-        _ValidateValues(*this);
-    }
+    inline constexpr Matrix4x3::Matrix4x3(f32 e00, f32 e01, f32 e02, f32 e10, f32 e11, f32 e12, f32 e20, f32 e21, f32 e22, f32 e30, f32 e31, f32 e32) : _Matrix(e00, e01, e02, e10, e11, e12, e20, e21, e22, e30, e31, e32) {}
+    inline constexpr Matrix4x3::Matrix4x3(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2, const Vector3 &row3) : _Matrix(row0.x, row0.y, row0.z, row1.x, row1.y, row1.z, row2.x, row2.y, row2.z, row3.x, row3.y, row3.z) {}
 
     ///////////////
     // Matrix3x4 //
     ///////////////
 
-    constexpr Matrix3x4::Matrix3x4(f32 e00, f32 e01, f32 e02, f32 e03, f32 e10, f32 e11, f32 e12, f32 e13, f32 e20, f32 e21, f32 e22, f32 e23) : _Matrix(e00, e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23)
-    {
-        _ValidateValues(*this);
-    }
-
-    constexpr Matrix3x4::Matrix3x4(const Vector4 &row0, const Vector4 &row1, const Vector4 &row2) : _Matrix(row0.x, row0.y, row0.z, row0.w, row1.x, row1.y, row1.z, row1.w, row2.x, row2.y, row2.z, row2.w)
-    {
-        _ValidateValues(*this);
-    }
+    inline constexpr Matrix3x4::Matrix3x4(f32 e00, f32 e01, f32 e02, f32 e03, f32 e10, f32 e11, f32 e12, f32 e13, f32 e20, f32 e21, f32 e22, f32 e23) : _Matrix(e00, e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23) {}
+    inline constexpr Matrix3x4::Matrix3x4(const Vector4 &row0, const Vector4 &row1, const Vector4 &row2) : _Matrix(row0.x, row0.y, row0.z, row0.w, row1.x, row1.y, row1.z, row1.w, row2.x, row2.y, row2.z, row2.w) {}
 
     ///////////////
     // Matrix4x4 //
     ///////////////
 
-    constexpr Matrix4x4::Matrix4x4(f32 e00, f32 e01, f32 e02, f32 e03, f32 e10, f32 e11, f32 e12, f32 e13, f32 e20, f32 e21, f32 e22, f32 e23, f32 e30, f32 e31, f32 e32, f32 e33) : _Matrix(e00, e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23, e30, e31, e32, e33)
-    {
-        _ValidateValues(*this);
-    }
-
-    constexpr Matrix4x4::Matrix4x4(const Vector4 &row0, const Vector4 &row1, const Vector4 &row2, const Vector4 &row3) : _Matrix(row0.x, row0.y, row0.z, row0.w, row1.x, row1.y, row1.z, row1.w, row2.x, row2.y, row2.z, row2.w, row3.x, row3.y, row3.z, row3.w)
-    {
-        _ValidateValues(*this);
-    }
+    inline constexpr Matrix4x4::Matrix4x4(f32 e00, f32 e01, f32 e02, f32 e03, f32 e10, f32 e11, f32 e12, f32 e13, f32 e20, f32 e21, f32 e22, f32 e23, f32 e30, f32 e31, f32 e32, f32 e33) : _Matrix(e00, e01, e02, e03, e10, e11, e12, e13, e20, e21, e22, e23, e30, e31, e32, e33) {}
+    inline constexpr Matrix4x4::Matrix4x4(const Vector4 &row0, const Vector4 &row1, const Vector4 &row2, const Vector4 &row3) : _Matrix(row0.x, row0.y, row0.z, row0.w, row1.x, row1.y, row1.z, row1.w, row2.x, row2.y, row2.z, row2.w, row3.x, row3.y, row3.z, row3.w) {}
 
     ///////////////
     // Matrix3x3 //
     ///////////////
 
-    constexpr Matrix3x3::Matrix3x3(f32 e00, f32 e01, f32 e02, f32 e10, f32 e11, f32 e12, f32 e20, f32 e21, f32 e22) : _Matrix(e00, e01, e02, e10, e11, e12, e20, e21, e22)
-    {
-        _ValidateValues(*this);
-    }
-
-    constexpr Matrix3x3::Matrix3x3(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2) : _Matrix(row0.x, row0.y, row0.z, row1.x, row1.y, row1.z, row2.x, row2.y, row2.z)
-    {
-        _ValidateValues(*this);
-    }
+    inline constexpr Matrix3x3::Matrix3x3(f32 e00, f32 e01, f32 e02, f32 e10, f32 e11, f32 e12, f32 e20, f32 e21, f32 e22) : _Matrix(e00, e01, e02, e10, e11, e12, e20, e21, e22) {}
+    inline constexpr Matrix3x3::Matrix3x3(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2) : _Matrix(row0.x, row0.y, row0.z, row1.x, row1.y, row1.z, row2.x, row2.y, row2.z) {}
 
     ///////////////
     // Rectangle //
