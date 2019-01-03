@@ -152,6 +152,189 @@ template <typename MatrixType, bool isAllowTranslation> inline MatrixType _Creat
     return r;
 }
 
+inline optional<Matrix4x4> _Inverse4x4Matrix(const Matrix4x4 &m)
+{
+    Matrix4x4 r;
+
+    f32 SubFactor00 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
+    f32 SubFactor01 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
+    f32 SubFactor02 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
+    f32 SubFactor03 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
+    f32 SubFactor04 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
+    f32 SubFactor05 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
+    f32 SubFactor06 = m[1][2] * m[3][3] - m[3][2] * m[1][3];
+    f32 SubFactor07 = m[1][1] * m[3][3] - m[3][1] * m[1][3];
+    f32 SubFactor08 = m[1][1] * m[3][2] - m[3][1] * m[1][2];
+    f32 SubFactor09 = m[1][0] * m[3][3] - m[3][0] * m[1][3];
+    f32 SubFactor10 = m[1][0] * m[3][2] - m[3][0] * m[1][2];
+    f32 SubFactor11 = m[1][1] * m[3][3] - m[3][1] * m[1][3];
+    f32 SubFactor12 = m[1][0] * m[3][1] - m[3][0] * m[1][1];
+    f32 SubFactor13 = m[1][2] * m[2][3] - m[2][2] * m[1][3];
+    f32 SubFactor14 = m[1][1] * m[2][3] - m[2][1] * m[1][3];
+    f32 SubFactor15 = m[1][1] * m[2][2] - m[2][1] * m[1][2];
+    f32 SubFactor16 = m[1][0] * m[2][3] - m[2][0] * m[1][3];
+    f32 SubFactor17 = m[1][0] * m[2][2] - m[2][0] * m[1][2];
+    f32 SubFactor18 = m[1][0] * m[2][1] - m[2][0] * m[1][1];
+
+    r[0][0] = +(m[1][1] * SubFactor00 - m[1][2] * SubFactor01 + m[1][3] * SubFactor02);
+    r[1][0] = -(m[1][0] * SubFactor00 - m[1][2] * SubFactor03 + m[1][3] * SubFactor04);
+    r[2][0] = +(m[1][0] * SubFactor01 - m[1][1] * SubFactor03 + m[1][3] * SubFactor05);
+    r[3][0] = -(m[1][0] * SubFactor02 - m[1][1] * SubFactor04 + m[1][2] * SubFactor05);
+
+    r[0][1] = -(m[0][1] * SubFactor00 - m[0][2] * SubFactor01 + m[0][3] * SubFactor02);
+    r[1][1] = +(m[0][0] * SubFactor00 - m[0][2] * SubFactor03 + m[0][3] * SubFactor04);
+    r[2][1] = -(m[0][0] * SubFactor01 - m[0][1] * SubFactor03 + m[0][3] * SubFactor05);
+    r[3][1] = +(m[0][0] * SubFactor02 - m[0][1] * SubFactor04 + m[0][2] * SubFactor05);
+
+    r[0][2] = +(m[0][1] * SubFactor06 - m[0][2] * SubFactor07 + m[0][3] * SubFactor08);
+    r[1][2] = -(m[0][0] * SubFactor06 - m[0][2] * SubFactor09 + m[0][3] * SubFactor10);
+    r[2][2] = +(m[0][0] * SubFactor11 - m[0][1] * SubFactor09 + m[0][3] * SubFactor12);
+    r[3][2] = -(m[0][0] * SubFactor08 - m[0][1] * SubFactor10 + m[0][2] * SubFactor12);
+
+    r[0][3] = -(m[0][1] * SubFactor13 - m[0][2] * SubFactor14 + m[0][3] * SubFactor15);
+    r[1][3] = +(m[0][0] * SubFactor13 - m[0][2] * SubFactor16 + m[0][3] * SubFactor17);
+    r[2][3] = -(m[0][0] * SubFactor14 - m[0][1] * SubFactor16 + m[0][3] * SubFactor18);
+    r[3][3] = +(m[0][0] * SubFactor15 - m[0][1] * SubFactor17 + m[0][2] * SubFactor18);
+
+    f32 det = +m[0][0] * r[0][0] + m[0][1] * r[1][0] + m[0][2] * r[2][0] + m[0][3] * r[3][0];
+    
+    if (Distance(det, 0.0f) < DefaultF32Epsilon)
+    {
+        return nullopt;
+    }
+
+    f32 revDet = 1.f / det;
+    r *= revDet;
+
+    return r;
+}
+
+inline optional<Matrix4x4> _Inverse4x3Matrix(const Matrix4x3 &m)
+{
+    Matrix4x4 r;
+
+    f32 SubFactor00 = m[2][2];
+    f32 SubFactor01 = m[2][1];
+    f32 SubFactor02 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
+    f32 SubFactor03 = m[2][0];
+    f32 SubFactor04 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
+    f32 SubFactor05 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
+    f32 SubFactor06 = m[1][2];
+    f32 SubFactor07 = m[1][1];
+    f32 SubFactor08 = m[1][1] * m[3][2] - m[3][1] * m[1][2];
+    f32 SubFactor09 = m[1][0];
+    f32 SubFactor10 = m[1][0] * m[3][2] - m[3][0] * m[1][2];
+    f32 SubFactor11 = m[1][1];
+    f32 SubFactor12 = m[1][0] * m[3][1] - m[3][0] * m[1][1];
+    f32 SubFactor13 = 0.f;
+    f32 SubFactor14 = 0.f;
+    f32 SubFactor15 = m[1][1] * m[2][2] - m[2][1] * m[1][2];
+    f32 SubFactor16 = 0.f;
+    f32 SubFactor17 = m[1][0] * m[2][2] - m[2][0] * m[1][2];
+    f32 SubFactor18 = m[1][0] * m[2][1] - m[2][0] * m[1][1];
+
+    r[0][0] = +(m[1][1] * SubFactor00 - m[1][2] * SubFactor01);
+    r[1][0] = -(m[1][0] * SubFactor00 - m[1][2] * SubFactor03);
+    r[2][0] = +(m[1][0] * SubFactor01 - m[1][1] * SubFactor03);
+    r[3][0] = -(m[1][0] * SubFactor02 - m[1][1] * SubFactor04 + m[1][2] * SubFactor05);
+
+    r[0][1] = -(m[0][1] * SubFactor00 - m[0][2] * SubFactor01);
+    r[1][1] = +(m[0][0] * SubFactor00 - m[0][2] * SubFactor03);
+    r[2][1] = -(m[0][0] * SubFactor01 - m[0][1] * SubFactor03);
+    r[3][1] = +(m[0][0] * SubFactor02 - m[0][1] * SubFactor04 + m[0][2] * SubFactor05);
+
+    r[0][2] = +(m[0][1] * SubFactor06 - m[0][2] * SubFactor07);
+    r[1][2] = -(m[0][0] * SubFactor06 - m[0][2] * SubFactor09);
+    r[2][2] = +(m[0][0] * SubFactor11 - m[0][1] * SubFactor09);
+    r[3][2] = -(m[0][0] * SubFactor08 - m[0][1] * SubFactor10 + m[0][2] * SubFactor12);
+
+    r[0][3] = -(m[0][1] * SubFactor13 - m[0][2] * SubFactor14);
+    r[1][3] = +(m[0][0] * SubFactor13 - m[0][2] * SubFactor16);
+    r[2][3] = -(m[0][0] * SubFactor14 - m[0][1] * SubFactor16);
+    r[3][3] = +(m[0][0] * SubFactor15 - m[0][1] * SubFactor17 + m[0][2] * SubFactor18);
+
+    f32 det = +m[0][0] * r[0][0] + m[0][1] * r[1][0] + m[0][2] * r[2][0];
+
+    if (Distance(det, 0.0f) < DefaultF32Epsilon)
+    {
+        return nullopt;
+    }
+
+    f32 revDet = 1.f / det;
+    r *= revDet;
+
+    return r;
+}
+
+inline optional<Matrix4x3> _Inverse4x3MatrixClipped(const Matrix4x3 &m)
+{
+    Matrix4x3 r;
+
+    f32 SubFactor00 = m[2][2];
+    f32 SubFactor01 = m[2][1];
+    f32 SubFactor02 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
+    f32 SubFactor03 = m[2][0];
+    f32 SubFactor04 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
+    f32 SubFactor05 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
+    f32 SubFactor06 = m[1][2];
+    f32 SubFactor07 = m[1][1];
+    f32 SubFactor08 = m[1][1] * m[3][2] - m[3][1] * m[1][2];
+    f32 SubFactor09 = m[1][0];
+    f32 SubFactor10 = m[1][0] * m[3][2] - m[3][0] * m[1][2];
+    f32 SubFactor11 = m[1][1];
+    f32 SubFactor12 = m[1][0] * m[3][1] - m[3][0] * m[1][1];
+
+    r[0][0] = +(m[1][1] * SubFactor00 - m[1][2] * SubFactor01);
+    r[1][0] = -(m[1][0] * SubFactor00 - m[1][2] * SubFactor03);
+    r[2][0] = +(m[1][0] * SubFactor01 - m[1][1] * SubFactor03);
+    r[3][0] = -(m[1][0] * SubFactor02 - m[1][1] * SubFactor04 + m[1][2] * SubFactor05);
+
+    r[0][1] = -(m[0][1] * SubFactor00 - m[0][2] * SubFactor01);
+    r[1][1] = +(m[0][0] * SubFactor00 - m[0][2] * SubFactor03);
+    r[2][1] = -(m[0][0] * SubFactor01 - m[0][1] * SubFactor03);
+    r[3][1] = +(m[0][0] * SubFactor02 - m[0][1] * SubFactor04 + m[0][2] * SubFactor05);
+
+    r[0][2] = +(m[0][1] * SubFactor06 - m[0][2] * SubFactor07);
+    r[1][2] = -(m[0][0] * SubFactor06 - m[0][2] * SubFactor09);
+    r[2][2] = +(m[0][0] * SubFactor11 - m[0][1] * SubFactor09);
+    r[3][2] = -(m[0][0] * SubFactor08 - m[0][1] * SubFactor10 + m[0][2] * SubFactor12);
+
+    f32 det = +m[0][0] * r[0][0] + m[0][1] * r[1][0] + m[0][2] * r[2][0];
+    
+    if (Distance(det, 0.0f) < DefaultF32Epsilon)
+    {
+        return nullopt;
+    }
+
+    f32 revDet = 1.f / det;
+    r *= revDet;
+
+    return r;
+}
+
+inline optional<Matrix2x2> _Inverse2x2Matrix(const Matrix2x2 &m)
+{
+    Matrix2x2 r;
+
+    r[0][0] = +m[1][1];
+    r[1][0] = -m[1][0];
+
+    r[0][1] = -m[0][1];
+    r[1][1] = +m[0][0];
+
+    f32 det = m[0][0] * r[0][0] + m[0][1] * r[1][0];
+
+    if (Distance(det, 0.0f) < DefaultF32Epsilon)
+    {
+        return nullopt;
+    }
+
+    f32 revDet = 1.f / det;
+    r *= revDet;
+
+    return r;
+}
+
 template <typename MatrixType> inline MatrixType _CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
 {
     MatrixType r;
@@ -246,7 +429,7 @@ Vector3 Vector3::GetCrossed(const Vector3 &other) const
 // Matrix3x2 //
 ///////////////
 
-Matrix3x3 Matrix3x2::GetInversed() const
+optional<Matrix3x3> Matrix3x2::GetInversed() const
 {
     Matrix3x3 r;
 
@@ -263,12 +446,19 @@ Matrix3x3 Matrix3x2::GetInversed() const
     r[2][2] = +(elements[0][0] * elements[1][1] - elements[0][1] * elements[1][0]);
 
     f32 det = elements[0][0] * r[0][0] + elements[0][1] * r[1][0];
-    f32 revDet = 1.f / det;
 
-    return r * revDet;
+    if (Distance(det, 0.0f) < DefaultF32Epsilon)
+    {
+        return nullopt;
+    }
+
+    f32 revDet = 1.f / det;
+    r *= revDet;
+
+    return r;
 }
 
-Matrix3x2 Matrix3x2::GetInversedClipped() const
+optional<Matrix3x2> Matrix3x2::GetInversedClipped() const
 {
     Matrix3x2 r;
 
@@ -281,9 +471,16 @@ Matrix3x2 Matrix3x2::GetInversedClipped() const
     r[2][1] = -elements[0][0] * elements[2][1] - elements[0][1] * elements[2][0];
 
     f32 det = elements[0][0] * r[0][0] + elements[0][1] * r[1][0];
-    f32 revDet = 1.f / det;
 
-    return r * revDet;
+    if (Distance(det, 0.0f) < DefaultF32Epsilon)
+    {
+        return nullopt;
+    }
+
+    f32 revDet = 1.f / det;
+    r *= revDet;
+
+    return r;
 }
 
 Matrix3x2 Matrix3x2::CreateRTS(const optional<f32> &rotation, const optional<Vector2> &translation, const optional<Vector2> &scale)
@@ -318,6 +515,16 @@ Matrix3x2 Matrix3x2::CreateRTS(const optional<f32> &rotation, const optional<Vec
 ///////////////
 // Matrix4x3 //
 ///////////////
+
+optional<Matrix4x4> Matrix4x3::GetInversed() const
+{
+    return _Inverse4x3Matrix(*this);
+}
+
+optional<Matrix4x3> Matrix4x3::GetInversedClipped() const
+{
+    return _Inverse4x3MatrixClipped(*this);
+}
 
 Matrix4x4 Matrix4x3::operator*(const Matrix4x4 &other) const
 {
@@ -388,6 +595,25 @@ Matrix4x4 &Matrix4x4::Transpose()
     return *this;
 }
 
+Matrix4x4 &Matrix4x4::Inverse()
+{
+    auto result = _Inverse4x4Matrix(*this);
+    if (result)
+    {
+        *this = *result;
+    }
+    else
+    {
+        SOFTBREAK;
+    }
+    return *this;
+}
+
+optional<Matrix4x4> Matrix4x4::GetInversed() const
+{
+    return _Inverse4x4Matrix(*this);
+}
+
 Matrix4x4 Matrix4x4::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
 {
     return _CreateRotationAroundAxis<Matrix4x4>(axis, angle);
@@ -450,6 +676,25 @@ Matrix2x2 &Matrix2x2::Transpose()
 {
 	_TransposeSquareMatrix(*this);
     return *this;
+}
+
+Matrix2x2 &Matrix2x2::Inverse()
+{
+    auto m = _Inverse2x2Matrix(*this);
+    if (m)
+    {
+        *this = *m;
+    }
+    else
+    {
+        SOFTBREAK;
+    }
+    return *this;
+}
+
+optional<Matrix2x2> Matrix2x2::GetInversed() const
+{
+    return _Inverse2x2Matrix(*this);
 }
 
 ///////////////

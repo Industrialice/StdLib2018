@@ -342,6 +342,9 @@ namespace StdLib
 
         constexpr Matrix4x3(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2, const Vector3 &row3);
 
+        [[nodiscard]] optional<Matrix4x4> GetInversed() const;
+        [[nodiscard]] optional<Matrix4x3> GetInversedClipped() const;
+
         [[nodiscard]] Matrix4x4 operator * (const Matrix4x4 &other) const;
 
         [[nodiscard]] static Matrix4x3 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
@@ -377,6 +380,9 @@ namespace StdLib
         constexpr Matrix4x4(const Vector4 &row0, const Vector4 &row1, const Vector4 &row2, const Vector4 &row3);
 
         Matrix4x4 &Transpose();
+        Matrix4x4 &Inverse(); // assertion fails if failed to inverse, the matrix isn't modified
+
+        optional<Matrix4x4> GetInversed() const;
 
         [[nodiscard]] static Matrix4x4 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
         [[nodiscard]] static Matrix4x4 CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt);
@@ -395,8 +401,8 @@ namespace StdLib
 
         constexpr Matrix3x2(const Vector2 &row0, const Vector2 &row1, const Vector2 &row2);
 
-        [[nodiscard]] Matrix3x3 GetInversed() const;
-        [[nodiscard]] Matrix3x2 GetInversedClipped() const;
+        [[nodiscard]] optional<Matrix3x3> GetInversed() const;
+        [[nodiscard]] optional<Matrix3x2> GetInversedClipped() const;
 
         // clockwise rotation around Z axis
         [[nodiscard]] static Matrix3x2 CreateRTS(const optional<f32> &rotation = nullopt, const optional<Vector2> &translation = nullopt, const optional<Vector2> &scale = nullopt);
@@ -422,6 +428,9 @@ namespace StdLib
         constexpr Matrix2x2(const Vector2 &row0, const Vector2 &row1);
 
         Matrix2x2 &Transpose();
+        Matrix2x2 &Inverse(); // assertion fails if failed to inverse, the matrix isn't modified
+
+        optional<Matrix2x2> GetInversed() const;
     };
 
     struct Matrix3x3 : _Matrix<3, 3>
@@ -538,7 +547,7 @@ namespace StdLib
     {
         static_assert(dim == Rows, "Cannot multiply vector and matrix, matrix's rows number and vector dimension must be equal");
 
-        VectorType result;
+        VectorTypeByDimension<f32, Columns> result;
 
         for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
         {

@@ -559,8 +559,25 @@ static void Matrix4x3Tests()
         UTest(true, m.GetRow(3).EqualsWithEpsilon({10.0f, 20.0f, 30.0f}));
     };
 
-    checkRTS(Matrix4x3::CreateRTS(Vector3{25.0f, 50.0f, 75.0f}.ForEach(DegToRad), Vector3(10, 20, 30), Vector3(0.4f, 0.5f, 0.6f)));
-    checkRTS(Matrix4x3::CreateRTS(Quaternion::FromEuler(Vector3{25.0f, 50.0f, 75.0f}.ForEach(DegToRad)), Vector3(10, 20, 30), Vector3(0.4f, 0.5f, 0.6f)));
+    auto rtsEuler = Matrix4x3::CreateRTS(Vector3{25.0f, 50.0f, 75.0f}.ForEach(DegToRad), Vector3(10, 20, 30), Vector3(0.4f, 0.5f, 0.6f));
+    checkRTS(rtsEuler);
+
+    auto rtsQuat = Matrix4x3::CreateRTS(Quaternion::FromEuler(Vector3{25.0f, 50.0f, 75.0f}.ForEach(DegToRad)), Vector3(10, 20, 30), Vector3(0.4f, 0.5f, 0.6f));
+    checkRTS(rtsQuat);
+
+    Vector4 toTransform{1, 2, 3, 1};
+    Vector3 transformed = toTransform * rtsQuat;
+    auto inversed = rtsQuat.GetInversed();
+    UTest(NotEqual, inversed, nullopt);
+    toTransform = Vector4(transformed, 1) * *inversed;
+    UTest(true, toTransform.EqualsWithEpsilon({1, 2, 3, 1}));
+
+    toTransform = {1, 2, 3, 1};
+    transformed = toTransform * rtsQuat;
+    auto inversedClipped = rtsQuat.GetInversedClipped();
+    UTest(NotEqual, inversedClipped, nullopt);
+    Vector3 originalPoint = Vector4(transformed, 1) * *inversedClipped;
+    UTest(true, originalPoint.EqualsWithEpsilon({1, 2, 3}));
 }
 
 static void Matrix4x4Tests()
@@ -582,6 +599,13 @@ static void Matrix4x4Tests()
     UTest(true, orto.GetRow(1).EqualsWithEpsilon({0.0f, 0.00186f, 0.0f, 0.0f}));
     UTest(true, orto.GetRow(2).EqualsWithEpsilon({0.0f, 0.0f, -0.002f, 0.0f}));
     UTest(true, orto.GetRow(3).EqualsWithEpsilon({-1.0f, -1.0f, -1.0002f, 1.0f}));
+
+    Vector4 toTransform{1, 2, 3, 4};
+    toTransform *= persp;
+    auto inversed = persp.GetInversed();
+    UTest(NotEqual, inversed, nullopt);
+    toTransform *= *inversed;
+    UTest(true, toTransform.EqualsWithEpsilon({1, 2, 3, 4}));
 }
 
 static void BaseVectorTests()
