@@ -47,6 +47,7 @@ namespace StdLib::SystemInfo
 	void Initialize()
 	{
 	    // TODO: find an adequate crossplatform solution
+        AllocationAlignmentValue = 16;
 	    void *addresses[10];
 	    for (int i = 0; i < 10; ++i)
         {
