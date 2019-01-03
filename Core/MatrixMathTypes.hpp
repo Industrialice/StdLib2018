@@ -7,7 +7,7 @@
 // TODO: determinant
 // TODO: matrix conversions (3x3 to 4x4, 4x4 to 3x3 etc.)
 // TODO: Rectangle3D
- // TODO: constexpr constructors with arguments validation
+// TODO: constexpr constructors with arguments validation
 
 namespace StdLib
 {
@@ -70,7 +70,24 @@ namespace StdLib
 
     template <uiw Rows, uiw Columns> using MatrixTypeByDimensions = typename _ChooseMatrixType<Rows, Columns>::Type;
 
-    template <typename _ScalarType, uiw Dim> struct _VectorBase
+    template <typename _ScalarType, uiw Dim> struct _VectorElements;
+    
+    template <typename _ScalarType> struct _VectorElements<_ScalarType, 2>
+    {
+        _ScalarType x = 0, y = 0;
+    };
+
+    template <typename _ScalarType> struct _VectorElements<_ScalarType, 3>
+    {
+        _ScalarType x = 0, y = 0, z = 0;
+    };
+
+    template <typename _ScalarType> struct _VectorElements<_ScalarType, 4>
+    {
+        _ScalarType x = 0, y = 0, z = 0, w = 0;
+    };
+
+    template <typename _ScalarType, uiw Dim> struct _VectorBase : _VectorElements<_ScalarType, Dim>
     {
         static_assert(Dim > 1);
 
@@ -79,7 +96,8 @@ namespace StdLib
         using ScalarType = _ScalarType;
         using VectorType = VectorTypeByDimension<ScalarType, dim>;
 
-        ScalarType x = 0, y = 0;
+        using _VectorElements<_ScalarType, Dim>::x;
+        using _VectorElements<_ScalarType, Dim>::y;
 
         constexpr _VectorBase() = default;
         constexpr _VectorBase(ScalarType x, ScalarType y);
@@ -114,6 +132,9 @@ namespace StdLib
         [[nodiscard]] std::array<ScalarType, Dim> &Data();
         [[nodiscard]] const std::array<ScalarType, Dim> &Data() const;
 
+        [[nodiscard]] ScalarType &operator [] (uiw index);
+        [[nodiscard]] const ScalarType &operator [] (uiw index) const;
+
         [[nodiscard]] ScalarType Accumulate() const;
         [[nodiscard]] ScalarType Max() const;
         [[nodiscard]] ScalarType Min() const;
@@ -128,21 +149,17 @@ namespace StdLib
 
         constexpr Vector2Base() = default;
         constexpr Vector2Base(ScalarType x, ScalarType y);
-        [[nodiscard]] ScalarType &operator [] (uiw index);
-        [[nodiscard]] const ScalarType &operator [] (uiw index) const;
     };
 
     template <typename ScalarType> struct Vector3Base : _VectorBase<ScalarType, 3>
     {
         using _VectorBase<ScalarType, 3>::x;
         using _VectorBase<ScalarType, 3>::y;
-        ScalarType z = 0;
+        using _VectorBase<ScalarType, 3>::z;
 
         constexpr Vector3Base() = default;
         constexpr Vector3Base(ScalarType x, ScalarType y, ScalarType z);
         constexpr Vector3Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z);
-        [[nodiscard]] ScalarType &operator [] (uiw index);
-        [[nodiscard]] const ScalarType &operator [] (uiw index) const;
         [[nodiscard]] VectorTypeByDimension<ScalarType, 2> ToVector2() const;
     };
 
@@ -150,16 +167,14 @@ namespace StdLib
     {
         using _VectorBase<ScalarType, 4>::x;
         using _VectorBase<ScalarType, 4>::y;
-        ScalarType z = 0;
-        ScalarType w = 0;
+        using _VectorBase<ScalarType, 4>::z;
+        using _VectorBase<ScalarType, 4>::w;
 
         constexpr Vector4Base() = default;
         constexpr Vector4Base(ScalarType x, ScalarType y, ScalarType z, ScalarType w);
         constexpr Vector4Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z, ScalarType w);
         constexpr Vector4Base(const VectorTypeByDimension<ScalarType, 3> &vec, ScalarType w);
         constexpr Vector4Base(const VectorTypeByDimension<ScalarType, 2> &v0, const VectorTypeByDimension<ScalarType, 2> &v1);
-        [[nodiscard]] ScalarType &operator [] (uiw index);
-        [[nodiscard]] const ScalarType &operator [] (uiw index) const;
         [[nodiscard]] VectorTypeByDimension<ScalarType, 2> ToVector2() const;
         [[nodiscard]] VectorTypeByDimension<ScalarType, 3> ToVector3() const;
     };
@@ -549,8 +564,10 @@ namespace StdLib
     // _VectorBase //
     /////////////////
 
-    template <typename _ScalarType, uiw Dim> inline constexpr _VectorBase<_ScalarType, Dim>::_VectorBase(ScalarType x, ScalarType y) : x(x), y(y)
+    template <typename _ScalarType, uiw Dim> inline constexpr _VectorBase<_ScalarType, Dim>::_VectorBase(ScalarType x, ScalarType y)
     {
+        this->x = x;
+        this->y = y;
         _ValidateValues(*this);
     }
 
@@ -567,12 +584,13 @@ namespace StdLib
     // Vector3Base //
     /////////////////
 
-    template <typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(ScalarType x, ScalarType y, ScalarType z) : _VectorBase<ScalarType, 3>(x, y), z(z)
+    template <typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(ScalarType x, ScalarType y, ScalarType z) : _VectorBase<ScalarType, 3>(x, y)
     {
+        this->z = z;
         _ValidateValues(*this);
     }
 
-    template <typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z) : _VectorBase<ScalarType, 3>(vec.x, vec.y), z(z)
+    template <typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z) : Vector3Base(vec.x, vec.y, z)
     {
         _ValidateValues(*this);
     }
@@ -581,22 +599,24 @@ namespace StdLib
     // Vector4Base //
     /////////////////
 
-    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(ScalarType x, ScalarType y, ScalarType z, ScalarType w) : _VectorBase<ScalarType, 4>(x, y), z(z), w(w)
+    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(ScalarType x, ScalarType y, ScalarType z, ScalarType w) : _VectorBase<ScalarType, 4>(x, y)
+    {
+        this->z = z;
+        this->w = w;
+        _ValidateValues(*this);
+    }
+
+    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z, ScalarType w) : Vector4Base(vec.x, vec.y, z, w)
     {
         _ValidateValues(*this);
     }
 
-    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z, ScalarType w) : _VectorBase<ScalarType, 4>(vec.x, vec.y), z(z), w(w)
+    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 3> &vec, ScalarType w) : Vector4Base(vec.x, vec.y, vec.z, w)
     {
         _ValidateValues(*this);
     }
 
-    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 3> &vec, ScalarType w) : _VectorBase<ScalarType, 4>(vec.x, vec.y), z(vec.z), w(w)
-    {
-        _ValidateValues(*this);
-    }
-
-    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &v0, const VectorTypeByDimension<ScalarType, 2> &v1) : _VectorBase<ScalarType, 4>(v0.x, v0.y), z(v1.x), w(v1.y)
+    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &v0, const VectorTypeByDimension<ScalarType, 2> &v1) : Vector4Base(v0.x, v0.y, v1.x, v1.y)
     {
         _ValidateValues(*this);
     }

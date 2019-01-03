@@ -9,11 +9,13 @@ namespace StdLib
     // _VectorBase //
     /////////////////
 
+#define VECDATA(v, index) ((&(v).x)[index])
+
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator + (const _VectorBase &other) const -> VectorType
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
-            result.Data()[index] = Data()[index] + other.Data()[index];
+            VECDATA(result, index) = VECDATA(*this, index) + VECDATA(other, index);
 		_ValidateValues(*this, other, result);
         return result;
     }
@@ -22,7 +24,7 @@ namespace StdLib
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
-            result.Data()[index] = Data()[index] + scalar;
+            VECDATA(result, index) = VECDATA(*this, index) + scalar;
 		_ValidateValues(*this, scalar, result);
         return result;
     }
@@ -30,7 +32,7 @@ namespace StdLib
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator += (const _VectorBase &other) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
-            Data()[index] += other.Data()[index];
+            VECDATA(*this, index) += VECDATA(other, index);
 		_ValidateValues(*this, other);
 		return *(VectorType *)this;
     }
@@ -38,7 +40,7 @@ namespace StdLib
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator += (ScalarType scalar) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
-            Data()[index] += scalar;
+            VECDATA(*this, index) += scalar;
         _ValidateValues(*this, scalar);
         return *(VectorType *)this;
     }
@@ -47,7 +49,7 @@ namespace StdLib
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
-            result.Data()[index] = Data()[index] - other.Data()[index];
+            VECDATA(result, index) = VECDATA(*this, index) - VECDATA(other, index);
 		_ValidateValues(*this, other, result);
         return result;
     }
@@ -56,7 +58,7 @@ namespace StdLib
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
-            result.Data()[index] = Data()[index] - scalar;
+            VECDATA(result, index) = VECDATA(*this, index) - scalar;
 		_ValidateValues(*this, scalar, result);
         return result;
     }
@@ -64,7 +66,7 @@ namespace StdLib
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator -= (const _VectorBase &other) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
-            Data()[index] -= other.Data()[index];
+            VECDATA(*this, index) -= VECDATA(other, index);
 		_ValidateValues(*this, other);
         return *(VectorType *)this;
     }
@@ -72,7 +74,7 @@ namespace StdLib
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator -= (ScalarType scalar) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
-            Data()[index] -= scalar;
+            VECDATA(*this, index) -= scalar;
 		_ValidateValues(*this, scalar);
         return *(VectorType *)this;
     }
@@ -81,7 +83,7 @@ namespace StdLib
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
-            result.Data()[index] = Data()[index] * other.Data()[index];
+            VECDATA(result, index) = VECDATA(*this, index) * VECDATA(other, index);
 		_ValidateValues(*this, other, result);
         return result;
     }
@@ -90,7 +92,7 @@ namespace StdLib
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
-            result.Data()[index] = Data()[index] * scalar;
+            VECDATA(result, index) = VECDATA(*this, index) * scalar;
 		_ValidateValues(*this, scalar, result);
         return result;
     }
@@ -98,7 +100,7 @@ namespace StdLib
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator *= (const _VectorBase &other) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
-            Data()[index] *= other.Data()[index];
+            VECDATA(*this, index) *= VECDATA(other, index);
 		_ValidateValues(*this, other);
         return *(VectorType *)this;
     }
@@ -106,7 +108,7 @@ namespace StdLib
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator *= (ScalarType scalar) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
-            Data()[index] *= scalar;
+            VECDATA(*this, index) *= scalar;
 		_ValidateValues(*this, scalar);
         return *(VectorType *)this;
     }
@@ -115,7 +117,7 @@ namespace StdLib
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
-            result.Data()[index] = Data()[index] / other.Data()[index];
+            VECDATA(result, index) = VECDATA(*this, index) / VECDATA(other, index);
 		_ValidateValues(*this, other, result);
         return result;
     }
@@ -124,7 +126,7 @@ namespace StdLib
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
-            result.Data()[index] = Data()[index] / scalar;
+            VECDATA(result, index) = VECDATA(*this, index) / scalar;
 		_ValidateValues(*this, scalar, result);
         return result;
     }
@@ -132,7 +134,7 @@ namespace StdLib
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator /= (const _VectorBase &other) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
-            Data()[index] /= other.Data()[index];
+            VECDATA(*this, index) /= VECDATA(other, index);
 		_ValidateValues(*this, other);
         return *(VectorType *)this;
     }
@@ -140,7 +142,7 @@ namespace StdLib
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator /= (ScalarType scalar) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
-            Data()[index] /= scalar;
+            VECDATA(*this, index) /= scalar;
 		_ValidateValues(*this, scalar);
         return *(VectorType *)this;
     }
@@ -149,7 +151,7 @@ namespace StdLib
 	{
 		_ValidateValues(*this, other);
 		for (uiw index = 0; index < Dim; ++index)
-			if (Data()[index] != other.Data()[index])
+			if (VECDATA(*this, index) != VECDATA(other, index))
 				return false;
 		return true;
 	}
@@ -171,11 +173,25 @@ namespace StdLib
         return *(std::array<ScalarType, Dim> *)&x;
     }
 
+    template <typename ScalarType, uiw Dim> inline ScalarType &_VectorBase<ScalarType, Dim>::operator[](uiw index)
+    {
+        _ValidateValues(*this);
+        ASSUME(index < Dim);
+        return VECDATA(*this, index);
+    }
+
+    template <typename ScalarType, uiw Dim> inline const ScalarType &_VectorBase<ScalarType, Dim>::operator[](uiw index) const
+    {
+        _ValidateValues(*this);
+        ASSUME(index < Dim);
+        return VECDATA(*this, index);
+    }
+
     template <typename ScalarType, uiw Dim> inline ScalarType _VectorBase<ScalarType, Dim>::Accumulate() const
     {
         ScalarType sum = x;
         for (uiw index = 1; index < dim; ++index)
-            sum += Data()[index];
+            sum += VECDATA(*this, index);
 		_ValidateValues(*this, sum);
         return sum;
     }
@@ -184,8 +200,8 @@ namespace StdLib
     {
         ScalarType max = x;
         for (uiw index = 1; index < dim; ++index)
-            if (Data()[index] > max)
-                max = Data()[index];
+            if (VECDATA(*this, index) > max)
+                max = VECDATA(*this, index);
 		_ValidateValues(*this, max);
         return max;
     }
@@ -194,8 +210,8 @@ namespace StdLib
     {
         ScalarType min = x;
         for (uiw index = 1; index < dim; ++index)
-            if (Data()[index] < min)
-                min = Data()[index];
+            if (VECDATA(*this, index) < min)
+                min = VECDATA(*this, index);
 		_ValidateValues(*this, min);
         return min;
     }
@@ -212,43 +228,9 @@ namespace StdLib
     // Vector2Base //
     /////////////////
 
-    template <typename ScalarType> inline ScalarType &Vector2Base<ScalarType>::operator[](uiw index)
-    {
-		_ValidateValues(*this);
-        if (index == 0) return x;
-        ASSUME(index == 1);
-        return y;
-    }
-
-    template <typename ScalarType> inline const ScalarType &Vector2Base<ScalarType>::operator[](uiw index) const
-    {
-		_ValidateValues(*this);
-        if (index == 0) return x;
-        ASSUME(index == 1);
-        return y;
-    }
-
     /////////////////
     // Vector3Base //
     /////////////////
-
-    template <typename ScalarType> inline ScalarType &Vector3Base<ScalarType>::operator[](uiw index)
-    {
-		_ValidateValues(*this);
-        if (index == 0) return x;
-        if (index == 1) return y;
-        ASSUME(index == 2);
-        return z;
-    }
-
-    template <typename ScalarType> inline const ScalarType &Vector3Base<ScalarType>::operator[](uiw index) const
-    {
-		_ValidateValues(*this);
-        if (index == 0) return x;
-        if (index == 1) return y;
-        ASSUME(index == 2);
-        return z;
-    }
 
     template <typename ScalarType> inline VectorTypeByDimension<ScalarType, 2> Vector3Base<ScalarType>::ToVector2() const
     {
@@ -259,26 +241,6 @@ namespace StdLib
     /////////////////
     // Vector4Base //
     /////////////////
-
-    template <typename ScalarType> inline ScalarType &Vector4Base<ScalarType>::operator[](uiw index)
-    {
-		_ValidateValues(*this);
-        if (index == 0) return x;
-        if (index == 1) return y;
-        if (index == 2) return z;
-        ASSUME(index == 3);
-        return w;
-    }
-
-    template <typename ScalarType> inline const ScalarType &Vector4Base<ScalarType>::operator[](uiw index) const
-    {
-		_ValidateValues(*this);
-        if (index == 0) return x;
-        if (index == 1) return y;
-        if (index == 2) return z;
-        ASSUME(index == 3);
-        return w;
-    }
 
     template <typename ScalarType> inline VectorTypeByDimension<ScalarType, 2> Vector4Base<ScalarType>::ToVector2() const
     {
@@ -307,7 +269,7 @@ namespace StdLib
     {
         f32 sum = x * x;
         for (uiw index = 1; index < dim; ++index)
-            sum += operator[](index) * operator[](index);
+            sum += VECDATA(*this, index) * VECDATA(*this, index);
 		_ValidateValues(*this, sum);
         return sum;
     }
@@ -325,7 +287,7 @@ namespace StdLib
         f32 sum = dist * dist;
         for (uiw index = 1; index < dim; ++index)
         {
-            dist = operator[](index) - other[index];
+            dist = VECDATA(*this, index) - VECDATA(other, index);
             sum += dist * dist;
         }
 		_ValidateValues(*this, sum);
@@ -336,7 +298,7 @@ namespace StdLib
     {
         f32 sum = x * other.x;
         for (uiw index = 1; index < dim; ++index)
-            sum += operator[](index) * other[index];
+            sum += VECDATA(*this, index) * VECDATA(other, index);
 		_ValidateValues(*this, sum);
         return sum;
     }
@@ -352,7 +314,7 @@ namespace StdLib
     {
         f32 revLength = ApproxMath::RSqrt<ApproxMath::Precision::High>(LengthSquare());
         for (uiw index = 0; index < dim; ++index)
-            operator[](index) *= revLength;
+            VECDATA(*this, index) *= revLength;
 		_ValidateValues(*this);
         return *(VectorType *)this;
     }
@@ -362,7 +324,7 @@ namespace StdLib
         VectorType result;
         f32 revLength = ApproxMath::RSqrt<ApproxMath::Precision::High>(LengthSquare());
         for (uiw index = 0; index < dim; ++index)
-            result[index] = operator[](index) * revLength;
+            VECDATA(result, index) = VECDATA(*this, index) * revLength;
 		_ValidateValues(*this, result);
         return result;
     }
@@ -377,7 +339,7 @@ namespace StdLib
     {
 		_ValidateValues(*this, other);
         for (uiw index = 0; index < dim; ++index)
-            if (abs(operator[](index) - other[index]) > epsilon)
+            if (abs(VECDATA(*this, index) - VECDATA(other, index)) > epsilon)
                 return false;
         return true;
     }
@@ -396,6 +358,8 @@ namespace StdLib
 		ASSUME(interpolant >= 0.0f && interpolant <= 1.0f);
         return *this + (other - *this) * interpolant;
     }
+
+#undef VECDATA
 
     /////////////
     // _Matrix //

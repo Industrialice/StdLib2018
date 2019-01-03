@@ -977,6 +977,7 @@ static void PrintSystemInfo()
 	PRINTLOG("  Logical CPU cores: %u\n", SystemInfo::LogicalCPUCores());
 	PRINTLOG("  Physical CPU cores: %u\n", SystemInfo::PhysicalCPUCores());
 	PRINTLOG("  Memory allocation alignment: %u\n", (ui32)SystemInfo::AllocationAlignment());
+    PRINTLOG("  Memory page size: %u\n", (ui32)SystemInfo::MemoryPageSize());
 	const char *arch = nullptr;
 	switch (SystemInfo::CPUArchitecture())
 	{

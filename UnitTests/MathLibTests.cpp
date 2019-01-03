@@ -6,7 +6,7 @@ using namespace Funcs;
 
 namespace
 {
-	static constexpr ui32 TestIterations = 10'00;
+	static constexpr ui32 TestIterations = 10;
 }
 
 template <uiw index, typename T> typename T::ScalarType Get(T vec)
@@ -58,7 +58,7 @@ template <typename T> T GenerateMatrix()
 	{
 		for (uiw column = 0; column < T::columns; ++column)
 		{
-			matrix[row][column] = rand() * 0.001f;
+			matrix[row][column] = (rand() % 1000) * 0.01f;
 		}
 	}
 	return matrix;
@@ -67,6 +67,23 @@ template <typename T> T GenerateMatrix()
 template <typename T> void BaseVectorTestsHelper()
 {
 	T v0, v1, v2;
+
+    // making sure everything is properly accessible
+    v0.x = 0;
+    UTest(Equal, v0[0], 0);
+    v0.y = 1;
+    UTest(Equal, v0[1], 1);
+    if constexpr (T::dim > 2)
+    {
+        v0.z = 2;
+        UTest(Equal, v0[2], 2);
+        if constexpr (T::dim > 3)
+        {
+            v0.w = 3;
+            UTest(Equal, v0[3], 3);
+        }
+    }
+
 	for (ui32 index = 0; index < TestIterations; ++index)
 	{
 		v0 = GenerateVec<T>(true);
@@ -561,7 +578,7 @@ void MathLibTests()
 		}
 
 	}
-	printf("iteration %i took %.4g\n", it, fastest);
+    PRINTLOG("iteration %i took %.4g\n", it, fastest);
 
     Vector3 rotTest(1.0f, 2.0f, 3.0f);
     auto rotMatrix = Matrix3x3::CreateRS(Vector3{1.0f, 2.0f, 3.0f});
