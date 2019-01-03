@@ -4,7 +4,6 @@
 
 // TODO: inverse matrix
 // TODO: determinant
-// TODO: matrix conversions (3x3 to 4x4, 4x4 to 3x3 etc.)
 // TODO: Rectangle3D
 
 namespace StdLib
@@ -98,7 +97,6 @@ namespace StdLib
         using _VectorElements<_ScalarType, Dim>::y;
 
         constexpr _VectorBase() = default;
-        constexpr _VectorBase(ScalarType x, ScalarType y);
 
         [[nodiscard]] VectorType operator + (const _VectorBase &other) const;
         [[nodiscard]] VectorType operator + (ScalarType scalar) const;
@@ -138,6 +136,9 @@ namespace StdLib
         [[nodiscard]] ScalarType Min() const;
 
         VectorType &ForEach(ScalarType func(ScalarType element));
+
+    protected:
+        template <typename... Args> constexpr _VectorBase(Args... args);
     };
 
     template <typename ScalarType> struct Vector2Base : _VectorBase<ScalarType, 2>
@@ -315,6 +316,8 @@ namespace StdLib
         MatrixType &StoreValueBoundless(uiw rowIndex, uiw columnIndex, f32 value);
 
         [[nodiscard]] bool EqualsWithEpsilon(const _Matrix &other, f32 epsilon = DefaultF32Epsilon) const;
+
+        template <typename OtherMatrix> OtherMatrix As() const;
 
     protected:
         constexpr _Matrix(); // will create identity matrix
@@ -562,10 +565,29 @@ namespace StdLib
     // _VectorBase //
     /////////////////
 
-    template <typename _ScalarType, uiw Dim> inline constexpr _VectorBase<_ScalarType, Dim>::_VectorBase(ScalarType x, ScalarType y)
+    template <typename _ScalarType, uiw Dim> 
+    template <typename... Args>
+    inline constexpr _VectorBase<_ScalarType, Dim>::_VectorBase(Args... args)
     {
-        this->x = x;
-        this->y = y;
+        uiw index = 0;
+        auto writeValue = [&index, this](_ScalarType value) mutable constexpr
+        {
+            if (index == 0) x = value;
+            else if (index == 1) y = value;
+
+            if constexpr (Dim > 2)
+            {
+                if (index == 2) _VectorElements<_ScalarType, Dim>::z = value;
+
+                if constexpr (Dim > 3)
+                {
+                    if (index == 3) _VectorElements<_ScalarType, Dim>::w = value;
+                }
+            }
+
+            ++index;
+        };
+        (writeValue(args), ...);
         _ValidateValues(*this);
     }
 
@@ -579,11 +601,7 @@ namespace StdLib
     // Vector3Base //
     /////////////////
 
-    template <typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(ScalarType x, ScalarType y, ScalarType z) : _VectorBase<ScalarType, 3>(x, y)
-    {
-        this->z = z;
-        _ValidateValues(*this);
-    }
+    template <typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(ScalarType x, ScalarType y, ScalarType z) : _VectorBase<ScalarType, 3>(x, y, z) {}
 
     template <typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z) : Vector3Base(vec.x, vec.y, z) {}
 
@@ -591,12 +609,7 @@ namespace StdLib
     // Vector4Base //
     /////////////////
 
-    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(ScalarType x, ScalarType y, ScalarType z, ScalarType w) : _VectorBase<ScalarType, 4>(x, y)
-    {
-        this->z = z;
-        this->w = w;
-        _ValidateValues(*this);
-    }
+    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(ScalarType x, ScalarType y, ScalarType z, ScalarType w) : _VectorBase<ScalarType, 4>(x, y, z, w) {}
 
     template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z, ScalarType w) : Vector4Base(vec.x, vec.y, z, w) {}
     template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 3> &vec, ScalarType w) : Vector4Base(vec.x, vec.y, vec.z, w) {}
@@ -606,19 +619,35 @@ namespace StdLib
     // _Matrix //
     /////////////
 
+    template <uiw Rows, uiw Columns>
+    template <typename OtherMatrix> 
+    inline OtherMatrix _Matrix<Rows, Columns>::As() const
+    {
+        _ValidateValues(*this);
+        OtherMatrix r;
+        for (uiw row = 0; row < Rows; ++row)
+        {
+            for (uiw column = 0; column < Columns; ++column)
+            {
+                r.StoreValueBoundless(row, column, elements[row][column]);
+            }
+        }
+        return r;
+    }
+
     template <uiw Rows, uiw Columns> inline constexpr _Matrix<Rows, Columns>::_Matrix()
     {
-        for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
+        for (uiw row = 0; row < Rows; ++row)
         {
-            for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
+            for (uiw column = 0; column < Columns; ++column)
             {
-                if (rowIndex == columnIndex)
+                if (row == column)
                 {
-                    elements[rowIndex][columnIndex] = 1.0f;
+                    elements[row][column] = 1.0f;
                 }
                 else
                 {
-                    elements[rowIndex][columnIndex] = 0.0f;
+                    elements[row][column] = 0.0f;
                 }
             }
         }
