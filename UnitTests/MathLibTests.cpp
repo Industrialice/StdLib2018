@@ -227,6 +227,14 @@ template <typename T> void FP32VectorTestsHelper()
 static void Vector2Tests()
 {
 	Vector2 v0;
+    
+    {
+        v0 = {1, 2};
+        auto[x, y] = v0;
+        UTest(Equal, x, 1);
+        UTest(Equal, y, 2);
+    }
+
 	for (ui32 index = 0; index < TestIterations; ++index)
 	{
 		v0 = GenerateVec<Vector2>(true);
@@ -238,6 +246,15 @@ static void Vector2Tests()
 static void Vector3Tests()
 {
 	Vector3 v0, v1, v2;
+
+    {
+        v0 = {1, 2, 3};
+        auto[x, y, z] = v0;
+        UTest(Equal, x, 1);
+        UTest(Equal, y, 2);
+        UTest(Equal, z, 3);
+    }
+
 	for (ui32 index = 0; index < TestIterations; ++index)
 	{
 		v0 = GenerateVec<Vector3>(true);
@@ -260,6 +277,17 @@ static void Vector3Tests()
 
 static void Vector4Tests()
 {
+    Vector4 v0;
+
+    {
+        v0 = {1, 2, 3, 4};
+        auto[x, y, z, w] = v0;
+        UTest(Equal, x, 1);
+        UTest(Equal, y, 2);
+        UTest(Equal, z, 3);
+        UTest(Equal, w, 4);
+    }
+
 	for (ui32 index = 0; index < TestIterations; ++index)
 	{
 		// nothing to test yet

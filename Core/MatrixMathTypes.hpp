@@ -2,7 +2,6 @@
 
 #include "CoreHeader.hpp"
 
-// TODO: try to make vectors decomposable, so you would be able to perform auto [x, y, z] = Vector3{};
 // TODO: inverse matrix
 // TODO: determinant
 // TODO: matrix conversions (3x3 to 4x4, 4x4 to 3x3 etc.)
