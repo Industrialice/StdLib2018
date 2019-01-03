@@ -11,4 +11,5 @@ namespace StdLib::SystemInfo
 	ui32 LogicalCPUCores();
 	ui32 PhysicalCPUCores();
 	uiw AllocationAlignment();
+    uiw MemoryPageSize(); // size in bytes
 }

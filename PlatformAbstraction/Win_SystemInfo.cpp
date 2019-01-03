@@ -10,6 +10,7 @@ namespace
 	SystemInfo::Arch ArchValue;
 	ui32 LogicalCPUCoresValue;
 	ui32 PhysicalCPUCoresValue;
+    uiw PageSizeValue;
 }
 
 auto SystemInfo::CPUArchitecture() -> Arch
@@ -35,6 +36,12 @@ uiw SystemInfo::AllocationAlignment()
 	return MEMORY_ALLOCATION_ALIGNMENT;
 }
 
+uiw SystemInfo::MemoryPageSize()
+{
+    ASSUME(PageSizeValue > 0);
+    return PageSizeValue;
+}
+
 namespace StdLib::SystemInfo
 {
 	void Initialize()
@@ -44,6 +51,7 @@ namespace StdLib::SystemInfo
 
 		LogicalCPUCoresValue = sysinfo.dwNumberOfProcessors;
 		PhysicalCPUCoresValue = LogicalCPUCoresValue; // TODO: determine this value
+        PageSizeValue = sysinfo.dwPageSize;
 
 		switch (sysinfo.wProcessorArchitecture)
 		{
