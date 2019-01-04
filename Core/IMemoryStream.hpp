@@ -10,8 +10,8 @@ namespace StdLib
     {
         virtual ~IMemoryStream() = default;
 
-        [[nodiscard]] virtual uiw Size() const = 0;
-        [[nodiscard]] virtual uiw Resize(uiw newSize) = 0; // returns final size, it can be lower than newSize if the stream had failed to allocate enough memory; memory address and size might change after this call
+        [[nodiscard]] virtual ui64 Size() const = 0;
+        [[nodiscard]] virtual ui64 Resize(ui64 newSize) = 0; // returns final size, it can be lower than newSize if the stream had failed to allocate enough memory; memory address and size might change after this call
         virtual void Flush() = 0; // memory address and size might change after this call
         [[nodiscard]] virtual ui8 *Memory() = 0;
         [[nodiscard]] virtual const ui8 *Memory() const = 0;
@@ -29,18 +29,18 @@ namespace StdLib
     public:
         MemoryStreamFixed() = default;
 
-        [[nodiscard]] virtual uiw Size() const override
+        [[nodiscard]] virtual ui64 Size() const override
         {
             return _currentSize;
         }
 
-        [[nodiscard]] virtual uiw Resize(uiw newSize) override
+        [[nodiscard]] virtual ui64 Resize(ui64 newSize) override
         {
             if (newSize > size)
             {
                 newSize = size;
             }
-            _currentSize = newSize;
+            _currentSize = (uiw)newSize;
             return _currentSize;
         }
 
@@ -106,18 +106,19 @@ namespace StdLib
             this->_currentSize = currentSize;
         }
 
-        [[nodiscard]] virtual uiw Size() const override
+        [[nodiscard]] virtual ui64 Size() const override
         {
             return _currentSize;
         }
 
-        [[nodiscard]] virtual uiw Resize(uiw newSize) override
+        [[nodiscard]] virtual ui64 Resize(ui64 newSize) override
         {
+            ASSUME(newSize <= uiw_max);
             if (newSize > _maxSize)
             {
                 newSize = _maxSize;
             }
-            _currentSize = newSize;
+            _currentSize = (uiw)newSize;
             return _currentSize;
         }
 
@@ -165,18 +166,19 @@ namespace StdLib
 
         MemoryStreamAllocator() = default;
 
-        [[nodiscard]] virtual uiw Size() const override
+        [[nodiscard]] virtual ui64 Size() const override
         {
             return _currentSize;
         }
 
-        [[nodiscard]] virtual uiw Resize(uiw newSize) override
+        [[nodiscard]] virtual ui64 Resize(ui64 newSize) override
         {
+            ASSUME(newSize <= uiw_max);
             if (newSize != _currentSize)
             {
-                _currentSize = newSize;
+                _currentSize = (uiw)newSize;
                 newSize += newSize == 0;
-                _buffer = _allocator.Reallocate(_buffer, newSize);
+                _buffer = _allocator.Reallocate(_buffer, (uiw)newSize);
             }
             return _currentSize;
         }
@@ -251,12 +253,12 @@ namespace StdLib
             return *this;
         }
 
-        [[nodiscard]] virtual uiw Size() const override
+        [[nodiscard]] virtual ui64 Size() const override
         {
             return _size;
         }
 
-        [[nodiscard]] virtual uiw Resize(uiw newSize) override
+        [[nodiscard]] virtual ui64 Resize(ui64 newSize) override
         {
             return _size;
         }

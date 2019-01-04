@@ -3,7 +3,7 @@
 
 using namespace StdLib;
 
-FileToMemoryStream::FileToMemoryStream(IMemoryStream &stream, FileProcModes::FileProcMode procMode, uiw offset, Error<> *error)
+FileToMemoryStream::FileToMemoryStream(IMemoryStream &stream, FileProcModes::FileProcMode procMode, ui64 offset, Error<> *error)
 {
     Error<> dummyError = this->Open(stream, procMode, offset);
     if (error) *error = dummyError;
@@ -29,7 +29,7 @@ FileToMemoryStream &FileToMemoryStream::operator = (FileToMemoryStream &&source)
     return *this;
 }
 
-Error<> FileToMemoryStream::Open(IMemoryStream &stream, FileProcModes::FileProcMode procMode, uiw offset)
+Error<> FileToMemoryStream::Open(IMemoryStream &stream, FileProcModes::FileProcMode procMode, ui64 offset)
 {
     _stream = 0;
     _offset = 0;
@@ -76,7 +76,7 @@ bool FileToMemoryStream::Read(void *target, ui32 len, ui32 *read)
 {
     ASSUME(_stream && _procMode.Contains(FileProcModes::Read));
     ASSUME(len == 0 || target);
-    uiw diff = _offset <= _stream->Size() ? _stream->Size() - _offset : 0;
+    ui64 diff = _offset <= _stream->Size() ? _stream->Size() - _offset : 0;
     len = std::min(len, (ui32)diff);
     if (_offset + len < _offset)  //  overflow
     {
@@ -92,7 +92,7 @@ bool FileToMemoryStream::Write(const void *source, ui32 len, ui32 *written)
 {
     ASSUME(_stream && _procMode.Contains(FileProcModes::Write));
     ASSUME(len == 0 || source);
-    uiw writeEnd = _offset + len;
+    ui64 writeEnd = _offset + len;
     if (writeEnd < _offset)  //  overflow
     {
         writeEnd = uiw_max;
@@ -100,7 +100,7 @@ bool FileToMemoryStream::Write(const void *source, ui32 len, ui32 *written)
     }
     if (writeEnd > _stream->Size())
     {
-        uiw newSize = _stream->Resize(writeEnd);
+        ui64 newSize = _stream->Resize(writeEnd);
         if (newSize <= _offset)
         {
             len = 0;

@@ -65,6 +65,10 @@ static void EnumCombinableTests()
     PRINTLOG("finished enum combinable tests\n");
 }
 
+#ifdef _MSC_VER
+    #pragma warning(push)
+    #pragma warning(disable : 4307) // FNVHashCT generates warning C4307: '*': integral constant overflow
+#endif
 static void TypeIdentifiableTests()
 {
 	//struct S1 {};
@@ -122,6 +126,9 @@ static void HashFuncsTest()
 
 	PRINTLOG("finished hash tests\n");
 }
+#ifdef _MSC_VER
+    #pragma warning(pop)
+#endif
 
 static void IntegerPropertiesTest()
 {
@@ -1073,6 +1080,6 @@ int main(int argc, const char **argv)
     PRINTLOG("~~~Finished Everything~~~\n");
 
 #ifdef PLATFORM_WINDOWS
-    getchar();
+    system("pause");
 #endif
 }

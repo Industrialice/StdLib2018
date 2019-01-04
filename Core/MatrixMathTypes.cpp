@@ -707,7 +707,7 @@ Matrix4x4 Matrix4x4::CreateRTS(const optional<Quaternion> &rotation, const optio
 
 Matrix4x4 Matrix4x4::CreatePerspectiveProjection(f32 horizontalFOVRad, f32 aspectRatio, f32 nearPlane, f32 farPlane, ProjectionTarget target)
 {
-	ASSUME(horizontalFOVRad > DefaultF32Epsilon && aspectRatio > DefaultF32Epsilon && nearPlane > DefaultF32Epsilon && farPlane > nearPlane);
+	ASSUME(horizontalFOVRad > DefaultF32Epsilon && horizontalFOVRad < MathPi<f32>() && aspectRatio > DefaultF32Epsilon && nearPlane > DefaultF32Epsilon && farPlane > nearPlane);
 
     Matrix4x4 r;
 

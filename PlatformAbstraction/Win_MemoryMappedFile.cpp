@@ -26,7 +26,12 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
     uiw fileSize;
     if (auto fileSizeResult = file.SizeGet(); fileSizeResult)
     {
-        fileSize = fileSizeResult.Unwrap();
+        ui64 fileSizeUnwrapped = fileSizeResult.Unwrap();
+        if ((fileSizeUnwrapped + file._offsetToStart) >= uiw_max)
+        {
+            return DefaultError::OutOfMemory("File is too big");
+        }
+        fileSize = (uiw)fileSizeUnwrapped;
     }
     else
     {
@@ -73,10 +78,10 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
         return DefaultError::UnknownError("MapViewOfFile failed");
     }
 
-    _offset = offset + file._offsetToStart;
+    _offset = offset + (uiw)file._offsetToStart;
     _size = size;
 
-    uiw accessibleFileSize = fileSize - file._offsetToStart;
+    uiw accessibleFileSize = fileSize - (uiw)file._offsetToStart;
     if (_size > accessibleFileSize)
     {
         _size = accessibleFileSize;

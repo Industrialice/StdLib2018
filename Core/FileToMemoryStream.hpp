@@ -8,16 +8,16 @@ namespace StdLib
     class FileToMemoryStream final : public IFile
     {
         IMemoryStream *_stream = nullptr;
-        uiw _offset;  //  _startOffset + current offset
-        uiw _startOffset;  //  can be non-zero in append mode
+        ui64 _offset;  //  _startOffset + current offset
+        ui64 _startOffset;  //  can be non-zero in append mode
         FileProcModes::FileProcMode _procMode = FileProcModes::Read;
 
     public:
         FileToMemoryStream() = default;
-        FileToMemoryStream(IMemoryStream &stream, FileProcModes::FileProcMode procMode, uiw offset = 0, Error<> *error = nullptr);
+        FileToMemoryStream(IMemoryStream &stream, FileProcModes::FileProcMode procMode, ui64 offset = 0, Error<> *error = nullptr);
         FileToMemoryStream(FileToMemoryStream &&source) noexcept;
         FileToMemoryStream &operator = (FileToMemoryStream &&source) noexcept;
-        Error<> Open(IMemoryStream &stream, FileProcModes::FileProcMode procMode, uiw offset = 0);
+        Error<> Open(IMemoryStream &stream, FileProcModes::FileProcMode procMode, ui64 offset = 0);
 
         virtual void Close() override;
         virtual bool IsOpened() const override;

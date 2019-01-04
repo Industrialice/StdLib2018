@@ -83,7 +83,7 @@ namespace StdLib
 
     template <typename _ScalarType> struct _VectorElements<_ScalarType, 4>
     {
-        _ScalarType x = 0, y = 0, z = 0, w = 0;
+        _ScalarType x = 0, y = 0, z = 0, w = 1;
     };
 
     template <typename _ScalarType, uiw Dim> struct _VectorBase : _VectorElements<_ScalarType, Dim>
