@@ -2,8 +2,11 @@
 
 #include "CoreHeader.hpp"
 
-// TODO: determinant
 // TODO: Rectangle3D
+// TODO: validate values for Rectangle
+// TODO: tests for Rectangle
+// TODO: validate values for Quaternion
+// TODO: more tests for Quaternion
 
 namespace StdLib
 {
@@ -342,6 +345,7 @@ namespace StdLib
         constexpr Matrix4x3(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2, const Vector3 &row3);
 
         [[nodiscard]] optional<Matrix4x3> GetInversed() const;
+		[[nodiscard]] f32 Determinant() const;
 
         [[nodiscard]] Matrix4x4 operator * (const Matrix4x4 &other) const;
 
@@ -362,6 +366,7 @@ namespace StdLib
         constexpr Matrix3x4(const Vector4 &row0, const Vector4 &row1, const Vector4 &row2);
 
 		[[nodiscard]] optional<Matrix3x4> GetInversed() const;
+		[[nodiscard]] f32 Determinant() const;
 
         [[nodiscard]] static Matrix3x4 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
         [[nodiscard]] static Matrix3x4 CreateRS(const optional<Vector3> &rotation, const optional<Vector3> &scale = nullopt);
@@ -383,6 +388,7 @@ namespace StdLib
         Matrix4x4 &Inverse(); // assertion fails if failed to inverse, the matrix isn't modified
 
         optional<Matrix4x4> GetInversed() const;
+		[[nodiscard]] f32 Determinant() const;
 
         [[nodiscard]] static Matrix4x4 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
         [[nodiscard]] static Matrix4x4 CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt);
@@ -402,6 +408,7 @@ namespace StdLib
         constexpr Matrix3x2(const Vector2 &row0, const Vector2 &row1, const Vector2 &row2);
 
         [[nodiscard]] optional<Matrix3x2> GetInversed() const;
+		[[nodiscard]] f32 Determinant() const;
 
         // clockwise rotation around Z axis
         [[nodiscard]] static Matrix3x2 CreateRTS(const optional<f32> &rotation = nullopt, const optional<Vector2> &translation = nullopt, const optional<Vector2> &scale = nullopt);
@@ -417,7 +424,8 @@ namespace StdLib
         constexpr Matrix2x3(const Vector3 &row0, const Vector3 &row1);
 
 		[[nodiscard]] optional<Matrix2x3> GetInversed() const;
-    };
+		[[nodiscard]] f32 Determinant() const;
+	};
 
     struct Matrix2x2 : _Matrix<2, 2>
     {
@@ -432,7 +440,8 @@ namespace StdLib
         Matrix2x2 &Inverse(); // assertion fails if failed to inverse, the matrix isn't modified
 
         optional<Matrix2x2> GetInversed() const;
-    };
+		[[nodiscard]] f32 Determinant() const;
+	};
 
     struct Matrix3x3 : _Matrix<3, 3>
     {
@@ -448,6 +457,7 @@ namespace StdLib
 		Matrix3x3 &Inverse(); // assertion fails if failed to inverse, the matrix isn't modified
 
 		optional<Matrix3x3> GetInversed() const;
+		[[nodiscard]] f32 Determinant() const;
 
         [[nodiscard]] static Matrix3x3 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
         [[nodiscard]] static Matrix3x3 CreateRS(const optional<Vector3> &rotation, const optional<Vector3> &scale = nullopt);

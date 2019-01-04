@@ -508,7 +508,7 @@ template <typename T> void MatrixTestsHelper()
 static void Matrix2x2Tests()
 {
     constexpr Matrix2x2 constexprTest = Matrix2x2(
-        0, 1,
+        5, 1,
         2, 3);
 
 	auto inversed = constexprTest.GetInversed();
@@ -517,12 +517,15 @@ static void Matrix2x2Tests()
 	toTransform *= constexprTest;
 	toTransform *= *inversed;
 	UTest(true, toTransform.EqualsWithEpsilon({5, 10}, 0.0001f));
+
+	f32 det = constexprTest.Determinant();
+	UTest(true, EqualsWithEpsilon(det, 13));
 }
 
 static void Matrix2x3Tests()
 {
     constexpr Matrix2x3 constexprTest = Matrix2x3(
-        0, 1, 2,
+        7, 1, 2,
         3, 4, 5);
 
 	auto inversed = constexprTest.GetInversed();
@@ -531,12 +534,15 @@ static void Matrix2x3Tests()
 	Vector3 transformed = toTransform * constexprTest;
 	transformed = transformed.ToVector2() * *inversed;
 	UTest(true, transformed.ToVector2().EqualsWithEpsilon({5, 15}, 0.0001f));
+
+	f32 det = constexprTest.Determinant();
+	UTest(true, EqualsWithEpsilon(det, 25));
 }
 
 static void Matrix3x2Tests()
 {
 	constexpr Matrix3x2 constexprTest = Matrix3x2(
-		0, 1,
+		9, 1,
 		2, 3,
 		4, 5);
 
@@ -546,6 +552,9 @@ static void Matrix3x2Tests()
 	Vector2 transformed = toTransform * constexprTest;
 	transformed = Vector3(transformed, 1) * *inversed;
 	UTest(true, transformed.EqualsWithEpsilon({5, 10}, 0.0001f));
+
+	f32 det = constexprTest.Determinant();
+	UTest(true, EqualsWithEpsilon(det, 25));
 }
 
 static void Matrix3x3Tests()
@@ -561,14 +570,17 @@ static void Matrix3x3Tests()
 	toTransform *= constexprTest;
 	toTransform *= *inversed;
 	UTest(true, toTransform.EqualsWithEpsilon({5, 10, 7}, 0.0001f));
+
+	f32 det = constexprTest.Determinant();
+	UTest(true, EqualsWithEpsilon(det, -15));
 }
 
 static void Matrix3x4Tests()
 {
     constexpr Matrix3x4 constexprTest = Matrix3x4(
-        0, 1, 2, 3,
+        7, 1, 2, 3,
         4, 5, 6, 7,
-        8, 9, 0, 1);
+        8, 9, 6, 2);
 
 	auto inversed = constexprTest.GetInversed();
 	UTest(NotEqual, inversed, nullopt);
@@ -576,15 +588,18 @@ static void Matrix3x4Tests()
 	Vector4 transformed = toTransform * constexprTest;
 	transformed = transformed.ToVector3() * *inversed;
 	UTest(true, transformed.ToVector3().EqualsWithEpsilon({5, 15, 75}, 0.0001f));
+
+	f32 det = constexprTest.Determinant();
+	UTest(true, EqualsWithEpsilon(det, -152));
 }
 
 static void Matrix4x3Tests()
 {
     constexpr Matrix4x3 constexprTest = Matrix4x3(
-        0, 1, 2,
-        3, 4, 5,
-        6, 7, 8,
-        9, 0, 1);
+        4, 2, 3,
+        4, 5, 6,
+        7, 8, 9,
+        1, 2, 3);
 
     auto checkRTS = [](const Matrix4x3 &m)
     {
@@ -606,14 +621,17 @@ static void Matrix4x3Tests()
     UTest(NotEqual, inversedClipped, nullopt);
     Vector3 originalPoint = Vector4(transformed, 1) * *inversedClipped;
     UTest(true, originalPoint.EqualsWithEpsilon({1, 2, 3}, 0.0001f));
+
+	f32 det = constexprTest.Determinant();
+	UTest(true, EqualsWithEpsilon(det, -9));
 }
 
 static void Matrix4x4Tests()
 {
     constexpr Matrix4x4 constexprTest = Matrix4x4(
-        0, 1, 2, 3,
+        5, 1, 2, 3,
         4, 5, 6, 7,
-        8, 9, 0, 1,
+        8, 9, 4, 1,
         2, 3, 4, 5);
 
     auto persp = Matrix4x4::CreatePerspectiveProjection(DegToRad(90.0f), 1920.0f / 1080.0f, 0.1f, 1000.0f, ProjectionTarget::OGL); // TODO: test other targets
@@ -634,6 +652,9 @@ static void Matrix4x4Tests()
     UTest(NotEqual, inversed, nullopt);
     toTransform *= *inversed;
     UTest(true, toTransform.EqualsWithEpsilon({1, 2, 3, 4}, 0.0001f));
+
+	f32 det = constexprTest.Determinant();
+	UTest(true, EqualsWithEpsilon(det, -20));
 }
 
 static void BaseVectorTests()

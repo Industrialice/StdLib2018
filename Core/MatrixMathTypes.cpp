@@ -418,7 +418,7 @@ template <typename MatrixType> inline MatrixType _CreateRotationAroundAxis(const
 
 template <typename T> T _CreateOrthographicMarix(const Vector3 &min, const Vector3 &max, ProjectionTarget target)
 {
-    T m;
+	T m;
     m[0][0] = 2.0f / (max.x - min.x);
     m[3][0] = -((max.x + min.x) / (max.x - min.x));
     m[1][1] = 2.0f / (max.y - min.y);
@@ -438,6 +438,7 @@ template <typename T> T _CreateOrthographicMarix(const Vector3 &min, const Vecto
         ASSUME(target == ProjectionTarget::Vulkan);
         NOIMPL;
     }
+	_ValidateValues(min, max, m);
     return m;
 }
 
@@ -447,12 +448,14 @@ template <typename T> T _CreateOrthographicMarix(const Vector3 &min, const Vecto
 
 Vector2 Vector2::GetLeftNormal() const
 {
-    return {-y, x};
+	_ValidateValues(*this);
+	return {-y, x};
 }
 
 Vector2 Vector2::GetRightNormal() const
 {
-    return {y, -x};
+	_ValidateValues(*this);
+	return {y, -x};
 }
 
 /////////////
@@ -461,7 +464,9 @@ Vector2 Vector2::GetRightNormal() const
 
 Vector3 &Vector3::Cross(const Vector3 &other)
 {
-    f32 nx = this->y * other.z - this->z * other.y;
+	_ValidateValues(*this, other);
+
+	f32 nx = this->y * other.z - this->z * other.y;
     f32 ny = this->z * other.x - this->x * other.z;
     f32 nz = this->x * other.y - this->y * other.x;
 
@@ -474,7 +479,9 @@ Vector3 &Vector3::Cross(const Vector3 &other)
 
 Vector3 Vector3::GetCrossed(const Vector3 &other) const
 {
-    f32 nx = this->y * other.z - this->z * other.y;
+	_ValidateValues(*this, other);
+
+	f32 nx = this->y * other.z - this->z * other.y;
     f32 ny = this->z * other.x - this->x * other.z;
     f32 nz = this->x * other.y - this->y * other.x;
 
@@ -487,7 +494,15 @@ Vector3 Vector3::GetCrossed(const Vector3 &other) const
 
 optional<Matrix3x2> Matrix3x2::GetInversed() const
 {
+	_ValidateValues(*this);
 	return _Inverse3x2Matrix(*this);
+}
+
+f32 Matrix3x2::Determinant() const
+{
+	_ValidateValues(*this);
+	auto &m = *this;
+	return +m[0][0] * m[1][1] + m[0][1] * -m[1][0];
 }
 
 Matrix3x2 Matrix3x2::CreateRTS(const optional<f32> &rotation, const optional<Vector2> &translation, const optional<Vector2> &scale)
@@ -496,6 +511,8 @@ Matrix3x2 Matrix3x2::CreateRTS(const optional<f32> &rotation, const optional<Vec
 
     if (rotation)
     {
+		_ValidateValues(*rotation);
+
         f32 cr = cos(*rotation);
         f32 sr = sin(*rotation);
 
@@ -505,17 +522,20 @@ Matrix3x2 Matrix3x2::CreateRTS(const optional<f32> &rotation, const optional<Vec
 
     if (translation)
     {
+		_ValidateValues(*translation);
         result[2][0] = translation->x; result[2][1] = translation->y;
     }
 
     if (scale)
     {
+		_ValidateValues(*scale);
         result[0][0] *= scale->x;
         result[0][1] *= scale->x;
         result[1][0] *= scale->y;
         result[1][1] *= scale->y;
     }
 
+	_ValidateValues(result);
     return result;
 }
 
@@ -525,27 +545,41 @@ Matrix3x2 Matrix3x2::CreateRTS(const optional<f32> &rotation, const optional<Vec
 
 optional<Matrix4x3> Matrix4x3::GetInversed() const
 {
-    return _Inverse4x3Matrix(*this);
+	_ValidateValues(*this);
+	return _Inverse4x3Matrix(*this);
 }
 
-Matrix4x4 Matrix4x3::operator*(const Matrix4x4 &other) const
+f32 Matrix4x3::Determinant() const
 {
-    Matrix4x4 result;
-    for (uiw rowIndex = 0; rowIndex < 4; ++rowIndex)
+	_ValidateValues(*this);
+	auto &m = *this;
+
+	f32 fac0 = +(m[1][1] * m[2][2] - m[1][2] * m[2][1]);
+	f32 fac1 = -(m[1][0] * m[2][2] - m[1][2] * m[2][0]);
+	f32 fac2 = +(m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+
+	return +m[0][0] * fac0 + m[0][1] * fac1 + m[0][2] * fac2;
+}
+
+Matrix4x4 Matrix4x3::operator * (const Matrix4x4 &other) const
+{
+    Matrix4x4 r;
+    for (uiw row = 0; row < 4; ++row)
     {
-        for (uiw columnIndex = 0; columnIndex < 4; ++columnIndex)
+        for (uiw column = 0; column < 4; ++column)
         {
-            result[rowIndex][columnIndex] =
-                elements[rowIndex][0] * other[0][columnIndex] +
-                elements[rowIndex][1] * other[1][columnIndex] +
-                elements[rowIndex][2] * other[2][columnIndex];
-            if (rowIndex == 3)
+            r[row][column] =
+                elements[row][0] * other[0][column] +
+                elements[row][1] * other[1][column] +
+                elements[row][2] * other[2][column];
+            if (row == 3)
             {
-                result[rowIndex][columnIndex] += other[3][columnIndex];
+                r[row][column] += other[3][column];
             }
         }
     }
-    return result;
+	_ValidateValues(*this, other, r);
+	return r;
 }
 
 Matrix4x3 Matrix4x3::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
@@ -574,7 +608,20 @@ Matrix4x3 Matrix4x3::CreateOrthographicProjection(const Vector3 &min, const Vect
 
 optional<Matrix3x4> Matrix3x4::GetInversed() const
 {
+	_ValidateValues(*this);
 	return _Inverse3x4Matrix(*this);
+}
+
+f32 Matrix3x4::Determinant() const
+{
+	_ValidateValues(*this);
+	auto &m = *this;
+
+	f32 fac0 = +(m[1][1] * m[2][2] - m[1][2] * m[2][1]);
+	f32 fac1 = -(m[1][0] * m[2][2] - m[1][2] * m[2][0]);
+	f32 fac2 = +(m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+
+	return +m[0][0] * fac0 + m[0][1] * fac1 + m[0][2] * fac2;
 }
 
 Matrix3x4 Matrix3x4::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
@@ -604,7 +651,8 @@ Matrix4x4 &Matrix4x4::Transpose()
 
 Matrix4x4 &Matrix4x4::Inverse()
 {
-    auto result = _Inverse4x4Matrix(*this);
+	_ValidateValues(*this);
+	auto result = _Inverse4x4Matrix(*this);
     if (result)
     {
         *this = *result;
@@ -618,7 +666,28 @@ Matrix4x4 &Matrix4x4::Inverse()
 
 optional<Matrix4x4> Matrix4x4::GetInversed() const
 {
-    return _Inverse4x4Matrix(*this);
+	_ValidateValues(*this);
+	return _Inverse4x4Matrix(*this);
+}
+
+f32 Matrix4x4::Determinant() const
+{
+	_ValidateValues(*this);
+	auto &m = *this;
+
+	f32 SubFactor00 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
+	f32 SubFactor01 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
+	f32 SubFactor02 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
+	f32 SubFactor03 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
+	f32 SubFactor04 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
+	f32 SubFactor05 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
+
+	f32 fac0 = +(m[1][1] * SubFactor00 - m[1][2] * SubFactor01 + m[1][3] * SubFactor02);
+	f32 fac1 = -(m[1][0] * SubFactor00 - m[1][2] * SubFactor03 + m[1][3] * SubFactor04);
+	f32 fac2 = +(m[1][0] * SubFactor01 - m[1][1] * SubFactor03 + m[1][3] * SubFactor05);
+	f32 fac3 = -(m[1][0] * SubFactor02 - m[1][1] * SubFactor04 + m[1][2] * SubFactor05);
+
+	return +m[0][0] * fac0 + m[0][1] * fac1 + m[0][2] * fac2 + m[0][3] * fac3;
 }
 
 Matrix4x4 Matrix4x4::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
@@ -638,6 +707,8 @@ Matrix4x4 Matrix4x4::CreateRTS(const optional<Quaternion> &rotation, const optio
 
 Matrix4x4 Matrix4x4::CreatePerspectiveProjection(f32 horizontalFOVRad, f32 aspectRatio, f32 nearPlane, f32 farPlane, ProjectionTarget target)
 {
+	ASSUME(horizontalFOVRad > DefaultF32Epsilon && aspectRatio > DefaultF32Epsilon && nearPlane > DefaultF32Epsilon && farPlane > nearPlane);
+
     Matrix4x4 r;
 
     f32 fovH = horizontalFOVRad;
@@ -665,6 +736,7 @@ Matrix4x4 Matrix4x4::CreatePerspectiveProjection(f32 horizontalFOVRad, f32 aspec
     r[2][0] = 0; r[2][1] = 0; r[2][2] = q; r[2][3] = d;
     r[3][0] = 0; r[3][1] = 0; r[3][2] = l; r[3][3] = 0;
 
+	_ValidateValues(r);
     return r;
 }
 
@@ -681,7 +753,15 @@ Matrix4x4 Matrix4x4::CreateOrthographicProjection(const Vector3 &min, const Vect
 
 [[nodiscard]] optional<Matrix2x3> Matrix2x3::GetInversed() const
 {
+	_ValidateValues(*this);
 	return _Inverse2x3Matrix(*this);
+}
+
+f32 Matrix2x3::Determinant() const
+{
+	_ValidateValues(*this);
+	auto &m = *this;
+	return +m[0][0] * m[1][1] + m[0][1] * -m[1][0];
 }
 
 ///////////////
@@ -696,7 +776,8 @@ Matrix2x2 &Matrix2x2::Transpose()
 
 Matrix2x2 &Matrix2x2::Inverse()
 {
-    auto m = _Inverse2x2Matrix(*this);
+	_ValidateValues(*this);
+	auto m = _Inverse2x2Matrix(*this);
     if (m)
     {
         *this = *m;
@@ -710,7 +791,15 @@ Matrix2x2 &Matrix2x2::Inverse()
 
 optional<Matrix2x2> Matrix2x2::GetInversed() const
 {
-    return _Inverse2x2Matrix(*this);
+	_ValidateValues(*this);
+	return _Inverse2x2Matrix(*this);
+}
+
+f32 Matrix2x2::Determinant() const
+{
+	_ValidateValues(*this);
+	auto &m = *this;
+	return m[0][0] * m[1][1] + m[0][1] * -m[1][0];
 }
 
 ///////////////
@@ -725,6 +814,7 @@ Matrix3x3 &Matrix3x3::Transpose()
 
 Matrix3x3 &Matrix3x3::Inverse()
 {
+	_ValidateValues(*this);
 	auto r = _Inverse3x3Matrix(*this);
 	if (r)
 	{
@@ -739,7 +829,21 @@ Matrix3x3 &Matrix3x3::Inverse()
 
 optional<Matrix3x3> Matrix3x3::GetInversed() const
 {
+	_ValidateValues(*this);
 	return _Inverse3x3Matrix(*this);
+}
+
+f32 Matrix3x3::Determinant() const
+{
+	_ValidateValues(*this);
+
+	auto &m = *this;
+
+	f32 fac0 = +(m[1][1] * m[2][2] - m[1][2] * m[2][1]);
+	f32 fac1 = -(m[1][0] * m[2][2] - m[1][2] * m[2][0]);
+	f32 fac2 = +(m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+
+	return +m[0][0] * fac0 + m[0][1] * fac1 + m[0][2] * fac2;
 }
 
 Matrix3x3 Matrix3x3::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
