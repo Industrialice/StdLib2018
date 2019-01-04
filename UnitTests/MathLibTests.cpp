@@ -510,6 +510,13 @@ static void Matrix2x2Tests()
     constexpr Matrix2x2 constexprTest = Matrix2x2(
         0, 1,
         2, 3);
+
+	auto inversed = constexprTest.GetInversed();
+	UTest(NotEqual, inversed, nullopt);
+	Vector2 toTransform = {5, 10};
+	toTransform *= constexprTest;
+	toTransform *= *inversed;
+	UTest(true, toTransform.EqualsWithEpsilon({5, 10}, 0.0001f));
 }
 
 static void Matrix2x3Tests()
@@ -517,22 +524,43 @@ static void Matrix2x3Tests()
     constexpr Matrix2x3 constexprTest = Matrix2x3(
         0, 1, 2,
         3, 4, 5);
+
+	auto inversed = constexprTest.GetInversed();
+	UTest(NotEqual, inversed, nullopt);
+	Vector2 toTransform = {5, 15};
+	Vector3 transformed = toTransform * constexprTest;
+	transformed = transformed.ToVector2() * *inversed;
+	UTest(true, transformed.ToVector2().EqualsWithEpsilon({5, 15}, 0.0001f));
 }
 
 static void Matrix3x2Tests()
 {
-    constexpr Matrix3x2 constexprTest = Matrix3x2(
-        0, 1,
-        2, 3,
-        4, 5);
+	constexpr Matrix3x2 constexprTest = Matrix3x2(
+		0, 1,
+		2, 3,
+		4, 5);
+
+	auto inversed = constexprTest.GetInversed();
+	UTest(NotEqual, inversed, nullopt);
+	Vector3 toTransform = {5, 10, 1};
+	Vector2 transformed = toTransform * constexprTest;
+	transformed = Vector3(transformed, 1) * *inversed;
+	UTest(true, transformed.EqualsWithEpsilon({5, 10}, 0.0001f));
 }
 
 static void Matrix3x3Tests()
 {
     constexpr Matrix3x3 constexprTest = Matrix3x3(
-        0, 1, 2,
+        5, 1, 2,
         3, 4, 5,
         6, 7, 8);
+
+	auto inversed = constexprTest.GetInversed();
+	UTest(NotEqual, inversed, nullopt);
+	Vector3 toTransform = {5, 10, 7};
+	toTransform *= constexprTest;
+	toTransform *= *inversed;
+	UTest(true, toTransform.EqualsWithEpsilon({5, 10, 7}, 0.0001f));
 }
 
 static void Matrix3x4Tests()
@@ -541,6 +569,13 @@ static void Matrix3x4Tests()
         0, 1, 2, 3,
         4, 5, 6, 7,
         8, 9, 0, 1);
+
+	auto inversed = constexprTest.GetInversed();
+	UTest(NotEqual, inversed, nullopt);
+	Vector3 toTransform = {5, 15, 75};
+	Vector4 transformed = toTransform * constexprTest;
+	transformed = transformed.ToVector3() * *inversed;
+	UTest(true, transformed.ToVector3().EqualsWithEpsilon({5, 15, 75}, 0.0001f));
 }
 
 static void Matrix4x3Tests()
@@ -565,19 +600,12 @@ static void Matrix4x3Tests()
     auto rtsQuat = Matrix4x3::CreateRTS(Quaternion::FromEuler(Vector3{25.0f, 50.0f, 75.0f}.ForEach(DegToRad)), Vector3(10, 20, 30), Vector3(0.4f, 0.5f, 0.6f));
     checkRTS(rtsQuat);
 
-    Vector4 toTransform{1, 2, 3, 1};
+    Vector4 toTransform = {1, 2, 3, 1};
     Vector3 transformed = toTransform * rtsQuat;
-    auto inversed = rtsQuat.GetInversed();
-    UTest(NotEqual, inversed, nullopt);
-    toTransform = Vector4(transformed, 1) * *inversed;
-    UTest(true, toTransform.EqualsWithEpsilon({1, 2, 3, 1}));
-
-    toTransform = {1, 2, 3, 1};
-    transformed = toTransform * rtsQuat;
-    auto inversedClipped = rtsQuat.GetInversedClipped();
+    auto inversedClipped = rtsQuat.GetInversed();
     UTest(NotEqual, inversedClipped, nullopt);
     Vector3 originalPoint = Vector4(transformed, 1) * *inversedClipped;
-    UTest(true, originalPoint.EqualsWithEpsilon({1, 2, 3}));
+    UTest(true, originalPoint.EqualsWithEpsilon({1, 2, 3}, 0.0001f));
 }
 
 static void Matrix4x4Tests()
@@ -605,7 +633,7 @@ static void Matrix4x4Tests()
     auto inversed = persp.GetInversed();
     UTest(NotEqual, inversed, nullopt);
     toTransform *= *inversed;
-    UTest(true, toTransform.EqualsWithEpsilon({1, 2, 3, 4}));
+    UTest(true, toTransform.EqualsWithEpsilon({1, 2, 3, 4}, 0.0001f));
 }
 
 static void BaseVectorTests()
