@@ -4,12 +4,14 @@
 using namespace StdLib;
 using namespace Funcs;
 
+void XNARef();
+
 namespace
 {
 	static constexpr ui32 TestIterations = 10;
 }
 
-template <uiw index, typename T> typename T::ScalarType Get(T vec)
+template <uiw index, typename T> static typename T::ScalarType Get(T vec)
 {
 	if constexpr (index >= T::dim) return 0;
 	return vec[index];
@@ -33,7 +35,7 @@ template <typename T> void Compare(T v2, T v0, T v1, typename T::ScalarType tran
 	}
 }
 
-template <typename T> T GenerateVec(bool isAllowZero)
+template <typename T> static T GenerateVec(bool isAllowZero)
 {
 	using st = typename T::ScalarType;
 	st add = isAllowZero ? st(0) : st(1);
@@ -51,7 +53,7 @@ template <typename T> T GenerateVec(bool isAllowZero)
 	return v;
 }
 
-template <typename T> T GenerateMatrix()
+template <typename T> static T GenerateMatrix()
 {
 	T matrix;
 	for (uiw row = 0; row < T::rows; ++row)
@@ -64,7 +66,7 @@ template <typename T> T GenerateMatrix()
 	return matrix;
 }
 
-template <typename T> void BaseVectorTestsHelper()
+template <typename T> static void BaseVectorTestsHelper()
 {
     using st = typename T::ScalarType;
 	T v0, v1, v2;
@@ -202,7 +204,7 @@ template <typename T> void BaseVectorTestsHelper()
 	}
 }
 
-template <typename T> void IntegerVectorTestsHelper()
+template <typename T> static void IntegerVectorTestsHelper()
 {
 	T v0, v1;
 	for (ui32 index = 0; index < TestIterations; ++index)
@@ -218,7 +220,7 @@ template <typename T> void IntegerVectorTestsHelper()
 	}
 }
 
-template <typename T> void FP32VectorTestsHelper()
+template <typename T> static void FP32VectorTestsHelper()
 {
 	using st = typename T::ScalarType;
 	T v2, v0, v1;
@@ -339,7 +341,7 @@ static void Vector4Tests()
 	}
 }
 
-template <typename T> void MathFuncsTests()
+template <typename T> static void MathFuncsTests()
 {
 	T epsilon = (T)DefaultF32Epsilon;
 	static constexpr T zero = T(0);
@@ -469,7 +471,7 @@ static void QuaternionTests()
     }
 }
 
-template <typename T> void MatrixTestsHelper()
+template <typename T> static void MatrixTestsHelper()
 {
 	T m0, m1, m2, m3;
 	for (ui32 index = 0; index < TestIterations; ++index)
@@ -767,12 +769,7 @@ void MathLibTests()
 	}
     PRINTLOG("iteration %i took %.4g\n", it, fastest);
 
-    Vector3 rotTest(1.0f, 2.0f, 3.0f);
-    auto rotMatrix = Matrix3x3::CreateRS(Vector3{1.0f, 2.0f, 3.0f});
-    rotTest *= rotMatrix;
-    rotMatrix.Transpose();
-    rotTest *= rotMatrix;
-    UTest(true, EqualsWithEpsilon(rotTest.x, 1.0f) && EqualsWithEpsilon(rotTest.y, 2.0f) && EqualsWithEpsilon(rotTest.z, 3.0f));
+    XNARef();
 
     PRINTLOG("finished math lib tests\n");
 }

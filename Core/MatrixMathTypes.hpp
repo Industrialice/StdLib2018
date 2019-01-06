@@ -318,6 +318,8 @@ namespace StdLib
 
         template <typename OtherMatrix> OtherMatrix As() const;
 
+        MatrixType &Inverse(); // assertion fails if failed to inverse, the matrix isn't modified
+
     protected:
         constexpr _Matrix(); // will create identity matrix
         template <typename... Args> constexpr _Matrix(Args &&... args);
@@ -382,7 +384,6 @@ namespace StdLib
         constexpr Matrix4x4(const Vector4 &row0, const Vector4 &row1, const Vector4 &row2, const Vector4 &row3);
 
         Matrix4x4 &Transpose();
-        Matrix4x4 &Inverse(); // assertion fails if failed to inverse, the matrix isn't modified
 
         optional<Matrix4x4> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
@@ -434,7 +435,6 @@ namespace StdLib
         constexpr Matrix2x2(const Vector2 &row0, const Vector2 &row1);
 
         Matrix2x2 &Transpose();
-        Matrix2x2 &Inverse(); // assertion fails if failed to inverse, the matrix isn't modified
 
         optional<Matrix2x2> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
@@ -451,7 +451,6 @@ namespace StdLib
         constexpr Matrix3x3(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2);
 
         Matrix3x3 &Transpose();
-		Matrix3x3 &Inverse(); // assertion fails if failed to inverse, the matrix isn't modified
 
 		optional<Matrix3x3> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;

@@ -10,7 +10,6 @@ using namespace Funcs;
 void MathLibTests();
 void UniqueIdManagerTests();
 void UniqueIdManagerBenchmark();
-void XNARef();
 
 static void CompileTimeStringsTests()
 {
@@ -1006,6 +1005,10 @@ static void FunctionInfoTests()
     UTest(true, std::is_same_v<test3::parentClass, local>);
     UTest(true, std::is_same_v<test3::result, f64>);
 
+    using test4 = FunctionInfo::Info<void(*)()>;
+    UTest(true, std::is_same_v<test4::result, void>);
+    UTest(Equal, std::tuple_size_v<test4::args>, 0);
+
     PRINTLOG("finished function info tests\n");
 }
 
@@ -1108,7 +1111,6 @@ int main(int argc, const char **argv)
     DoTests(argc, argv);
 
     //UniqueIdManagerBenchmark();
-    XNARef();
 
     PRINTLOG("~~~Finished Everything~~~\n");
 

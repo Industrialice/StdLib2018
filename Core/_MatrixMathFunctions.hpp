@@ -520,6 +520,20 @@ namespace StdLib
         return true;
     }
 
+    template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::Inverse() -> MatrixType &
+    {
+        auto inversed = ((MatrixType *)this)->GetInversed();
+        if (inversed)
+        {
+            *(MatrixType *)this = *inversed;
+        }
+        else
+        {
+            SOFTBREAK;
+        }
+        return *(MatrixType *)this;
+    }
+
     ///////////////
     // Rectangle //
     ///////////////

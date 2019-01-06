@@ -649,21 +649,6 @@ Matrix4x4 &Matrix4x4::Transpose()
     return *this;
 }
 
-Matrix4x4 &Matrix4x4::Inverse()
-{
-	_ValidateValues(*this);
-	auto result = _Inverse4x4Matrix(*this);
-    if (result)
-    {
-        *this = *result;
-    }
-    else
-    {
-        SOFTBREAK;
-    }
-    return *this;
-}
-
 optional<Matrix4x4> Matrix4x4::GetInversed() const
 {
 	_ValidateValues(*this);
@@ -774,21 +759,6 @@ Matrix2x2 &Matrix2x2::Transpose()
     return *this;
 }
 
-Matrix2x2 &Matrix2x2::Inverse()
-{
-	_ValidateValues(*this);
-	auto m = _Inverse2x2Matrix(*this);
-    if (m)
-    {
-        *this = *m;
-    }
-    else
-    {
-        SOFTBREAK;
-    }
-    return *this;
-}
-
 optional<Matrix2x2> Matrix2x2::GetInversed() const
 {
 	_ValidateValues(*this);
@@ -810,21 +780,6 @@ Matrix3x3 &Matrix3x3::Transpose()
 {
 	_TransposeSquareMatrix(*this);
     return *this;
-}
-
-Matrix3x3 &Matrix3x3::Inverse()
-{
-	_ValidateValues(*this);
-	auto r = _Inverse3x3Matrix(*this);
-	if (r)
-	{
-		*this = *r;
-	}
-	else
-	{
-		SOFTBREAK;
-	}
-	return *this;
 }
 
 optional<Matrix3x3> Matrix3x3::GetInversed() const
