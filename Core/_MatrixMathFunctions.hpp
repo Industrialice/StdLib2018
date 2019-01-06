@@ -147,7 +147,24 @@ namespace StdLib
         return *(VectorType *)this;
     }
 
-	template <typename _ScalarType, uiw Dim>	inline bool _VectorBase<_ScalarType, Dim>::operator == (const _VectorBase &other) const
+    template <typename _ScalarType, uiw Dim> inline auto _VectorBase<_ScalarType, Dim>::operator - () const -> VectorType
+    {
+        VectorType result;
+        if constexpr (std::is_signed_v<_ScalarType>)
+        {
+            for (uiw index = 0; index < Dim; ++index)
+                VECDATA(result, index) = -VECDATA(*this, index);
+        }
+        else
+        {
+            HARDBREAK; // trying to negate an unsigned type
+            result = *(VectorType *)this;
+        }
+        _ValidateValues(*this, result);
+        return result;
+    }
+
+	template <typename _ScalarType, uiw Dim> inline bool _VectorBase<_ScalarType, Dim>::operator == (const _VectorBase &other) const
 	{
 		_ValidateValues(*this, other);
 		for (uiw index = 0; index < Dim; ++index)
@@ -156,7 +173,7 @@ namespace StdLib
 		return true;
 	}
 
-	template <typename _ScalarType, uiw Dim>	inline bool _VectorBase<_ScalarType, Dim>::operator != (const _VectorBase &other) const
+	template <typename _ScalarType, uiw Dim> inline bool _VectorBase<_ScalarType, Dim>::operator != (const _VectorBase &other) const
 	{
 		return !operator==(other);
 	}
@@ -185,43 +202,6 @@ namespace StdLib
         _ValidateValues(*this);
         ASSUME(index < Dim);
         return VECDATA(*this, index);
-    }
-
-    template <typename ScalarType, uiw Dim> inline ScalarType _VectorBase<ScalarType, Dim>::Accumulate() const
-    {
-        ScalarType sum = x;
-        for (uiw index = 1; index < dim; ++index)
-            sum += VECDATA(*this, index);
-		_ValidateValues(*this, sum);
-        return sum;
-    }
-
-    template <typename ScalarType, uiw Dim> inline ScalarType _VectorBase<ScalarType, Dim>::Max() const
-    {
-        ScalarType max = x;
-        for (uiw index = 1; index < dim; ++index)
-            if (VECDATA(*this, index) > max)
-                max = VECDATA(*this, index);
-		_ValidateValues(*this, max);
-        return max;
-    }
-
-    template <typename ScalarType, uiw Dim> inline ScalarType _VectorBase<ScalarType, Dim>::Min() const
-    {
-        ScalarType min = x;
-        for (uiw index = 1; index < dim; ++index)
-            if (VECDATA(*this, index) < min)
-                min = VECDATA(*this, index);
-		_ValidateValues(*this, min);
-        return min;
-    }
-
-    template <typename _ScalarType, uiw Dim> inline auto _VectorBase<_ScalarType, Dim>::ForEach(ScalarType func(ScalarType element)) -> VectorType &
-    {
-        for (auto &el : Data())
-            el = func(el);
-        _ValidateValues(*this);
-        return *(VectorType *)this;
     }
 
     /////////////////
@@ -301,13 +281,6 @@ namespace StdLib
             sum += VECDATA(*this, index) * VECDATA(other, index);
 		_ValidateValues(*this, sum);
         return sum;
-    }
-
-    template <typename Basis> inline f32 _VectorFP<Basis>::Average() const
-    {
-        f32 avg = Accumulate() / dim;
-		_ValidateValues(avg);
-		return avg;
     }
 
     template <typename Basis> inline auto _VectorFP<Basis>::Normalize() -> VectorType &

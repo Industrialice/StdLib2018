@@ -124,6 +124,8 @@ namespace StdLib
         VectorType &operator /= (const _VectorBase &other);
         VectorType &operator /= (ScalarType scalar);
 
+        VectorType operator - () const; // only valid for signed scalar types
+
         [[nodiscard]] bool operator == (const _VectorBase &other) const;
         [[nodiscard]] bool operator != (const _VectorBase &other) const;
 
@@ -133,11 +135,11 @@ namespace StdLib
         [[nodiscard]] ScalarType &operator [] (uiw index);
         [[nodiscard]] const ScalarType &operator [] (uiw index) const;
 
-        [[nodiscard]] ScalarType Accumulate() const;
-        [[nodiscard]] ScalarType Max() const;
-        [[nodiscard]] ScalarType Min() const;
-
-        VectorType &ForEach(ScalarType func(ScalarType element));
+        VectorType &ForEach(_ScalarType func(_ScalarType));
+        template <typename ReturnType> VectorType &ForEach(ReturnType func(_ScalarType &));
+        template <typename Func> VectorType &ForEach(Func func);
+        template <typename ReturnType> const VectorType &ForEach(ReturnType func(_ScalarType)) const;
+        template <typename Func> const VectorType &ForEach(Func func) const;
 
     protected:
         template <typename... Args> constexpr _VectorBase(Args... args);
@@ -195,9 +197,6 @@ namespace StdLib
         using Basis::operator/;
         using Basis::operator/=;
         using Basis::Data;
-        using Basis::Accumulate;
-        using Basis::Max;
-        using Basis::Min;
         using Basis::x;
         using Basis::y;
 
@@ -208,8 +207,6 @@ namespace StdLib
         [[nodiscard]] f32 DistanceSquare(const _VectorFP &other) const;
 
         [[nodiscard]] f32 Dot(const _VectorFP &other) const;
-
-        [[nodiscard]] f32 Average() const;
 
         VectorType &Normalize();
         [[nodiscard]] VectorType GetNormalized() const;
@@ -587,6 +584,98 @@ namespace StdLib
     /////////////////
     // _VectorBase //
     /////////////////
+
+    template <typename _ScalarType, uiw Dim>
+    auto _VectorBase<_ScalarType, Dim>::ForEach(_ScalarType func(_ScalarType)) -> VectorType &
+    {
+        _ValidateValues(*this);
+        for (auto &e : Data())
+        {
+            e = func(e);
+        }
+        _ValidateValues(*this);
+        return *(VectorType *)this;
+    }
+
+    template <typename _ScalarType, uiw Dim>
+    template <typename ReturnType>
+    auto _VectorBase<_ScalarType, Dim>::ForEach(ReturnType func(_ScalarType &)) -> VectorType &
+    {
+        _ValidateValues(*this);
+        for (auto &e : Data())
+        {
+            if constexpr (std::is_same_v<ReturnType, void>)
+            {
+                func(e);
+            }
+            else
+            {
+                e = func(e);
+            }
+        }
+        _ValidateValues(*this);
+        return *(VectorType *)this;
+    }
+
+    template <typename _ScalarType, uiw Dim>
+    template <typename Func>
+    auto _VectorBase<_ScalarType, Dim>::ForEach(Func func) -> VectorType &
+    {
+        _ValidateValues(*this);
+        for (auto &e : Data())
+        {
+            if constexpr (std::is_same_v<std::invoke_result_t<Func, _ScalarType>, void>)
+            {
+                func(e);
+            }
+            else
+            {
+                e = func(e);
+            }
+        }
+        _ValidateValues(*this);
+        return *(VectorType *)this;
+    }
+
+    template <typename _ScalarType, uiw Dim>
+    template <typename ReturnType>
+    auto _VectorBase<_ScalarType, Dim>::ForEach(ReturnType func(_ScalarType)) const -> const VectorType &
+    {
+        _ValidateValues(*this);
+        for (const auto &e : Data())
+        {
+            if constexpr (std::is_same_v<ReturnType, void>)
+            {
+                func(e);
+            }
+            else
+            {
+                e = func(e);
+            }
+        }
+        _ValidateValues(*this);
+        return *(VectorType *)this;
+    }
+
+    template <typename _ScalarType, uiw Dim>
+    template <typename Func>
+    auto _VectorBase<_ScalarType, Dim>::ForEach(Func func) const -> const VectorType &
+    {
+        _ValidateValues(*this);
+        for (const auto &e : Data())
+        {
+            if constexpr (std::is_same_v<std::invoke_result_t<Func, _ScalarType>, void>)
+            {
+                func(e);
+            }
+            else
+            {
+                e = func(e);
+            }
+        }
+        _ValidateValues(*this);
+        return *(VectorType *)this;
+    }
 
     template <typename _ScalarType, uiw Dim> 
     template <typename... Args>

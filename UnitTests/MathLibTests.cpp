@@ -66,6 +66,7 @@ template <typename T> T GenerateMatrix()
 
 template <typename T> void BaseVectorTestsHelper()
 {
+    using st = typename T::ScalarType;
 	T v0, v1, v2;
 
     // making sure everything is properly accessible
@@ -111,6 +112,7 @@ template <typename T> void BaseVectorTestsHelper()
 		auto subTransform = [](auto s0, auto s1) { return s0 - s1; };
 		auto mulTransform = [](auto s0, auto s1) { return s0 * s1; };
 		auto divTransform = [](auto s0, auto s1) { return s0 / (s1 ? s1 : 1); };
+        auto negTransform = [](auto s0, auto s1) { return std::is_signed_v<decltype(s0)> ? s0 * -1 : s0; };
 
 		v2 = v0 + v1;
 		Compare(v2, v0, v1, addTransform);
@@ -139,18 +141,51 @@ template <typename T> void BaseVectorTestsHelper()
 		legitMin = std::min(legitMin, v0.y);
 		if constexpr (T::dim > 2) legitMin = std::min(legitMin, v0.z);
 		if constexpr (T::dim > 3) legitMin = std::min(legitMin, v0.w);
-		UTest(Equal, v0.Min(), legitMin);
+        st gotMin = std::numeric_limits<st>::max();
+        auto computeMin = [&gotMin](st value) mutable
+        {
+            gotMin = std::min(gotMin, value);
+        };
+        v0.ForEach(computeMin);
+		UTest(Equal, gotMin, legitMin);
 
 		auto legitMax = v0.x;
 		legitMax = std::max(legitMax, v0.y);
 		if constexpr (T::dim > 2) legitMax = std::max(legitMax, v0.z);
 		if constexpr (T::dim > 3) legitMax = std::max(legitMax, v0.w);
-		UTest(Equal, v0.Max(), legitMax);
+        st gotMax;
+        if constexpr (std::is_floating_point_v<st>)
+        {
+            gotMax = -std::numeric_limits<st>::max();
+        }
+        else
+        {
+            gotMax = std::numeric_limits<st>::min();
+        }
+        auto computeMax = [&gotMax](st value) mutable
+        {
+            gotMax = std::max(gotMax, value);
+        };
+        v0.ForEach(computeMax);
+		UTest(Equal, gotMax, legitMax);
 
 		auto accum = v0.x + v0.y;
 		if constexpr (T::dim > 2) accum += v0.z;
 		if constexpr (T::dim > 3) accum += v0.w;
-		UTest(Equal, v0.Accumulate(), accum);
+        st accumulated = st(0);
+        auto accumulate = [&accumulated](st value) mutable
+        {
+            accumulated += value;
+        };
+        v0.ForEach(accumulate);
+		UTest(Equal, accumulated, accum);
+
+        if constexpr (std::is_signed_v<T::ScalarType>)
+        {
+            v2 = v0;
+            v2 = -v2;
+            Compare(v2, v0, v0, negTransform);
+        }
 
 		T v0p = GenerateVec<T>(false);
 		T v1p = GenerateVec<T>(false);
@@ -206,9 +241,6 @@ template <typename T> void FP32VectorTestsHelper()
 		st distSquareComp = Get<0>(v2) * Get<0>(v2) + Get<1>(v2) * Get<1>(v2) + Get<2>(v2) * Get<2>(v2) + Get<3>(v2) * Get<3>(v2);
 		UTest(true, EqualsWithEpsilon(v0.DistanceSquare(v1), distSquareComp));
 		UTest(true, EqualsWithEpsilon(v0.Distance(v1), sqrt(distSquareComp)));
-
-		st avgComp = (Get<0>(v0) + Get<1>(v0) + Get<2>(v0) + Get<3>(v0)) / T::dim;
-		UTest(true, EqualsWithEpsilon(v0.Average(), avgComp));
 
 		st dotComp = Get<0>(v0) * Get<0>(v1) + Get<1>(v0) * Get<1>(v1) + Get<2>(v0) * Get<2>(v1) + Get<3>(v0) * Get<3>(v1);
 		UTest(true, EqualsWithEpsilon(v0.Dot(v1), dotComp));
