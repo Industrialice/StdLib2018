@@ -10,6 +10,7 @@
 #include "IMemoryStream.hpp"
 #include "IFile.hpp"
 #include "DataHolder.hpp"
+#include "FunctionInfo.hpp"
 
 namespace StdLib::Initialization
 {

@@ -10,6 +10,7 @@ using namespace Funcs;
 void MathLibTests();
 void UniqueIdManagerTests();
 void UniqueIdManagerBenchmark();
+void XNARef();
 
 static void CompileTimeStringsTests()
 {
@@ -978,6 +979,36 @@ static void MemoryStreamTests()
     PRINTLOG("finished memory stream tests\n");
 }
 
+static void FunctionInfoTests()
+{
+    using test0 = FunctionInfo::Info<decltype(FunctionInfoTests)>;
+    UTest(Equal, std::tuple_size_v<test0::args>, 0);
+    UTest(true, std::is_same_v<test0::result, void>);
+
+    struct local
+    {
+        static void f0(i32, f32) {}
+        static i32 f1() {}
+        f64 f2(ui8) {}
+    };
+
+    using test1 = FunctionInfo::Info<decltype(local::f0)>;
+    UTest(true, std::is_same_v<std::tuple_element_t<0, test1::args>, i32>);
+    UTest(true, std::is_same_v<std::tuple_element_t<1, test1::args>, f32>);
+    UTest(true, std::is_same_v<test1::result, void>);
+
+    using test2 = FunctionInfo::Info<decltype(local::f1)>;
+    UTest(Equal, std::tuple_size_v<test2::args>, 0);
+    UTest(true, std::is_same_v<test2::result, i32>);
+
+    using test3 = FunctionInfo::Info<decltype(&local::f2)>;
+    UTest(true, std::is_same_v<std::tuple_element_t<0, test3::args>, ui8>);
+    UTest(true, std::is_same_v<test3::parentClass, local>);
+    UTest(true, std::is_same_v<test3::result, f64>);
+
+    PRINTLOG("finished function info tests\n");
+}
+
 static void PrintSystemInfo()
 {
 	PRINTLOG("System info:\n");
@@ -1059,6 +1090,7 @@ static void DoTests(int argc, const char **argv)
     TimeMomentTests();
     DataHolderTests();
     MemoryStreamTests();
+    FunctionInfoTests();
     MathLibTests();
     UniqueIdManagerTests();
 	PrintSystemInfo();
@@ -1076,6 +1108,7 @@ int main(int argc, const char **argv)
     DoTests(argc, argv);
 
     //UniqueIdManagerBenchmark();
+    XNARef();
 
     PRINTLOG("~~~Finished Everything~~~\n");
 

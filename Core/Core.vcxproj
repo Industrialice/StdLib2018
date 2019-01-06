@@ -138,6 +138,7 @@
     <ClInclude Include="EnumCombinable.hpp" />
     <ClInclude Include="Error.hpp" />
     <ClInclude Include="FileToMemoryStream.hpp" />
+    <ClInclude Include="FunctionInfo.hpp" />
     <ClInclude Include="HashFuncs.hpp" />
     <ClInclude Include="IFile.hpp" />
     <ClInclude Include="IMemoryStream.hpp" />
