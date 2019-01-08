@@ -574,6 +574,28 @@ template <typename T> static void MatrixDecomposeTest()
 	UTest(true, decTranslation1.EqualsWithEpsilon({0, 0, 0}));
 }
 
+template <typename T> static void MatrixDecompose2DTest()
+{
+	Vector2 decScale, decTranslate;
+	f32 decRotate;
+	Vector2 refScale = {0.4f, 0.65f}, refTranslate = {0.22f, -9.5f};
+	f32 refRotate = DegToRad(34.4f);
+	if constexpr (T::rows > 2)
+	{
+		auto rts = T::CreateRTS(refRotate, refTranslate, refScale);
+		rts.Decompose(&decRotate, &decTranslate, &decScale);
+	}
+	else
+	{
+		auto rs = T::CreateRS(refRotate, refScale);
+		rs.Decompose(&decRotate, &decScale);
+		decTranslate = refTranslate;
+	}
+	UTest(true, refScale.EqualsWithEpsilon(decScale));
+	UTest(true, refTranslate.EqualsWithEpsilon(decTranslate));
+	UTest(true, EqualsWithEpsilon(refRotate, decRotate));
+}
+
 static void Matrix2x2Tests()
 {
     constexpr Matrix2x2 constexprTest = Matrix2x2(
@@ -589,6 +611,8 @@ static void Matrix2x2Tests()
 
 	f32 det = constexprTest.Determinant();
 	UTest(true, EqualsWithEpsilon(det, 13));
+
+	MatrixDecompose2DTest<Matrix2x2>();
 }
 
 static void Matrix2x3Tests()
@@ -624,6 +648,8 @@ static void Matrix3x2Tests()
 
 	f32 det = constexprTest.Determinant();
 	UTest(true, EqualsWithEpsilon(det, 25));
+
+	MatrixDecompose2DTest<Matrix3x2>();
 }
 
 static void Matrix3x3Tests()
@@ -644,6 +670,7 @@ static void Matrix3x3Tests()
 	UTest(true, EqualsWithEpsilon(det, -15));
 
 	MatrixDecomposeTest<Matrix3x3>();
+	MatrixDecompose2DTest<Matrix3x3>();
 }
 
 static void Matrix3x4Tests()

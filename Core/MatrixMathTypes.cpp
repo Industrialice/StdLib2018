@@ -85,7 +85,7 @@ template <typename MatrixType, bool isAllowTranslation> static inline void _SetT
     }
 }
 
-template <typename MatrixType, bool isAllowTranslation> static inline MatrixType _CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt)
+template <typename MatrixType, bool isAllowTranslation> static inline MatrixType _CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale)
 {
     static_assert(MatrixType::rows >= (isAllowTranslation ? 4 : 3));
     static_assert(MatrixType::columns >= 3);
@@ -124,7 +124,7 @@ template <typename MatrixType, bool isAllowTranslation> static inline MatrixType
     return r;
 }
 
-template <typename MatrixType, bool isAllowTranslation> static inline MatrixType _CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt)
+template <typename MatrixType, bool isAllowTranslation> static inline MatrixType _CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale)
 {
     static_assert(MatrixType::rows >= (isAllowTranslation ? 4 : 3));
     static_assert(MatrixType::columns >= 3);
@@ -150,6 +150,40 @@ template <typename MatrixType, bool isAllowTranslation> static inline MatrixType
     _ValidateValues(r);
 
     return r;
+}
+
+template <typename MatrixType, bool isAllowTranslation> static inline MatrixType _CreateRTS2D(const optional<f32> &rotation, const optional<Vector2> &translation, const optional<Vector2> &scale)
+{
+	MatrixType result;
+
+	if (rotation)
+	{
+		_ValidateValues(*rotation);
+
+		f32 cr = cos(*rotation);
+		f32 sr = sin(*rotation);
+
+		result[0][0] = cr; result[0][1] = -sr;
+		result[1][0] = sr; result[1][1] = cr;
+	}
+
+	if (isAllowTranslation && translation)
+	{
+		_ValidateValues(*translation);
+		result[2][0] = translation->x; result[2][1] = translation->y;
+	}
+
+	if (scale)
+	{
+		_ValidateValues(*scale);
+		result[0][0] *= scale->x;
+		result[0][1] *= scale->x;
+		result[1][0] *= scale->y;
+		result[1][1] *= scale->y;
+	}
+
+	_ValidateValues(result);
+	return result;
 }
 
 static inline optional<Matrix4x4> _Inverse4x4Matrix(const Matrix4x4 &m)
@@ -507,6 +541,28 @@ template <typename T, typename E> static inline void _DecomposeMatrix(const T &m
 	}
 }
 
+template <typename T> static inline void _Decompose2DMatrix(const T &m, f32 *rotation, Vector2 *translation, Vector2 *scale)
+{
+	f32 sx = m.GetRow(0).ToVector2().Length();
+	f32 sy = m.GetRow(1).ToVector2().Length();
+
+	if (rotation)
+	{
+		f32 unscaled = m.elements[0][0] / sx;
+		*rotation = acos(unscaled);
+	}
+
+	if (translation)
+	{
+		*translation = m.GetRow(2).ToVector2();
+	}
+
+	if (scale)
+	{
+		*scale = {sx, sy};
+	}
+}
+
 /////////////
 // Vector2 //
 /////////////
@@ -570,38 +626,14 @@ f32 Matrix3x2::Determinant() const
 	return +m[0][0] * m[1][1] + m[0][1] * -m[1][0];
 }
 
+void Matrix3x2::Decompose(f32 *rotation, Vector2 *translation, Vector2 *scale) const
+{
+	_Decompose2DMatrix(*this, rotation, translation, scale);
+}
+
 Matrix3x2 Matrix3x2::CreateRTS(const optional<f32> &rotation, const optional<Vector2> &translation, const optional<Vector2> &scale)
 {
-    Matrix3x2 result;
-
-    if (rotation)
-    {
-		_ValidateValues(*rotation);
-
-        f32 cr = cos(*rotation);
-        f32 sr = sin(*rotation);
-
-        result[0][0] = cr; result[0][1] = -sr;
-        result[1][0] = sr; result[1][1] = cr;
-    }
-
-    if (translation)
-    {
-		_ValidateValues(*translation);
-        result[2][0] = translation->x; result[2][1] = translation->y;
-    }
-
-    if (scale)
-    {
-		_ValidateValues(*scale);
-        result[0][0] *= scale->x;
-        result[0][1] *= scale->x;
-        result[1][0] *= scale->y;
-        result[1][1] *= scale->y;
-    }
-
-	_ValidateValues(result);
-    return result;
+	return _CreateRTS2D<Matrix3x2, true>(rotation, translation, scale);
 }
 
 ///////////////
@@ -854,6 +886,11 @@ Matrix2x2 &Matrix2x2::Transpose()
     return *this;
 }
 
+void Matrix2x2::Decompose(f32 *rotation, Vector2 *scale) const
+{
+	_Decompose2DMatrix(*this, rotation, nullptr, scale);
+}
+
 optional<Matrix2x2> Matrix2x2::GetInversed() const
 {
 	_ValidateValues(*this);
@@ -865,6 +902,11 @@ f32 Matrix2x2::Determinant() const
 	_ValidateValues(*this);
 	auto &m = *this;
 	return m[0][0] * m[1][1] + m[0][1] * -m[1][0];
+}
+
+Matrix2x2 Matrix2x2::CreateRS(const optional<f32> &rotation, const optional<Vector2> &scale)
+{
+	return _CreateRTS2D<Matrix2x2, false>(rotation, nullopt, scale);
 }
 
 ///////////////
@@ -911,6 +953,11 @@ void Matrix3x3::Decompose(Quaternion *rotation, Vector3 *scale) const
 	_DecomposeMatrix(*this, rotation, nullptr, scale);
 }
 
+void Matrix3x3::Decompose(f32 *rotation, Vector2 *translation, Vector2 *scale) const
+{
+	_Decompose2DMatrix(*this, rotation, translation, scale);
+}
+
 Matrix3x3 Matrix3x3::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
 {
     return _CreateRotationAroundAxis<Matrix3x3>(axis, angle);
@@ -924,6 +971,11 @@ Matrix3x3 Matrix3x3::CreateRS(const optional<Vector3> &rotation, const optional<
 Matrix3x3 Matrix3x3::CreateRS(const optional<Quaternion> &rotation, const optional<Vector3> &scale)
 {
     return _CreateRTS<Matrix3x3, false>(rotation, nullopt, scale);
+}
+
+Matrix3x3 Matrix3x3::CreateRTS(const optional<f32> &rotation, const optional<Vector2> &translation, const optional<Vector2> &scale)
+{
+	return _CreateRTS2D<Matrix3x3, true>(rotation, translation, scale);
 }
 
 ////////////////

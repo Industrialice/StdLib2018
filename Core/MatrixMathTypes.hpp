@@ -6,7 +6,6 @@
 // TODO: validate values for Rectangle
 // TODO: tests for Rectangle
 // TODO: more tests for Quaternion
-// TODO: decompose for 3x2 and 2x2 matrices
 
 namespace StdLib
 {
@@ -416,9 +415,9 @@ namespace StdLib
 
         [[nodiscard]] optional<Matrix3x2> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
+		void Decompose(f32 *rotation, Vector2 *translation, Vector2 *scale) const;
 
-        // clockwise rotation around Z axis
-        [[nodiscard]] static Matrix3x2 CreateRTS(const optional<f32> &rotation = nullopt, const optional<Vector2> &translation = nullopt, const optional<Vector2> &scale = nullopt);
+        [[nodiscard]] static Matrix3x2 CreateRTS(const optional<f32> &rotation, const optional<Vector2> &translation, const optional<Vector2> &scale = nullopt); // clockwise rotation around Z axis
     };
 
     struct Matrix2x3 : _Matrix<2, 3>
@@ -444,9 +443,12 @@ namespace StdLib
         constexpr Matrix2x2(const Vector2 &row0, const Vector2 &row1);
 
         Matrix2x2 &Transpose();
+		void Decompose(f32 *rotation, Vector2 *scale) const;
 
         optional<Matrix2x2> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
+		
+		[[nodiscard]] static Matrix2x2 CreateRS(const optional<f32> &rotation, const optional<Vector2> &scale = nullopt); // clockwise rotation around Z axis
 	};
 
     struct Matrix3x3 : _Matrix<3, 3>
@@ -463,14 +465,16 @@ namespace StdLib
 
 		optional<Matrix3x3> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
-		void Decompose(Matrix3x3 *rotation, Vector3 *scale) const;
-		void Decompose(Vector3 *rotation, Vector3 *scale) const;
-		void Decompose(Quaternion *rotation, Vector3 *scale) const;
+		void Decompose(Matrix3x3 *rotation, Vector3 *scale) const; // decomposes as 3D
+		void Decompose(Vector3 *rotation, Vector3 *scale) const; // decomposes as 3D
+		void Decompose(Quaternion *rotation, Vector3 *scale) const; // decomposes as 3D
+		void Decompose(f32 *rotation, Vector2 *translation, Vector2 *scale) const; // decomposes as 2D
 
         [[nodiscard]] static Matrix3x3 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
         [[nodiscard]] static Matrix3x3 CreateRS(const optional<Vector3> &rotation, const optional<Vector3> &scale = nullopt);
         [[nodiscard]] static Matrix3x3 CreateRS(const optional<Quaternion> &rotation, const optional<Vector3> &scale = nullopt);
-    };
+		[[nodiscard]] static Matrix3x3 CreateRTS(const optional<f32> &rotation, const optional<Vector2> &translation, const optional<Vector2> &scale = nullopt); // clockwise rotation around Z axis
+	};
 
     // Addition and subtraction are a component-wise operation; composing quaternions should be done via multiplication.
     // Order matters when composing quaternions : C = A * B will yield a quaternion C that logically
@@ -519,9 +523,9 @@ namespace StdLib
         Quaternion &Inverse();
         [[nodiscard]] Quaternion GetInversed() const;
 
-        [[nodiscard]] Vector3 ToEuler() const;
+        [[nodiscard]] Vector3 ToEuler() const; // Must quaternion be normalized?
         [[nodiscard]] std::tuple<Vector3, f32> ToAxisAndAngle() const; // Quaternion must be normalized
-        [[nodiscard]] Matrix3x3 ToMatrix() const;
+        [[nodiscard]] Matrix3x3 ToMatrix() const; // Must quaternion be normalized?
 
         [[nodiscard]] bool EqualsWithEpsilon(const Quaternion &other, f32 epsilon = DefaultF32Epsilon) const;
     };
