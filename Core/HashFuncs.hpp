@@ -85,4 +85,7 @@ namespace StdLib::Hash
 			return FNVHash<precision>(&value, sizeof(T));
 		}
 	}
+
+	ui32 CRC32(const ui8 *message); // zero terminated
+	ui32 CRC32(const ui8 *message, uiw length);
 }

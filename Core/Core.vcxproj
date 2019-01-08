@@ -157,6 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileToMemoryStream.cpp" />
+    <ClCompile Include="HashFuncs.cpp" />
     <ClCompile Include="MatrixMathTypes.cpp" />
     <ClCompile Include="StdCoreLib.cpp" />
     <ClCompile Include="_PreHeader.cpp">

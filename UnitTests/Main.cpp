@@ -124,6 +124,12 @@ static void HashFuncsTest()
 	ui64 nameHashed = Hash::FNVHash<Hash::Precision::P64>(name, CountOf(name));
 	UTest(Equal, nameHashedCT, nameHashed);
 
+	const char *crc32str = "Skellig Peaceful Theme.mp3";
+	ui32 crc32 = Hash::CRC32((ui8 *)crc32str);
+	UTest(Equal, crc32, 0xD85554CE);
+	crc32 = Hash::CRC32((ui8 *)crc32str, strlen(crc32str));
+	UTest(Equal, crc32, 0xD85554CE);
+
 	PRINTLOG("finished hash tests\n");
 }
 #ifdef _MSC_VER
