@@ -17,7 +17,7 @@ template <uiw index, typename T> static typename T::ScalarType Get(T vec)
 	return vec[index];
 }
 
-template <typename T> void Compare(T v2, T v0, T v1, typename T::ScalarType transform(typename T::ScalarType, typename T::ScalarType))
+template <typename T> static void Compare(T v2, T v0, T v1, typename T::ScalarType transform(typename T::ScalarType, typename T::ScalarType))
 {
 	if constexpr (std::is_floating_point_v<typename T::ScalarType>)
 	{
@@ -232,8 +232,6 @@ template <typename T> static void FP32VectorTestsHelper()
 		st lenSquareComp = Get<0>(v0) * Get<0>(v0) + Get<1>(v0) * Get<1>(v0) + Get<2>(v0) * Get<2>(v0) + Get<3>(v0) * Get<3>(v0);
 		UTest(true, EqualsWithEpsilon(v0.LengthSquare(), lenSquareComp));
 		UTest(true, EqualsWithEpsilon(v0.Length(), sqrt(lenSquareComp)));
-		UTest(Equal, EqualsWithEpsilon(v0.Length(), 1.0f), v0.IsNormalized());
-		UTest(Equal, EqualsWithEpsilon(v0.LengthSquare(), 1.0f), v0.IsNormalized());
 		v2 = v0 + 1;
 		UTest(true, v2.GetNormalized().IsNormalized());
 		v2.Normalize();
@@ -442,14 +440,20 @@ static void QuaternionTests()
     UTest(true, toEuler.EqualsWithEpsilon({25.0f, 40.0f, 75.0f}, epsilon));
 
     auto mat = Matrix3x3::CreateRS(Vector3{25.0f, 40.0f, 75.0f}.ForEach(DegToRad)); // positive trace matrix
-    q0 = Quaternion(mat);
+    q0 = Quaternion::FromMatrix(mat);
     toEuler = q0.ToEuler().ForEach(RadToDeg);
     UTest(true, toEuler.EqualsWithEpsilon({25.0f, 40.0f, 75.0f}, epsilon));
 
+	auto revMat = q0.ToMatrix();
+	UTest(true, revMat.EqualsWithEpsilon(mat));
+
     mat = Matrix3x3::CreateRS(Vector3{25.0f, 50.0f, 256.0f}.ForEach(DegToRad)); // negative trace matrix
-    q0 = Quaternion(mat);
+    q0 = Quaternion::FromMatrix(mat);
     toEuler = q0.ToEuler().ForEach(RadToDeg);
     UTest(true, toEuler.EqualsWithEpsilon({25.0f, 50.0f, 256.0f}, epsilon));
+
+	revMat = q0.ToMatrix();
+	UTest(true, revMat.EqualsWithEpsilon(mat));
 
     for (ui32 index = 0; index < TestIterations; ++index)
     {
@@ -539,6 +543,37 @@ template <typename T> static void MatrixTestsHelper()
     }
 }
 
+template <typename T> static void MatrixDecomposeTest()
+{
+	auto refRot = Vector3{10, 20, -11}.ForEach(DegToRad);
+	T mat;
+	Vector3 decRotEuler, decScale0, decScale1 = {1, 1, 1}, decTranslation0, decTranslation1;
+	Quaternion decRotQ0, decRotQ1;
+	if constexpr (T::rows > 3)
+	{
+		mat = T::CreateRTS(refRot, Vector3{4, -5, 17}, Vector3{0.3f, 0.5f, 0.75f});
+		mat.Decompose(&decRotEuler, &decTranslation0, &decScale0);
+		mat.Decompose(&decRotQ0, nullptr, nullptr);
+		UTest(true, decTranslation0.EqualsWithEpsilon({4, -5, 17}));
+		mat = T::CreateRTS(refRot, nullopt, nullopt);
+		mat.Decompose(&decRotQ1, &decTranslation1, &decScale1);
+	}
+	else
+	{
+		mat = T::CreateRS(refRot, Vector3{0.3f, 0.5f, 0.75f});
+		mat.Decompose(&decRotEuler, &decScale0);
+		mat.Decompose(&decRotQ0, nullptr);
+		mat = T::CreateRS(refRot, nullopt);
+		mat.Decompose(&decRotQ1, &decScale1);
+	}
+	UTest(true, refRot.EqualsWithEpsilon(decRotEuler));
+	UTest(true, decScale0.EqualsWithEpsilon({0.3f, 0.5f, 0.75f}));
+	UTest(true, Quaternion::FromEuler(refRot).EqualsWithEpsilon(decRotQ0));
+	UTest(true, Quaternion::FromEuler(refRot).EqualsWithEpsilon(decRotQ1));
+	UTest(true, decScale1.EqualsWithEpsilon({1, 1, 1}));
+	UTest(true, decTranslation1.EqualsWithEpsilon({0, 0, 0}));
+}
+
 static void Matrix2x2Tests()
 {
     constexpr Matrix2x2 constexprTest = Matrix2x2(
@@ -607,6 +642,8 @@ static void Matrix3x3Tests()
 
 	f32 det = constexprTest.Determinant();
 	UTest(true, EqualsWithEpsilon(det, -15));
+
+	MatrixDecomposeTest<Matrix3x3>();
 }
 
 static void Matrix3x4Tests()
@@ -643,10 +680,14 @@ static void Matrix4x3Tests()
         UTest(true, m.GetRow(3).EqualsWithEpsilon({10.0f, 20.0f, 30.0f}));
     };
 
-    auto rtsEuler = Matrix4x3::CreateRTS(Vector3{25.0f, 50.0f, 75.0f}.ForEach(DegToRad), Vector3(10, 20, 30), Vector3(0.4f, 0.5f, 0.6f));
+	Vector3 refRotationEuler = Vector3{25.0f, 50.0f, 75.0f}.ForEach(DegToRad);
+	Quaternion refRotationQ = Quaternion::FromEuler(refRotationEuler);
+    auto rtsEuler = Matrix4x3::CreateRTS(refRotationEuler, Vector3(10, 20, 30), Vector3(0.4f, 0.5f, 0.6f));
     checkRTS(rtsEuler);
 
-    auto rtsQuat = Matrix4x3::CreateRTS(Quaternion::FromEuler(Vector3{25.0f, 50.0f, 75.0f}.ForEach(DegToRad)), Vector3(10, 20, 30), Vector3(0.4f, 0.5f, 0.6f));
+	MatrixDecomposeTest<Matrix4x3>();
+
+    auto rtsQuat = Matrix4x3::CreateRTS(refRotationQ, Vector3(10, 20, 30), Vector3(0.4f, 0.5f, 0.6f));
     checkRTS(rtsQuat);
 
     Vector4 toTransform = {1, 2, 3, 1};
@@ -689,6 +730,8 @@ static void Matrix4x4Tests()
 
 	f32 det = constexprTest.Determinant();
 	UTest(true, EqualsWithEpsilon(det, -20));
+
+	MatrixDecomposeTest<Matrix4x4>();
 }
 
 static void BaseVectorTests()

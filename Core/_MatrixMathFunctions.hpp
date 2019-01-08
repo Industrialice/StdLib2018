@@ -208,6 +208,12 @@ namespace StdLib
     // Vector2Base //
     /////////////////
 
+	template<typename ScalarType> inline VectorTypeByDimension<ScalarType, 2> Vector2Base<ScalarType>::ToVector2() const
+	{
+		_ValidateValues(*this);
+		return {x, y};
+	}
+
     /////////////////
     // Vector3Base //
     /////////////////
@@ -217,6 +223,12 @@ namespace StdLib
 		_ValidateValues(*this);
         return {x, y};
     }
+
+	template<typename ScalarType> inline VectorTypeByDimension<ScalarType, 3> Vector3Base<ScalarType>::ToVector3() const
+	{
+		_ValidateValues(*this);
+		return {x, y, z};
+	}
 
     /////////////////
     // Vector4Base //
@@ -233,6 +245,12 @@ namespace StdLib
 		_ValidateValues(*this);
         return {x, y, z};
     }
+
+	template<typename ScalarType> inline VectorTypeByDimension<ScalarType, 4> Vector4Base<ScalarType>::ToVector4() const
+	{
+		_ValidateValues(*this);
+		return {x, y, z, w};
+	}
 
     /////////////
     // _Vector //
@@ -302,14 +320,14 @@ namespace StdLib
         return result;
     }
 
-    template <typename Basis> inline bool _VectorFP<Basis>::IsNormalized(f32 epsilon) const
-    {
-        f32 length = LengthSquare();
-        return (length >= 1.0f - epsilon) && (length <= 1.0f + epsilon);
-    }
+	template<typename Basis> inline bool _VectorFP<Basis>::IsNormalized() const
+	{
+		return StdLib::EqualsWithEpsilon(LengthSquare(), 1.0f);
+	}
 
     template <typename Basis> inline bool _VectorFP<Basis>::EqualsWithEpsilon(const _VectorFP &other, f32 epsilon) const
     {
+		ASSUME(epsilon >= 0);
 		_ValidateValues(*this, other);
         for (uiw index = 0; index < dim; ++index)
             if (abs(VECDATA(*this, index) - VECDATA(other, index)) > epsilon)
@@ -512,6 +530,7 @@ namespace StdLib
 
     template <uiw Rows, uiw Columns> inline bool _Matrix<Rows, Columns>::EqualsWithEpsilon(const _Matrix &other, f32 epsilon) const
     {
+		ASSUME(epsilon >= 0);
         _ValidateValues(*this, other, epsilon);
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)

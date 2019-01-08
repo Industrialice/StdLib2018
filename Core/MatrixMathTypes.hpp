@@ -5,8 +5,8 @@
 // TODO: Rectangle3D
 // TODO: validate values for Rectangle
 // TODO: tests for Rectangle
-// TODO: validate values for Quaternion
 // TODO: more tests for Quaternion
+// TODO: decompose for 3x2 and 2x2 matrices
 
 namespace StdLib
 {
@@ -152,6 +152,7 @@ namespace StdLib
 
         constexpr Vector2Base() = default;
         constexpr Vector2Base(ScalarType x, ScalarType y);
+		[[nodiscard]] VectorTypeByDimension<ScalarType, 2> ToVector2() const;
     };
 
     template <typename ScalarType> struct Vector3Base : _VectorBase<ScalarType, 3>
@@ -163,7 +164,8 @@ namespace StdLib
         constexpr Vector3Base() = default;
         constexpr Vector3Base(ScalarType x, ScalarType y, ScalarType z);
         constexpr Vector3Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z);
-        [[nodiscard]] VectorTypeByDimension<ScalarType, 2> ToVector2() const;
+		[[nodiscard]] VectorTypeByDimension<ScalarType, 2> ToVector2() const;
+		[[nodiscard]] VectorTypeByDimension<ScalarType, 3> ToVector3() const;
     };
 
     template <typename ScalarType> struct Vector4Base : _VectorBase<ScalarType, 4>
@@ -179,7 +181,8 @@ namespace StdLib
         constexpr Vector4Base(const VectorTypeByDimension<ScalarType, 3> &vec, ScalarType w);
         constexpr Vector4Base(const VectorTypeByDimension<ScalarType, 2> &v0, const VectorTypeByDimension<ScalarType, 2> &v1);
         [[nodiscard]] VectorTypeByDimension<ScalarType, 2> ToVector2() const;
-        [[nodiscard]] VectorTypeByDimension<ScalarType, 3> ToVector3() const;
+		[[nodiscard]] VectorTypeByDimension<ScalarType, 3> ToVector3() const;
+		[[nodiscard]] VectorTypeByDimension<ScalarType, 4> ToVector4() const;
     };
 
     template <typename Basis> struct _VectorFP : Basis
@@ -209,8 +212,8 @@ namespace StdLib
         [[nodiscard]] f32 Dot(const _VectorFP &other) const;
 
         VectorType &Normalize();
-        [[nodiscard]] VectorType GetNormalized() const;
-        [[nodiscard]] bool IsNormalized(f32 epsilon = DefaultF32Epsilon) const;
+		[[nodiscard]] VectorType GetNormalized() const;
+		[[nodiscard]] bool IsNormalized() const;
 
         [[nodiscard]] bool EqualsWithEpsilon(const _VectorFP &other, f32 epsilon = DefaultF32Epsilon) const;
 
@@ -345,6 +348,9 @@ namespace StdLib
 
         [[nodiscard]] optional<Matrix4x3> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
+		void Decompose(Matrix3x3 *rotation, Vector3 *translation, Vector3 *scale) const;
+		void Decompose(Vector3 *rotation, Vector3 *translation, Vector3 *scale) const;
+		void Decompose(Quaternion *rotation, Vector3 *translation, Vector3 *scale) const;
 
         [[nodiscard]] Matrix4x4 operator * (const Matrix4x4 &other) const;
 
@@ -387,6 +393,9 @@ namespace StdLib
 
         optional<Matrix4x4> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
+		void Decompose(Matrix3x3 *rotation, Vector3 *translation, Vector3 *scale) const;
+		void Decompose(Vector3 *rotation, Vector3 *translation, Vector3 *scale) const;
+		void Decompose(Quaternion *rotation, Vector3 *translation, Vector3 *scale) const;
 
         [[nodiscard]] static Matrix4x4 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
         [[nodiscard]] static Matrix4x4 CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt);
@@ -454,6 +463,9 @@ namespace StdLib
 
 		optional<Matrix3x3> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
+		void Decompose(Matrix3x3 *rotation, Vector3 *scale) const;
+		void Decompose(Vector3 *rotation, Vector3 *scale) const;
+		void Decompose(Quaternion *rotation, Vector3 *scale) const;
 
         [[nodiscard]] static Matrix3x3 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
         [[nodiscard]] static Matrix3x3 CreateRS(const optional<Vector3> &rotation, const optional<Vector3> &scale = nullopt);
@@ -462,17 +474,17 @@ namespace StdLib
 
     // Addition and subtraction are a component-wise operation; composing quaternions should be done via multiplication.
     // Order matters when composing quaternions : C = A * B will yield a quaternion C that logically
-    // first applies B then A to any subsequent transformation(right first, then left).
+    // first applies A then B to any subsequent transformation(left first, then right).
     struct Quaternion
     {
         f32 x = 0, y = 0, z = 0, w = 1;
 
         static Quaternion FromEuler(const Vector3 &source);
+		static Quaternion FromMatrix(const Matrix3x3 &matrix);
+		static Quaternion FromAxis(const Vector3 &axis, f32 angleRad); // axis must be normalized
 
         constexpr Quaternion() = default;
         Quaternion(f32 x, f32 y, f32 z, f32 w);
-        explicit Quaternion(const Matrix3x3 &matrix);
-        Quaternion(const Vector3 &axis, f32 angleRad); // axis must be normalized
 
         [[nodiscard]] Quaternion operator + (const Quaternion &other) const;
         Quaternion &operator += (const Quaternion &other);
@@ -499,16 +511,16 @@ namespace StdLib
 
         Quaternion &Normalize();
         [[nodiscard]] Quaternion GetNormalized() const;
-        [[nodiscard]] bool IsNormalized(f32 epsilon = DefaultF32Epsilon) const;
+		[[nodiscard]] bool IsNormalized() const;
+
+		[[nodiscard]] f32 Length() const;
+		[[nodiscard]] f32 LengthSquare() const;
 
         Quaternion &Inverse();
         [[nodiscard]] Quaternion GetInversed() const;
 
-        [[nodiscard]] f32 GetAngle() const;
-        [[nodiscard]] Vector3 GetRotationAxis() const;
-
         [[nodiscard]] Vector3 ToEuler() const;
-        [[nodiscard]] std::tuple<Vector3, f32> ToAxisAndAngle() const;
+        [[nodiscard]] std::tuple<Vector3, f32> ToAxisAndAngle() const; // Quaternion must be normalized
         [[nodiscard]] Matrix3x3 ToMatrix() const;
 
         [[nodiscard]] bool EqualsWithEpsilon(const Quaternion &other, f32 epsilon = DefaultF32Epsilon) const;

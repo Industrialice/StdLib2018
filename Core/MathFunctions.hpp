@@ -243,7 +243,7 @@ namespace StdLib
 
 	[[nodiscard]] constexpr inline f32 Lerp(f32 left, f32 right, f32 interpolant)
 	{
-		ASSUME(interpolant >= -0.00001f && interpolant <= 1 + 0.00001f);
+		ASSUME(interpolant >= -0.00001f && interpolant <= 1.00001f);
 		f32 interpolated = left + ((right - left) * interpolant);
 		_ValidateValues(left, right, interpolated);
 		return interpolated;
@@ -251,7 +251,7 @@ namespace StdLib
 
 	[[nodiscard]] constexpr inline f64 Lerp(f64 left, f64 right, f64 interpolant)
 	{
-		ASSUME(interpolant >= -0.000001 && interpolant <= 1 + 0.000001);
+		ASSUME(interpolant >= -0.000001 && interpolant <= 1.000001);
 		f64 interpolated = left + ((right - left) * interpolant);
 		_ValidateValues(left, right, interpolated);
 		return interpolated;
@@ -274,12 +274,14 @@ namespace StdLib
 
 	[[nodiscard]] inline bool EqualsWithEpsilon(f32 left, f32 right, f32 epsilon = DefaultF32Epsilon)
 	{
+		ASSUME(epsilon >= 0);
 		_ValidateValues(left, right, epsilon);
         return abs(left - right) <= epsilon;
     }
 
 	[[nodiscard]] inline bool EqualsWithEpsilon(f64 left, f64 right, f64 epsilon = (f64)DefaultF32Epsilon)
 	{
+		ASSUME(epsilon >= 0);
 		_ValidateValues(left, right, epsilon);
 		return abs(left - right) <= epsilon;
 	}

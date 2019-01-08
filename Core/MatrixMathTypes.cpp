@@ -49,7 +49,7 @@ namespace StdLib
     template struct Rectangle<i32>;
 }
 
-template <uiw Rows, uiw Columns> inline void _TransposeSquareMatrix(_Matrix<Rows, Columns> &matrix)
+template <uiw Rows, uiw Columns> static inline void _TransposeSquareMatrix(_Matrix<Rows, Columns> &matrix)
 {
     static_assert(Rows == Columns);
 
@@ -60,7 +60,7 @@ template <uiw Rows, uiw Columns> inline void _TransposeSquareMatrix(_Matrix<Rows
             std::swap(matrix.elements[rowIndex][columnIndex], matrix.elements[columnIndex][rowIndex]);
 }
 
-template <typename MatrixType, bool isAllowTranslation> inline void _SetTranslationScale(MatrixType &r, const optional<Vector3> &translation, const optional<Vector3> &scale)
+template <typename MatrixType, bool isAllowTranslation> static inline void _SetTranslationScale(MatrixType &r, const optional<Vector3> &translation, const optional<Vector3> &scale)
 {
     if (scale)
     {
@@ -85,7 +85,7 @@ template <typename MatrixType, bool isAllowTranslation> inline void _SetTranslat
     }
 }
 
-template <typename MatrixType, bool isAllowTranslation> inline MatrixType _CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt)
+template <typename MatrixType, bool isAllowTranslation> static inline MatrixType _CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt)
 {
     static_assert(MatrixType::rows >= (isAllowTranslation ? 4 : 3));
     static_assert(MatrixType::columns >= 3);
@@ -124,7 +124,7 @@ template <typename MatrixType, bool isAllowTranslation> inline MatrixType _Creat
     return r;
 }
 
-template <typename MatrixType, bool isAllowTranslation> inline MatrixType _CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt)
+template <typename MatrixType, bool isAllowTranslation> static inline MatrixType _CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt)
 {
     static_assert(MatrixType::rows >= (isAllowTranslation ? 4 : 3));
     static_assert(MatrixType::columns >= 3);
@@ -152,7 +152,7 @@ template <typename MatrixType, bool isAllowTranslation> inline MatrixType _Creat
     return r;
 }
 
-inline optional<Matrix4x4> _Inverse4x4Matrix(const Matrix4x4 &m)
+static inline optional<Matrix4x4> _Inverse4x4Matrix(const Matrix4x4 &m)
 {
     Matrix4x4 r;
 
@@ -209,7 +209,7 @@ inline optional<Matrix4x4> _Inverse4x4Matrix(const Matrix4x4 &m)
     return r;
 }
 
-inline optional<Matrix4x3> _Inverse4x3Matrix(const Matrix4x3 &m)
+static inline optional<Matrix4x3> _Inverse4x3Matrix(const Matrix4x3 &m)
 {
     Matrix4x3 r;
 
@@ -248,7 +248,7 @@ inline optional<Matrix4x3> _Inverse4x3Matrix(const Matrix4x3 &m)
     return r;
 }
 
-inline optional<Matrix3x4> _Inverse3x4Matrix(const Matrix3x4 &m)
+static inline optional<Matrix3x4> _Inverse3x4Matrix(const Matrix3x4 &m)
 {
 	Matrix3x4 r;
 
@@ -288,7 +288,7 @@ inline optional<Matrix3x4> _Inverse3x4Matrix(const Matrix3x4 &m)
 	return r;
 }
 
-inline optional<Matrix2x2> _Inverse2x2Matrix(const Matrix2x2 &m)
+static inline optional<Matrix2x2> _Inverse2x2Matrix(const Matrix2x2 &m)
 {
     Matrix2x2 r;
 
@@ -311,7 +311,7 @@ inline optional<Matrix2x2> _Inverse2x2Matrix(const Matrix2x2 &m)
     return r;
 }
 
-inline optional<Matrix3x2> _Inverse3x2Matrix(const Matrix3x2 &m)
+static inline optional<Matrix3x2> _Inverse3x2Matrix(const Matrix3x2 &m)
 {
 	Matrix3x2 r;
 
@@ -336,7 +336,7 @@ inline optional<Matrix3x2> _Inverse3x2Matrix(const Matrix3x2 &m)
 	return r;
 }
 
-inline optional<Matrix2x3> _Inverse2x3Matrix(const Matrix2x3 &m)
+static inline optional<Matrix2x3> _Inverse2x3Matrix(const Matrix2x3 &m)
 {
 	Matrix2x3 r;
 
@@ -362,7 +362,7 @@ inline optional<Matrix2x3> _Inverse2x3Matrix(const Matrix2x3 &m)
 	return r;
 }
 
-inline optional<Matrix3x3> _Inverse3x3Matrix(const Matrix3x3 &m)
+static inline optional<Matrix3x3> _Inverse3x3Matrix(const Matrix3x3 &m)
 {
 	Matrix3x3 r;
 
@@ -391,7 +391,7 @@ inline optional<Matrix3x3> _Inverse3x3Matrix(const Matrix3x3 &m)
 	return r;
 }
 
-template <typename MatrixType> inline MatrixType _CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
+template <typename MatrixType> static inline MatrixType _CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
 {
     MatrixType r;
     angle = -angle;
@@ -416,7 +416,7 @@ template <typename MatrixType> inline MatrixType _CreateRotationAroundAxis(const
     return r;
 }
 
-template <typename T> T _CreateOrthographicMarix(const Vector3 &min, const Vector3 &max, ProjectionTarget target)
+template <typename T> static inline T _CreateOrthographicMarix(const Vector3 &min, const Vector3 &max, ProjectionTarget target)
 {
 	T m;
     m[0][0] = 2.0f / (max.x - min.x);
@@ -440,6 +440,71 @@ template <typename T> T _CreateOrthographicMarix(const Vector3 &min, const Vecto
     }
 	_ValidateValues(min, max, m);
     return m;
+}
+
+template <typename T, typename E> static inline void _DecomposeMatrix(const T &m, E *rotation, Vector3 *translation, Vector3 *scale)
+{
+	_ValidateValues(m);
+
+	f32 sx = m.GetRow(0).Length();
+	f32 sy = m.GetRow(1).Length();
+	f32 sz = m.GetRow(2).Length();
+
+	if (rotation)
+	{
+		f32 rsx = 1.0f / sx;
+		f32 rsy = 1.0f / sy;
+		f32 rsz = 1.0f / sz;
+		Matrix3x3 rm = Matrix3x3(
+			m.GetRow(0).ToVector3() * rsx,
+			m.GetRow(1).ToVector3() * rsy,
+			m.GetRow(2).ToVector3() * rsz);
+
+		if constexpr (std::is_same_v<E, Matrix3x3>)
+		{
+			*rotation = rm;
+		}
+		else if constexpr (std::is_same_v<E, Vector3>)
+		{
+			float singy = sqrt(rm[0][0] * rm[0][0] + rm[0][1] * rm[0][1]);
+
+			bool singular = singy < 0.0001f;
+
+			f32 x, y, z;
+			if (!singular)
+			{
+				x = atan2(rm[1][2], rm[2][2]);
+				y = atan2(-rm[0][2], singy);
+				z = atan2(rm[0][1], rm[0][0]);
+			}
+			else
+			{
+				x = atan2(-rm[2][1], rm[1][1]);
+				y = atan2(-rm[0][2], singy);
+				z = 0;
+			}
+
+			*rotation = {x, y, z};
+		}
+		else
+		{
+			*rotation = Quaternion::FromMatrix(rm);
+		}
+
+		_ValidateValues(*rotation);
+	}
+
+	if (translation)
+	{
+		*translation = m.GetRow(3).ToVector3();
+		_ValidateValues(*translation);
+	}
+
+	if (scale)
+	{
+		*scale = {sx, sy, sz};
+		_ValidateValues(*scale);
+	}
 }
 
 /////////////
@@ -561,6 +626,21 @@ f32 Matrix4x3::Determinant() const
 	return +m[0][0] * fac0 + m[0][1] * fac1 + m[0][2] * fac2;
 }
 
+void Matrix4x3::Decompose(Matrix3x3 *rotation, Vector3 *translation, Vector3 *scale) const
+{
+	_DecomposeMatrix(*this, rotation, translation, scale);
+}
+
+void Matrix4x3::Decompose(Vector3 *rotation, Vector3 *translation, Vector3 *scale) const
+{
+	_DecomposeMatrix(*this, rotation, translation, scale);
+}
+
+void Matrix4x3::Decompose(Quaternion *rotation, Vector3 *translation, Vector3 *scale) const
+{
+	_DecomposeMatrix(*this, rotation, translation, scale);
+}
+
 Matrix4x4 Matrix4x3::operator * (const Matrix4x4 &other) const
 {
     Matrix4x4 r;
@@ -673,6 +753,21 @@ f32 Matrix4x4::Determinant() const
 	f32 fac3 = -(m[1][0] * SubFactor02 - m[1][1] * SubFactor04 + m[1][2] * SubFactor05);
 
 	return +m[0][0] * fac0 + m[0][1] * fac1 + m[0][2] * fac2 + m[0][3] * fac3;
+}
+
+void Matrix4x4::Decompose(Matrix3x3 *rotation, Vector3 *translation, Vector3 *scale) const
+{
+	_DecomposeMatrix(*this, rotation, translation, scale);
+}
+
+void Matrix4x4::Decompose(Vector3 *rotation, Vector3 *translation, Vector3 *scale) const
+{
+	_DecomposeMatrix(*this, rotation, translation, scale);
+}
+
+void Matrix4x4::Decompose(Quaternion *rotation, Vector3 *translation, Vector3 *scale) const
+{
+	_DecomposeMatrix(*this, rotation, translation, scale);
 }
 
 Matrix4x4 Matrix4x4::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
@@ -801,6 +896,21 @@ f32 Matrix3x3::Determinant() const
 	return +m[0][0] * fac0 + m[0][1] * fac1 + m[0][2] * fac2;
 }
 
+void Matrix3x3::Decompose(Matrix3x3 *rotation, Vector3 *scale) const
+{
+	_DecomposeMatrix(*this, rotation, nullptr, scale);
+}
+
+void Matrix3x3::Decompose(Vector3 *rotation, Vector3 *scale) const
+{
+	_DecomposeMatrix(*this, rotation, nullptr, scale);
+}
+
+void Matrix3x3::Decompose(Quaternion *rotation, Vector3 *scale) const
+{
+	_DecomposeMatrix(*this, rotation, nullptr, scale);
+}
+
 Matrix3x3 Matrix3x3::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
 {
     return _CreateRotationAroundAxis<Matrix3x3>(axis, angle);
@@ -836,71 +946,93 @@ Quaternion Quaternion::FromEuler(const Vector3 &source)
     f32 y = cx * sy * cz + sx * cy * sz;
     f32 z = cx * cy * sz - sx * sy * cz;
 
-    return {x, y, z, w};
+    Quaternion result = {x, y, z, w};
+	_ValidateValues(source, result);
+	return result;
+}
+
+Quaternion Quaternion::FromMatrix(const Matrix3x3 &matrix)
+{
+#ifdef DEBUG
+	Vector3 debugScale;
+	matrix.Decompose((Vector3 *)nullptr, &debugScale);
+	ASSUME(debugScale.EqualsWithEpsilon({1, 1, 1}));
+#endif
+
+	Quaternion q;
+
+	const f32 trace = matrix[0][0] + matrix[1][1] + matrix[2][2];
+
+	if (trace > 0.0f)
+	{
+		f32 s = sqrt(trace + 1.0f);
+		q.w = s * 0.5f;
+		s = 0.5f / s;
+
+		q.x = (matrix[1][2] - matrix[2][1]) * s;
+		q.y = (matrix[2][0] - matrix[0][2]) * s;
+		q.z = (matrix[0][1] - matrix[1][0]) * s;
+	}
+	else
+	{
+		static constexpr uiw nxt[3] = { 1, 2, 0 };
+		uiw i = 0;
+
+		if (matrix[1][1] > matrix[0][0])
+		{
+			i = 1;
+		}
+		if (matrix[2][2] > matrix[i][i])
+		{
+			i = 2;
+		}
+
+		uiw j = nxt[i];
+		uiw k = nxt[j];
+
+		f32 s = sqrt((matrix[i][i] - (matrix[j][j] + matrix[k][k])) + 1.0f);
+
+		q[i] = s * 0.5f;
+		s = 0.5f / s;
+
+		q[3] = (matrix[j][k] - matrix[k][j]) * s;
+		q[j] = (matrix[i][j] + matrix[j][i]) * s;
+		q[k] = (matrix[i][k] + matrix[k][i]) * s;
+	}
+
+	_ValidateValues(matrix, q);
+	return q;
+}
+
+Quaternion Quaternion::FromAxis(const Vector3 &axis, f32 angleRad)
+{
+	ASSUME(axis.IsNormalized());
+
+	const f32 halfAngle = 0.5f * angleRad;
+	const f32 s = sin(halfAngle);
+
+	Quaternion result =
+	{
+		s * axis.x,
+		s * axis.y,
+		s * axis.z,
+		cos(halfAngle)
+	};
+
+	_ValidateValues(axis, angleRad, result);
+	return result;
 }
 
 Quaternion::Quaternion(f32 x, f32 y, f32 z, f32 w) : x(x), y(y), z(z), w(w)
-{}
-
-// TODO: make sure that the rotation matrix is unit length (doesn't contain scale)
-Quaternion::Quaternion(const Matrix3x3 &matrix)
 {
-    const f32 trace = matrix[0][0] + matrix[1][1] + matrix[2][2];
-
-    if (trace > 0.0f)
-    {
-        f32 s = sqrt(trace + 1.0f);
-        w = s * 0.5f;
-        s = 0.5f / s;
-
-        x = (matrix[1][2] - matrix[2][1]) * s;
-        y = (matrix[2][0] - matrix[0][2]) * s;
-        z = (matrix[0][1] - matrix[1][0]) * s;
-    }
-    else
-    {
-        static constexpr uiw nxt[3] = {1, 2, 0};
-        uiw i = 0;
-
-        if (matrix[1][1] > matrix[0][0])
-        {
-            i = 1;
-        }
-        if (matrix[2][2] > matrix[i][i])
-        {
-            i = 2;
-        }
-
-        uiw j = nxt[i];
-        uiw k = nxt[j];
-        
-        f32 s = sqrt((matrix[i][i] - (matrix[j][j] + matrix[k][k])) + 1.0f);
-
-        operator[](i) = s * 0.5f;
-        s = 0.5f / s;
-
-        operator[](3) = (matrix[j][k] - matrix[k][j]) * s;
-        operator[](j) = (matrix[i][j] + matrix[j][i]) * s;
-        operator[](k) = (matrix[i][k] + matrix[k][i]) * s;
-    }
-}
-
-Quaternion::Quaternion(const Vector3 &axis, f32 angleRad)
-{
-    ASSUME(axis.IsNormalized());
-
-    const f32 halfAngle = 0.5f * angleRad;
-    const f32 s = sin(halfAngle);
-
-    x = s * axis.x;
-    y = s * axis.y;
-    z = s * axis.z;
-    w = cos(halfAngle);
+	_ValidateValues(*this);
 }
 
 Quaternion Quaternion::operator + (const Quaternion &other) const
 {
-    return {x + other.x, y + other.y, z + other.z, w + other.w};
+	Quaternion added = {x + other.x, y + other.y, z + other.z, w + other.w};
+	_ValidateValues(*this, other, added);
+	return added;
 }
 
 Quaternion &Quaternion::operator += (const Quaternion &other)
@@ -909,12 +1041,15 @@ Quaternion &Quaternion::operator += (const Quaternion &other)
     y += other.y;
     z += other.z;
     w += other.w;
+	_ValidateValues(*this, other);
     return *this;
 }
 
 Quaternion Quaternion::operator - (const Quaternion &other) const
 {
-    return {x - other.x, y - other.y, z - other.z, w - other.w};
+	Quaternion subbed = {x - other.x, y - other.y, z - other.z, w - other.w};
+	_ValidateValues(*this, other, subbed);
+	return subbed;
 }
 
 Quaternion &Quaternion::operator -= (const Quaternion &other)
@@ -923,34 +1058,37 @@ Quaternion &Quaternion::operator -= (const Quaternion &other)
     y -= other.y;
     z -= other.z;
     w -= other.w;
+	_ValidateValues(*this, other);
     return *this;
+}
+
+static inline Quaternion QuaternionMul(const Quaternion &left, const Quaternion &right)
+{
+	_ValidateValues(left, right);
+	f32 x = right.w * left.x + right.x * left.w + right.y * left.z - right.z * left.y;
+	f32 y = right.w * left.y + right.y * left.w + right.z * left.x - right.x * left.z;
+	f32 z = right.w * left.z + right.z * left.w + right.x * left.y - right.y * left.x;
+	f32 w = right.w * left.w - right.x * left.x - right.y * left.y - right.z * left.z;
+	_ValidateValues(x, y, z, w);
+	return {x, y, z, w};
 }
 
 Quaternion Quaternion::operator * (const Quaternion &other) const
 {
-    f32 nx = w * other.x + x * other.w + y * other.z - z * other.y;
-    f32 ny = w * other.y + y * other.w + z * other.x - x * other.z;
-    f32 nz = w * other.z + z * other.w + x * other.y - y * other.x;
-    f32 nw = w * other.w - x * other.x - y * other.y - z * other.z;
-    return {nx, ny, nz, nw};
+    return QuaternionMul(*this, other);
 }
 
 Quaternion &Quaternion::operator *= (const Quaternion &other)
 {
-    f32 nx = w * other.x + x * other.w + y * other.z - z * other.y;
-    f32 ny = w * other.y + y * other.w + z * other.x - x * other.z;
-    f32 nz = w * other.z + z * other.w + x * other.y - y * other.x;
-    f32 nw = w * other.w - x * other.x - y * other.y - z * other.z;
-    x = nx;
-    y = ny;
-    z = nz;
-    w = nw;
+	*this = QuaternionMul(*this, other);
     return *this;
 }
 
 Quaternion Quaternion::operator * (f32 scale) const
 {
-    return {x * scale, y * scale, z * scale, w * scale};
+    Quaternion scaled = {x * scale, y * scale, z * scale, w * scale};
+	_ValidateValues(*this, scale, scaled);
+	return scaled;
 }
 
 Quaternion &Quaternion::operator *= (f32 scale)
@@ -959,13 +1097,16 @@ Quaternion &Quaternion::operator *= (f32 scale)
     y *= scale;
     z *= scale;
     w *= scale;
+	_ValidateValues(*this, scale);
     return *this;
 }
 
 Quaternion Quaternion::operator / (f32 scale) const
 {
     f32 r = 1.0f / scale;
-    return {x * r, y * r, z * r, w * r};
+    Quaternion scaled = {x * r, y * r, z * r, w * r};
+	_ValidateValues(*this, scale, scaled);
+	return *this;
 }
 
 Quaternion &Quaternion::operator /= (f32 scale)
@@ -975,34 +1116,33 @@ Quaternion &Quaternion::operator /= (f32 scale)
     y *= r;
     z *= r;
     w *= r;
+	_ValidateValues(*this, scale);
     return *this;
 }
 
 f32 &Quaternion::operator[](uiw index)
 {
-    if (index == 0) return x;
-    if (index == 1) return y;
-    if (index == 2) return z;
-    ASSUME(index == 3);
-    return w;
+	ASSUME(index < 4);
+	_ValidateValues(*this);
+	return (&x)[index];
 }
 
 const f32 &Quaternion::operator[](uiw index) const
 {
-    if (index == 0) return x;
-    if (index == 1) return y;
-    if (index == 2) return z;
-    ASSUME(index == 3);
-    return w;
+	ASSUME(index < 4);
+	_ValidateValues(*this);
+	return (&x)[index];
 }
 
 std::array<f32, 4> &Quaternion::Data()
 {
+	_ValidateValues(*this);
     return *(std::array<f32, 4> *)&x;
 }
 
 const std::array<f32, 4> &Quaternion::Data() const
 {
+	_ValidateValues(*this);
     return *(std::array<f32, 4> *)&x;
 }
 
@@ -1012,31 +1152,47 @@ Vector3 Quaternion::RotateVector(const Vector3 &source) const
     Vector3 v = source;
     Vector3 uv = u.GetCrossed(v);
     Vector3 uuv = u.GetCrossed(uv);
-    return v + ((uv * w) + uuv) * 2.0f;
+    Vector3 rotated = v + ((uv * w) + uuv) * 2.0f;
+	_ValidateValues(*this, source, rotated);
+	return rotated;
 }
 
 Quaternion &Quaternion::Normalize()
 {
-    f32 lengthSquare = x * x + y * y + z * z + w * w;
-    f32 r = ApproxMath::RSqrt<ApproxMath::Precision::High>(lengthSquare);
+    f32 r = ApproxMath::RSqrt<ApproxMath::Precision::High>(LengthSquare());
     x *= r;
     y *= r;
     z *= r;
     w *= r;
+	_ValidateValues(*this);
     return *this;
 }
 
 Quaternion Quaternion::GetNormalized() const
 {
-    f32 lengthSquare = x * x + y * y + z * z + w * w;
-    f32 r = ApproxMath::RSqrt<ApproxMath::Precision::High>(lengthSquare);
-    return {x * r, y * r, z * r, w * r};
+    f32 r = ApproxMath::RSqrt<ApproxMath::Precision::High>(LengthSquare());
+    Quaternion normalized = {x * r, y * r, z * r, w * r};
+	_ValidateValues(*this, normalized);
+	return normalized;
 }
 
-bool Quaternion::IsNormalized(f32 epsilon) const
+bool Quaternion::IsNormalized() const
 {
-    f32 length = sqrt(x * x + y * y + z * z + w * w);
-    return (length >= 1.0f - epsilon) && (length <= 1.0f + epsilon);
+	return StdLib::EqualsWithEpsilon(LengthSquare(), 1.0f);
+}
+
+f32 Quaternion::Length() const
+{
+	f32 len = sqrt(LengthSquare());
+	_ValidateValues(*this, len);
+	return len;
+}
+
+f32 Quaternion::LengthSquare() const
+{
+	f32 len = x * x + y * y + z * z + w * w;
+	_ValidateValues(*this, len);
+	return len;
 }
 
 Quaternion &Quaternion::Inverse()
@@ -1044,23 +1200,14 @@ Quaternion &Quaternion::Inverse()
     x = -x;
     y = -y;
     z = -z;
+	_ValidateValues(*this);
     return *this;
 }
 
 Quaternion Quaternion::GetInversed() const
 {
+	_ValidateValues(*this);
     return {-x, -y, -z, w};
-}
-
-f32 Quaternion::GetAngle() const
-{
-    return 2.0f * acos(w);
-}
-
-Vector3 Quaternion::GetRotationAxis() const
-{
-    f32 r = ApproxMath::RSqrt<ApproxMath::Precision::High>(std::max(1.0f - (w * w), DefaultF32Epsilon));
-    return {x * r, y * r, z * r};
 }
 
 Vector3 Quaternion::ToEuler() const
@@ -1097,7 +1244,7 @@ Vector3 Quaternion::ToEuler() const
     ASSUME(eulerY < MathPiDouble<f32>() + DefaultF32Epsilon);
     ASSUME(eulerZ < MathPiDouble<f32>() + DefaultF32Epsilon);
 
-    return {eulerX, eulerY, eulerZ};
+    Vector3 euler = {eulerX, eulerY, eulerZ};
         
     // based on https://math.stackexchange.com/questions/1477926/quaternion-to-euler-with-some-properties
     //const f32 sqx = x * x;
@@ -1134,7 +1281,7 @@ Vector3 Quaternion::ToEuler() const
     //ASSUME(eulerY < MathPiDouble<f32>() + DefaultF32Epsilon);
     //ASSUME(eulerZ < MathPiDouble<f32>() + DefaultF32Epsilon);
 
-    //return {eulerX, eulerY, eulerZ};
+	// Vector3 euler = {eulerX, eulerY, eulerZ};
 
     // based on https://www.gamedev.net/forums/topic/166424-quaternion-to-euler/
     //f32 sqw = w * w;
@@ -1154,12 +1301,28 @@ Vector3 Quaternion::ToEuler() const
     //ASSUME(eulerY < MathPiDouble<f32>() + DefaultF32Epsilon);
     //ASSUME(eulerZ < MathPiDouble<f32>() + DefaultF32Epsilon);
 
-    //return {rotxrad, rotyrad, rotzrad};
+	//Vector3 euler = {rotxrad, rotyrad, rotzrad};
+
+	_ValidateValues(*this, euler);
+	return euler;
 }
 
 std::tuple<Vector3, f32> Quaternion::ToAxisAndAngle() const
 {
-    return {GetRotationAxis(), GetAngle()};
+	ASSUME(IsNormalized());
+	Vector3 axis;
+	f32 r = ApproxMath::RSqrt<ApproxMath::Precision::High>(1.0f - (w * w));
+	if (r < 0.0001f)
+	{
+		axis = {x, y, z};
+	}
+	else
+	{
+		axis = {x * r, y * r, z * r};
+	}
+	f32 angle = 2.0f * acos(w);
+	_ValidateValues(*this, axis, angle);
+	return {axis, angle};
 }
 
 Matrix3x3 Quaternion::ToMatrix() const
@@ -1194,26 +1357,12 @@ Matrix3x3 Quaternion::ToMatrix() const
     result[2][1] = doubleYZ - doubleWX;
     result[2][2] = 1.0f - doubleSQX - doubleSQY;
 
+	_ValidateValues(*this, result);
     return result;
 }
 
 bool Quaternion::EqualsWithEpsilon(const Quaternion &other, f32 epsilon) const
 {
-    if (abs(x - other.x) > epsilon)
-    {
-        return false;
-    }
-    if (abs(y - other.y) > epsilon)
-    {
-        return false;
-    }
-    if (abs(z - other.z) > epsilon)
-    {
-        return false;
-    }
-    if (abs(w - other.w) > epsilon)
-    {
-        return false;
-    }
-    return true;
+	_ValidateValues(*this, other, epsilon);
+	return StdLib::EqualsWithEpsilon({x, y, z, w}, {other.x, other.y, other.z, other.w}, epsilon);
 }

@@ -39,6 +39,10 @@ namespace StdLib
 						VALIDATE_VALUES_ARRAY(&v.x, t::dim); \
 					} \
 				} \
+				else if constexpr (std::is_same_v<t, Quaternion>) \
+				{ \
+					VALIDATE_VALUES_ARRAY(&v.x, 4); \
+				} \
                 else if constexpr (__IsMatrix(t())) \
                 { \
                     VALIDATE_VALUES_ARRAY(v.elements[0].data(), t::numElements); \
@@ -66,6 +70,14 @@ namespace StdLib
 		VALIDATE_VALUE(v0);
 		VALIDATE_VALUE(v1);
 		VALIDATE_VALUE(v2);
+	}
+
+	template <typename T0, typename T1, typename T2, typename T3> constexpr void _ValidateValues(const T0 &v0, const T1 &v1, const T2 &v2, const T3 &v3)
+	{
+		VALIDATE_VALUE(v0);
+		VALIDATE_VALUE(v1);
+		VALIDATE_VALUE(v2);
+		VALIDATE_VALUE(v3);
 	}
 
 	#undef VALIDATE_FP_VALUE
