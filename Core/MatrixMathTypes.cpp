@@ -186,6 +186,8 @@ template <typename MatrixType, bool isAllowTranslation> static inline MatrixType
 	return result;
 }
 
+// Inverse code is based on GLM
+
 static inline optional<Matrix4x4> _Inverse4x4Matrix(const Matrix4x4 &m)
 {
     Matrix4x4 r;
