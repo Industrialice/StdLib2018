@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreHeader.hpp"
+#include "MathFunctions.hpp"
 
 namespace StdLib::ApproxMath
 {
@@ -190,5 +191,46 @@ namespace StdLib::ApproxMath
 	template <Precision precision> [[nodiscard]] inline f64 Qurt(f64 input)
 	{
 		return pow(input, 1.0 / 3.0);
+	}
+
+	template <Precision precision> [[nodiscard]] inline f32 Cos(f32 value)
+	{
+		// based on GLM, relative to std::cos precision on range 
+		// [-0.5pi-0.00001;2.5pi+0.00001] is [-0.000007;0.000007]
+
+		ASSUME(value >= -MathPiHalf() - 0.00001f && value <= MathPiDouble() + MathPiHalf() + 0.00001f);
+
+		auto cos_52s = [](f32 value) -> f32
+		{
+			f32 const xx(value * value);
+			return (0.9999932946f + xx * (-0.4999124376f + xx * (0.0414877472f + xx * -0.0012712095f)));
+		};
+
+		if (value < MathPiHalf())
+			return cos_52s(value);
+		if (value < MathPi())
+			return -cos_52s(MathPi() - value);
+		if (value < (3.0f * MathPiHalf()))
+			return -cos_52s(value - MathPi());
+
+		return cos_52s(MathPiDouble() - value);
+	}
+
+	template <Precision precision> [[nodiscard]] inline f64 Cos(f64 value)
+	{
+		return std::cos(value);
+	}
+
+	template <Precision precision> [[nodiscard]] inline f32 Sin(f32 value)
+	{
+		// based on GLM, relative to std::sin precision on range 
+		// [-0.00001;3pi+0.00001] is [-0.000007;0.000007]
+		ASSUME(value >= -0.00001f && value <= MathPiDouble() + MathPi() + 0.00001f);
+		return Cos<precision>((MathPiDouble() + MathPiHalf()) - value);
+	}
+
+	template <Precision precision> [[nodiscard]] inline f64 Sin(f64 value)
+	{
+		return std::sin(value);
 	}
 }

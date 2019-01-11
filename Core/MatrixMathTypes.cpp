@@ -821,7 +821,7 @@ Matrix4x4 Matrix4x4::CreateRTS(const optional<Quaternion> &rotation, const optio
 
 Matrix4x4 Matrix4x4::CreatePerspectiveProjection(f32 horizontalFOVRad, f32 aspectRatio, f32 nearPlane, f32 farPlane, ProjectionTarget target)
 {
-	ASSUME(horizontalFOVRad > DefaultF32Epsilon && horizontalFOVRad < MathPi<f32>() && aspectRatio > DefaultF32Epsilon && nearPlane > DefaultF32Epsilon && farPlane > nearPlane);
+	ASSUME(horizontalFOVRad > DefaultF32Epsilon && horizontalFOVRad < MathPi() && aspectRatio > DefaultF32Epsilon && nearPlane > DefaultF32Epsilon && farPlane > nearPlane);
 
     Matrix4x4 r;
 
@@ -1279,7 +1279,7 @@ Vector3 Quaternion::ToEuler() const
     f32 sinp = 2.0f * (w * y - z * x);
     if (abs(sinp) >= 1)
     {
-        eulerY = copysign(MathPiHalf<f32>(), sinp); // use 90 degrees if out of range
+        eulerY = copysign(MathPiHalf(), sinp); // use 90 degrees if out of range
     }
     else
     {
@@ -1290,13 +1290,13 @@ Vector3 Quaternion::ToEuler() const
     f32 cosy_cosp = 1.0f - 2.0f * (sqy + sqz);
     f32 eulerZ = atan2(siny_cosp, cosy_cosp);
 
-    if (eulerX < 0) eulerX += MathPiDouble<f32>();
-    if (eulerY < 0) eulerY += MathPiDouble<f32>();
-    if (eulerZ < 0) eulerZ += MathPiDouble<f32>();
+    if (eulerX < 0) eulerX += MathPiDouble();
+    if (eulerY < 0) eulerY += MathPiDouble();
+    if (eulerZ < 0) eulerZ += MathPiDouble();
 
-    ASSUME(eulerX < MathPiDouble<f32>() + DefaultF32Epsilon);
-    ASSUME(eulerY < MathPiDouble<f32>() + DefaultF32Epsilon);
-    ASSUME(eulerZ < MathPiDouble<f32>() + DefaultF32Epsilon);
+    ASSUME(eulerX < MathPiDouble() + DefaultF32Epsilon);
+    ASSUME(eulerY < MathPiDouble() + DefaultF32Epsilon);
+    ASSUME(eulerZ < MathPiDouble() + DefaultF32Epsilon);
 
     Vector3 euler = {eulerX, eulerY, eulerZ};
         
@@ -1311,13 +1311,13 @@ Vector3 Quaternion::ToEuler() const
     //if (singularity > 0.99995f)
     //{
     //    eulerX = atan2(x, w);
-    //    eulerY = -MathPiHalf<f32>();
+    //    eulerY = -MathPiHalf();
     //    eulerZ = atan2(z, w);
     //}
     //else if (singularity < -0.99995f)
     //{
     //    eulerX = atan2(x, w);
-    //    eulerY = MathPiHalf<f32>();
+    //    eulerY = MathPiHalf();
     //    eulerZ = atan2(z, w);
     //}
     //else
@@ -1327,13 +1327,13 @@ Vector3 Quaternion::ToEuler() const
     //    eulerZ = atan2(y * x + z * w, 0.5f - sqy - sqz);
     //}
 
-    //if (eulerX < 0) eulerX += MathPiDouble<f32>();
-    //if (eulerY < 0) eulerY += MathPiDouble<f32>();
-    //if (eulerZ < 0) eulerZ += MathPiDouble<f32>();
+    //if (eulerX < 0) eulerX += MathPiDouble();
+    //if (eulerY < 0) eulerY += MathPiDouble();
+    //if (eulerZ < 0) eulerZ += MathPiDouble();
 
-    //ASSUME(eulerX < MathPiDouble<f32>() + DefaultF32Epsilon);
-    //ASSUME(eulerY < MathPiDouble<f32>() + DefaultF32Epsilon);
-    //ASSUME(eulerZ < MathPiDouble<f32>() + DefaultF32Epsilon);
+    //ASSUME(eulerX < MathPiDouble() + DefaultF32Epsilon);
+    //ASSUME(eulerY < MathPiDouble() + DefaultF32Epsilon);
+    //ASSUME(eulerZ < MathPiDouble() + DefaultF32Epsilon);
 
 	// Vector3 euler = {eulerX, eulerY, eulerZ};
 
@@ -1347,13 +1347,13 @@ Vector3 Quaternion::ToEuler() const
     //f32 rotyrad = asin(-2.0f * (x * z - y * w));
     //f32 rotzrad = atan2(2.0f * (x * y + z * w), (sqx - sqy - sqz + sqw));
 
-    //if (eulerX < 0) eulerX += MathPiDouble<f32>();
-    //if (eulerY < 0) eulerY += MathPiDouble<f32>();
-    //if (eulerZ < 0) eulerZ += MathPiDouble<f32>();
+    //if (eulerX < 0) eulerX += MathPiDouble();
+    //if (eulerY < 0) eulerY += MathPiDouble();
+    //if (eulerZ < 0) eulerZ += MathPiDouble();
 
-    //ASSUME(eulerX < MathPiDouble<f32>() + DefaultF32Epsilon);
-    //ASSUME(eulerY < MathPiDouble<f32>() + DefaultF32Epsilon);
-    //ASSUME(eulerZ < MathPiDouble<f32>() + DefaultF32Epsilon);
+    //ASSUME(eulerX < MathPiDouble() + DefaultF32Epsilon);
+    //ASSUME(eulerY < MathPiDouble() + DefaultF32Epsilon);
+    //ASSUME(eulerZ < MathPiDouble() + DefaultF32Epsilon);
 
 	//Vector3 euler = {rotxrad, rotyrad, rotzrad};
 

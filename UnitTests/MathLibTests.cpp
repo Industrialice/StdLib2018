@@ -1,14 +1,21 @@
 #include "_PreHeader.hpp"
 #include <MathFunctions.hpp>
+#include <ApproxMath.hpp>
 
 using namespace StdLib;
 using namespace Funcs;
 
 void XNARef();
 
+#define BENCHMARK_TESTS
+
 namespace
 {
+#ifdef BENCHMARK_TESTS
+	static constexpr ui32 TestIterations = 1000;
+#else
 	static constexpr ui32 TestIterations = 10;
+#endif
 }
 
 template <uiw index, typename T> static typename T::ScalarType Get(T vec)
@@ -811,102 +818,108 @@ static void MatrixTests()
     Matrix4x4Tests();
 }
 
-// relative to std::cos precision on range [-0.00001;2pi+0.00001]
-// is [-0.001091;0.001091]
-static inline f32 approxCos(f32 x) 
-{
-	ASSUME(x >= -MathPiDouble<f32>() && x <= MathPiDouble<f32>());
-	x += 1.57079632f;
-	if (x > 3.14159265f)
-		x -= 6.28318531f;
-	f32 cos = 1.27323954f * x;
-	f32 addition = 0.405284735f * x * x;
-	if (x >= 0) addition = -addition;
-	cos += addition;
-	f32 mul = cos * cos;
-	if (cos < 0) mul = -mul;
-	cos = 0.225f * (mul - cos) + cos;
-	return cos;
-}
-
-// relative to std::cos precision on range [-0.00001;2pi+0.00001]
-// is [-0.000007;0.000007]
-static inline f32 approxCosGLM(f32 x)
-{
-	x = abs(fmod(x, MathPiDouble<f32>()));
-
-	auto cos_52s = [](f32 x) -> f32
-	{
-		f32 const xx(x * x);
-		return (0.9999932946f + xx * (-0.4999124376f + xx * (0.0414877472f + xx * -0.0012712095f)));
-	};
-
-	if (x < MathPiHalf<f32>())
-		return cos_52s(x);
-	if (x < MathPi<f32>())
-		return -cos_52s(MathPi<f32>() - x);
-	if (x < (3.0f * MathPiHalf<f32>()))
-		return -cos_52s(x - MathPi<f32>());
-
-	return cos_52s(MathPiDouble<f32>() - x);
-}
-
 static void CosTests()
 {
 	f32 c0Min = 0, c0Max = 0;
-	f32 c2Min = 0, c2Max = 0;
+	f32 c0MinValue = 0, c0MaxValue = 0;
+	ui32 counter = 0;
 
+	union { f32 value; ui32 intRep; };
+	value = -MathPiHalf() - DefaultF32Epsilon;
+
+	auto repeat = [&counter, &c0Min, &c0Max, &c0MinValue, &c0MaxValue](f32 value) mutable
+	{
+		f32 ref = std::cos(value);
+		f32 c0 = ApproxMath::Cos<ApproxMath::Precision::High>(value);
+		if (c0Min > c0 - ref)
+		{
+			c0Min = c0 - ref;
+			c0MinValue = value;
+		}
+		if (c0Max < c0 - ref)
+		{
+			c0Max = c0 - ref;
+			c0MaxValue = value;
+		}
+
+		++counter;
+		if (counter >= 1'000'000)
+		{
+			PRINTLOG("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b                        \b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%.14f", value);
+			counter = 0;
+		}
+	};
+
+	for (; value < 0; --intRep)
+	{
+		repeat(value);
+	}
+	value = 0;
+	for (; value < MathPiDouble() + MathPiHalf() + DefaultF32Epsilon; ++intRep)
+	{
+		repeat(value);
+	}
+
+	PRINTLOG("\napprox cos 0 min %f at %f max %f at %f\n", c0Min, c0MinValue, c0Max, c0MaxValue);
+}
+
+static void SinTests()
+{
+	f32 c0Min = 0, c0Max = 0;
+	f32 c0MinValue = 0, c0MaxValue = 0;
+	ui32 counter = 0;
 
 	union { f32 value; ui32 intRep; };
 	value = -DefaultF32Epsilon;
 
-	for (; value < 0; --intRep)
-	{
-		f32 ref = cos(value);
-		f32 c0 = approxCos(value);
-		c0Min = std::min(c0Min, c0 - ref);
-		c0Max = std::max(c0Max, c0 - ref);
-		f32 c2 = approxCosGLM(value);
-		c2Min = std::min(c2Min, c2 - ref);
-		c2Max = std::max(c2Max, c2 - ref);
-	}
+	constexpr ui32 step = 1;
 
-	ui32 counter = 0;
-	value = 0;
-	for (; value < MathPiDouble<f32>() + DefaultF32Epsilon; ++intRep)
+	auto repeat = [&counter, &c0Min, &c0Max, &c0MinValue, &c0MaxValue](f32 value) mutable
 	{
-		f32 ref = cos(value);
-		f32 c0 = approxCos(value);
-		c0Min = std::min(c0Min, c0 - ref);
-		c0Max = std::max(c0Max, c0 - ref);
-		f32 c2 = approxCosGLM(value);
-		c2Min = std::min(c2Min, c2 - ref);
-		c2Max = std::max(c2Max, c2 - ref);
+		f32 ref = std::sin(value);
+		f32 c0 = ApproxMath::Sin<ApproxMath::Precision::High>(value);
+		if (c0Min > c0 - ref)
+		{
+			c0Min = c0 - ref;
+			c0MinValue = value;
+		}
+		if (c0Max < c0 - ref)
+		{
+			c0Max = c0 - ref;
+			c0MaxValue = value;
+		}
 
 		++counter;
-		if (counter >= 50000)
+		if (counter >= 1'000'000)
 		{
-			PRINTLOG("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b                        \b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%f", value);
+			PRINTLOG("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b                        \b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%.14f", value);
 			counter = 0;
 		}
+	};
+
+	for (; value < 0; intRep -= step)
+	{
+		repeat(value);
+	}
+	value = 0;
+	for (; value < MathPiDouble() + MathPi() + DefaultF32Epsilon; intRep += step)
+	{
+		repeat(value);
 	}
 
-	PRINTLOG("\napprox cos 0 min %f max %f\n", c0Min, c0Max);
-	PRINTLOG("approx cos 2 min %f max %f\n", c2Min, c2Max);
+	PRINTLOG("\napprox sin 0 min %f at %f max %f at %f\n", c0Min, c0MinValue, c0Max, c0MaxValue);
 }
 
-static f32 BenchmarkTable[16384];
-
-template <auto CosFunc> static inline void CosBenchmarksHelper(const char *name)
+template <typename TrigFuncType, TrigFuncType TrigFunc> static inline void TrigBenchmarksHelper(const char *name)
 {
-	static f32 resultTable[CountOf(BenchmarkTable)];
+	static f32 resultTable[256];
 	
-	const f32 *table = BenchmarkTable;
 	f32 *target = resultTable;
 
 	TimeMoment start = TimeMoment::Now();
 	TimeDifference64 diff = 0;
 	ui32 counted = 0;
+	f32 fvalue = 0.00001f;
 	for (;; ++counted)
 	{
 		if ((counted & 0xFFFF) == 0)
@@ -919,9 +932,14 @@ template <auto CosFunc> static inline void CosBenchmarksHelper(const char *name)
 			}
 		}
 
-		ui32 index = counted % CountOf(BenchmarkTable);
-		f32 value = table[index];
-		resultTable[index] = CosFunc(value);
+
+		resultTable[counted % CountOf(resultTable)] = TrigFunc(fvalue);
+
+		fvalue += (counted & 15) * 0.2f;
+		if (fvalue >= MathPiDouble())
+		{
+			fvalue = 0.00001f;
+		}
 	}
 
 	PRINTLOG("%s performance is %u/s\n", name, (ui32)(counted / diff.ToSeconds()));
@@ -929,31 +947,24 @@ template <auto CosFunc> static inline void CosBenchmarksHelper(const char *name)
 
 static void CosBenchmarks()
 {
-	for (ui32 index = 0; index < CountOf(BenchmarkTable); ++index)
-	{
-		f64 value = rand() / (f64)RAND_MAX;
-		value *= MathPiDouble<f64>();
-		BenchmarkTable[index] = (f32)value;
-	}
+	TrigBenchmarksHelper<decltype(std::cosf), std::cosf>(" std::cos");
+	TrigBenchmarksHelper<f32 (*)(f32), ApproxMath::Cos<ApproxMath::Precision::High>>("approxCos");
+}
 
-	volatile ui32 counter = 0;
-	for (ui32 index = 1; index < 100000; ++index)
-	{
-		counter /= index;
-		counter *= index;
-	}
-
-	CosBenchmarksHelper<std::cosf>   ("    std::cos");
-	CosBenchmarksHelper<approxCos>   ("   approxCos");
-	CosBenchmarksHelper<approxCosGLM>("approxCosGLM");
+static void SinBenchmarks()
+{
+	TrigBenchmarksHelper<decltype(std::sinf), std::sinf>(" std::sin");
+	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Sin<ApproxMath::Precision::High>>("approxSin");
 }
 
 void MathLibTests()
 {
+#ifdef BENCHMARK_TESTS
 	f32 fastest = FLT_MAX;
 	i32 it = 0;
 	for (i32 index = 0; index < 10; ++index)
 	{
+#endif
 		auto start = TimeMoment::Now();
 
 		MathFuncsTests<f32>();
@@ -972,14 +983,24 @@ void MathLibTests()
 			fastest = diff.ToSeconds();
 			it = index;
 		}
-
+#ifdef BENCHMARK_TESTS
 	}
     PRINTLOG("iteration %i took %.4g\n", it, fastest);
+#endif
 
     XNARef();
 
-	//CosTests();
+	CosTests();
+	SinTests();
+
+	volatile ui32 counter = 0;
+	for (ui32 index = 1; index < 1000000; ++index)
+	{
+		counter /= index;
+		counter *= index;
+	}
 	CosBenchmarks();
+	SinBenchmarks();
 
     PRINTLOG("finished math lib tests\n");
 }

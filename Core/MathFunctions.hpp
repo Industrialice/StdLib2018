@@ -5,25 +5,25 @@
 
 namespace StdLib
 {
-	template <typename T> [[nodiscard]] constexpr inline T MathPi()
+	template <typename T = f32> [[nodiscard]] constexpr inline T MathPi()
 	{
 		if constexpr (std::is_same_v<T, f32>) return 3.14159265358979323846f;
 		else if constexpr (std::is_same_v<T, f64>) return 3.14159265358979323846;
 	}
 
-	template <typename T> [[nodiscard]] constexpr inline T MathPiHalf()
+	template <typename T = f32> [[nodiscard]] constexpr inline T MathPiHalf()
 	{
 		if constexpr (std::is_same_v<T, f32>) return 1.57079632679489661923f;
 		else if constexpr (std::is_same_v<T, f64>) return 1.57079632679489661923;
 	}
 
-	template <typename T> [[nodiscard]] constexpr inline T MathPiQuarter()
+	template <typename T = f32> [[nodiscard]] constexpr inline T MathPiQuarter()
 	{
 		if constexpr (std::is_same_v<T, f32>) return 0.785398163397448309616f;
 		else if constexpr (std::is_same_v<T, f64>) return 0.785398163397448309616;
 	}
 
-	template <typename T> [[nodiscard]] constexpr inline T MathPiDouble()
+	template <typename T = f32> [[nodiscard]] constexpr inline T MathPiDouble()
 	{
 		if constexpr (std::is_same_v<T, f32>) return 6.283185307179586476925f;
 		else if constexpr (std::is_same_v<T, f64>) return 6.283185307179586476925;
