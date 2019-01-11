@@ -7,7 +7,7 @@ using namespace Funcs;
 
 void XNARef();
 
-#define BENCHMARK_TESTS
+//#define BENCHMARK_TESTS
 
 namespace
 {
@@ -189,7 +189,7 @@ template <typename T> static void BaseVectorTestsHelper()
         v0.ForEach(accumulate);
 		UTest(Equal, accumulated, accum);
 
-        if constexpr (std::is_signed_v<T::ScalarType>)
+        if constexpr (std::is_signed_v<typename T::ScalarType>)
         {
             v2 = v0;
             v2 = -v2;
@@ -842,12 +842,14 @@ static void CosTests()
 			c0MaxValue = value;
 		}
 
+    #ifdef PLATFORM_WINDOWS
 		++counter;
 		if (counter >= 1'000'000)
 		{
 			PRINTLOG("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b                        \b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%.14f", value);
 			counter = 0;
 		}
+    #endif
 	};
 
 	for (; value < 0; --intRep)
@@ -889,12 +891,14 @@ static void SinTests()
 			c0MaxValue = value;
 		}
 
+    #ifdef PLATFORM_WINDOWS
 		++counter;
 		if (counter >= 1'000'000)
 		{
 			PRINTLOG("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b                        \b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%.14f", value);
 			counter = 0;
 		}
+    #endif
 	};
 
 	for (; value < 0; intRep -= step)
@@ -932,7 +936,6 @@ template <typename TrigFuncType, TrigFuncType TrigFunc> static inline void TrigB
 			}
 		}
 
-
 		resultTable[counted % CountOf(resultTable)] = TrigFunc(fvalue);
 
 		fvalue += (counted & 15) * 0.2f;
@@ -942,6 +945,7 @@ template <typename TrigFuncType, TrigFuncType TrigFunc> static inline void TrigB
 		}
 	}
 
+	volatile f32 v = resultTable[rand() % 256];
 	PRINTLOG("%s performance is %u/s\n", name, (ui32)(counted / diff.ToSeconds()));
 }
 
@@ -978,29 +982,29 @@ void MathLibTests()
 
 		auto diff = end - start;
 
+#ifdef BENCHMARK_TESTS
 		if (fastest > diff.ToSeconds())
 		{
 			fastest = diff.ToSeconds();
 			it = index;
 		}
-#ifdef BENCHMARK_TESTS
 	}
     PRINTLOG("iteration %i took %.4g\n", it, fastest);
 #endif
 
     XNARef();
 
-	CosTests();
-	SinTests();
+	//CosTests();
+	//SinTests();
 
-	volatile ui32 counter = 0;
-	for (ui32 index = 1; index < 1000000; ++index)
-	{
-		counter /= index;
-		counter *= index;
-	}
-	CosBenchmarks();
-	SinBenchmarks();
+	//volatile ui32 counter = 0;
+	//for (ui32 index = 1; index < 1000000; ++index)
+	//{
+	//	counter /= index;
+	//	counter *= index;
+	//}
+	//CosBenchmarks();
+	//SinBenchmarks();
 
     PRINTLOG("finished math lib tests\n");
 }

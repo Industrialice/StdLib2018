@@ -44,11 +44,11 @@ namespace StdLib::Funcs
             ui32 widened = reinterpreted;
             if (bitValue)
             {
-                _BITTESTANDSET64(&widened, bitNum);
+                _BITTESTANDSET32(&widened, bitNum);
             }
             else
             {
-                _BITTESTANDRESET64(&widened, bitNum);
+                _BITTESTANDRESET32(&widened, bitNum);
             }
             reinterpreted = (intType)widened;
         }

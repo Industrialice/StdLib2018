@@ -200,20 +200,30 @@ namespace StdLib::ApproxMath
 
 		ASSUME(value >= -MathPiHalf() - 0.00001f && value <= MathPiDouble() + MathPiHalf() + 0.00001f);
 
-		auto cos_52s = [](f32 value) -> f32
-		{
-			f32 const xx(value * value);
-			return (0.9999932946f + xx * (-0.4999124376f + xx * (0.0414877472f + xx * -0.0012712095f)));
-		};
+        #define COS52S(v) \
+            const f32 x = v; \
+            const f32 xx = x * x; \
+            f32 r = (0.9999932946f + xx * (-0.4999124376f + xx * (0.0414877472f + xx * -0.0012712095f)));
 
-		if (value < MathPiHalf())
-			return cos_52s(value);
-		if (value < MathPi())
-			return -cos_52s(MathPi() - value);
-		if (value < (3.0f * MathPiHalf()))
-			return -cos_52s(value - MathPi());
+        if (value < MathPiHalf())
+        {
+            COS52S(value);
+            return r;
+        }
+        if (value < MathPi())
+        {
+            COS52S(MathPi() - value);
+            return -r;
+        }
+        if (value < (3.0f * MathPiHalf()))
+        {
+            COS52S(value - MathPi());
+            return -r;
+        }
 
-		return cos_52s(MathPiDouble() - value);
+        COS52S(MathPiDouble() - value);
+        #undef COS52S
+		return r;
 	}
 
 	template <Precision precision> [[nodiscard]] inline f64 Cos(f64 value)

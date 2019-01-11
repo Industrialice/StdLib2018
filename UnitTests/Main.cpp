@@ -992,9 +992,9 @@ static void FunctionInfoTests()
 
     struct local
     {
-        static void f0(i32, f32) {}
-        static i32 f1() {}
-        f64 f2(ui8) {}
+        static void f0(i32, f32);
+        static i32 f1();
+        f64 f2(ui8);
     };
 
     using test1 = FunctionInfo::Info<decltype(local::f0)>;
