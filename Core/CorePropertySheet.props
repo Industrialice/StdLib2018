@@ -11,6 +11,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <PrecompiledHeaderFile>_PreHeader.hpp</PrecompiledHeaderFile>
+      <SDLCheck>false</SDLCheck>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup />

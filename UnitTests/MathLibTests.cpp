@@ -1003,8 +1003,8 @@ void MathLibTests()
 	//	counter /= index;
 	//	counter *= index;
 	//}
-	//CosBenchmarks();
-	//SinBenchmarks();
+	CosBenchmarks();
+	SinBenchmarks();
 
     PRINTLOG("finished math lib tests\n");
 }

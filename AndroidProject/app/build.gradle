@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "com.stdlib.industrialice.stdlib"
-        minSdkVersion 16
+        minSdkVersion 15
         targetSdkVersion 26
         multiDexEnabled true
         versionCode 1
