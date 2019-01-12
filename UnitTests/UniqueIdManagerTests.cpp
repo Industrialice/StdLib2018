@@ -123,5 +123,5 @@ void UniqueIdManagerTests()
         ASSUME(result == false);
     }
 
-    PRINTLOG("finished unique id manager tests\n");
+    Logger::Message("finished unique id manager tests\n");
 }

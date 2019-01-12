@@ -842,14 +842,16 @@ static void CosTests()
 			c0MaxValue = value;
 		}
 
-    #ifdef PLATFORM_WINDOWS
-		++counter;
-		if (counter >= 1'000'000)
-		{
-			PRINTLOG("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b                        \b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%.14f", value);
-			counter = 0;
-		}
-    #endif
+        if (Logger::IsMessagePoppingSupported())
+        {
+            ++counter;
+            if (counter >= 1'000'000)
+            {
+                Logger::PopLastMessage();
+                Logger::Message("%.14f", value);
+                counter = 0;
+            }
+        }
 	};
 
 	for (; value < 0; --intRep)
@@ -862,7 +864,7 @@ static void CosTests()
 		repeat(value);
 	}
 
-	PRINTLOG("\napprox cos 0 min %f at %f max %f at %f\n", c0Min, c0MinValue, c0Max, c0MaxValue);
+	Logger::Message("\napprox cos 0 min %f at %f max %f at %f\n", c0Min, c0MinValue, c0Max, c0MaxValue);
 }
 
 static void SinTests()
@@ -891,14 +893,16 @@ static void SinTests()
 			c0MaxValue = value;
 		}
 
-    #ifdef PLATFORM_WINDOWS
-		++counter;
-		if (counter >= 1'000'000)
-		{
-			PRINTLOG("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b                        \b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%.14f", value);
-			counter = 0;
-		}
-    #endif
+        if (Logger::IsMessagePoppingSupported())
+        {
+            ++counter;
+            if (counter >= 1'000'000)
+            {
+                Logger::PopLastMessage();
+                Logger::Message("%.14f", value);
+                counter = 0;
+            }
+        }
 	};
 
 	for (; value < 0; intRep -= step)
@@ -911,22 +915,36 @@ static void SinTests()
 		repeat(value);
 	}
 
-	PRINTLOG("\napprox sin 0 min %f at %f max %f at %f\n", c0Min, c0MinValue, c0Max, c0MaxValue);
+	Logger::Message("\napprox sin 0 min %f at %f max %f at %f\n", c0Min, c0MinValue, c0Max, c0MaxValue);
 }
 
 template <typename TrigFuncType, TrigFuncType TrigFunc> static inline void TrigBenchmarksHelper(const char *name)
 {
-	static f32 resultTable[256];
-	
-	f32 *target = resultTable;
+    struct Local
+    {
+        f32 resultTable[256];
+        ui32 counted = 0;
+        f32 fvalue = 0.00001f;
+
+        FORCEINLINE void Compute()
+        {
+            resultTable[counted % CountOf(resultTable)] = TrigFunc(fvalue);
+
+            fvalue += (counted & 15) * 0.2f;
+            if (fvalue >= MathPiDouble())
+            {
+                fvalue = 0.00001f;
+            }
+
+            ++counted;
+        }
+    } l;
 
 	TimeMoment start = TimeMoment::Now();
 	TimeDifference64 diff = 0;
-	ui32 counted = 0;
-	f32 fvalue = 0.00001f;
-	for (;; ++counted)
+	for (;;)
 	{
-		if ((counted & 0xFFFF) == 0)
+		if ((l.counted & 0xFFFF) == 0)
 		{
 			TimeMoment end = TimeMoment::Now();
 			diff = (end - start).As64();
@@ -935,18 +953,16 @@ template <typename TrigFuncType, TrigFuncType TrigFunc> static inline void TrigB
 				break;
 			}
 		}
-
-		resultTable[counted % CountOf(resultTable)] = TrigFunc(fvalue);
-
-		fvalue += (counted & 15) * 0.2f;
-		if (fvalue >= MathPiDouble())
-		{
-			fvalue = 0.00001f;
-		}
+        
+        l.Compute();
+        l.Compute();
+        l.Compute();
+        l.Compute();
+        l.Compute();
 	}
 
-	volatile f32 v = resultTable[rand() % 256];
-	PRINTLOG("%s performance is %u/s\n", name, (ui32)(counted / diff.ToSeconds()));
+	volatile f32 v = l.resultTable[rand() % 256];
+	Logger::Message("%s performance is %u/s\n", name, (ui32)(l.counted / diff.ToSeconds()));
 }
 
 static void CosBenchmarks()
@@ -989,7 +1005,7 @@ void MathLibTests()
 			it = index;
 		}
 	}
-    PRINTLOG("iteration %i took %.4g\n", it, fastest);
+    Logger::Message("iteration %i took %.4g\n", it, fastest);
 #endif
 
     XNARef();
@@ -1003,8 +1019,8 @@ void MathLibTests()
 	//	counter /= index;
 	//	counter *= index;
 	//}
-	CosBenchmarks();
-	SinBenchmarks();
+	//CosBenchmarks();
+	//SinBenchmarks();
 
-    PRINTLOG("finished math lib tests\n");
+    Logger::Message("finished math lib tests\n");
 }

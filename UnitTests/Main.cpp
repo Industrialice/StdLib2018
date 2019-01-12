@@ -33,7 +33,7 @@ static void CompileTimeStringsTests()
 
     //printf("decoded string is %s\n", result.data());
 
-    PRINTLOG("finished compile time strings tests\n");
+    Logger::Message("finished compile time strings tests\n");
 }
 
 static void EnumCombinableTests()
@@ -62,7 +62,7 @@ static void EnumCombinableTests()
 
     UTest(true, value.Combined(One).Contains(One));
 
-    PRINTLOG("finished enum combinable tests\n");
+    Logger::Message("finished enum combinable tests\n");
 }
 
 #ifdef _MSC_VER
@@ -100,7 +100,7 @@ static void TypeIdentifiableTests()
     constexpr StableTypeId stableIdDebug = StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf("Test"), true>("Test"), encoded>::GetTypeId();
 #endif
 
-	PRINTLOG("finished type identifiable tests\n");
+	Logger::Message("finished type identifiable tests\n");
 }
 
 static void HashFuncsTest()
@@ -130,7 +130,7 @@ static void HashFuncsTest()
 	crc32 = Hash::CRC32((ui8 *)crc32str, strlen(crc32str));
 	UTest(Equal, crc32, 0xD85554CE);
 
-	PRINTLOG("finished hash tests\n");
+	Logger::Message("finished hash tests\n");
 }
 #ifdef _MSC_VER
     #pragma warning(pop)
@@ -145,7 +145,7 @@ static void IntegerPropertiesTest()
 	UTest(false, IsPowerOf2(15));
 	UTest(false, IsPowerOf2(-5));
 
-	PRINTLOG("finished integer properties tests\n");
+	Logger::Message("finished integer properties tests\n");
 }
 
 static void SetBitTests()
@@ -160,7 +160,7 @@ static void SetBitTests()
     ui64 value64 = SetBit<ui64>(0, 63, 1);
     UTest(Equal, value64, 0x8000'0000'0000'0000ULL);
 
-    PRINTLOG("finished set bit tests\n");
+    Logger::Message("finished set bit tests\n");
 }
 
 static void SignificantBitTests()
@@ -193,7 +193,7 @@ static void SignificantBitTests()
     UTest(Equal, IndexOfMostSignificantNonZeroBit(i8value), 3u);
     UTest(Equal, IndexOfLeastSignificantNonZeroBit(i8value), 0u);
 
-    PRINTLOG("finished significant bit tests\n");
+    Logger::Message("finished significant bit tests\n");
 }
 
 static void ChangeEndiannessTests()
@@ -207,7 +207,7 @@ static void ChangeEndiannessTests()
     ui8 ui8value = 0xFF;
     UTest(Equal, ChangeEndianness(ui8value), 0xFF);
 
-    PRINTLOG("finished change endianness tests\n");
+    Logger::Message("finished change endianness tests\n");
 }
 
 static void RotateBitsTests()
@@ -233,7 +233,7 @@ static void RotateBitsTests()
     ui8value = RotateBitsLeft(ui8value, 2);
     UTest(Equal, ui8value, 0b001);
 
-    PRINTLOG("finished rotate bits tests\n");
+    Logger::Message("finished rotate bits tests\n");
 }
 
 static void ErrorTests()
@@ -288,7 +288,7 @@ static void ErrorTests()
     UTest(Equal, customErrorWithAttachmentAndCustomDescription.Attachment(), -45);
     UTest(Equal, customErrorWithAttachmentAndCustomDescription.Description(), "UnitTesting "s + std::to_string(-45));
 
-    PRINTLOG("finished error tests\n");
+    Logger::Message("finished error tests\n");
 }
 
 static void ResultTests()
@@ -299,7 +299,7 @@ static void ResultTests()
     UTest(Equal, intResult.GetError(), DefaultError::Ok());
     UTest(Equal, intResult.Unwrap(), 43);
 
-    PRINTLOG("finished result tests\n");
+    Logger::Message("finished result tests\n");
 }
 
 #ifdef PLATFORM_WINDOWS
@@ -349,7 +349,7 @@ static void VirtualMemoryTests()
 
     UTest(true, VirtualMemory::Free(memory, 999));
 
-    PRINTLOG("finished virtual memory tests\n");
+    Logger::Message("finished virtual memory tests\n");
 }
 
 static void AllocatorsTests()
@@ -380,7 +380,7 @@ static void AllocatorsTests()
 
     Allocator::MallocBased::Free(memory);
 
-    PRINTLOG("finished allocators tests\n");
+    Logger::Message("finished allocators tests\n");
 }
 
 void FilePathTests()
@@ -417,7 +417,7 @@ void FilePathTests()
     path.ReplaceFileNameExt(TSTR("new.fil"));
     UTest(Equal, path.PlatformPath(), TSTR("C:/folder/new.fil"));
 
-    PRINTLOG("finished FilePath tests\n");
+    Logger::Message("finished FilePath tests\n");
 }
 
 static void FileWrite(IFile &file)
@@ -624,7 +624,7 @@ static void TestFileToMemoryStream()
     UTest(true, !fileError && file.IsOpened());
     FileWriteRead(file);
 
-    PRINTLOG("finished file memory stream tests\n");
+    Logger::Message("finished file memory stream tests\n");
 }
 
 template <typename T> void TestFile(const FilePath &folderForTests)
@@ -683,7 +683,7 @@ template <typename T> void TestFile(const FilePath &folderForTests)
     internalTest(2, allocNullBuff);
     internalTest(10, std::bind(allocSizedBuff, 10));
 
-    PRINTLOG("finished template file tests\n");
+    Logger::Message("finished template file tests\n");
 }
 
 template <typename T> void TestFileSharing(const FilePath &folderForTests)
@@ -703,7 +703,7 @@ template <typename T> void TestFileSharing(const FilePath &folderForTests)
     file = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::OpenExisting, FileProcModes::Read, 0, FileCacheModes::Default, FileShareModes::Write, &fileError);
     UTest(true, !fileError && file.IsOpened());
 
-    PRINTLOG("finished template file sharing tests\n");
+    Logger::Message("finished template file sharing tests\n");
 }
 
 static void TestFileSystem(const FilePath &folderForTests)
@@ -739,7 +739,7 @@ static void TestFileSystem(const FilePath &folderForTests)
     UTest(false, FileSystem::IsReadOnlySet(tempFileRenamedPath, false));
     UTest(Equal, FileSystem::IsReadOnlyGet(tempFileRenamedPath).Unwrap(), false);
 
-    PRINTLOG("finished filesystem tests\n");
+    Logger::Message("finished filesystem tests\n");
 }
 
 static void TestMemoryMappedFile(const FilePath &folderForTests)
@@ -822,7 +822,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     UTest(true, appendedFileMapping.IsOpened());
     UTest(true, !memcmp(appendedFileMapping.Memory(), currentPartStr.data(), currentPartStr.size()));
 
-    PRINTLOG("finished memory mapped file tests\n");
+    Logger::Message("finished memory mapped file tests\n");
 }
 
 static void TimeMomentTests()
@@ -849,7 +849,7 @@ static void TimeMomentTests()
     UTest(true, EqualsWithEpsilon(refDiff.ToSeconds(), 0.5f, 0.0001f));
     UTest(LeftLesser, TimeDifference(0.2f), 0.5f);
 
-    PRINTLOG("finished time moment tests\n");
+    Logger::Message("finished time moment tests\n");
 }
 
 static void DataHolderTests()
@@ -909,7 +909,7 @@ static void DataHolderTests()
     holder4.Destroy<NonCopyable>();
     //holder3.Destroy<NonCopyable>();
 
-    PRINTLOG("finished data holder tests\n");
+    Logger::Message("finished data holder tests\n");
 }
 
 static void MemoryStreamTests()
@@ -981,7 +981,7 @@ static void MemoryStreamTests()
         std::exchange(streams, {});
     }
 
-    PRINTLOG("finished memory stream tests\n");
+    Logger::Message("finished memory stream tests\n");
 }
 
 static void FunctionInfoTests()
@@ -1015,22 +1015,22 @@ static void FunctionInfoTests()
     UTest(true, std::is_same_v<test4::result, void>);
     UTest(Equal, std::tuple_size_v<test4::args>, 0);
 
-    PRINTLOG("finished function info tests\n");
+    Logger::Message("finished function info tests\n");
 }
 
 static void PrintSystemInfo()
 {
-	PRINTLOG("System info:\n");
-	PRINTLOG("  Logical CPU cores: %u\n", SystemInfo::LogicalCPUCores());
-	PRINTLOG("  Physical CPU cores: %u\n", SystemInfo::PhysicalCPUCores());
-	PRINTLOG("  Memory allocation alignment: %u\n", (ui32)SystemInfo::AllocationAlignment());
-    PRINTLOG("  Memory page size: %u\n", (ui32)SystemInfo::MemoryPageSize());
+	Logger::Message("System info:\n");
+	Logger::Message("  Logical CPU cores: %u\n", SystemInfo::LogicalCPUCores());
+	Logger::Message("  Physical CPU cores: %u\n", SystemInfo::PhysicalCPUCores());
+	Logger::Message("  Memory allocation alignment: %u\n", (ui32)SystemInfo::AllocationAlignment());
+    Logger::Message("  Memory page size: %u\n", (ui32)SystemInfo::MemoryPageSize());
 	const char *arch = nullptr;
 	switch (SystemInfo::CPUArchitecture())
 	{
 	case SystemInfo::Arch::ARM:
 		arch = "ARM";
-		break;
+        break;
 	case SystemInfo::Arch::ARM64:
 		arch = "ARM64";
 		break;
@@ -1053,13 +1053,39 @@ static void PrintSystemInfo()
 		arch = "x86";
 		break;
 	}
-	PRINTLOG("  CPU architecture: %s\n", arch);
-	PRINTLOG("Finished printing system info\n");
+	Logger::Message("  CPU architecture: %s\n", arch);
+    const char *platform = nullptr;
+    switch (SystemInfo::CurrentPlatform())
+    {
+    case SystemInfo::Platform::Android:
+        platform = "Android";
+        break;
+    case SystemInfo::Platform::Emscripten:
+        platform = "Emscripten";
+        break;
+    case SystemInfo::Platform::iOS:
+        platform = "iOS";
+        break;
+    case SystemInfo::Platform::Linux:
+        platform = "Linux";
+        break;
+    case SystemInfo::Platform::macOS:
+        platform = "macOS";
+        break;
+    case SystemInfo::Platform::Unknown:
+        platform = "Unknown";
+        break;
+    case SystemInfo::Platform::Windows:
+        platform = "Windows";
+        break;
+    }
+    Logger::Message("  Platform: %s\n", platform);
+    Logger::Message("Finished printing system info\n");
 }
 
 static void DoTests(int argc, const char **argv)
 {
-    PRINTLOG("~~~Starting Tests~~~\n");
+    Logger::Message("~~~Starting Tests~~~\n");
 
     std::string filesTestFolder = "FileTestsFolder";
     if (argc >= 2)
@@ -1107,7 +1133,7 @@ static void DoTests(int argc, const char **argv)
     Error<> folderForTestsRemove = FileSystem::Remove(folderForTests);
     UTest(false, folderForTestsRemove);
 
-    PRINTLOG("~~~Finished All Tests~~~\n");
+    Logger::Message("~~~Finished All Tests~~~\n");
 }
 
 int main(int argc, const char **argv)
@@ -1118,7 +1144,7 @@ int main(int argc, const char **argv)
 
     //UniqueIdManagerBenchmark();
 
-    PRINTLOG("~~~Finished Everything~~~\n");
+    Logger::Message("~~~Finished Everything~~~\n");
 
 #ifdef PLATFORM_WINDOWS
     system("pause");

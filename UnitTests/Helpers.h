@@ -48,15 +48,17 @@
     #include <Windows.h>
 #endif
 
-#ifdef PLATFORM_ANDROID
+/*#ifdef PLATFORM_ANDROID
     #include <android/log.h>
 #endif
 
 #ifdef PLATFORM_ANDROID
-    #define PRINTLOG(...) __android_log_print(ANDROID_LOG_INFO, "StdLib", __VA_ARGS__)
+    #define Logger::Message(...) __android_log_print(ANDROID_LOG_INFO, "StdLib", __VA_ARGS__)
 #else
-    #define PRINTLOG(...) printf(__VA_ARGS__)
-#endif
+    #define Logger::Message(...) printf(__VA_ARGS__)
+#endif*/
+
+#include "Logger.hpp"
 
 enum UnitTestType
 {
