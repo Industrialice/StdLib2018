@@ -1,6 +1,6 @@
 #include "_PreHeader.hpp"
 
-#ifndef PLATFORM_WINDOWS
+#if !defined(PLATFORM_WINDOWS) || (defined(_USING_V110_SDK71_) && _USING_V110_SDK71_ == 1)
 
 void XNARef()
 {}
