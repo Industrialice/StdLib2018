@@ -95,6 +95,7 @@
     <Import Project="..\BasicPropertySheet.props" />
     <Import Project="..\ReleasePropertySheet.props" />
     <Import Project="UnitTestsPropertySheet.props" />
+    <Import Project="PropertySheetWinXP.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -113,6 +114,7 @@
     <Import Project="..\BasicPropertySheet.props" />
     <Import Project="..\ReleasePropertySheet.props" />
     <Import Project="UnitTestsPropertySheet.props" />
+    <Import Project="PropertySheetWinXP.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
