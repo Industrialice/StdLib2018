@@ -1008,7 +1008,9 @@ void MathLibTests()
     Logger::Message("iteration %i took %.4g\n", it, fastest);
 #endif
 
+#if defined(PLATFORM_WINDOWS) && (defined(_M_AMD64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2))
     XNARef();
+#endif
 
 	//CosTests();
 	//SinTests();
