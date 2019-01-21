@@ -1,5 +1,7 @@
 #pragma once
 
+#include "MiscellaneousCoreTypes.hpp"
+
 namespace StdLib
 {
     class UniqueIdManager

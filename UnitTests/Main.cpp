@@ -10,6 +10,7 @@ using namespace Funcs;
 void MathLibTests();
 void UniqueIdManagerTests();
 void UniqueIdManagerBenchmark();
+void LoggerTests();
 
 static void CompileTimeStringsTests()
 {
@@ -1128,6 +1129,7 @@ static void DoTests(int argc, const char **argv)
     FunctionInfoTests();
     MathLibTests();
     UniqueIdManagerTests();
+	LoggerTests();
 	PrintSystemInfo();
 
     Error<> folderForTestsRemove = FileSystem::Remove(folderForTests);
