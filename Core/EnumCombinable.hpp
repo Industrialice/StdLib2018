@@ -27,6 +27,8 @@ namespace StdLib
 
     public:
 
+		using valueType = ValueType;
+
         constexpr EnumCombinable() = default;
 
         static constexpr WrapperType Create(ValueType value)

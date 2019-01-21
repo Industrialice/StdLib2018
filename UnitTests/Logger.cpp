@@ -37,7 +37,7 @@ void Logger::PopLastMessage()
         std::fill(message, message + CountOf(message), ' ');
     }
     DWORD written;
-    WriteConsoleA(outputHandle, message, std::min<ui32>(CountOf(message), _lastMessageLength), &written, 0);
+    WriteConsoleA(outputHandle, message, std::min<ui32>((ui32)CountOf(message), _lastMessageLength), &written, 0);
     SetConsoleCursorPosition(outputHandle, newCoord);
 #elif defined(PLATFORM_ANDROID)
     ::PopLastMessage(_lastMessageLength);

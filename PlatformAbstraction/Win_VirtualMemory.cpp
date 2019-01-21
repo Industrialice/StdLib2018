@@ -82,7 +82,7 @@ auto VirtualMemory::PageModeGet(const void *memory, uiw size) -> Result<PageMode
     {
         if (PageProtectionMapping[index] == mbi.Protect)
         {
-            return PageModes::PageMode::Create(index);
+            return PageModes::PageMode::Create((PageModes::PageMode::valueType)index);
         }
     }
     SOFTBREAK;
