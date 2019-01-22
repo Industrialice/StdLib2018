@@ -25,3 +25,4 @@ namespace StdLib::_Private
 
 #define TOSTR(code) #code
 #define CONCAT(first, second) first##second
+#define ALLOCA_TYPED(count, type) (std::remove_const_t<type> *)ALLOCA(count, sizeof(type))

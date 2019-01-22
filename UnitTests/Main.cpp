@@ -7,10 +7,30 @@
 using namespace StdLib;
 using namespace Funcs;
 
+void MiscTests();
 void MathLibTests();
 void UniqueIdManagerTests();
 void UniqueIdManagerBenchmark();
 void LoggerTests();
+
+void MiscTests()
+{
+    ui32 *arr = (ui32 *)ALLOCA(5, sizeof(ui32));
+    std::fill(arr, arr + 5, 1);
+    for (uiw index = 0; index < 5; ++index)
+    {
+        UTest(Equal, arr[index], 1);
+    }
+
+    arr = ALLOCA_TYPED(5, ui32);
+    std::fill(arr, arr + 5, 2);
+    for (uiw index = 0; index < 5; ++index)
+    {
+        UTest(Equal, arr[index], 2);
+    }
+
+    Logger::Message("finished misc tests\n");
+}
 
 static void CompileTimeSortingTests()
 {
@@ -1128,6 +1148,7 @@ static void DoTests(int argc, const char **argv)
     FilePath folderForTests = FilePath::FromChar(filesTestFolder);
     UTest(false, FileSystem::CreateNewFolder(folderForTests, {}, true));
 
+    MiscTests();
     CompileTimeSortingTests();
     CompileTimeStringsTests();
     EnumCombinableTests();
