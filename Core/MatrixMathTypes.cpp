@@ -60,7 +60,7 @@ template <uiw Rows, uiw Columns> static inline void _TransposeSquareMatrix(_Matr
             std::swap(matrix.elements[rowIndex][columnIndex], matrix.elements[columnIndex][rowIndex]);
 }
 
-template <typename MatrixType, bool isAllowTranslation> static inline void _SetTranslationScale(MatrixType &r, const optional<Vector3> &translation, const optional<Vector3> &scale)
+template <typename MatrixType, bool isAllowTranslation> static inline void _SetTranslationScale(MatrixType &r, const std::optional<Vector3> &translation, const std::optional<Vector3> &scale)
 {
     if (scale)
     {
@@ -85,7 +85,7 @@ template <typename MatrixType, bool isAllowTranslation> static inline void _SetT
     }
 }
 
-template <typename MatrixType, bool isAllowTranslation> static inline MatrixType _CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale)
+template <typename MatrixType, bool isAllowTranslation> static inline MatrixType _CreateRTS(const std::optional<Vector3> &rotation, const std::optional<Vector3> &translation, const std::optional<Vector3> &scale)
 {
     static_assert(MatrixType::rows >= (isAllowTranslation ? 4 : 3));
     static_assert(MatrixType::columns >= 3);
@@ -124,7 +124,7 @@ template <typename MatrixType, bool isAllowTranslation> static inline MatrixType
     return r;
 }
 
-template <typename MatrixType, bool isAllowTranslation> static inline MatrixType _CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale)
+template <typename MatrixType, bool isAllowTranslation> static inline MatrixType _CreateRTS(const std::optional<Quaternion> &rotation, const std::optional<Vector3> &translation, const std::optional<Vector3> &scale)
 {
     static_assert(MatrixType::rows >= (isAllowTranslation ? 4 : 3));
     static_assert(MatrixType::columns >= 3);
@@ -152,7 +152,7 @@ template <typename MatrixType, bool isAllowTranslation> static inline MatrixType
     return r;
 }
 
-template <typename MatrixType, bool isAllowTranslation> static inline MatrixType _CreateRTS2D(const optional<f32> &rotation, const optional<Vector2> &translation, const optional<Vector2> &scale)
+template <typename MatrixType, bool isAllowTranslation> static inline MatrixType _CreateRTS2D(const std::optional<f32> &rotation, const std::optional<Vector2> &translation, const std::optional<Vector2> &scale)
 {
 	MatrixType result;
 
@@ -188,7 +188,7 @@ template <typename MatrixType, bool isAllowTranslation> static inline MatrixType
 
 // Inverse code is based on GLM
 
-static inline optional<Matrix4x4> _Inverse4x4Matrix(const Matrix4x4 &m)
+static inline std::optional<Matrix4x4> _Inverse4x4Matrix(const Matrix4x4 &m)
 {
     Matrix4x4 r;
 
@@ -236,7 +236,7 @@ static inline optional<Matrix4x4> _Inverse4x4Matrix(const Matrix4x4 &m)
     
     if (Distance(det, 0.0f) < DefaultF32Epsilon)
     {
-        return nullopt;
+        return std::nullopt;
     }
 
     f32 revDet = 1.f / det;
@@ -245,7 +245,7 @@ static inline optional<Matrix4x4> _Inverse4x4Matrix(const Matrix4x4 &m)
     return r;
 }
 
-static inline optional<Matrix4x3> _Inverse4x3Matrix(const Matrix4x3 &m)
+static inline std::optional<Matrix4x3> _Inverse4x3Matrix(const Matrix4x3 &m)
 {
     Matrix4x3 r;
 
@@ -275,7 +275,7 @@ static inline optional<Matrix4x3> _Inverse4x3Matrix(const Matrix4x3 &m)
     
     if (Distance(det, 0.0f) < DefaultF32Epsilon)
     {
-        return nullopt;
+        return std::nullopt;
     }
 
     f32 revDet = 1.f / det;
@@ -284,7 +284,7 @@ static inline optional<Matrix4x3> _Inverse4x3Matrix(const Matrix4x3 &m)
     return r;
 }
 
-static inline optional<Matrix3x4> _Inverse3x4Matrix(const Matrix3x4 &m)
+static inline std::optional<Matrix3x4> _Inverse3x4Matrix(const Matrix3x4 &m)
 {
 	Matrix3x4 r;
 
@@ -315,7 +315,7 @@ static inline optional<Matrix3x4> _Inverse3x4Matrix(const Matrix3x4 &m)
 
 	if (Distance(det, 0.0f) < DefaultF32Epsilon)
 	{
-		return nullopt;
+		return std::nullopt;
 	}
 
 	f32 revDet = 1.f / det;
@@ -324,7 +324,7 @@ static inline optional<Matrix3x4> _Inverse3x4Matrix(const Matrix3x4 &m)
 	return r;
 }
 
-static inline optional<Matrix2x2> _Inverse2x2Matrix(const Matrix2x2 &m)
+static inline std::optional<Matrix2x2> _Inverse2x2Matrix(const Matrix2x2 &m)
 {
     Matrix2x2 r;
 
@@ -338,7 +338,7 @@ static inline optional<Matrix2x2> _Inverse2x2Matrix(const Matrix2x2 &m)
 
     if (Distance(det, 0.0f) < DefaultF32Epsilon)
     {
-        return nullopt;
+        return std::nullopt;
     }
 
     f32 revDet = 1.f / det;
@@ -347,7 +347,7 @@ static inline optional<Matrix2x2> _Inverse2x2Matrix(const Matrix2x2 &m)
     return r;
 }
 
-static inline optional<Matrix3x2> _Inverse3x2Matrix(const Matrix3x2 &m)
+static inline std::optional<Matrix3x2> _Inverse3x2Matrix(const Matrix3x2 &m)
 {
 	Matrix3x2 r;
 
@@ -363,7 +363,7 @@ static inline optional<Matrix3x2> _Inverse3x2Matrix(const Matrix3x2 &m)
 
 	if (Distance(det, 0.0f) < DefaultF32Epsilon)
 	{
-		return nullopt;
+		return std::nullopt;
 	}
 
 	f32 revDet = 1.f / det;
@@ -372,7 +372,7 @@ static inline optional<Matrix3x2> _Inverse3x2Matrix(const Matrix3x2 &m)
 	return r;
 }
 
-static inline optional<Matrix2x3> _Inverse2x3Matrix(const Matrix2x3 &m)
+static inline std::optional<Matrix2x3> _Inverse2x3Matrix(const Matrix2x3 &m)
 {
 	Matrix2x3 r;
 
@@ -389,7 +389,7 @@ static inline optional<Matrix2x3> _Inverse2x3Matrix(const Matrix2x3 &m)
 
 	if (Distance(det, 0.0f) < DefaultF32Epsilon)
 	{
-		return nullopt;
+		return std::nullopt;
 	}
 
 	f32 revDet = 1.f / det;
@@ -398,7 +398,7 @@ static inline optional<Matrix2x3> _Inverse2x3Matrix(const Matrix2x3 &m)
 	return r;
 }
 
-static inline optional<Matrix3x3> _Inverse3x3Matrix(const Matrix3x3 &m)
+static inline std::optional<Matrix3x3> _Inverse3x3Matrix(const Matrix3x3 &m)
 {
 	Matrix3x3 r;
 
@@ -418,7 +418,7 @@ static inline optional<Matrix3x3> _Inverse3x3Matrix(const Matrix3x3 &m)
 
 	if (Distance(det, 0.0f) < DefaultF32Epsilon)
 	{
-		return nullopt;
+		return std::nullopt;
 	}
 
 	f32 revDet = 1.f / det;
@@ -615,7 +615,7 @@ Vector3 Vector3::GetCrossed(const Vector3 &other) const
 // Matrix3x2 //
 ///////////////
 
-optional<Matrix3x2> Matrix3x2::GetInversed() const
+std::optional<Matrix3x2> Matrix3x2::GetInversed() const
 {
 	_ValidateValues(*this);
 	return _Inverse3x2Matrix(*this);
@@ -633,7 +633,7 @@ void Matrix3x2::Decompose(f32 *rotation, Vector2 *translation, Vector2 *scale) c
 	_Decompose2DMatrix(*this, rotation, translation, scale);
 }
 
-Matrix3x2 Matrix3x2::CreateRTS(const optional<f32> &rotation, const optional<Vector2> &translation, const optional<Vector2> &scale)
+Matrix3x2 Matrix3x2::CreateRTS(const std::optional<f32> &rotation, const std::optional<Vector2> &translation, const std::optional<Vector2> &scale)
 {
 	return _CreateRTS2D<Matrix3x2, true>(rotation, translation, scale);
 }
@@ -642,7 +642,7 @@ Matrix3x2 Matrix3x2::CreateRTS(const optional<f32> &rotation, const optional<Vec
 // Matrix4x3 //
 ///////////////
 
-optional<Matrix4x3> Matrix4x3::GetInversed() const
+std::optional<Matrix4x3> Matrix4x3::GetInversed() const
 {
 	_ValidateValues(*this);
 	return _Inverse4x3Matrix(*this);
@@ -701,12 +701,12 @@ Matrix4x3 Matrix4x3::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
     return _CreateRotationAroundAxis<Matrix4x3>(axis, angle);
 }
 
-Matrix4x3 Matrix4x3::CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale)
+Matrix4x3 Matrix4x3::CreateRTS(const std::optional<Vector3> &rotation, const std::optional<Vector3> &translation, const std::optional<Vector3> &scale)
 {
     return _CreateRTS<Matrix4x3, true>(rotation, translation, scale);
 }
 
-Matrix4x3 Matrix4x3::CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale)
+Matrix4x3 Matrix4x3::CreateRTS(const std::optional<Quaternion> &rotation, const std::optional<Vector3> &translation, const std::optional<Vector3> &scale)
 {
     return _CreateRTS<Matrix4x3, true>(rotation, translation, scale);
 }
@@ -720,7 +720,7 @@ Matrix4x3 Matrix4x3::CreateOrthographicProjection(const Vector3 &min, const Vect
 // Matrix3x4 //
 ///////////////
 
-optional<Matrix3x4> Matrix3x4::GetInversed() const
+std::optional<Matrix3x4> Matrix3x4::GetInversed() const
 {
 	_ValidateValues(*this);
 	return _Inverse3x4Matrix(*this);
@@ -743,14 +743,14 @@ Matrix3x4 Matrix3x4::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
     return _CreateRotationAroundAxis<Matrix3x4>(axis, angle);
 }
 
-Matrix3x4 Matrix3x4::CreateRS(const optional<Vector3> &rotation, const optional<Vector3> &scale)
+Matrix3x4 Matrix3x4::CreateRS(const std::optional<Vector3> &rotation, const std::optional<Vector3> &scale)
 {
-    return _CreateRTS<Matrix3x4, false>(rotation, nullopt, scale);
+    return _CreateRTS<Matrix3x4, false>(rotation, std::nullopt, scale);
 }
 
-Matrix3x4 Matrix3x4::CreateRS(const optional<Quaternion> &rotation, const optional<Vector3> &scale)
+Matrix3x4 Matrix3x4::CreateRS(const std::optional<Quaternion> &rotation, const std::optional<Vector3> &scale)
 {
-    return _CreateRTS<Matrix3x4, false>(rotation, nullopt, scale);
+    return _CreateRTS<Matrix3x4, false>(rotation, std::nullopt, scale);
 }
 
 ///////////////
@@ -763,7 +763,7 @@ Matrix4x4 &Matrix4x4::Transpose()
     return *this;
 }
 
-optional<Matrix4x4> Matrix4x4::GetInversed() const
+std::optional<Matrix4x4> Matrix4x4::GetInversed() const
 {
 	_ValidateValues(*this);
 	return _Inverse4x4Matrix(*this);
@@ -809,12 +809,12 @@ Matrix4x4 Matrix4x4::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
     return _CreateRotationAroundAxis<Matrix4x4>(axis, angle);
 }
 
-Matrix4x4 Matrix4x4::CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale)
+Matrix4x4 Matrix4x4::CreateRTS(const std::optional<Vector3> &rotation, const std::optional<Vector3> &translation, const std::optional<Vector3> &scale)
 {
     return _CreateRTS<Matrix4x4, true>(rotation, translation, scale);
 }
 
-Matrix4x4 Matrix4x4::CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale)
+Matrix4x4 Matrix4x4::CreateRTS(const std::optional<Quaternion> &rotation, const std::optional<Vector3> &translation, const std::optional<Vector3> &scale)
 {
     return _CreateRTS<Matrix4x4, true>(rotation, translation, scale);
 }
@@ -865,7 +865,7 @@ Matrix4x4 Matrix4x4::CreateOrthographicProjection(const Vector3 &min, const Vect
 // Matrix2x3 //
 ///////////////
 
-[[nodiscard]] optional<Matrix2x3> Matrix2x3::GetInversed() const
+[[nodiscard]] std::optional<Matrix2x3> Matrix2x3::GetInversed() const
 {
 	_ValidateValues(*this);
 	return _Inverse2x3Matrix(*this);
@@ -893,7 +893,7 @@ void Matrix2x2::Decompose(f32 *rotation, Vector2 *scale) const
 	_Decompose2DMatrix(*this, rotation, nullptr, scale);
 }
 
-optional<Matrix2x2> Matrix2x2::GetInversed() const
+std::optional<Matrix2x2> Matrix2x2::GetInversed() const
 {
 	_ValidateValues(*this);
 	return _Inverse2x2Matrix(*this);
@@ -906,9 +906,9 @@ f32 Matrix2x2::Determinant() const
 	return m[0][0] * m[1][1] + m[0][1] * -m[1][0];
 }
 
-Matrix2x2 Matrix2x2::CreateRS(const optional<f32> &rotation, const optional<Vector2> &scale)
+Matrix2x2 Matrix2x2::CreateRS(const std::optional<f32> &rotation, const std::optional<Vector2> &scale)
 {
-	return _CreateRTS2D<Matrix2x2, false>(rotation, nullopt, scale);
+	return _CreateRTS2D<Matrix2x2, false>(rotation, std::nullopt, scale);
 }
 
 ///////////////
@@ -921,7 +921,7 @@ Matrix3x3 &Matrix3x3::Transpose()
     return *this;
 }
 
-optional<Matrix3x3> Matrix3x3::GetInversed() const
+std::optional<Matrix3x3> Matrix3x3::GetInversed() const
 {
 	_ValidateValues(*this);
 	return _Inverse3x3Matrix(*this);
@@ -965,17 +965,17 @@ Matrix3x3 Matrix3x3::CreateRotationAroundAxis(const Vector3 &axis, f32 angle)
     return _CreateRotationAroundAxis<Matrix3x3>(axis, angle);
 }
 
-Matrix3x3 Matrix3x3::CreateRS(const optional<Vector3> &rotation, const optional<Vector3> &scale)
+Matrix3x3 Matrix3x3::CreateRS(const std::optional<Vector3> &rotation, const std::optional<Vector3> &scale)
 {
-    return _CreateRTS<Matrix3x3, false>(rotation, nullopt, scale);
+    return _CreateRTS<Matrix3x3, false>(rotation, std::nullopt, scale);
 }
 
-Matrix3x3 Matrix3x3::CreateRS(const optional<Quaternion> &rotation, const optional<Vector3> &scale)
+Matrix3x3 Matrix3x3::CreateRS(const std::optional<Quaternion> &rotation, const std::optional<Vector3> &scale)
 {
-    return _CreateRTS<Matrix3x3, false>(rotation, nullopt, scale);
+    return _CreateRTS<Matrix3x3, false>(rotation, std::nullopt, scale);
 }
 
-Matrix3x3 Matrix3x3::CreateRTS(const optional<f32> &rotation, const optional<Vector2> &translation, const optional<Vector2> &scale)
+Matrix3x3 Matrix3x3::CreateRTS(const std::optional<f32> &rotation, const std::optional<Vector2> &translation, const std::optional<Vector2> &scale)
 {
 	return _CreateRTS2D<Matrix3x3, true>(rotation, translation, scale);
 }

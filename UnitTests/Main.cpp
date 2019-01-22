@@ -12,6 +12,15 @@ void UniqueIdManagerTests();
 void UniqueIdManagerBenchmark();
 void LoggerTests();
 
+static void CompileTimeSortingTests()
+{
+    static constexpr std::array<ui32, 5> source = {4, 0, 100, 1, 9};
+    static constexpr auto result = SortCompileTime(source);
+    UTest(Equal, result, std::array<ui32, 5>{0, 1, 4, 9, 100});
+
+    Logger::Message("finished compile time sorting tests\n");
+}
+
 static void CompileTimeStringsTests()
 {
     auto compute = []() constexpr -> std::array<char, 28>
@@ -1102,6 +1111,7 @@ static void DoTests(int argc, const char **argv)
     FilePath folderForTests = FilePath::FromChar(filesTestFolder);
     UTest(false, FileSystem::CreateNewFolder(folderForTests, {}, true));
 
+    CompileTimeSortingTests();
     CompileTimeStringsTests();
     EnumCombinableTests();
 	TypeIdentifiableTests();

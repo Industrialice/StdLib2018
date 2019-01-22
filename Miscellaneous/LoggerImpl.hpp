@@ -53,7 +53,7 @@ template <typename MetaType, bool IsThreadSafe> void Logger<MetaType, IsThreadSa
 		return;
 	}
 
-	optional<std::scoped_lock<std::mutex>> scopeLock;
+    std::optional<std::scoped_lock<std::mutex>> scopeLock;
 	if constexpr (IsThreadSafe)
 	{
 		scopeLock.emplace(this->_mutex);
@@ -95,7 +95,7 @@ template <typename MetaType, bool IsThreadSafe> void Logger<MetaType, IsThreadSa
 
 template <typename MetaType, bool IsThreadSafe> auto Logger<MetaType, IsThreadSafe>::OnMessage(const ListenerCallbackType &listener, LogLevels::LogLevel levelMask) -> ListenerHandle
 {
-	optional<std::scoped_lock<std::mutex>> scopeLock;
+    std::optional<std::scoped_lock<std::mutex>> scopeLock;
 	if constexpr (IsThreadSafe)
 	{
 		scopeLock.emplace(this->_mutex);
@@ -114,7 +114,7 @@ template <typename MetaType, bool IsThreadSafe> auto Logger<MetaType, IsThreadSa
 
 template <typename MetaType, bool IsThreadSafe> void Logger<MetaType, IsThreadSafe>::RemoveListener(ListenerHandle &handle)
 {
-	optional<std::scoped_lock<std::mutex>> scopeLock;
+    std::optional<std::scoped_lock<std::mutex>> scopeLock;
 	if constexpr (IsThreadSafe)
 	{
 		scopeLock.emplace(this->_mutex);

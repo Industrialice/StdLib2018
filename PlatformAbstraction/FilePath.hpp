@@ -92,19 +92,19 @@ namespace StdLib
 
         // without extension
         bool HasFileName() const;
-        optional<FilePath> FileName(optional<pathStringView> defaultName = nullopt) const;
-        optional<pathStringView> FileNameView(optional<pathStringView> defaultName = nullopt) const;
+        std::optional<FilePath> FileName(std::optional<pathStringView> defaultName = std::nullopt) const;
+        std::optional<pathStringView> FileNameView(std::optional<pathStringView> defaultName = std::nullopt) const;
         void ReplaceFileName(pathStringView newName); // does nothing if both HasFileName() and HasExtension() are false
 
         // methods return and take extension without .
         bool HasExtension() const;
-        optional<FilePath> Extension(optional<pathStringView> defaultName = nullopt) const;
-        optional<pathStringView> ExtensionView(optional<pathStringView> defaultName = nullopt) const;
+        std::optional<FilePath> Extension(std::optional<pathStringView> defaultName = std::nullopt) const;
+        std::optional<pathStringView> ExtensionView(std::optional<pathStringView> defaultName = std::nullopt) const;
         void ReplaceExtension(pathStringView newExt); // does nothing if both HasFileName() and HasExtension() are false
 
         bool HasFileNameExt() const;
-        optional <FilePath> FileNameExt(optional<pathStringView> defaultName = nullopt) const;
-        optional <pathStringView> FileNameExtView(optional<pathStringView> defaultName = nullopt) const;
+        std::optional <FilePath> FileNameExt(std::optional<pathStringView> defaultName = std::nullopt) const;
+        std::optional <pathStringView> FileNameExtView(std::optional<pathStringView> defaultName = std::nullopt) const;
         void ReplaceFileNameExt(pathStringView newName); // does nothing if HasFileNameExt() is false
     };
 }

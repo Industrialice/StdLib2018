@@ -345,7 +345,7 @@ namespace StdLib
 
         constexpr Matrix4x3(const Vector3 &row0, const Vector3 &row1, const Vector3 &row2, const Vector3 &row3);
 
-        [[nodiscard]] optional<Matrix4x3> GetInversed() const;
+        [[nodiscard]] std::optional<Matrix4x3> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
 		void Decompose(Matrix3x3 *rotation, Vector3 *translation, Vector3 *scale) const;
 		void Decompose(Vector3 *rotation, Vector3 *translation, Vector3 *scale) const;
@@ -354,8 +354,8 @@ namespace StdLib
         [[nodiscard]] Matrix4x4 operator * (const Matrix4x4 &other) const;
 
         [[nodiscard]] static Matrix4x3 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
-        [[nodiscard]] static Matrix4x3 CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt);
-        [[nodiscard]] static Matrix4x3 CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt);
+        [[nodiscard]] static Matrix4x3 CreateRTS(const std::optional<Vector3> &rotation, const std::optional<Vector3> &translation, const std::optional<Vector3> &scale = std::nullopt);
+        [[nodiscard]] static Matrix4x3 CreateRTS(const std::optional<Quaternion> &rotation, const std::optional<Vector3> &translation, const std::optional<Vector3> &scale = std::nullopt);
         [[nodiscard]] static Matrix4x3 CreateOrthographicProjection(const Vector3 &min, const Vector3 &max, ProjectionTarget target);
     };
 
@@ -369,12 +369,12 @@ namespace StdLib
 
         constexpr Matrix3x4(const Vector4 &row0, const Vector4 &row1, const Vector4 &row2);
 
-		[[nodiscard]] optional<Matrix3x4> GetInversed() const;
+		[[nodiscard]] std::optional<Matrix3x4> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
 
         [[nodiscard]] static Matrix3x4 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
-        [[nodiscard]] static Matrix3x4 CreateRS(const optional<Vector3> &rotation, const optional<Vector3> &scale = nullopt);
-        [[nodiscard]] static Matrix3x4 CreateRS(const optional<Quaternion> &rotation, const optional<Vector3> &scale = nullopt);
+        [[nodiscard]] static Matrix3x4 CreateRS(const std::optional<Vector3> &rotation, const std::optional<Vector3> &scale = std::nullopt);
+        [[nodiscard]] static Matrix3x4 CreateRS(const std::optional<Quaternion> &rotation, const std::optional<Vector3> &scale = std::nullopt);
     };
 
     struct Matrix4x4 : _Matrix<4, 4>
@@ -390,15 +390,15 @@ namespace StdLib
 
         Matrix4x4 &Transpose();
 
-        optional<Matrix4x4> GetInversed() const;
+        std::optional<Matrix4x4> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
 		void Decompose(Matrix3x3 *rotation, Vector3 *translation, Vector3 *scale) const;
 		void Decompose(Vector3 *rotation, Vector3 *translation, Vector3 *scale) const;
 		void Decompose(Quaternion *rotation, Vector3 *translation, Vector3 *scale) const;
 
         [[nodiscard]] static Matrix4x4 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
-        [[nodiscard]] static Matrix4x4 CreateRTS(const optional<Vector3> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt);
-        [[nodiscard]] static Matrix4x4 CreateRTS(const optional<Quaternion> &rotation, const optional<Vector3> &translation, const optional<Vector3> &scale = nullopt);
+        [[nodiscard]] static Matrix4x4 CreateRTS(const std::optional<Vector3> &rotation, const std::optional<Vector3> &translation, const std::optional<Vector3> &scale = std::nullopt);
+        [[nodiscard]] static Matrix4x4 CreateRTS(const std::optional<Quaternion> &rotation, const std::optional<Vector3> &translation, const std::optional<Vector3> &scale = std::nullopt);
         [[nodiscard]] static Matrix4x4 CreatePerspectiveProjection(f32 horizontalFOV, f32 aspectRatio, f32 nearPlane, f32 farPlane, ProjectionTarget target);
         [[nodiscard]] static Matrix4x4 CreateOrthographicProjection(const Vector3 &min, const Vector3 &max, ProjectionTarget target);
     };
@@ -413,11 +413,11 @@ namespace StdLib
 
         constexpr Matrix3x2(const Vector2 &row0, const Vector2 &row1, const Vector2 &row2);
 
-        [[nodiscard]] optional<Matrix3x2> GetInversed() const;
+        [[nodiscard]] std::optional<Matrix3x2> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
 		void Decompose(f32 *rotation, Vector2 *translation, Vector2 *scale) const;
 
-        [[nodiscard]] static Matrix3x2 CreateRTS(const optional<f32> &rotation, const optional<Vector2> &translation, const optional<Vector2> &scale = nullopt); // clockwise rotation around Z axis
+        [[nodiscard]] static Matrix3x2 CreateRTS(const std::optional<f32> &rotation, const std::optional<Vector2> &translation, const std::optional<Vector2> &scale = std::nullopt); // clockwise rotation around Z axis
     };
 
     struct Matrix2x3 : _Matrix<2, 3>
@@ -429,7 +429,7 @@ namespace StdLib
 
         constexpr Matrix2x3(const Vector3 &row0, const Vector3 &row1);
 
-		[[nodiscard]] optional<Matrix2x3> GetInversed() const;
+		[[nodiscard]] std::optional<Matrix2x3> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
 	};
 
@@ -445,10 +445,10 @@ namespace StdLib
         Matrix2x2 &Transpose();
 		void Decompose(f32 *rotation, Vector2 *scale) const;
 
-        optional<Matrix2x2> GetInversed() const;
+        std::optional<Matrix2x2> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
 		
-		[[nodiscard]] static Matrix2x2 CreateRS(const optional<f32> &rotation, const optional<Vector2> &scale = nullopt); // clockwise rotation around Z axis
+		[[nodiscard]] static Matrix2x2 CreateRS(const std::optional<f32> &rotation, const std::optional<Vector2> &scale = std::nullopt); // clockwise rotation around Z axis
 	};
 
     struct Matrix3x3 : _Matrix<3, 3>
@@ -463,7 +463,7 @@ namespace StdLib
 
         Matrix3x3 &Transpose();
 
-		optional<Matrix3x3> GetInversed() const;
+		std::optional<Matrix3x3> GetInversed() const;
 		[[nodiscard]] f32 Determinant() const;
 		void Decompose(Matrix3x3 *rotation, Vector3 *scale) const; // decomposes as 3D
 		void Decompose(Vector3 *rotation, Vector3 *scale) const; // decomposes as 3D
@@ -471,9 +471,9 @@ namespace StdLib
 		void Decompose(f32 *rotation, Vector2 *translation, Vector2 *scale) const; // decomposes as 2D
 
         [[nodiscard]] static Matrix3x3 CreateRotationAroundAxis(const Vector3 &axis, f32 angle);
-        [[nodiscard]] static Matrix3x3 CreateRS(const optional<Vector3> &rotation, const optional<Vector3> &scale = nullopt);
-        [[nodiscard]] static Matrix3x3 CreateRS(const optional<Quaternion> &rotation, const optional<Vector3> &scale = nullopt);
-		[[nodiscard]] static Matrix3x3 CreateRTS(const optional<f32> &rotation, const optional<Vector2> &translation, const optional<Vector2> &scale = nullopt); // clockwise rotation around Z axis
+        [[nodiscard]] static Matrix3x3 CreateRS(const std::optional<Vector3> &rotation, const std::optional<Vector3> &scale = std::nullopt);
+        [[nodiscard]] static Matrix3x3 CreateRS(const std::optional<Quaternion> &rotation, const std::optional<Vector3> &scale = std::nullopt);
+		[[nodiscard]] static Matrix3x3 CreateRTS(const std::optional<f32> &rotation, const std::optional<Vector2> &translation, const std::optional<Vector2> &scale = std::nullopt); // clockwise rotation around Z axis
 	};
 
     // Addition and subtraction are a component-wise operation; composing quaternions should be done via multiplication.

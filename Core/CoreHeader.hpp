@@ -17,13 +17,14 @@ using namespace std::literals;
 
 #if __has_include(<optional>)
     #include <optional>
-    using std::optional;
-    using std::nullopt;
 #else
     #warning This system doesn't provide unexperimental optional
     #include <experimental/optional>
-    using std::experimental::optional;
-    using std::experimental::nullopt;
+    namespace std
+    {
+        using std::experimental::optional;
+        using std::experimental::nullopt;
+    }
 #endif
 
 #define _USE_MATH_DEFINES

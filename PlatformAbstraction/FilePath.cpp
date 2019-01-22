@@ -254,15 +254,15 @@ bool FilePath::HasFileName() const
     return false;
 }
 
-optional<FilePath> FilePath::FileName(optional<pathStringView> defaultName) const
+std::optional<FilePath> FilePath::FileName(std::optional<pathStringView> defaultName) const
 {
     auto view = FileNameView();
-    if (view) return optional<FilePath>{*view};
-    if (defaultName) return optional<FilePath>{*defaultName};
-    return nullopt;
+    if (view) return {*view};
+    if (defaultName) return {*defaultName};
+    return std::nullopt;
 }
 
-optional<pathStringView> FilePath::FileNameView(optional<pathStringView> defaultName) const
+std::optional<pathStringView> FilePath::FileNameView(std::optional<pathStringView> defaultName) const
 {
     if (!IsValid() || IsPathDelim(_path.back()))
     {
@@ -332,15 +332,15 @@ bool FilePath::HasExtension() const
     return false;
 }
 
-optional<FilePath> FilePath::Extension(optional<pathStringView> defaultName) const
+std::optional<FilePath> FilePath::Extension(std::optional<pathStringView> defaultName) const
 {
     auto view = ExtensionView();
-    if (view) return optional<FilePath>{*view};
-    if (defaultName) return optional<FilePath>{*defaultName};
-    return nullopt;
+    if (view) return {*view};
+    if (defaultName) return {*defaultName};
+    return std::nullopt;
 }
 
-optional<pathStringView> FilePath::ExtensionView(optional<pathStringView> defaultName) const
+std::optional<pathStringView> FilePath::ExtensionView(std::optional<pathStringView> defaultName) const
 {
     if (!IsValid() || IsPathDelim(_path.back()))
     {
@@ -392,15 +392,15 @@ bool FilePath::HasFileNameExt() const
     return HasFileName();
 }
 
-optional<FilePath> FilePath::FileNameExt(optional<pathStringView> defaultName) const
+std::optional<FilePath> FilePath::FileNameExt(std::optional<pathStringView> defaultName) const
 {
     auto view = FileNameExtView();
-    if (view) return optional<FilePath>{*view};
-    if (defaultName) return optional<FilePath>{*defaultName};
-    return nullopt;
+    if (view) return {*view};
+    if (defaultName) return {*defaultName};
+    return std::nullopt;
 }
 
-optional<pathStringView> FilePath::FileNameExtView(optional<pathStringView> defaultName) const
+std::optional<pathStringView> FilePath::FileNameExtView(std::optional<pathStringView> defaultName) const
 {
     if (!IsValid() || IsPathDelim(_path.back()))
     {

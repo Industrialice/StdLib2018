@@ -270,6 +270,79 @@ namespace StdLib::Funcs
         target.~T();
         new (&target) T(std::move(newValue));
     }
+
+    template <typename T, uiw size> [[nodiscard]] constexpr std::array<T, size> SortCompileTime(const std::array<T, size> &source)
+    {
+        auto countElements = [](const std::array<T, size> &source, T element) constexpr -> uiw
+        {
+            uiw count = 0;
+            for (uiw i = 0; i < size; ++i)
+            {
+                if (source[i] == element)
+                {
+                    ++count;
+                }
+            }
+            return count;
+        };
+
+        auto findMaxElement = [](const std::array<T, size> &source) constexpr -> T
+        {
+            T max = source[0];
+            for (uiw i = 1; i < size; ++i)
+            {
+                if (source[i] > max)
+                {
+                    max = source[i];
+                }
+            }
+            return max;
+        };
+
+        auto findMinElement = [](const std::array<T, size> &source, std::optional<T> lowerBound, T maxElement) constexpr -> T
+        {
+            T min = maxElement;
+            for (uiw i = 0; i < size; ++i)
+            {
+                if (source[i] <= lowerBound)
+                {
+                    continue;
+                }
+                if (source[i] < min)
+                {
+                    min = source[i];
+                }
+            }
+            return min;
+        };
+
+        auto fill = [](std::array<T, size> &target, uiw &index, T element, uiw count) constexpr
+        {
+            while (count)
+            {
+                target[index++] = element;
+                --count;
+            }
+        };
+
+        std::array<T, size> output{};
+        if (size > 0)
+        {
+            uiw index = 0;
+            T maxElement = findMaxElement(source);
+            T minElement = findMinElement(source, std::nullopt, maxElement);
+            uiw count = countElements(source, minElement);
+            fill(output, index, minElement, count);
+
+            while (minElement != maxElement)
+            {
+                minElement = findMinElement(source, minElement, maxElement);
+                count = countElements(source, minElement);
+                fill(output, index, minElement, count);
+            }
+        }
+        return output;
+    }
 }
 
 #define CountOf(a) Funcs::_CountOf<decltype(a)>()
