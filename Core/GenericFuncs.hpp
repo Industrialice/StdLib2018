@@ -273,81 +273,17 @@ namespace StdLib::Funcs
 
     template <typename T, uiw size> [[nodiscard]] constexpr std::array<T, size> SortCompileTime(const std::array<T, size> &source)
     {
-        auto equals = [](T left, T right) constexpr -> bool
+        std::array<T, size> output = source;
+        for (uiw i = 0; i < size - 1; ++i)
         {
-            return ((left < right) || (right < left)) == false;
-        };
-
-        auto countElements = [equals](const std::array<T, size> &source, T element) constexpr -> uiw
-        {
-            uiw count = 0;
-            for (uiw i = 0; i < size; ++i)
+            for (uiw j = i + 1; j < size; ++j)
             {
-                if (equals(source[i], element))
+                if (output[j] < output[i])
                 {
-                    ++count;
+                    T temp = output[j];
+                    output[j] = output[i];
+                    output[i] = temp;
                 }
-            }
-            return count;
-        };
-
-        auto findMaxElement = [](const std::array<T, size> &source) constexpr -> T
-        {
-            T max = source[0];
-            for (uiw i = 1; i < size; ++i)
-            {
-                if (max < source[i])
-                {
-                    max = source[i];
-                }
-            }
-            return max;
-        };
-
-        auto findMinElement = [equals](const std::array<T, size> &source, std::optional<T> lowerBound, T maxElement) constexpr -> T
-        {
-            T min = maxElement;
-            for (uiw i = 0; i < size; ++i)
-            {
-                if (lowerBound)
-                {
-                    if (source[i] < *lowerBound || equals(source[i], *lowerBound))
-                    {
-                        continue;
-                    }
-                }
-
-                if (source[i] < min)
-                {
-                    min = source[i];
-                }
-            }
-            return min;
-        };
-
-        auto fill = [](std::array<T, size> &target, uiw &index, T element, uiw count) constexpr
-        {
-            while (count)
-            {
-                target[index++] = element;
-                --count;
-            }
-        };
-
-        std::array<T, size> output{};
-        if (size > 0)
-        {
-            uiw index = 0;
-            T maxElement = findMaxElement(source);
-            T minElement = findMinElement(source, std::nullopt, maxElement);
-            uiw count = countElements(source, minElement);
-            fill(output, index, minElement, count);
-
-            while (!equals(minElement, maxElement))
-            {
-                minElement = findMinElement(source, minElement, maxElement);
-                count = countElements(source, minElement);
-                fill(output, index, minElement, count);
             }
         }
         return output;
