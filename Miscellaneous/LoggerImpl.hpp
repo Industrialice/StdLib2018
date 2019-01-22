@@ -1,6 +1,22 @@
 #include "Logger.hpp"
 #pragma once
 
+template<typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Message(LogLevels::LogLevel level, const MetaType &meta, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    ((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(level, &meta, format, args);
+    va_end(args);
+}
+
+template<bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Message(LogLevels::LogLevel level, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    ((Logger<void, IsThreadSafe> *)this)->MessageImpl(level, nullptr, format, args);
+    va_end(args);
+}
+
 template <typename MetaType, bool IsThreadSafe> void Logger<MetaType, IsThreadSafe>::RemoveListener(LoggerLocation *instance, void *handle)
 {
 	instance->logger->RemoveListener(*(ListenerHandle *)handle);
@@ -30,9 +46,7 @@ template <typename MetaType, bool IsThreadSafe> Logger<MetaType, IsThreadSafe> &
 	return *this;
 }
 
-template <typename MetaType, bool IsThreadSafe>
-template <typename>
-void Logger<MetaType, IsThreadSafe>::Message(LogLevels::LogLevel level, const MetaType &meta, const char *format, ...)
+template <typename MetaType, bool IsThreadSafe> void Logger<MetaType, IsThreadSafe>::MessageImpl(LogLevels::LogLevel level, const void *meta, const char *format, va_list args)
 {
 	if (_isEnabled == false)
 	{
@@ -50,19 +64,9 @@ void Logger<MetaType, IsThreadSafe>::Message(LogLevels::LogLevel level, const Me
 		return;
 	}
 
-	va_list args;
-	va_start(args, format);
-
 	uiw printed = 0;
-	if (meta.size())
-	{
-		printed = std::min(meta.size(), logBufferSize - 1);
-		memcpy(_logBuffer, meta.data(), printed);
-	}
 
 	int variadicPrintResult = vsnprintf(_logBuffer + printed, logBufferSize - printed, format, args);
-
-	va_end(args);
 
 	if (variadicPrintResult <= 0)
 	{
@@ -77,14 +81,16 @@ void Logger<MetaType, IsThreadSafe>::Message(LogLevels::LogLevel level, const Me
 		const auto &listener = *it;
 		if (listener.levelMask.Contains(level))
 		{
-			listener.callback(level, string_view(_logBuffer, printed));
+            if constexpr (std::is_same_v<MetaType, void>)
+            {
+                listener.callback(level, std::string_view(_logBuffer, printed));
+            }
+            else
+            {
+                listener.callback(level, std::string_view(_logBuffer, printed), *(MetaType *)meta);
+            }
 		}
 	}
-}
-
-template <typename MetaType, bool IsThreadSafe> NOINLINE void StdLib::Logger<MetaType, IsThreadSafe>::Message(LogLevels::LogLevel level, const char *format, ...)
-{
-	return void();
 }
 
 template <typename MetaType, bool IsThreadSafe> auto Logger<MetaType, IsThreadSafe>::OnMessage(const ListenerCallbackType &listener, LogLevels::LogLevel levelMask) -> ListenerHandle
@@ -121,7 +127,7 @@ template <typename MetaType, bool IsThreadSafe> void Logger<MetaType, IsThreadSa
 		return;
 	}
 
-	ASSUME(Funcs::AreSharedPointersEqual(handle.Owner(), _loggerLocation));
+	ASSUME(Funcs::AreSharedPointersEqual(currentOwner, _loggerLocation));
 
 	for (auto it = _listeners.begin(); ; ++it)
 	{

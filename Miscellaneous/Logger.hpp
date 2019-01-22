@@ -32,6 +32,15 @@ namespace StdLib
 		std::mutex _mutex{};
 	};
 
+    template <typename MetaType, bool IsThreadSafe> struct _LoggerMessageMethod
+    {
+        void Message(LogLevels::LogLevel level, const MetaType &meta, const char *format, ...);
+    };
+    template <bool IsThreadSafe> struct _LoggerMessageMethod<void, IsThreadSafe>
+    {
+        void Message(LogLevels::LogLevel level, const char *format, ...);
+    };
+
 	template <typename MetaType> struct _LoggerCallbackType
 	{
 		using type = std::function<void(LogLevels::LogLevel level, std::string_view message, const MetaType &meta)>;
@@ -41,8 +50,10 @@ namespace StdLib
 		using type = std::function<void(LogLevels::LogLevel level, std::string_view message)>;
 	};
 
-    template <typename MetaType = void, bool IsThreadSafe = false> class Logger : public _LoggerThreadSafeData<IsThreadSafe>
+    template <typename MetaType = void, bool IsThreadSafe = false> class Logger : public _LoggerThreadSafeData<IsThreadSafe>, public _LoggerMessageMethod<MetaType, IsThreadSafe>
     {
+        friend _LoggerMessageMethod<MetaType, IsThreadSafe>;
+
         struct LoggerLocation;
         static void RemoveListener(LoggerLocation *instance, void *handle);
 
@@ -65,14 +76,15 @@ namespace StdLib
         Logger(Logger &&source) noexcept;
         Logger &operator = (Logger &&source) noexcept;
 
-        template <typename = std::enable_if_t<!std::is_same_v<MetaType, void>>> NOINLINE void Message(LogLevels::LogLevel level, const MetaType &meta, const char *format, ...); // printf-family function will be used to convert the message into a string
-		NOINLINE void Message(LogLevels::LogLevel level, const char *format, ...); // printf-family function will be used to convert the message into a string
+        using _LoggerMessageMethod<MetaType, IsThreadSafe>::Message;
         ListenerHandle OnMessage(const ListenerCallbackType &listener, LogLevels::LogLevel levelMask = LogLevels::_All);
         void RemoveListener(ListenerHandle &handle);
         void IsEnabled(bool isEnabled);
         bool IsEnabled() const;
 
     private:        
+        void MessageImpl(LogLevels::LogLevel level, const void *meta, const char *format, va_list args);
+
         struct MessageListener
         {
             ListenerCallbackType callback{};
