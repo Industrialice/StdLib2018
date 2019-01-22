@@ -273,12 +273,17 @@ namespace StdLib::Funcs
 
     template <typename T, uiw size> [[nodiscard]] constexpr std::array<T, size> SortCompileTime(const std::array<T, size> &source)
     {
-        auto countElements = [](const std::array<T, size> &source, T element) constexpr -> uiw
+        auto equals = [](T left, T right) constexpr -> bool
+        {
+            return ((left < right) || (right < left)) == false;
+        };
+
+        auto countElements = [equals](const std::array<T, size> &source, T element) constexpr -> uiw
         {
             uiw count = 0;
             for (uiw i = 0; i < size; ++i)
             {
-                if (source[i] == element)
+                if (equals(source[i], element))
                 {
                     ++count;
                 }
@@ -291,7 +296,7 @@ namespace StdLib::Funcs
             T max = source[0];
             for (uiw i = 1; i < size; ++i)
             {
-                if (source[i] > max)
+                if (max < source[i])
                 {
                     max = source[i];
                 }
@@ -299,15 +304,19 @@ namespace StdLib::Funcs
             return max;
         };
 
-        auto findMinElement = [](const std::array<T, size> &source, std::optional<T> lowerBound, T maxElement) constexpr -> T
+        auto findMinElement = [equals](const std::array<T, size> &source, std::optional<T> lowerBound, T maxElement) constexpr -> T
         {
             T min = maxElement;
             for (uiw i = 0; i < size; ++i)
             {
-                if (source[i] <= lowerBound)
+                if (lowerBound)
                 {
-                    continue;
+                    if (source[i] < *lowerBound || equals(source[i], *lowerBound))
+                    {
+                        continue;
+                    }
                 }
+
                 if (source[i] < min)
                 {
                     min = source[i];
@@ -334,7 +343,7 @@ namespace StdLib::Funcs
             uiw count = countElements(source, minElement);
             fill(output, index, minElement, count);
 
-            while (minElement != maxElement)
+            while (!equals(minElement, maxElement))
             {
                 minElement = findMinElement(source, minElement, maxElement);
                 count = countElements(source, minElement);

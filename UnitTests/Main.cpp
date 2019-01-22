@@ -18,6 +18,23 @@ static void CompileTimeSortingTests()
     static constexpr auto result = SortCompileTime(source);
     UTest(Equal, result, std::array<ui32, 5>{0, 1, 4, 9, 100});
 
+    struct Limited
+    {
+        ui32 value{};
+
+        constexpr bool operator < (const Limited &other) const
+        {
+            return value < other.value;
+        }
+    };
+    static constexpr std::array<Limited, 5> source2 = {15, 99, 12, 1, 0};
+    static constexpr std::array<Limited, 5> result2 = SortCompileTime(source2);
+    for (uiw index = 0; index < source2.size(); ++index)
+    {
+        static constexpr std::array<Limited, 5> ref = {0, 1, 12, 15, 99};
+        UTest(Equal, result2[index].value, ref[index].value);
+    }
+
     Logger::Message("finished compile time sorting tests\n");
 }
 
