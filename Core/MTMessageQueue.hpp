@@ -25,7 +25,7 @@ namespace StdLib
         {
             using messageType = MessageDelegate<MessageWithNext, Caller, MethodType, method, typename std::remove_reference<VArgs>::type...>;
             auto newMessage = new messageType(std::forward<Caller>(caller), std::forward<typename std::remove_reference<VArgs>::type>(args)...);
-            std::scoped_lock<std::mutex> lock{_mutex};
+            std::scoped_lock lock{_mutex};
             NewMessage(newMessage);
             _newWorkNotifier.notify_all();
         }
@@ -34,7 +34,7 @@ namespace StdLib
         {
             using messageType = MessageFuncInline<MessageWithNext, FuncType, func, typename std::remove_reference<VArgs>::type...>;
             auto newMessage = new messageType(std::forward<typename std::remove_reference<VArgs>::type>(args)...);
-            std::scoped_lock<std::mutex> lock{_mutex};
+            std::scoped_lock lock{_mutex};
             NewMessage(newMessage);
             _newWorkNotifier.notify_all();
         }
@@ -43,14 +43,14 @@ namespace StdLib
         {
             using messageType = MessageFuncPointer<MessageWithNext, FuncType, typename std::remove_reference<VArgs>::type...>;
             auto newMessage = new messageType(func, std::forward<typename std::remove_reference<VArgs>::type>(args)...);
-            std::scoped_lock<std::mutex> lock{_mutex};
+            std::scoped_lock lock{_mutex};
             NewMessage(newMessage);
             _newWorkNotifier.notify_all();
         }
 
         void ExecWait()
         {
-            std::unique_lock<std::mutex> cvLock{_mutex};
+            std::unique_lock cvLock{_mutex};
             _newWorkNotifier.wait(cvLock, [this] { return _firstMessage != nullptr; });
 
 			Message *message = _firstMessage;
@@ -71,7 +71,7 @@ namespace StdLib
 			Message *message;
 
             {
-                std::scoped_lock<std::mutex> scopeLock{_mutex};
+                std::scoped_lock scopeLock{_mutex};
 
                 if (_firstMessage == nullptr)
                 {
@@ -94,7 +94,7 @@ namespace StdLib
 
 		void Clear()
 		{
-			std::scoped_lock<std::mutex> scopeLock{_mutex};
+			std::scoped_lock scopeLock{_mutex};
 
 			Message *curMessage = _firstMessage;
 
