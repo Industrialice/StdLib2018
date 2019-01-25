@@ -265,10 +265,10 @@ namespace StdLib::Funcs
         new (&target) T();
     }
 
-    template <typename T> void Reinitialize(T &target, T &&newValue)
+    template <typename T, typename U> void Reinitialize(T &target, U &&newValue)
     {
         target.~T();
-        new (&target) T(std::move(newValue));
+        new (&target) T(std::forward<U>(newValue));
     }
 
     template <typename T, uiw size> [[nodiscard]] constexpr std::array<T, size> SortCompileTime(const std::array<T, size> &source)

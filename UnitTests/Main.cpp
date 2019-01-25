@@ -29,6 +29,40 @@ void MiscTests()
         UTest(Equal, arr[index], 2);
     }
 
+	struct ReinitializeTest
+	{
+		bool isMovedOut = false;
+		i32 value;
+
+		ReinitializeTest(i32 value) : value(value)
+		{}
+
+		ReinitializeTest(const ReinitializeTest &) = default;
+		ReinitializeTest &operator = (const ReinitializeTest &) = default;
+
+		ReinitializeTest(ReinitializeTest &&source) : value(source.value)
+		{
+			source.isMovedOut = true;
+			isMovedOut = false;
+		}
+
+		ReinitializeTest &operator = (ReinitializeTest &&source)
+		{
+			value = source.value;
+			source.isMovedOut = true;
+			isMovedOut = false;
+			return *this;
+		}
+	};
+
+	ReinitializeTest t0(0);
+	ReinitializeTest t1(1);
+
+	Funcs::Reinitialize(t0, t1);
+
+	UTest(Equal, t1.isMovedOut, false);
+	UTest(Equal, t0.value, t1.value);
+
     Logger::Message("finished misc tests\n");
 }
 
