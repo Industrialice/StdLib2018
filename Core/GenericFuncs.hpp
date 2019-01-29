@@ -274,15 +274,18 @@ namespace StdLib::Funcs
     template <typename T, uiw size> [[nodiscard]] constexpr std::array<T, size> SortCompileTime(const std::array<T, size> &source)
     {
         std::array<T, size> output = source;
-        for (uiw i = 0; i < size - 1; ++i)
+        if (size > 0)
         {
-            for (uiw j = i + 1; j < size; ++j)
+            for (uiw i = 0; i < size - 1; ++i)
             {
-                if (output[j] < output[i])
+                for (uiw j = i + 1; j < size; ++j)
                 {
-                    T temp = output[j];
-                    output[j] = output[i];
-                    output[i] = temp;
+                    if (output[j] < output[i])
+                    {
+                        T temp = output[j];
+                        output[j] = output[i];
+                        output[i] = temp;
+                    }
                 }
             }
         }
