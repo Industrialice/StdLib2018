@@ -12,6 +12,7 @@ void MathLibTests();
 void UniqueIdManagerTests();
 void UniqueIdManagerBenchmark();
 void LoggerTests();
+void MTTests();
 
 void MiscTests()
 {
@@ -1212,6 +1213,7 @@ static void DoTests(int argc, const char **argv)
     MathLibTests();
     UniqueIdManagerTests();
 	LoggerTests();
+    MTTests();
 	PrintSystemInfo();
 
     Error<> folderForTestsRemove = FileSystem::Remove(folderForTests);

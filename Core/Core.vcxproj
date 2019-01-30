@@ -191,6 +191,7 @@
     <ClInclude Include="CoreTypes.hpp" />
     <ClInclude Include="CompilerSpecific.hpp" />
     <ClInclude Include="DataHolder.hpp" />
+    <ClInclude Include="DIWRSpinLock.hpp" />
     <ClInclude Include="EnumCombinable.hpp" />
     <ClInclude Include="Error.hpp" />
     <ClInclude Include="FileToMemoryStream.hpp" />
@@ -214,6 +215,7 @@
     <ClInclude Include="_PreHeader.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DIWRSpinLock.cpp" />
     <ClCompile Include="FileToMemoryStream.cpp" />
     <ClCompile Include="HashFuncs.cpp" />
     <ClCompile Include="MatrixMathTypes.cpp" />

@@ -9,6 +9,12 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="MT Header Files">
+      <UniqueIdentifier>{88638bd0-ffbe-4a12-8251-6ddda98b82d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MT Source Files">
+      <UniqueIdentifier>{835d2dae-0d47-406c-8a66-2a52d1424516}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CompilerSpecific.hpp">
@@ -92,11 +98,14 @@
     <ClInclude Include="FunctionInfo.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Message.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="DIWRSpinLock.hpp">
+      <Filter>MT Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MTMessageQueue.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>MT Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Message.hpp">
+      <Filter>MT Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -114,6 +123,9 @@
     </ClCompile>
     <ClCompile Include="HashFuncs.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DIWRSpinLock.cpp">
+      <Filter>MT Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

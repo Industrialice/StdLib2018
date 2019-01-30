@@ -213,6 +213,7 @@
     <ClCompile Include="LoggerTests.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MathLibTests.cpp" />
+    <ClCompile Include="MTTests.cpp" />
     <ClCompile Include="UniqueIdManagerBenchmark.cpp" />
     <ClCompile Include="UniqueIdManagerTests.cpp" />
     <ClCompile Include="XNARef.cpp" />

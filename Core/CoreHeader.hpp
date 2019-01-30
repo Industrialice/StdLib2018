@@ -12,6 +12,7 @@
 #include <vector>
 #include <variant>
 #include <malloc.h>
+#include <atomic>
 
 using namespace std::literals;
 
