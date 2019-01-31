@@ -66,7 +66,7 @@ auto DIWRSpinLock::TryLock(LockType type) const -> std::optional<Unlocker>
         break;
     case DIWRSpinLock::LockType::Exclusive: // inclusive, exclusive, read and pending exclusive must be 0
         oldLock = 0;
-        newLock = ExclusiveMask;
+        newLock = ExclusiveMask | (ReadersMask + 1);
         if (_users.compare_exchange_strong(oldLock, newLock))
         {
             return Unlocker(*this, type);
@@ -159,6 +159,7 @@ void DIWRSpinLock::Transition(LockType current, LockType target) const
             _users.fetch_add(1 - InclusiveMask); // remove inclusive flag, increment readers counter
             break;
         }
+		break;
     case LockType::Read:
         ASSUME((_users.load() & ReadersMask) > 0);
         ASSUME(!Funcs::IsBitSet(_users.load(), ExclusiveBitIndex));
@@ -193,6 +194,7 @@ void DIWRSpinLock::Transition(LockType current, LockType target) const
             SOFTBREAK;
             break;
         }
+		break;
     }
 }
 
