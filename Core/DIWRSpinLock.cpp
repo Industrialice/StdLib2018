@@ -6,6 +6,19 @@ using namespace StdLib;
 
 // TODO: optimize memory_order
 
+DIWRSpinLock::DIWRSpinLock(DIWRSpinLock &&source) noexcept
+{
+    ASSUME(source._users.load() == 0);
+}
+
+DIWRSpinLock &DIWRSpinLock::operator = (DIWRSpinLock &&source) noexcept
+{
+    ASSUME(this != &source);
+    ASSUME(source._users.load() == 0);
+    _users.store(0);
+    return *this;
+}
+
 auto DIWRSpinLock::Lock(LockType type) const -> Unlocker
 {
     switch (type)
@@ -198,17 +211,17 @@ void DIWRSpinLock::Transition(LockType current, LockType target) const
     }
 }
 
-DIWRSpinLock::Unlocker::Unlocker(const DIWRSpinLock &lock, DIWRSpinLock::LockType lockType) : _lock(lock), _lockType(lockType)
+DIWRSpinLock::Unlocker::Unlocker(const DIWRSpinLock &lock, DIWRSpinLock::LockType lockType) noexcept : _lock(lock), _lockType(lockType)
 {}
 
-DIWRSpinLock::Unlocker::~Unlocker()
+DIWRSpinLock::Unlocker::~Unlocker() noexcept
 {
 #ifdef DEBUG
     ASSUME(!_isLocked);
 #endif
 }
 
-DIWRSpinLock::Unlocker::Unlocker(Unlocker &&source) : _lock(source._lock), _lockType(source._lockType)
+DIWRSpinLock::Unlocker::Unlocker(Unlocker &&source) noexcept : _lock(source._lock), _lockType(source._lockType)
 {
 #ifdef DEBUG
     _isLocked = source._isLocked;

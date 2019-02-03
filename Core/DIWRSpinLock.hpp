@@ -37,19 +37,19 @@ namespace StdLib
             bool _isLocked = true;
         #endif
 
-            Unlocker(const DIWRSpinLock &lock, LockType lockType);
+            Unlocker(const DIWRSpinLock &lock, LockType lockType) noexcept;
 
         public:
-            ~Unlocker();
-            Unlocker(Unlocker &&source);
+            ~Unlocker() noexcept;
+            Unlocker(Unlocker &&source) noexcept;
             void Unlock();
             void Transition(LockType target);
             [[nodiscard]] LockType LockType() const;
         };
 
-        DIWRSpinLock() = default;
-        DIWRSpinLock(DIWRSpinLock &&) = default;
-        DIWRSpinLock &operator = (DIWRSpinLock &&) = default;
+        DIWRSpinLock() noexcept = default;
+        DIWRSpinLock(DIWRSpinLock &&source) noexcept;
+        DIWRSpinLock &operator = (DIWRSpinLock &&source) noexcept;
 
         [[nodiscard]] Unlocker Lock(LockType type) const;
         [[nodiscard]] std::optional<Unlocker> TryLock(LockType type) const; // avoid using it with LockType::Exclusive, there may always be some read/inclusive locks that will prevent it from ever succeeding
