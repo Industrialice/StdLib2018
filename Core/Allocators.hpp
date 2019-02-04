@@ -9,32 +9,20 @@ namespace StdLib::Allocator
     {
         template <typename T = ui8> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count)
         {
-            if (count)
+            if constexpr (!std::is_same_v<T, void>)
             {
-                if constexpr (!std::is_same_v<T, void>)
-                {
-                    count *= sizeof(T);
-                }
-                return (T *)malloc(count);
+                count *= sizeof(T);
             }
-            return nullptr;
+            return (T *)malloc(count);
         }
 
         template <typename T> [[nodiscard]] static T *Reallocate(T *memory, uiw count)
         {
-            if (memory || count)
+            if constexpr (!std::is_same_v<T, void>)
             {
-                if (count == 0)
-                {
-                    count = 1;
-                }
-                if constexpr (!std::is_same_v<T, void>)
-                {
-                    count *= sizeof(T);
-                }
-                return (T *)realloc(memory, count);
+                count *= sizeof(T);
             }
-            return nullptr;
+            return (T *)realloc(memory, count);
         }
 
         template <typename T> [[nodiscard]] static bool ReallocateInplace(T *memory, uiw count)
@@ -43,10 +31,22 @@ namespace StdLib::Allocator
             {
                 count *= sizeof(T);
             }
+
         #ifdef PLATFORM_WINDOWS
-            return _expand(memory, count) != nullptr;
+
+            if (memory == nullptr)
+            {
+                return count == 0;
+            }
+            else
+            {
+                return _expand(memory, count) != nullptr;
+            }
+
         #else
-            return false;
+
+            return false; // TODO: solutions for other platforms?
+
         #endif
         }
 
@@ -68,12 +68,4 @@ namespace StdLib::Allocator
             free(memory);
         }
     };
-
-    /*template <uiw Size> class Fixed
-    {
-        ui8 _buffer[Size];
-        uiw _currentSize = 0;
-
-    public:
-    };*/
 }

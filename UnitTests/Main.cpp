@@ -462,6 +462,11 @@ static void AllocatorsTests()
 
     Allocator::MallocBased::Free(memory);
 
+    memory = Allocator::MallocBased::Allocate(0);
+    memory = Allocator::MallocBased::Reallocate(memory, 0);
+    UTest(true, Allocator::MallocBased::ReallocateInplace(memory, 0));
+    Allocator::MallocBased::Free(memory);
+
     Logger::Message("finished allocators tests\n");
 }
 
