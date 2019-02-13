@@ -120,7 +120,7 @@ template <typename MetaType, bool IsThreadSafe> void Logger<MetaType, IsThreadSa
 		scopeLock.emplace(this->_mutex);
 	}
 
-	std::weak_ptr<ListenerHandle::ownerType> currentOwner{};
+	std::weak_ptr<typename ListenerHandle::ownerType> currentOwner{};
 	handle.Owner().swap(currentOwner);
 	if (currentOwner.expired())
 	{

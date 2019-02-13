@@ -88,4 +88,45 @@ namespace StdLib::Hash
 
 	ui32 CRC32(const ui8 *message); // zero terminated
 	ui32 CRC32(const ui8 *message, uiw length);
+
+    // based on Thomas Mueller's answer from 
+    // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key
+    // doesn't work well for 8 and 16 bits inputs
+    // TODO: add precision specifier
+    template <typename T> [[nodiscard]] T Integer(T x)
+    {
+        static_assert(std::is_integral_v<T>);
+        if constexpr (sizeof(T) == 8)
+        {
+            x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
+            x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
+            x = x ^ (x >> 31);
+        }
+        else
+        {
+            x = ((x >> 16) ^ x) * 0x45d9f3b;
+            x = ((x >> 16) ^ x) * 0x45d9f3b;
+            x = (x >> 16) ^ x;
+        }
+        return x;
+    }
+
+    // returns the original value passed into Hash::Integer
+    template <typename T> [[nodiscard]] T IntegerInverse(T x)
+    {
+        static_assert(std::is_integral_v<T>);
+        if constexpr (sizeof(T) == 8)
+        {
+            x = (x ^ (x >> 31) ^ (x >> 62)) * 0x319642b2d24d8ec3ULL;
+            x = (x ^ (x >> 27) ^ (x >> 54)) * 0x96de1b173f119089ULL;
+            x = x ^ (x >> 30) ^ (x >> 60);
+        }
+        else
+        {
+            x = ((x >> 16) ^ x) * 0x119de1f3;
+            x = ((x >> 16) ^ x) * 0x119de1f3;
+            x = (x >> 16) ^ x;
+        }
+        return x;
+    }
 }

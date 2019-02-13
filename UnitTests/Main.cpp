@@ -185,6 +185,31 @@ static void TypeIdentifiableTests()
 	Logger::Message("finished type identifiable tests\n");
 }
 
+template <typename T> static void TestIntegerHashes()
+{
+    T number0 = 3;
+    T number1 = 2;
+    T number2 = 5;
+
+    UTest(NotEqual, Hash::FNVHash<Hash::Precision::P32>(number0) + Hash::FNVHash<Hash::Precision::P32>(number1), Hash::FNVHash<Hash::Precision::P32>(number2));
+
+    T hash0 = Hash::Integer(number0);
+    T hash1 = Hash::Integer(number1);
+    T hash2 = Hash::Integer(number2);
+
+    UTest(NotEqual, hash0, hash1);
+    UTest(NotEqual, hash1, hash2);
+
+    if constexpr (sizeof(T) > 2) // the hash doesn't work well for ui8 and ui16, this check fails
+    {
+        UTest(NotEqual, hash0 + hash1, hash2);
+    }
+
+    UTest(Equal, Hash::IntegerInverse(hash0), 3);
+    UTest(Equal, Hash::IntegerInverse(hash1), 2);
+    UTest(Equal, Hash::IntegerInverse(hash2), 5);
+}
+
 static void HashFuncsTest()
 {
 	constexpr ui32 value = 23534;
@@ -211,6 +236,11 @@ static void HashFuncsTest()
 	UTest(Equal, crc32, 0xD85554CE);
 	crc32 = Hash::CRC32((ui8 *)crc32str, strlen(crc32str));
 	UTest(Equal, crc32, 0xD85554CE);
+
+    TestIntegerHashes<ui8>();
+    TestIntegerHashes<ui16>();
+    TestIntegerHashes<ui32>();
+    TestIntegerHashes<ui64>();
 
 	Logger::Message("finished hash tests\n");
 }
@@ -464,7 +494,9 @@ static void AllocatorsTests()
 
     memory = Allocator::MallocBased::Allocate(0);
     memory = Allocator::MallocBased::Reallocate(memory, 0);
+#ifdef PLATFORM_WINDOWS
     UTest(true, Allocator::MallocBased::ReallocateInplace(memory, 0));
+#endif
     Allocator::MallocBased::Free(memory);
 
     Logger::Message("finished allocators tests\n");

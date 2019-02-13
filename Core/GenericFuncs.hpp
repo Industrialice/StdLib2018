@@ -271,6 +271,12 @@ namespace StdLib::Funcs
         new (&target) T(std::forward<U>(newValue));
     }
 
+    template <typename T> void Drop(T &&target)
+    {
+        T _ = std::move(target);
+        (void)_;
+    }
+
     template <typename T, uiw size> [[nodiscard]] constexpr std::array<T, size> SortCompileTime(const std::array<T, size> &source)
     {
         std::array<T, size> output = source;
