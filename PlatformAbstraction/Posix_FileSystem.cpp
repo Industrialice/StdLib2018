@@ -439,7 +439,7 @@ Error<> CopyFileInternal(const char *sourcePnn, const char *targetPnn)
     auto sizeLeft = statSource.st_size;
     while (sizeLeft > 0)
     {
-        auto actuallyRead = read(sourceFile, localBuffer, Funcs::CountOf(localBuffer));
+        auto actuallyRead = read(sourceFile, localBuffer, CountOf(localBuffer));
         if (actuallyRead == 0)
         {
             break;

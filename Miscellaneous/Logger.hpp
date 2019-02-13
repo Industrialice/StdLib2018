@@ -5,6 +5,7 @@
 #include <ListenerHandle.hpp>
 #include <atomic>
 #include <mutex>
+#include <cstdarg>
 
 namespace StdLib
 {

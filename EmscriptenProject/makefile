@@ -3,13 +3,16 @@ CC=emcc
 CPPSOURCES := $(wildcard *.cpp)
 CPPSOURCES += $(wildcard ../Core/*.cpp)
 CPPSOURCES += $(wildcard ../PlatformAbstraction/*.cpp)
+CPPSOURCES += $(wildcard ../Miscellaneous/*.cpp)
 CPPSOURCES += $(wildcard ../UnitTests/*.cpp)
 CPPSOURCES := $(filter-out $(wildcard ../PlatformAbstraction/Win_*.cpp), $(CPPSOURCES))
+CPPSOURCES := $(filter-out $(wildcard ../Miscellaneous/Win_*.cpp), $(CPPSOURCES))
 
 INC1 = ../Core
 INC2 = ../PlatformAbstraction
+INC3 = ../Miscellaneous
 
-INC = $(INC1) $(INC2)
+INC = $(INC1) $(INC2) $(INC3)
 INC_PARAMS = $(foreach d, $(INC), -I$d)
 
 COMPILER_OPTS = -std=c++1z -stdlib=libstdc++ $(INC_PARAMS)

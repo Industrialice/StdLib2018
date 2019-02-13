@@ -58,7 +58,7 @@ void Logger::Message(const char *fmt, ...)
     buf[CountOf(buf) - 1] = '\0';
     OnLogMessage(buf);
 #else
-    HARDBREAK;
+    vfprintf(stderr, fmt, args);
 #endif
     va_end(args);
 }
