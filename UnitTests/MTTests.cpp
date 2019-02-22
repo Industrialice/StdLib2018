@@ -29,7 +29,7 @@ static void SpinLockTests()
 			{
 				locks[index]->Unlock();
 			}
-			Funcs::Drop(std::move(locks[index]));
+            std::exchange(locks[index], {});
 		}
 	};
 

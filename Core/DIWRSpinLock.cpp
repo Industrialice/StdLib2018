@@ -211,7 +211,7 @@ void DIWRSpinLock::Transition(LockType current, LockType target) const
     }
 }
 
-DIWRSpinLock::Unlocker::Unlocker(const DIWRSpinLock &lock, DIWRSpinLock::LockType lockType) noexcept : _lock(lock), _lockType(lockType)
+DIWRSpinLock::Unlocker::Unlocker(const DIWRSpinLock &lock, DIWRSpinLock::LockType lockType) noexcept : _lock(&lock), _lockType(lockType)
 {}
 
 DIWRSpinLock::Unlocker::~Unlocker() noexcept
@@ -229,6 +229,21 @@ DIWRSpinLock::Unlocker::Unlocker(Unlocker &&source) noexcept : _lock(source._loc
 #endif
 }
 
+auto DIWRSpinLock::Unlocker::operator = (Unlocker &&source) noexcept -> Unlocker &
+{
+#ifdef DEBUG
+    ASSUME(!_isLocked);
+    _isLocked = source._isLocked;
+    source._isLocked = false;
+#endif
+
+    ASSUME(this != &source);
+    _lock = source._lock;
+    _lockType = source._lockType;
+
+    return *this;
+}
+
 void DIWRSpinLock::Unlocker::Unlock()
 {
 #ifdef DEBUG
@@ -236,7 +251,7 @@ void DIWRSpinLock::Unlocker::Unlock()
     _isLocked = false;
 #endif
 
-    _lock.Unlock(_lockType);
+    _lock->Unlock(_lockType);
 }
 
 void DIWRSpinLock::Unlocker::Transition(DIWRSpinLock::LockType target)
@@ -244,7 +259,7 @@ void DIWRSpinLock::Unlocker::Transition(DIWRSpinLock::LockType target)
 #ifdef DEBUG
     ASSUME(_isLocked);
 #endif
-    _lock.Transition(_lockType, target);
+    _lock->Transition(_lockType, target);
     _lockType = target;
 }
 

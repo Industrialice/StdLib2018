@@ -32,7 +32,7 @@ namespace StdLib
             friend DIWRSpinLock;
 
             LockType _lockType;
-            const DIWRSpinLock &_lock;
+            const DIWRSpinLock *_lock;
         #ifdef DEBUG
             bool _isLocked = true;
         #endif
@@ -42,6 +42,7 @@ namespace StdLib
         public:
             ~Unlocker() noexcept;
             Unlocker(Unlocker &&source) noexcept;
+            Unlocker &operator = (Unlocker &&source) noexcept;
             void Unlock();
             void Transition(LockType target);
             [[nodiscard]] LockType LockType() const;
