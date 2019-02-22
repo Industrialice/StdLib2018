@@ -102,12 +102,22 @@ namespace StdLib::Hash
             x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
             x = x ^ (x >> 31);
         }
-        else
+        else if constexpr (sizeof(T) == 4)
         {
             x = ((x >> 16) ^ x) * 0x45d9f3b;
             x = ((x >> 16) ^ x) * 0x45d9f3b;
             x = (x >> 16) ^ x;
         }
+		else if constexpr (sizeof(T) == 2)
+		{
+			x = ((x >> 8) ^ x) * 0x45d9f3b;
+			x = ((x >> 8) ^ x) * 0x45d9f3b;
+			x = (x >> 8) ^ x;
+		}
+		else
+		{
+			x = x * 0x45d9f3b;
+		}
         return x;
     }
 
@@ -121,11 +131,21 @@ namespace StdLib::Hash
             x = (x ^ (x >> 27) ^ (x >> 54)) * 0x96de1b173f119089ULL;
             x = x ^ (x >> 30) ^ (x >> 60);
         }
+		else if constexpr (sizeof(T) == 4)
+		{
+			x = ((x >> 16) ^ x) * 0x119de1f3;
+			x = ((x >> 16) ^ x) * 0x119de1f3;
+			x = (x >> 16) ^ x;
+		}
+		else if constexpr (sizeof(T) == 2)
+		{
+			x = ((x >> 8) ^ x) * 0x119de1f3;
+			x = ((x >> 8) ^ x) * 0x119de1f3;
+			x = (x >> 8) ^ x;
+		}
         else
         {
-            x = ((x >> 16) ^ x) * 0x119de1f3;
-            x = ((x >> 16) ^ x) * 0x119de1f3;
-            x = (x >> 16) ^ x;
+            x = x * 0x119de1f3;
         }
         return x;
     }

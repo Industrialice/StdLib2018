@@ -200,10 +200,7 @@ template <typename T> static void TestIntegerHashes()
     UTest(NotEqual, hash0, hash1);
     UTest(NotEqual, hash1, hash2);
 
-    if constexpr (sizeof(T) > 2) // the hash doesn't work well for ui8 and ui16, this check fails
-    {
-        UTest(NotEqual, hash0 + hash1, hash2);
-    }
+    UTest(NotEqual, hash0 + hash1, hash2);
 
     UTest(Equal, Hash::IntegerInverse(hash0), 3);
     UTest(Equal, Hash::IntegerInverse(hash1), 2);
