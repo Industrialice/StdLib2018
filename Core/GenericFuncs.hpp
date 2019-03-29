@@ -112,7 +112,15 @@ namespace StdLib::Funcs
         return result;
     }
 
-    // TODO: IndexOfMostSignificantZeroBit and IndexOfLeastSignificantZeroBit
+    template <typename T> [[nodiscard]] FORCEINLINE ui32 IndexOfMostSignificantZeroBit(T value)
+    {
+        return IndexOfMostSignificantNonZeroBit(T(~value));
+    }
+
+    template <typename T> [[nodiscard]] FORCEINLINE ui32 IndexOfLeastSignificantZeroBit(T value)
+    {
+        return IndexOfLeastSignificantNonZeroBit(T(~value));
+    }
 
     template <typename T> [[nodiscard]] T ChangeEndianness(T value)
     {

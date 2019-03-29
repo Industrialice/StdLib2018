@@ -302,6 +302,28 @@ static void SignificantBitTests()
     UTest(Equal, IndexOfMostSignificantNonZeroBit(i8value), 3u);
     UTest(Equal, IndexOfLeastSignificantNonZeroBit(i8value), 0u);
 
+    ui64value = 16384;
+    UTest(Equal, IndexOfMostSignificantZeroBit(ui64value), 63u);
+    UTest(Equal, IndexOfLeastSignificantZeroBit(ui64value), 0u);
+    ui64value += 1;
+    UTest(Equal, IndexOfMostSignificantZeroBit(ui64value), 63u);
+    UTest(Equal, IndexOfLeastSignificantZeroBit(ui64value), 1u);
+
+    i64value = i64_min + 1;
+    UTest(Equal, IndexOfMostSignificantZeroBit(i64value), 62u);
+    UTest(Equal, IndexOfLeastSignificantZeroBit(i64value), 1u);
+
+    ui8value = 128;
+    UTest(Equal, IndexOfMostSignificantZeroBit(ui8value), 6u);
+    UTest(Equal, IndexOfLeastSignificantZeroBit(ui8value), 0u);
+    ui8value += 1;
+    UTest(Equal, IndexOfMostSignificantZeroBit(ui8value), 6u);
+    UTest(Equal, IndexOfLeastSignificantZeroBit(ui8value), 1u);
+
+    i8value = -127;
+    UTest(Equal, IndexOfMostSignificantZeroBit(i8value), 6u);
+    UTest(Equal, IndexOfLeastSignificantZeroBit(i8value), 1u);
+
     Logger::Message("finished significant bit tests\n");
 }
 

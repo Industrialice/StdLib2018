@@ -33,9 +33,6 @@ namespace StdLib
 
             LockType _lockType;
             const DIWRSpinLock *_lock;
-        #ifdef DEBUG
-            bool _isLocked = true;
-        #endif
 
             Unlocker(const DIWRSpinLock &lock, LockType lockType) noexcept;
 
@@ -46,6 +43,7 @@ namespace StdLib
             void Unlock();
             void Transition(LockType target);
             [[nodiscard]] LockType LockType() const;
+            [[nodiscard]] bool PointToSameLock(const Unlocker &other) const;
         };
 
         DIWRSpinLock() noexcept = default;

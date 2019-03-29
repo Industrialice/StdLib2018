@@ -217,47 +217,48 @@ DIWRSpinLock::Unlocker::Unlocker(const DIWRSpinLock &lock, DIWRSpinLock::LockTyp
 DIWRSpinLock::Unlocker::~Unlocker() noexcept
 {
 #ifdef DEBUG
-    ASSUME(!_isLocked);
+    ASSUME(_lock == nullptr);
 #endif
 }
 
 DIWRSpinLock::Unlocker::Unlocker(Unlocker &&source) noexcept : _lock(source._lock), _lockType(source._lockType)
 {
 #ifdef DEBUG
-    _isLocked = source._isLocked;
-    source._isLocked = false;
+    source._lock = nullptr;
 #endif
 }
 
 auto DIWRSpinLock::Unlocker::operator = (Unlocker &&source) noexcept -> Unlocker &
 {
 #ifdef DEBUG
-    ASSUME(!_isLocked);
-    _isLocked = source._isLocked;
-    source._isLocked = false;
+    ASSUME(_lock == nullptr);
 #endif
 
     ASSUME(this != &source);
     _lock = source._lock;
     _lockType = source._lockType;
 
+#ifdef DEBUG
+    source._lock = nullptr;
+#endif
+
     return *this;
 }
 
 void DIWRSpinLock::Unlocker::Unlock()
 {
-#ifdef DEBUG
-    ASSUME(_isLocked);
-    _isLocked = false;
-#endif
-
     _lock->Unlock(_lockType);
+
+#ifdef DEBUG
+    ASSUME(_lock);
+    _lock = nullptr;
+#endif
 }
 
 void DIWRSpinLock::Unlocker::Transition(DIWRSpinLock::LockType target)
 {
 #ifdef DEBUG
-    ASSUME(_isLocked);
+    ASSUME(_lock);
 #endif
     _lock->Transition(_lockType, target);
     _lockType = target;
@@ -266,4 +267,12 @@ void DIWRSpinLock::Unlocker::Transition(DIWRSpinLock::LockType target)
 auto DIWRSpinLock::Unlocker::LockType() const -> DIWRSpinLock::LockType
 {
     return _lockType;
+}
+
+bool DIWRSpinLock::Unlocker::PointToSameLock(const Unlocker &other) const
+{
+#ifdef DEBUG
+    ASSUME(_lock && other._lock);
+#endif
+    return _lock == other._lock;
 }
