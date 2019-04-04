@@ -209,7 +209,7 @@ void File::Close()
     {
         return;
     }
-    Flush();
+    PerformFlush(false);
     if (_isOwningFileHandle)
     {
         BOOL result = CloseHandle(_handle);
@@ -226,7 +226,7 @@ Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 
     DWORD moveMethod;
 
-    if (!CancelCachedRead() || !File::Flush())
+    if (!CancelCachedRead() || !PerformFlush(false))
     {
         return DefaultError::UnknownError();
     }
@@ -278,7 +278,7 @@ Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 Result<ui64> File::SizeGet()
 {
     ASSUME(IsOpened());
-    if (!File::Flush()) // flushing first because file pointer may not be at the end of the file, in that case we can't just return FileSize + BufferSize
+    if (!PerformFlush(false)) // flushing first because file pointer may not be at the end of the file, in that case we can't just return FileSize + BufferSize
     {
         return DefaultError::UnknownError();
     }
@@ -299,7 +299,7 @@ Error<> File::SizeSet(ui64 newSize)
 {
     ASSUME(IsOpened());
 
-    if (!CancelCachedRead() || !File::Flush())
+    if (!CancelCachedRead() || !PerformFlush(false))
     {
         return DefaultError::UnknownError();
     }

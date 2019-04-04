@@ -130,7 +130,7 @@ NOINLINE bool File::Read(void *target, ui32 len, ui32 *read)
         ++_stats.bufferedReads;
     #endif
 
-        if (!File::Flush())
+        if (!PerformFlush(false))
         {
             return false;
         }
@@ -192,7 +192,7 @@ NOINLINE bool File::Write(const void *source, ui32 len, ui32 *written)
 
         if (_bufferSize - _bufferPos < len)
         {
-            if (!File::Flush())
+            if (!PerformFlush(false))
             {
                 return false;
             }
@@ -218,23 +218,7 @@ NOINLINE bool File::Write(const void *source, ui32 len, ui32 *written)
 
 NOINLINE bool File::Flush()
 {
-    ASSUME(IsOpened());
-    ASSUME(_bufferPos <= _bufferSize);
-    FlushSystemCaches();
-    if (_readBufferCurrentSize)
-    {
-        return true;
-    }
-    if (_bufferPos)
-    {
-        bool result = WriteToFile(_internalBuffer.get(), _bufferPos, 0);
-        if (result)
-        {
-            _bufferPos = 0;
-        }
-        return result;
-    }
-    return true;
+    return PerformFlush(true);
 }
 
 bool File::IsBufferingSupported() const
@@ -251,7 +235,7 @@ NOINLINE bool File::BufferSet(ui32 size, bufferType &&buffer)
     {
         return true;
     }
-	if (!File::Flush() || !File::CancelCachedRead())
+	if (!PerformFlush(false) || !File::CancelCachedRead())
 	{
 		return false;
 	}
@@ -298,7 +282,7 @@ Result<i64> File::OffsetGet(FileOffsetMode offsetMode)
 
     if (offsetMode == FileOffsetMode::FromEnd)
     {
-        if (!CancelCachedRead() || !File::Flush())
+        if (!CancelCachedRead() || !PerformFlush(false))
         {
             return DefaultError::UnknownError();
         }
@@ -350,4 +334,32 @@ FileCacheModes::FileCacheMode File::CacheMode() const
 {
     ASSUME(IsOpened());
     return _cacheMode;
+}
+
+NOINLINE bool File::PerformFlush(bool isFlushSystemCaches)
+{
+    ASSUME(IsOpened());
+    ASSUME(_bufferPos <= _bufferSize);
+
+    if (isFlushSystemCaches)
+    {
+        FlushSystemCaches();
+    }
+
+    if (_readBufferCurrentSize)
+    {
+        return true;
+    }
+
+    if (_bufferPos)
+    {
+        bool result = WriteToFile(_internalBuffer.get(), _bufferPos, 0);
+        if (result)
+        {
+            _bufferPos = 0;
+        }
+        return result;
+    }
+
+    return true;
 }
