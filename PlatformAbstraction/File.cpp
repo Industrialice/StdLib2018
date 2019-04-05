@@ -101,6 +101,11 @@ fileHandle File::CloseAndGetOsFileDescriptor()
     return handle;
 }
 
+bool File::FlushInternal()
+{
+    return PerformFlush(false);
+}
+
 bool File::IsOpened() const
 {
     return _handle != fileHandle_undefined;
