@@ -135,9 +135,9 @@ namespace StdLib::TimeMomentInitialization
 		RevFreqFP64 = 1.0 / FreqInt;
 		FreqMSFP64 = FreqInt * 0.001;
 		FreqUSFP64 = FreqInt * 0.000001;
-		RevFreqMSFP32 = 0.001f / FreqInt;
-		RevFreqMSFP64 = 0.001 / FreqInt;
-		RevFreqUSFP32 = 0.000001f / FreqInt;
-		RevFreqUSFP64 = 0.000001 / FreqInt;
+		RevFreqMSFP32 = 1'000.0f / FreqInt;
+		RevFreqMSFP64 = 1'000.0 / FreqInt;
+		RevFreqUSFP32 = 1'000'000.0f / FreqInt;
+		RevFreqUSFP64 = 1'000'000.0 / FreqInt;
     }
 }

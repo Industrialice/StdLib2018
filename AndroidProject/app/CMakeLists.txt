@@ -25,9 +25,9 @@ add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++1z> $<$<COMPILE_LANGUAGE:C
 add_compile_options(-Wno-missing-braces -Wno-inconsistent-missing-override -Wpessimizing-move -Wlarge-by-value-copy -Winstantiation-after-specialization -Wself-assign)
 add_compile_options(-fno-stack-protector -D_FORTIFY_SOURCE=0 -fno-sanitize=memory -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden)
 
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
-set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fuse-ld=lld")
-set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=lld")
+#set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
+#set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fuse-ld=lld")
+#set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=lld")
 
 add_definitions(-DPLATFORM_ANDROID)
 
