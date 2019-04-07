@@ -41,8 +41,8 @@ static std::pair<f32, f32> Benchmark(const std::vector<std::pair<ui32, ui32>> &s
 
     auto endLoading = TimeMoment::Now();
 
-    f32 time0 = (endRandomGenerating - startRandomGenerating).ToSeconds();
-    f32 time1 = (endLoading - startLoading).ToSeconds();
+    f32 time0 = (endRandomGenerating - startRandomGenerating).ToSec();
+    f32 time1 = (endLoading - startLoading).ToSec();
 
     return {time0, time1};
 }

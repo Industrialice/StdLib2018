@@ -941,14 +941,14 @@ template <typename TrigFuncType, TrigFuncType TrigFunc> static inline void TrigB
     } l;
 
 	TimeMoment start = TimeMoment::Now();
-	TimeDifference64 diff = 0;
+	TimeDifference diff = 0_s;
 	for (;;)
 	{
 		if ((l.counted & 0xFFFF) == 0)
 		{
 			TimeMoment end = TimeMoment::Now();
-			diff = (end - start).As64();
-			if (diff.ToSeconds() >= 5)
+			diff = end - start;
+			if (diff.ToSec(f64()) >= 5)
 			{
 				break;
 			}
@@ -962,7 +962,7 @@ template <typename TrigFuncType, TrigFuncType TrigFunc> static inline void TrigB
 	}
 
 	volatile f32 v = l.resultTable[rand() % 256];
-	Logger::Message("%s performance is %u/s\n", name, (ui32)(l.counted / diff.ToSeconds()));
+	Logger::Message("%s performance is %u/s\n", name, (ui32)(l.counted / diff.ToSec(f64())));
 }
 
 static void CosBenchmarks()

@@ -3,75 +3,6 @@
 
 using namespace StdLib;
 
-//////////////////////
-// TimeDifference64 //
-//////////////////////
-
-TimeDifference64::TimeDifference64(i64 counter) : _counter(counter)
-{}
-
-TimeDifference64 TimeDifference64::operator - (const TimeDifference64 &other) const
-{
-    return TimeDifference64{_counter - other._counter};
-}
-
-TimeDifference64 TimeDifference64::operator + (const TimeDifference64 &other) const
-{
-    return TimeDifference64{_counter + other._counter};
-}
-
-TimeDifference64 &TimeDifference64::operator -= (const TimeDifference64 &other)
-{
-    _counter -= other._counter;
-    return *this;
-}
-
-TimeDifference64 &TimeDifference64::operator += (const TimeDifference64 &other)
-{
-    _counter += other._counter;
-    return *this;
-}
-
-bool TimeDifference64::operator < (const TimeDifference64 &other) const
-{
-    return _counter < other._counter;
-}
-
-bool TimeDifference64::operator <= (const TimeDifference64 &other) const
-{
-    return _counter <= other._counter;
-}
-
-bool TimeDifference64::operator > (const TimeDifference64 &other) const
-{
-    return _counter > other._counter;
-}
-
-bool TimeDifference64::operator >= (const TimeDifference64 &other) const
-{
-    return _counter >= other._counter;
-}
-
-bool TimeDifference64::operator == (const TimeDifference64 &other) const
-{
-    return _counter == other._counter;
-}
-
-bool TimeDifference64::operator != (const TimeDifference64 &other) const
-{
-    return _counter != other._counter;
-}
-
-TimeDifference TimeDifference64::As32() const
-{
-    return TimeDifference{_counter};
-}
-
-TimeDifference64::operator TimeDifference() const
-{
-    return As32();
-}
-
 ////////////////////
 // TimeDifference //
 ////////////////////
@@ -129,16 +60,6 @@ bool TimeDifference::operator == (const TimeDifference &other) const
 bool TimeDifference::operator != (const TimeDifference &other) const
 {
     return _counter != other._counter;
-}
-
-TimeDifference64 TimeDifference::As64() const
-{
-    return TimeDifference64{_counter};
-}
-
-TimeDifference::operator TimeDifference64() const
-{
-    return As64();
 }
 
 ////////////////

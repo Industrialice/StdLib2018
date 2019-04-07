@@ -974,18 +974,18 @@ static void TimeMomentTests()
     TimeMoment moment2 = TimeMoment::Now();
     UTest(LeftLesser, moment, moment2);
     UTest(LeftGreater, moment2, moment);
-    UTest(LeftGreater, moment + 0.5f, moment2);
-    UTest(LeftGreater, moment, moment2 - 0.5f);
+    UTest(LeftGreater, moment + 0.5_s, moment2);
+    UTest(LeftGreater, moment, moment2 - 0.5_s);
     TimeDifference diff = moment2 - moment;
-    f32 diffSeconds = diff.ToSeconds();
+    f32 diffSeconds = diff.ToSec();
     UTest(LeftGreater, diffSeconds, 0.0001f);
     UTest(LeftGreaterEqual, TimeMoment::Now(), moment2);
     UTest(LeftGreaterEqual, TimeMoment::Now(), moment);
-    UTest(true, EqualsWithEpsilon(((moment + diff) - moment2).ToSeconds(), 0.0f, 0.0001f));
-    UTest(true, EqualsWithEpsilon(((moment2 - diff) - moment).ToSeconds(), 0.0f, 0.0001f));
-    TimeDifference refDiff = 0.5f;
-    UTest(true, EqualsWithEpsilon(refDiff.ToSeconds(), 0.5f, 0.0001f));
-    UTest(LeftLesser, TimeDifference(0.2f), 0.5f);
+    UTest(true, EqualsWithEpsilon(((moment + diff) - moment2).ToSec(), 0.0f, 0.0001f));
+    UTest(true, EqualsWithEpsilon(((moment2 - diff) - moment).ToSec(), 0.0f, 0.0001f));
+    TimeDifference refDiff = 0.5_s;
+    UTest(true, EqualsWithEpsilon(refDiff.ToSec(), 0.5f, 0.0001f));
+    UTest(LeftLesser, TimeDifference(0.2_s), TimeDifference(0.5_s));
 
     Logger::Message("finished time moment tests\n");
 }

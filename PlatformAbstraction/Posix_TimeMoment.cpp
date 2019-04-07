@@ -14,19 +14,14 @@ namespace
     constexpr f64 CounterToSec64 = 0.000'000'001;
 }
 
-TimeDifference64::TimeDifference64(f64 seconds)
-{
-    _counter = (i64)(seconds * Sec64ToCounter);
-}
-
-f64 TimeDifference64::ToSeconds() const
-{
-    return _counter * CounterToSec64;
-}
-
 TimeDifference::TimeDifference(f32 seconds)
 {
     _counter = (i64)(seconds * Sec32ToCounter);
+}
+
+TimeDifference::TimeDifference(f64 seconds)
+{
+	_counter = (i64)(seconds * Sec64ToCounter);
 }
 
 f32 TimeDifference::ToSeconds() const
