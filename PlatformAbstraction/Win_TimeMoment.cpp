@@ -7,14 +7,26 @@ namespace
 {
 	i64 FreqInt;
 	f64 FreqFP64;
-	f32 RevFreqFP32;
-	f64 RevFreqFP64;
+    i64 FreqMInt;
+    f64 FreqMFP64;
 	f64 FreqMSFP64;
 	f64 FreqUSFP64;
+    f32 RevFreqFP32;
+    f64 RevFreqFP64;
 	f32 RevFreqMSFP32;
 	f64 RevFreqMSFP64;
 	f32 RevFreqUSFP32;
 	f64 RevFreqUSFP64;
+}
+
+TimeDifference::TimeDifference(MinutesFP64 time)
+{
+    _counter = (i64)(time * FreqMFP64);
+}
+
+TimeDifference::TimeDifference(MinutesI64 time)
+{
+    _counter = time * FreqMInt;
 }
 
 TimeDifference::TimeDifference(SecondsFP64 time)
@@ -131,10 +143,12 @@ namespace StdLib::TimeMomentInitialization
 
 		FreqInt = freq.QuadPart;
 		FreqFP64 = (f64)FreqInt;
-		RevFreqFP32 = 1.0f / FreqInt;
-		RevFreqFP64 = 1.0 / FreqInt;
+        FreqMInt = FreqInt * 60;
+        FreqMFP64 = FreqInt * 60.0;
 		FreqMSFP64 = FreqInt * 0.001;
 		FreqUSFP64 = FreqInt * 0.000001;
+        RevFreqFP32 = 1.0f / FreqInt;
+        RevFreqFP64 = 1.0 / FreqInt;
 		RevFreqMSFP32 = 1'000.0f / FreqInt;
 		RevFreqMSFP64 = 1'000.0 / FreqInt;
 		RevFreqUSFP32 = 1'000'000.0f / FreqInt;

@@ -17,12 +17,18 @@ namespace StdLib
 
 		T operator - () const 
 		{ 
-			T ret;
-			ret.value = -value;
-			return ret;
+            return -value;
 		}
 	};
 
+    struct MinutesFP64 : _TimeBase<MinutesFP64, f64>
+    {
+        using _TimeBase<MinutesFP64, f64>::_TimeBase;
+    };
+    struct MinutesI64 : _TimeBase<MinutesI64, i64>
+    {
+        using _TimeBase<MinutesI64, i64>::_TimeBase;
+    };
 	struct SecondsFP64 : _TimeBase<SecondsFP64, f64> 
 	{
 		using _TimeBase<SecondsFP64, f64>::_TimeBase;
@@ -48,6 +54,14 @@ namespace StdLib
 		using _TimeBase<MicroSecondsI64, i64>::_TimeBase;
 	};
 
+    inline MinutesFP64 operator "" _m(long double value)
+    {
+        return {(f64)value};
+    }
+    inline MinutesI64 operator "" _m(unsigned long long value)
+    {
+        return {(i64)value};
+    }
 	inline SecondsFP64 operator "" _s(long double value)
 	{
 		return {(f64)value};
@@ -83,6 +97,8 @@ namespace StdLib
 
     public:
         TimeDifference() = delete;
+        TimeDifference(MinutesFP64 time);
+        TimeDifference(MinutesI64 time);
 		TimeDifference(SecondsFP64 time);
 		TimeDifference(SecondsI64 time);
 		TimeDifference(MilliSecondsFP64 time);

@@ -984,26 +984,29 @@ static void TimeMomentTests()
     UTest(true, EqualsWithEpsilon(((moment + diff) - moment2).ToSec(), 0.0f, 0.0001f));
     UTest(true, EqualsWithEpsilon(((moment2 - diff) - moment).ToSec(), 0.0f, 0.0001f));
     TimeDifference refDiff = 0.5_s;
-    auto testWithRef = [](TimeDifference refDiff)
+    auto testWithRef = [](TimeDifference refDiff, i64 timeUSec)
     {
-        UTest(true, EqualsWithEpsilon(refDiff.ToSec(), 0.5f, 0.00001f));
-        UTest(true, EqualsWithEpsilon(refDiff.ToMSec(), 500.0f, 0.01f));
-        UTest(true, EqualsWithEpsilon(refDiff.ToUSec(), 500'000.0f, 10.0f));
-        UTest(true, EqualsWithEpsilon(refDiff.ToSec(f64()), 0.5, 0.00001));
-        UTest(true, EqualsWithEpsilon(refDiff.ToMSec(f64()), 500.0, 0.01));
-        UTest(true, EqualsWithEpsilon(refDiff.ToUSec(f64()), 500'000.0, 10.0));
-        UTest(true, refDiff.ToSec(i32()) == 0);
-        UTest(true, abs(refDiff.ToMSec(i32()) - 500) <= 1);
-        UTest(true, abs(refDiff.ToUSec(i32()) - 500'000) <= 10);
-        UTest(true, refDiff.ToSec(i64()) == 0);
-        UTest(true, abs(refDiff.ToMSec(i64()) - 500) <= 1);
-        UTest(true, abs(refDiff.ToUSec(i64()) - 500'000) <= 10);
+        UTest(true, EqualsWithEpsilon(refDiff.ToSec(), timeUSec / (1'000'000.0f), 0.00001f));
+        UTest(true, EqualsWithEpsilon(refDiff.ToMSec(), timeUSec / (1'000.0f), 0.01f));
+        UTest(true, EqualsWithEpsilon(refDiff.ToUSec(), (f32)timeUSec, 10.0f));
+        UTest(true, EqualsWithEpsilon(refDiff.ToSec(f64()), timeUSec / (1'000'000.0), 0.00001));
+        UTest(true, EqualsWithEpsilon(refDiff.ToMSec(f64()), timeUSec / (1'000.0), 0.01));
+        UTest(true, EqualsWithEpsilon(refDiff.ToUSec(f64()), (f64)timeUSec, 10.0));
+        UTest(true, refDiff.ToSec(i32()) == (i32)timeUSec / 1'000'000);
+        UTest(true, abs(refDiff.ToMSec(i32()) - (i32)timeUSec / 1'000) <= 1);
+        UTest(true, abs(refDiff.ToUSec(i32()) - (i32)timeUSec) <= 10);
+        UTest(true, refDiff.ToSec(i64()) == timeUSec / 1'000'000);
+        UTest(true, abs(refDiff.ToMSec(i64()) - timeUSec / 1'000) <= 1);
+        UTest(true, abs(refDiff.ToUSec(i64()) - timeUSec) <= 10);
     };
-    testWithRef(0.5_s);
-    testWithRef(500.0_ms);
-    testWithRef(500'000.0_us);
-    testWithRef(500_ms);
-    testWithRef(500'000_us);
+    testWithRef(0.0083333333333333333333333_m, 500'000);
+    testWithRef(0.5_s, 500'000);
+    testWithRef(500.0_ms, 500'000);
+    testWithRef(500'000.0_us, 500'000);
+    testWithRef(500_ms, 500'000);
+    testWithRef(500'000_us, 500'000);
+    testWithRef(2_s, 2'000'000);
+    testWithRef(-2_s, -2'000'000);
     UTest(LeftLesser, TimeDifference(0.2_s), TimeDifference(0.5_s));
 
     Logger::Message("finished time moment tests\n");
