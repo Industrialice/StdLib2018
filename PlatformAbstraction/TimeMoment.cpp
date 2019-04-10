@@ -76,7 +76,7 @@ bool TimeMoment::HasValue() const
 
 TimeDifference TimeMoment::operator - (const TimeMoment &other) const
 {
-    ASSUME(HasValue());
+    ASSUME(HasValue() && other.HasValue());
     return TimeDifference{_counter - other._counter};
 }
 
