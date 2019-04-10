@@ -107,19 +107,19 @@ namespace StdLib
 		TimeDifference(MicroSecondsI64 time);
 
         [[nodiscard]] f32 ToSec() const;
-		[[nodiscard]] f64 ToSec(f64) const;
-		[[nodiscard]] i32 ToSec(i32) const;
-		[[nodiscard]] i64 ToSec(i64) const;
+		[[nodiscard]] f64 ToSec_f64() const;
+		[[nodiscard]] i32 ToSec_i32() const;
+		[[nodiscard]] i64 ToSec_i64() const;
 
 		[[nodiscard]] f32 ToMSec() const;
-		[[nodiscard]] f64 ToMSec(f64) const;
-		[[nodiscard]] i32 ToMSec(i32) const;
-		[[nodiscard]] i64 ToMSec(i64) const;
+		[[nodiscard]] f64 ToMSec_f64() const;
+		[[nodiscard]] i32 ToMSec_i32() const;
+		[[nodiscard]] i64 ToMSec_i64() const;
 
 		[[nodiscard]] f32 ToUSec() const;
-		[[nodiscard]] f64 ToUSec(f64) const;
-		[[nodiscard]] i32 ToUSec(i32) const;
-		[[nodiscard]] i64 ToUSec(i64) const;
+		[[nodiscard]] f64 ToUSec_f64() const;
+		[[nodiscard]] i32 ToUSec_i32() const;
+		[[nodiscard]] i64 ToUSec_i64() const;
 
         [[nodiscard]] TimeDifference operator - (const TimeDifference &other) const;
         [[nodiscard]] TimeDifference operator + (const TimeDifference &other) const;

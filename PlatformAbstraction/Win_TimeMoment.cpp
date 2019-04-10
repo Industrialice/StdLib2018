@@ -64,19 +64,19 @@ f32 TimeDifference::ToSec() const
 	return _counter * RevFreqFP32;
 }
 
-f64 TimeDifference::ToSec(f64) const
+f64 TimeDifference::ToSec_f64() const
 {
 	return _counter * RevFreqFP64;
 }
 
-i32 TimeDifference::ToSec(i32) const
+i32 TimeDifference::ToSec_i32() const
 {
-	i64 result = ToSec(i64());
+	i64 result = ToSec_i64();
 	ASSUME(result <= std::numeric_limits<i32>::max() && result >= std::numeric_limits<i32>::min());
 	return (i32)result;
 }
 
-i64 TimeDifference::ToSec(i64) const
+i64 TimeDifference::ToSec_i64() const
 {
 	return _counter / FreqInt;
 }
@@ -86,19 +86,19 @@ f32 TimeDifference::ToMSec() const
 	return _counter * RevFreqMSFP32;
 }
 
-f64 TimeDifference::ToMSec(f64) const
+f64 TimeDifference::ToMSec_f64() const
 {
 	return _counter * RevFreqMSFP64;
 }
 
-i32 TimeDifference::ToMSec(i32) const
+i32 TimeDifference::ToMSec_i32() const
 {
-	i64 result = ToMSec(i64());
+	i64 result = ToMSec_i64();
 	ASSUME(result <= std::numeric_limits<i32>::max() && result >= std::numeric_limits<i32>::min());
 	return (i32)result;
 }
 
-i64 TimeDifference::ToMSec(i64) const
+i64 TimeDifference::ToMSec_i64() const
 {
 	return (_counter * 1'000) / FreqInt;
 }
@@ -108,19 +108,19 @@ f32 TimeDifference::ToUSec() const
 	return _counter * RevFreqUSFP32;
 }
 
-f64 TimeDifference::ToUSec(f64) const
+f64 TimeDifference::ToUSec_f64() const
 {
 	return _counter * RevFreqUSFP64;
 }
 
-i32 TimeDifference::ToUSec(i32) const
+i32 TimeDifference::ToUSec_i32() const
 {
-	i64 result = ToUSec(i64());
+	i64 result = ToUSec_i64();
 	ASSUME(result <= std::numeric_limits<i32>::max() && result >= std::numeric_limits<i32>::min());
 	return (i32)result;
 }
 
-i64 TimeDifference::ToUSec(i64) const
+i64 TimeDifference::ToUSec_i64() const
 {
 	return (_counter * 1'000'000) / FreqInt;
 }
