@@ -8,14 +8,14 @@ namespace StdLib
 	{
 		E value;
 
-		_TimeBase(E _value) : value(_value)	{}
+		constexpr _TimeBase(E _value) : value(_value)	{}
 
-		operator E () const
+        constexpr operator E () const
 		{
 			return value;
 		}
 
-		T operator - () const 
+        constexpr T operator - () const
 		{ 
             return -value;
 		}
@@ -54,35 +54,35 @@ namespace StdLib
 		using _TimeBase<MicroSecondsI64, i64>::_TimeBase;
 	};
 
-    inline MinutesFP64 operator "" _m(long double value)
+    constexpr inline MinutesFP64 operator "" _m(long double value)
     {
         return {(f64)value};
     }
-    inline MinutesI64 operator "" _m(unsigned long long value)
+    constexpr inline MinutesI64 operator "" _m(unsigned long long value)
     {
         return {(i64)value};
     }
-	inline SecondsFP64 operator "" _s(long double value)
+    constexpr inline SecondsFP64 operator "" _s(long double value)
 	{
 		return {(f64)value};
 	}
-	inline SecondsI64 operator "" _s(unsigned long long value)
+    constexpr inline SecondsI64 operator "" _s(unsigned long long value)
 	{
 		return {(i64)value};
 	}
-	inline MilliSecondsFP64 operator "" _ms(long double value)
+    constexpr inline MilliSecondsFP64 operator "" _ms(long double value)
 	{
 		return {(f64)value};
 	}
-	inline MilliSecondsI64 operator "" _ms(unsigned long long value)
+    constexpr inline MilliSecondsI64 operator "" _ms(unsigned long long value)
 	{
 		return {(i64)value};
 	}
-	inline MicroSecondsFP64 operator "" _us(long double value)
+    constexpr inline MicroSecondsFP64 operator "" _us(long double value)
 	{
 		return {(f64)value};
 	}
-	inline MicroSecondsI64 operator "" _us(unsigned long long value)
+    constexpr inline MicroSecondsI64 operator "" _us(unsigned long long value)
 	{
 		return {(i64)value};
 	}

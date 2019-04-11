@@ -5,6 +5,7 @@ using namespace StdLib;
 
 namespace
 {
+    bool IsInitialized;
 	i64 FreqInt;
 	f64 FreqFP64;
     i64 FreqMInt;
@@ -21,52 +22,62 @@ namespace
 
 TimeDifference::TimeDifference(MinutesFP64 time)
 {
+    ASSUME(IsInitialized);
     _counter = (i64)(time * FreqMFP64);
 }
 
 TimeDifference::TimeDifference(MinutesI64 time)
 {
+    ASSUME(IsInitialized);
     _counter = time * FreqMInt;
 }
 
 TimeDifference::TimeDifference(SecondsFP64 time)
 {
-	_counter = (i64)(time * FreqFP64);
+    ASSUME(IsInitialized);
+    _counter = (i64)(time * FreqFP64);
 }
 
 TimeDifference::TimeDifference(SecondsI64 time)
 {
-	_counter = time * FreqInt;
+    ASSUME(IsInitialized);
+    _counter = time * FreqInt;
 }
 
 TimeDifference::TimeDifference(MilliSecondsFP64 time)
 {
-	_counter = (i64)(time * FreqMSFP64);
+    ASSUME(IsInitialized);
+    _counter = (i64)(time * FreqMSFP64);
 }
 
 TimeDifference::TimeDifference(MilliSecondsI64 time)
 {
-	_counter = time * FreqInt / 1'000;
+    ASSUME(IsInitialized);
+    _counter = time * FreqInt / 1'000;
 }
 
 TimeDifference::TimeDifference(MicroSecondsFP64 time)
 {
-	_counter = (i64)(time * FreqUSFP64);
+    ASSUME(IsInitialized);
+    _counter = (i64)(time * FreqUSFP64);
 }
 
 TimeDifference::TimeDifference(MicroSecondsI64 time)
 {
-	_counter = time * FreqInt / 1'000'000;
+    ASSUME(IsInitialized);
+    _counter = time * FreqInt / 1'000'000;
 }
 
 f32 TimeDifference::ToSec() const
 {
-	return _counter * RevFreqFP32;
+    ASSUME(IsInitialized);
+    return _counter * RevFreqFP32;
 }
 
 f64 TimeDifference::ToSec_f64() const
 {
-	return _counter * RevFreqFP64;
+    ASSUME(IsInitialized);
+    return _counter * RevFreqFP64;
 }
 
 i32 TimeDifference::ToSec_i32() const
@@ -78,17 +89,20 @@ i32 TimeDifference::ToSec_i32() const
 
 i64 TimeDifference::ToSec_i64() const
 {
-	return _counter / FreqInt;
+    ASSUME(IsInitialized);
+    return _counter / FreqInt;
 }
 
 f32 TimeDifference::ToMSec() const
 {
-	return _counter * RevFreqMSFP32;
+    ASSUME(IsInitialized);
+    return _counter * RevFreqMSFP32;
 }
 
 f64 TimeDifference::ToMSec_f64() const
 {
-	return _counter * RevFreqMSFP64;
+    ASSUME(IsInitialized);
+    return _counter * RevFreqMSFP64;
 }
 
 i32 TimeDifference::ToMSec_i32() const
@@ -100,17 +114,20 @@ i32 TimeDifference::ToMSec_i32() const
 
 i64 TimeDifference::ToMSec_i64() const
 {
-	return (_counter * 1'000) / FreqInt;
+    ASSUME(IsInitialized);
+    return (_counter * 1'000) / FreqInt;
 }
 
 f32 TimeDifference::ToUSec() const
 {
-	return _counter * RevFreqUSFP32;
+    ASSUME(IsInitialized);
+    return _counter * RevFreqUSFP32;
 }
 
 f64 TimeDifference::ToUSec_f64() const
 {
-	return _counter * RevFreqUSFP64;
+    ASSUME(IsInitialized);
+    return _counter * RevFreqUSFP64;
 }
 
 i32 TimeDifference::ToUSec_i32() const
@@ -122,7 +139,8 @@ i32 TimeDifference::ToUSec_i32() const
 
 i64 TimeDifference::ToUSec_i64() const
 {
-	return (_counter * 1'000'000) / FreqInt;
+    ASSUME(IsInitialized);
+    return (_counter * 1'000'000) / FreqInt;
 }
 
 TimeMoment TimeMoment::Now()
@@ -153,5 +171,7 @@ namespace StdLib::TimeMomentInitialization
 		RevFreqMSFP64 = 1'000.0 / FreqInt;
 		RevFreqUSFP32 = 1'000'000.0f / FreqInt;
 		RevFreqUSFP64 = 1'000'000.0 / FreqInt;
+
+        IsInitialized = true;
     }
 }

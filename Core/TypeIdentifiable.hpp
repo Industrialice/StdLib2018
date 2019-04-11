@@ -2,13 +2,17 @@
 
 #include "HashFuncs.hpp"
 
+#ifdef DEBUG
+    #define USE_ID_NAMES
+#endif
+
 namespace StdLib
 {
 // Doesn't work in Release in Visual C++
 //    class TypeId
 //    {
 //        const char *_id{};
-//    #ifdef DEBUG
+//    #ifdef USE_ID_NAMES
 //        union
 //        {
 //            std::array<char, 28> name;
@@ -24,7 +28,7 @@ namespace StdLib
 //        constexpr TypeId(InternalIdType id) : _id(id)
 //        {}
 //
-//    #ifdef DEBUG
+//    #ifdef USE_ID_NAMES
 //        constexpr TypeId(InternalIdType id, std::array<char, 28> name) : _id(id), _u{name}
 //        {}
 //    #endif
@@ -70,7 +74,7 @@ namespace StdLib
 //		}
 //	};
 //    
-//#ifdef DEBUG
+//#ifdef USE_ID_NAMES
 //    template <typename T, ui64 encoded0 = 0, ui64 encoded1 = 0, ui64 encoded2 = 0> class TypeIdentifiable
 //    {
 //        static constexpr char var = 0;
@@ -99,7 +103,7 @@ namespace StdLib
 	class StableTypeId
 	{
 		ui64 _id{};
-    #ifdef DEBUG
+    #ifdef USE_ID_NAMES
         union
         {
             std::array<char, 28> name;
@@ -115,7 +119,7 @@ namespace StdLib
 		constexpr StableTypeId(InternalIdType id) : _id(id)
 		{}
 
-    #ifdef DEBUG
+    #ifdef USE_ID_NAMES
         constexpr StableTypeId(InternalIdType id, std::array<char, 28> name) : _id(id), _u{name}
         {}
     #endif
@@ -154,9 +158,18 @@ namespace StdLib
 		{
 			return _id;
 		}
+
+        const char *Name() const
+        {
+        #ifdef USE_ID_NAMES
+            return _u.displayName;
+        #else
+            return "{NoNameInRelease}";
+        #endif
+        }
 	};
 
-#ifdef DEBUG
+#ifdef USE_ID_NAMES
     template <ui64 stableId, ui64 encoded0 = 0, ui64 encoded1 = 0, ui64 encoded2 = 0> class StableTypeIdentifiable
     {
     public:
