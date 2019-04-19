@@ -64,6 +64,11 @@ void MiscTests()
 	UTest(Equal, t1.isMovedOut, false);
 	UTest(Equal, t0.value, t1.value);
 
+    MovableAtomic<ui32> atomicTest(15);
+    UTest(Equal, atomicTest.load(), 15);
+    MovableAtomic<ui32> atomicTest2 = std::move(atomicTest);
+    UTest(Equal, atomicTest2.load(), 15);
+
     Logger::Message("finished misc tests\n");
 }
 

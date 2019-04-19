@@ -50,4 +50,21 @@ namespace StdLib
     constexpr utf16char utf16char_min = std::numeric_limits<utf16char>::min();
     constexpr utf32char utf32char_max = std::numeric_limits<utf32char>::max();
     constexpr utf32char utf32char_min = std::numeric_limits<utf32char>::min();
+
+    template <typename T> struct MovableAtomic : public std::atomic<T>
+    {
+        using std::atomic<T>::atomic;
+
+        MovableAtomic(MovableAtomic &&source)
+        {
+            this->store(source.load());
+        }
+
+        MovableAtomic &operator = (MovableAtomic &&source)
+        {
+            ASSUME(this != &source);
+            store(source.load());
+            return *this;
+        }
+    };
 }
