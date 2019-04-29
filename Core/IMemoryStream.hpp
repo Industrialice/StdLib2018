@@ -6,7 +6,7 @@
 
 namespace StdLib
 {
-    struct IMemoryStream
+    struct PURE IMemoryStream
     {
         virtual ~IMemoryStream() = default;
 

@@ -63,7 +63,7 @@ namespace StdLib
         FromEnd
     };
 
-    struct IFile
+    struct PURE IFile
     {
         using bufferType = std::unique_ptr<ui8, void(*)(ui8 *)>;
 

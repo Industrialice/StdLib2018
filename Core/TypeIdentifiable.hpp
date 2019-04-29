@@ -159,7 +159,7 @@ namespace StdLib
 			return _id;
 		}
 
-        const char *Name() const
+        constexpr const char *Name() const
         {
         #ifdef USE_ID_NAMES
             return _u.displayName;
@@ -169,8 +169,11 @@ namespace StdLib
         }
 	};
 
+    struct StableTypeIdentifiableBase
+    {};
+
 #ifdef USE_ID_NAMES
-    template <ui64 stableId, ui64 encoded0 = 0, ui64 encoded1 = 0, ui64 encoded2 = 0> class StableTypeIdentifiable
+    template <ui64 stableId, ui64 encoded0 = 0, ui64 encoded1 = 0, ui64 encoded2 = 0> class EMPTY_BASES StableTypeIdentifiable : public StableTypeIdentifiableBase
     {
     public:
         [[nodiscard]] static constexpr StableTypeId GetTypeId()
@@ -222,3 +225,12 @@ namespace std
 		}
 	};
 }
+
+#ifdef DEBUG
+    #define NAME_TO_STABLE_ID(name) StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf(name), true>(name), \
+        CompileTimeStrings::EncodeASCII(name, CountOf(name), CompileTimeStrings::CharsPerNumber * 0), \
+        CompileTimeStrings::EncodeASCII(name, CountOf(name), CompileTimeStrings::CharsPerNumber * 1), \
+        CompileTimeStrings::EncodeASCII(name, CountOf(name), CompileTimeStrings::CharsPerNumber * 2)>
+#else
+    #define NAME_TO_STABLE_ID(name) StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf(name), true>(name)>
+#endif

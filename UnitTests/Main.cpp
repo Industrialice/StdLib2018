@@ -175,16 +175,16 @@ static void TypeIdentifiableTests()
 	//ui64 ui8Hash = ui8Id.Hash();
 	//UTest(NotEqual, ui32Hash, ui8Hash);
 
-	constexpr StableTypeId stableId = StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf("Test"), true>("Test")>::GetTypeId();
-	constexpr StableTypeId stableId2 = StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf("Test2"), true>("Test2")>::GetTypeId();
+	constexpr StableTypeId stableId = NAME_TO_STABLE_ID("Test")::GetTypeId();
+	constexpr StableTypeId stableId2 = NAME_TO_STABLE_ID("Test2")::GetTypeId();
 	UTest(NotEqual, stableId, stableId2);
 	constexpr ui64 stableIdHash = stableId.Hash();
 	constexpr ui64 stableId2Hash = stableId2.Hash();
 	UTest(NotEqual, stableIdHash, stableId2Hash);
 
 #ifdef DEBUG
-    constexpr ui64 encoded = CompileTimeStrings::EncodeASCII("Test", CountOf("Test"), 0);
-    constexpr StableTypeId stableIdDebug = StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf("Test"), true>("Test"), encoded>::GetTypeId();
+    constexpr StableTypeId stableIdDebug = NAME_TO_STABLE_ID("Test")::GetTypeId();
+    UTest(Equal, std::string(stableIdDebug.Name()), "Test"s);
 #endif
 
 	Logger::Message("finished type identifiable tests\n");
