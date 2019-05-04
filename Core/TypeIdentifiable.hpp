@@ -104,11 +104,7 @@ namespace StdLib
 	{
 		ui64 _id{};
     #ifdef USE_ID_NAMES
-        union
-        {
-            std::array<char, 28> name;
-            char displayName[28];
-        } _u{};
+		const char *_name{};
     #endif
 
 	public:
@@ -120,7 +116,7 @@ namespace StdLib
 		{}
 
     #ifdef USE_ID_NAMES
-        constexpr StableTypeId(InternalIdType id, std::array<char, 28> name) : _id(id), _u{name}
+        constexpr StableTypeId(InternalIdType id, const char *name) : _id(id), _name{name}
         {}
     #endif
 
@@ -162,7 +158,7 @@ namespace StdLib
         constexpr const char *Name() const
         {
         #ifdef USE_ID_NAMES
-            return _u.displayName;
+            return _name;
         #else
             return "{NoNameInRelease}";
         #endif
@@ -175,12 +171,12 @@ namespace StdLib
 #ifdef USE_ID_NAMES
     template <ui64 stableId, ui64 encoded0 = 0, ui64 encoded1 = 0, ui64 encoded2 = 0> class EMPTY_BASES StableTypeIdentifiable : public StableTypeIdentifiableBase
     {
+		static constexpr std::array<char, 28> staticName = CompileTimeStrings::DecodeASCIIToArray<28, encoded0, encoded1, encoded2>();
+
     public:
         [[nodiscard]] static constexpr StableTypeId GetTypeId()
         {
-            std::array<char, 28> name{};
-            CompileTimeStrings::DecodeASCII<encoded0, encoded1, encoded2>(name.data(), name.size());
-            return {stableId, name};
+            return {stableId, staticName.data()};
         }
     };
 #else

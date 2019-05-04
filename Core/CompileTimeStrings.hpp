@@ -47,5 +47,12 @@ namespace StdLib
             (decodeNumber(encoded, target, length, start), ...);
             target[length - 1] = '\0';
         }
+
+		template <uiw Length, ui64... encoded> constexpr std::array<char, Length> DecodeASCIIToArray()
+		{
+			std::array<char, Length> name{};
+			DecodeASCII<encoded...>(name.data(), name.size());
+			return name;
+		}
     }
 }
