@@ -226,11 +226,11 @@ namespace std
 	};
 }
 
-#ifdef DEBUG
-    #define NAME_TO_STABLE_ID(name) StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf(name), true>(name), \
-        CompileTimeStrings::EncodeASCII(name, CountOf(name), CompileTimeStrings::CharsPerNumber * 0), \
-        CompileTimeStrings::EncodeASCII(name, CountOf(name), CompileTimeStrings::CharsPerNumber * 1), \
-        CompileTimeStrings::EncodeASCII(name, CountOf(name), CompileTimeStrings::CharsPerNumber * 2)>
+#ifdef USE_ID_NAMES
+    #define NAME_TO_STABLE_ID(name) StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf(TOSTR(name)), true>(TOSTR(name)), \
+        CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), CompileTimeStrings::CharsPerNumber * 0), \
+        CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), CompileTimeStrings::CharsPerNumber * 1), \
+        CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), CompileTimeStrings::CharsPerNumber * 2)>
 #else
-    #define NAME_TO_STABLE_ID(name) StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf(name), true>(name)>
+    #define NAME_TO_STABLE_ID(name) StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf(TOSTR(name)), true>(TOSTR(name))>
 #endif

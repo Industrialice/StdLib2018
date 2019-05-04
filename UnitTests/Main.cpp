@@ -175,15 +175,15 @@ static void TypeIdentifiableTests()
 	//ui64 ui8Hash = ui8Id.Hash();
 	//UTest(NotEqual, ui32Hash, ui8Hash);
 
-	constexpr StableTypeId stableId = NAME_TO_STABLE_ID("Test")::GetTypeId();
-	constexpr StableTypeId stableId2 = NAME_TO_STABLE_ID("Test2")::GetTypeId();
+	constexpr StableTypeId stableId = NAME_TO_STABLE_ID(Test)::GetTypeId();
+	constexpr StableTypeId stableId2 = NAME_TO_STABLE_ID(Test2)::GetTypeId();
 	UTest(NotEqual, stableId, stableId2);
 	constexpr ui64 stableIdHash = stableId.Hash();
 	constexpr ui64 stableId2Hash = stableId2.Hash();
 	UTest(NotEqual, stableIdHash, stableId2Hash);
 
 #ifdef DEBUG
-    constexpr StableTypeId stableIdDebug = NAME_TO_STABLE_ID("Test")::GetTypeId();
+    constexpr StableTypeId stableIdDebug = NAME_TO_STABLE_ID(Test)::GetTypeId();
     UTest(Equal, std::string(stableIdDebug.Name()), "Test"s);
 #endif
 

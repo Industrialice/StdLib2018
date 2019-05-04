@@ -36,10 +36,12 @@ namespace StdLib
     template <typename MetaType, bool IsThreadSafe> struct _LoggerMessageMethod
     {
         void Message(LogLevels::LogLevel level, const MetaType &meta, const char *format, ...);
+		void Message(LogLevels::LogLevel level, const MetaType &meta, const char *format, va_list args);
     };
     template <bool IsThreadSafe> struct _LoggerMessageMethod<void, IsThreadSafe>
     {
-        void Message(LogLevels::LogLevel level, const char *format, ...);
+		void Message(LogLevels::LogLevel level, const char *format, ...);
+		void Message(LogLevels::LogLevel level, const char *format, va_list args);
     };
 
 	template <typename MetaType> struct _LoggerCallbackType
@@ -83,7 +85,7 @@ namespace StdLib
         void IsEnabled(bool isEnabled);
         bool IsEnabled() const;
 
-    private:        
+    private:
         void MessageImpl(LogLevels::LogLevel level, const void *meta, const char *format, va_list args);
 
         struct MessageListener
@@ -114,12 +116,22 @@ namespace StdLib
 		va_end(args);
 	}
 
+	template<typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Message(LogLevels::LogLevel level, const MetaType &meta, const char *format, va_list args)
+	{
+		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(level, &meta, format, args);
+	}
+
 	template<bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Message(LogLevels::LogLevel level, const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
 		((Logger<void, IsThreadSafe> *)this)->MessageImpl(level, nullptr, format, args);
 		va_end(args);
+	}
+
+	template<bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Message(LogLevels::LogLevel level, const char *format, va_list args)
+	{
+		((Logger<void, IsThreadSafe> *)this)->MessageImpl(level, nullptr, format, args);
 	}
 
 	template <typename MetaType, bool IsThreadSafe> void Logger<MetaType, IsThreadSafe>::RemoveListener(LoggerLocation *instance, void *handle)
