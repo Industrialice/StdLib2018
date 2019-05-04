@@ -160,7 +160,7 @@ namespace StdLib
         #ifdef USE_ID_NAMES
             return _name;
         #else
-            return "{NoNameInRelease}";
+            return "{DebugTypeNamesDisabled}";
         #endif
         }
 	};
