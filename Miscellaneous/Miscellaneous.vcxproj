@@ -185,7 +185,6 @@
   <ItemGroup>
     <ClInclude Include="AssignListenerId.hpp" />
     <ClInclude Include="Logger.hpp" />
-    <ClInclude Include="LoggerImpl.hpp" />
     <ClInclude Include="MiscellaneousCoreTypes.hpp" />
     <ClInclude Include="StdMiscellaneousLib.hpp" />
     <ClInclude Include="UniqueIdManager.hpp" />
