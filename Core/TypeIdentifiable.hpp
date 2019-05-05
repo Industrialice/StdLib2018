@@ -168,27 +168,26 @@ namespace StdLib
     struct StableTypeIdentifiableBase
     {};
 
-#ifdef USE_ID_NAMES
     template <ui64 stableId, ui64 encoded0 = 0, ui64 encoded1 = 0, ui64 encoded2 = 0> class EMPTY_BASES StableTypeIdentifiable : public StableTypeIdentifiableBase
     {
-		static constexpr std::array<char, 28> staticName = CompileTimeStrings::DecodeASCIIToArray<28, encoded0, encoded1, encoded2>();
+        static constexpr uiw staticNameLength = CompileTimeStrings::DecodeASCIIToLength<encoded0, encoded1, encoded2>();
+		static constexpr std::array<char, staticNameLength + 1> staticName = CompileTimeStrings::DecodeASCIIToArray<staticNameLength + 1, encoded0, encoded1, encoded2>();
 
     public:
         [[nodiscard]] static constexpr StableTypeId GetTypeId()
         {
+        #ifdef USE_ID_NAMES
             return {stableId, staticName.data()};
+        #else
+            return stableId;
+        #endif
+        }
+
+        [[nodiscard]] static constexpr std::string_view GetTypeName()
+        {
+            return {staticName.data(), staticNameLength};
         }
     };
-#else
-	template <ui64 stableId> class StableTypeIdentifiable
-	{
-	public:
-		[[nodiscard]] static constexpr StableTypeId GetTypeId()
-		{
-			return stableId;
-		}
-	};
-#endif
 
     //template <TypeId::InternalIdType id, bool isWriteable> struct TypeIdToType;
 }
@@ -222,11 +221,7 @@ namespace std
 	};
 }
 
-#ifdef USE_ID_NAMES
-    #define NAME_TO_STABLE_ID(name) StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf(TOSTR(name)), true>(TOSTR(name)), \
-        CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), CompileTimeStrings::CharsPerNumber * 0), \
-        CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), CompileTimeStrings::CharsPerNumber * 1), \
-        CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), CompileTimeStrings::CharsPerNumber * 2)>
-#else
-    #define NAME_TO_STABLE_ID(name) StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf(TOSTR(name)), true>(TOSTR(name))>
-#endif
+#define NAME_TO_STABLE_ID(name) StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf(TOSTR(name)), true>(TOSTR(name)), \
+    CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), CompileTimeStrings::CharsPerNumber * 0), \
+    CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), CompileTimeStrings::CharsPerNumber * 1), \
+    CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), CompileTimeStrings::CharsPerNumber * 2)>

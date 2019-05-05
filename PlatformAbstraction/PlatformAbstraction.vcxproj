@@ -192,6 +192,7 @@
     <ClInclude Include="StdPlatformAbstractionLib.hpp" />
     <ClInclude Include="SystemInfo.hpp" />
     <ClInclude Include="TimeMoment.hpp" />
+    <ClInclude Include="VirtualKeys.hpp" />
     <ClInclude Include="VirtualMemory.hpp" />
     <ClInclude Include="_PreHeader.hpp" />
   </ItemGroup>
@@ -240,6 +241,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWinXP|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="SystemInfo.cpp" />
+    <ClCompile Include="VirtualKeys.cpp" />
     <ClCompile Include="Win_SystemInfo.cpp" />
     <ClCompile Include="TimeMoment.cpp" />
     <ClCompile Include="Win_File.cpp" />

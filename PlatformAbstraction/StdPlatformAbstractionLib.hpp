@@ -13,6 +13,7 @@
 #include "FileSystem.hpp"
 #include "MemoryMappedFile.hpp"
 #include "SystemInfo.hpp"
+#include "VirtualKeys.hpp"
 
 namespace StdLib::Initialization
 {

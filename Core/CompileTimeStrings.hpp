@@ -54,5 +54,25 @@ namespace StdLib
 			DecodeASCII<encoded...>(name.data(), name.size());
 			return name;
 		}
+
+        template <ui64... encoded> constexpr uiw DecodeASCIIToLength()
+        {
+            auto decodeNumber = [](ui64 number, uiw &start) constexpr
+            {
+                uiw offset = 56;
+                for (uiw index = 0; index < 9; ++index, offset -= 7)
+                {
+                    char sym = (char)((number >> offset) & 0x7F);
+                    if (sym == 0)
+                    {
+                        break;
+                    }
+                    ++start;
+                }
+            };
+            uiw start = 0;
+            (decodeNumber(encoded, start), ...);
+            return start;
+        }
     }
 }
