@@ -19,7 +19,7 @@
     #define FORCEINLINE __forceinline
 	#define UNALIGNEDPTR __unaligned
     #define EMPTY_BASES __declspec(empty_bases)
-    #define PURE __declspec(novtable)
+    #define NOVTABLE __declspec(novtable)
 
     #define _UNREACHABLE __assume(0)
 
@@ -71,9 +71,9 @@
     #define FORCEINLINE __attribute__((always_inline)) inline
 #ifdef __clang__
 	#define UNALIGNEDPTR __unaligned /* It seems there's no alternative for GCC */
-    #define PURE __declspec(novtable)
+    #define NOVTABLE __declspec(novtable)
 #else
-    #define PURE /* doesn't seem to be supported by GCC */
+    #define NOVTABLE /* doesn't seem to be supported by GCC */
 #endif
     #define EMPTY_BASES /* TODO: do these compilers have something similar */
 

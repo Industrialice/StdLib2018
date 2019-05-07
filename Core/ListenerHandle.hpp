@@ -31,7 +31,7 @@ namespace StdLib
 
         TListenerHandle(TListenerHandle &&source) : _owner(move(source._owner)), _id(source._id)
         {
-            source._owner = nullptr;
+            source._owner.reset();
         }
 
         TListenerHandle &operator = (TListenerHandle &&source) noexcept

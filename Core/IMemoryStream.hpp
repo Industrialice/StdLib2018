@@ -6,7 +6,7 @@
 
 namespace StdLib
 {
-    struct PURE IMemoryStream
+    struct NOVTABLE IMemoryStream
     {
         virtual ~IMemoryStream() = default;
 
