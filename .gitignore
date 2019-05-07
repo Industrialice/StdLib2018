@@ -224,5 +224,5 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 /EmscriptenProject/stdlib.wasm
-/ReleaseWinXP_Win32
-/ReleaseWinXP_x64
+/ReleaseXP_Win32
+/ReleaseXP_x64
