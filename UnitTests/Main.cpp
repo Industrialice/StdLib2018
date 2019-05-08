@@ -153,8 +153,8 @@ static void EnumCombinableTests()
 }
 
 #ifdef _MSC_VER
-    #pragma warning(push)
-    #pragma warning(disable : 4307) // FNVHashCT generates warning C4307: '*': integral constant overflow
+    __pragma(warning(push))
+    __pragma(warning(disable : 4307)) // FNVHashCT generates warning C4307: '*': integral constant overflow
 #endif
 static void TypeIdentifiableTests()
 {
@@ -251,7 +251,7 @@ static void HashFuncsTest()
 	Logger::Message("finished hash tests\n");
 }
 #ifdef _MSC_VER
-    #pragma warning(pop)
+    __pragma(warning(pop))
 #endif
 
 static void IntegerPropertiesTest()

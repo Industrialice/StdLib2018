@@ -55,15 +55,14 @@ namespace StdLib
     {
         using std::atomic<T>::atomic;
 
-        MovableAtomic(MovableAtomic &&source)
+        MovableAtomic(MovableAtomic &&source) noexcept
         {
             this->store(source.load());
         }
 
-        MovableAtomic &operator = (MovableAtomic &&source)
+        MovableAtomic &operator = (MovableAtomic &&source) noexcept
         {
-            ASSUME(this != &source);
-            store(source.load());
+			this->store(source.load());
             return *this;
         }
     };

@@ -941,7 +941,7 @@ template <typename TrigFuncType, TrigFuncType TrigFunc> static inline void TrigB
     } l;
 
 	TimeMoment start = TimeMoment::Now();
-	TimeDifference diff = 0_s;
+	TimeDifference diff;
 	for (;;)
 	{
 		if ((l.counted & 0xFFFF) == 0)

@@ -91,12 +91,12 @@ namespace StdLib
     {
         friend class TimeMoment;
          
-        i64 _counter = i64_min;
+        i64 _counter = 0;
 
         explicit TimeDifference(i64 counter);
 
     public:
-        TimeDifference() = delete;
+        TimeDifference() = default;
         TimeDifference(MinutesFP64 time);
         TimeDifference(MinutesI64 time);
 		TimeDifference(SecondsFP64 time);
