@@ -102,21 +102,16 @@ namespace StdLib
 
 	class StableTypeId
 	{
-		ui64 _id{};
-    #ifdef USE_ID_NAMES
-		const char *_name{};
-    #endif
-
 	public:
-		using InternalIdType = decltype(_id);
+		using idType = ui32;
 
 		constexpr StableTypeId() = default;
 
-		constexpr StableTypeId(InternalIdType id) : _id(id)
+		constexpr StableTypeId(idType id) : _id(id)
 		{}
 
     #ifdef USE_ID_NAMES
-        constexpr StableTypeId(InternalIdType id, const char *name) : _id(id), _name{name}
+        constexpr StableTypeId(idType id, const char *name) : _id(id), _name{name}
         {}
     #endif
 
@@ -150,7 +145,7 @@ namespace StdLib
             return _id >= other._id;
         }
 
-		[[nodiscard]] constexpr ui64 Hash() const
+		[[nodiscard]] constexpr idType Hash() const
 		{
 			return _id;
 		}
@@ -163,12 +158,18 @@ namespace StdLib
             return "{DebugTypeNamesDisabled}";
         #endif
         }
+
+	private:
+		idType _id{};
+#ifdef USE_ID_NAMES
+		const char *_name{};
+#endif
 	};
 
     struct StableTypeIdentifiableBase
     {};
 
-    template <ui64 stableId, ui64 encoded0 = 0, ui64 encoded1 = 0, ui64 encoded2 = 0> struct EMPTY_BASES StableTypeIdentifiable : StableTypeIdentifiableBase
+    template <StableTypeId::idType stableId, ui64 encoded0 = 0, ui64 encoded1 = 0, ui64 encoded2 = 0> struct EMPTY_BASES StableTypeIdentifiable : StableTypeIdentifiableBase
     {
     private:
         static constexpr uiw staticNameLength = CompileTimeStrings::DecodeASCIIToLength<encoded0, encoded1, encoded2>();
@@ -222,7 +223,7 @@ namespace std
 	};
 }
 
-#define NAME_TO_STABLE_ID(name) StableTypeIdentifiable<Hash::FNVHashCT<Hash::Precision::P64, char, CountOf(TOSTR(name)), true>(TOSTR(name)), \
+#define NAME_TO_STABLE_ID(name) StableTypeIdentifiable<Hash::FNVHashCT<std::is_same_v<StableTypeId::idType, ui64> ? Hash::Precision::P64 : Hash::Precision::P32, char, CountOf(TOSTR(name)), true>(TOSTR(name)), \
     CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), CompileTimeStrings::CharsPerNumber * 0), \
     CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), CompileTimeStrings::CharsPerNumber * 1), \
     CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), CompileTimeStrings::CharsPerNumber * 2)>
