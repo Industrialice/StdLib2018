@@ -35,12 +35,12 @@ namespace StdLib
 
     template <typename MetaType, bool IsThreadSafe> struct _LoggerMessageMethod
     {
-        void Message(LogLevels::LogLevel level, const MetaType &meta, const char *format, ...);
+        void Message(LogLevels::LogLevel level, const MetaType &meta, PRINTF_VERIFY_FRONT const char *format, ...) PRINTF_VERIFY_BACK(4, 5);
 		void Message(LogLevels::LogLevel level, const MetaType &meta, const char *format, va_list args);
     };
     template <bool IsThreadSafe> struct _LoggerMessageMethod<void, IsThreadSafe>
     {
-		void Message(LogLevels::LogLevel level, const char *format, ...);
+		void Message(LogLevels::LogLevel level, PRINTF_VERIFY_FRONT const char *format, ...) PRINTF_VERIFY_BACK(3, 4);
 		void Message(LogLevels::LogLevel level, const char *format, va_list args);
     };
 

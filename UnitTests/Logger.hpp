@@ -7,5 +7,5 @@ class Logger
 public:
     static bool IsMessagePoppingSupported();
     static void PopLastMessage();
-    static void Message(const char *fmt, ...);
+    static void Message(PRINTF_VERIFY_FRONT const char *fmt, ...) PRINTF_VERIFY_BACK(1, 2);
 };

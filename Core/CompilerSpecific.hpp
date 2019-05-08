@@ -20,6 +20,8 @@
 	#define UNALIGNEDPTR __unaligned
     #define EMPTY_BASES __declspec(empty_bases)
     #define NOVTABLE __declspec(novtable)
+    #define PRINTF_VERIFY_FRONT _In_z_ _Printf_format_string_
+    #define PRINTF_VERIFY_BACK(...)
 
     #define _UNREACHABLE __assume(0)
 
@@ -71,11 +73,11 @@
     #define FORCEINLINE __attribute__((always_inline)) inline
 #ifdef __clang__
 	#define UNALIGNEDPTR __unaligned /* It seems there's no alternative for GCC */
-    #define NOVTABLE __declspec(novtable)
-#else
-    #define NOVTABLE /* doesn't seem to be supported by GCC */
 #endif
+    #define NOVTABLE /* doesn't seem to be supported by neither Clang, nor GCC */
     #define EMPTY_BASES /* TODO: do these compilers have something similar */
+    #define PRINTF_VERIFY_FRONT
+    #define PRINTF_VERIFY_BACK(stringIndex, argumentIndex) __attribute__((format(printf, stringIndex, argumentIndex))) /* when counting arguments, the first argument has index 1, you should also account for this argument */
 
     #define _UNREACHABLE __builtin_unreachable()
 
@@ -131,17 +133,17 @@
 
 #endif
 
-inline bool __BitTestAndReset32(long *value, long position)
+inline bool __BitTestAndReset32(int *value, int position)
 {
-    bool isSet = (*value & ((long)1 << position)) != 0;
-    *value &= ~((long)1 << position);
+    bool isSet = (*value & ((int)1 << position)) != 0;
+    *value &= ~((int)1 << position);
     return isSet;
 }
 
-inline bool __BitTestAndSet32(long *value, long position)
+inline bool __BitTestAndSet32(int *value, int position)
 {
-    bool isSet = (*value & ((long)1 << position)) != 0;
-    *value |= (long)1 << position;
+    bool isSet = (*value & ((int)1 << position)) != 0;
+    *value |= (int)1 << position;
     return isSet;
 }
 
@@ -203,10 +205,10 @@ inline bool __BitTestAndSet64(long long *value, long long position)
     #define _BITTEST64(value, position) (*value & ((long long)1 << position)) != 0
 #endif
 #ifndef _BITTESTANDRESET32
-    #define _BITTESTANDRESET32(value, position) __BitTestAndReset32((long *)value, (long)position)
+    #define _BITTESTANDRESET32(value, position) __BitTestAndReset32((int *)value, (int)position)
 #endif
 #ifndef _BITTESTANDSET32
-    #define _BITTESTANDSET32(value, position) __BitTestAndSet32((long *)value, (long)position)
+    #define _BITTESTANDSET32(value, position) __BitTestAndSet32((int *)value, (int)position)
 #endif
 #ifndef _BITTESTANDRESET64
     #define _BITTESTANDRESET64(value, position) __BitTestAndReset64((long long *)value, (long)position)

@@ -168,8 +168,9 @@ namespace StdLib
     struct StableTypeIdentifiableBase
     {};
 
-    template <ui64 stableId, ui64 encoded0 = 0, ui64 encoded1 = 0, ui64 encoded2 = 0> class EMPTY_BASES StableTypeIdentifiable : public StableTypeIdentifiableBase
+    template <ui64 stableId, ui64 encoded0 = 0, ui64 encoded1 = 0, ui64 encoded2 = 0> struct EMPTY_BASES StableTypeIdentifiable : StableTypeIdentifiableBase
     {
+    private:
         static constexpr uiw staticNameLength = CompileTimeStrings::DecodeASCIIToLength<encoded0, encoded1, encoded2>();
 		static constexpr std::array<char, staticNameLength + 1> staticName = CompileTimeStrings::DecodeASCIIToArray<staticNameLength + 1, encoded0, encoded1, encoded2>();
 
