@@ -305,6 +305,24 @@ namespace StdLib::Funcs
         }
         return output;
     }
+
+	template <size_t I, typename T> struct _RemoveTupleElement
+	{
+	};
+
+	template <typename T, typename... Ts> struct _RemoveTupleElement<0, std::tuple<T, Ts...>>
+	{
+		using type = std::tuple<Ts...>;
+	};
+
+	template <size_t I, typename T, typename... Ts> struct _RemoveTupleElement<I, std::tuple<T, Ts...>>
+	{
+		using type = decltype(std::tuple_cat(
+				std::declval<std::tuple<T>>(),
+				std::declval<typename _RemoveTupleElement<I - 1, std::tuple<Ts...>>::type>()));
+	};
+
+	template <size_t I, typename T> using RemoveTupleElement = typename _RemoveTupleElement<I, T>::type;
 }
 
 #define CountOf(a) Funcs::_CountOf<decltype(a)>()

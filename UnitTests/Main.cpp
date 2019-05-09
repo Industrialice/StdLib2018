@@ -69,6 +69,20 @@ void MiscTests()
     MovableAtomic<ui32> atomicTest2 = std::move(atomicTest);
     UTest(Equal, atomicTest2.load(), 15);
 
+	std::tuple<ui32, f32, bool> tuple;
+
+	using tuple0 = RemoveTupleElement<0, decltype(tuple)>;
+	static_assert(std::is_same_v<std::tuple_element_t<0, tuple0>, f32>);
+	static_assert(std::is_same_v<std::tuple_element_t<1, tuple0>, bool>);
+
+	using tuple1 = RemoveTupleElement<1, decltype(tuple)>;
+	static_assert(std::is_same_v<std::tuple_element_t<0, tuple1>, ui32>);
+	static_assert(std::is_same_v<std::tuple_element_t<1, tuple1>, bool>);
+
+	using tuple2 = RemoveTupleElement<2, decltype(tuple)>;
+	static_assert(std::is_same_v<std::tuple_element_t<0, tuple2>, ui32>);
+	static_assert(std::is_same_v<std::tuple_element_t<1, tuple2>, f32>);
+
     Logger::Message("finished misc tests\n");
 }
 
