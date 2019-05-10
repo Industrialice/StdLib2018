@@ -310,6 +310,11 @@ namespace StdLib::Funcs
 	{
 	};
 
+	template <> struct _RemoveTupleElement<0, std::tuple<>>
+	{
+		using type = std::tuple<>;
+	};
+
 	template <typename T, typename... Ts> struct _RemoveTupleElement<0, std::tuple<T, Ts...>>
 	{
 		using type = std::tuple<Ts...>;

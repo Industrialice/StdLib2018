@@ -83,6 +83,10 @@ void MiscTests()
 	static_assert(std::is_same_v<std::tuple_element_t<0, tuple2>, ui32>);
 	static_assert(std::is_same_v<std::tuple_element_t<1, tuple2>, f32>);
 
+	std::tuple<> emptyTuple;
+	using emptyTuple2 = RemoveTupleElement<0, decltype(emptyTuple)>;
+	static_assert(std::tuple_size_v<decltype(emptyTuple)> == std::tuple_size_v<emptyTuple2>);
+
     Logger::Message("finished misc tests\n");
 }
 

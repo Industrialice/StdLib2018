@@ -23,6 +23,17 @@ namespace StdLib::_Private
 
 #define NOIMPL HARDBREAK
 
-#define TOSTR(code) #code
+// CONCAT_EXPANDED first expands the arguments, for example possible output of CONCAT_EXPANDED(__FILE__, __LINE__) is Test.cpp107
+// CONCAT(__FILE__, __LINE__) will output __FILE____LINE__
+#define CONCAT_EXPANDED(first, second) CONCAT(first, second)
 #define CONCAT(first, second) first##second
+#define TOSTR(code) #code
 #define ALLOCA_TYPED(count, type) (std::remove_const_t<type> *)ALLOCA(count, sizeof(type))
+
+#define STATIC_WARNING(cond, msg) \
+	struct CONCAT_EXPANDED(Warning, __LINE__) \
+	{ \
+		constexpr DEPRECATE(void _(std::false_type), msg) {}; \
+		constexpr void _(std::true_type) {}; \
+		constexpr CONCAT_EXPANDED(Warning, __LINE__)() {_(std::conditional_t<cond, std::true_type, std::false_type>());} \
+	}

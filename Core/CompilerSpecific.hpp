@@ -22,6 +22,7 @@
     #define NOVTABLE __declspec(novtable)
     #define PRINTF_VERIFY_FRONT _In_z_ _Printf_format_string_
     #define PRINTF_VERIFY_BACK(...)
+	#define DEPRECATE(foo, msg) __declspec(deprecated(msg)) foo
 
     #define _UNREACHABLE __assume(0)
 
@@ -78,6 +79,7 @@
     #define EMPTY_BASES /* TODO: do these compilers have something similar */
     #define PRINTF_VERIFY_FRONT
     #define PRINTF_VERIFY_BACK(stringIndex, argumentIndex) __attribute__((format(printf, stringIndex, argumentIndex))) /* when counting arguments, the first argument has index 1, you should also account for this argument */
+	#define DEPRECATE(foo, msg) foo __attribute__((deprecated(msg)))
 
     #define _UNREACHABLE __builtin_unreachable()
 
