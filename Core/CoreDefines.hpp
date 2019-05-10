@@ -30,10 +30,10 @@ namespace StdLib::_Private
 #define TOSTR(code) #code
 #define ALLOCA_TYPED(count, type) (std::remove_const_t<type> *)ALLOCA(count, sizeof(type))
 
-#define STATIC_WARNING(cond, msg) \
-	struct CONCAT_EXPANDED(Warning, __LINE__) \
+#define static_warning(condition, message) \
+	struct CONCAT_EXPANDED(_Warning, __LINE__) \
 	{ \
-		constexpr DEPRECATE(void _(std::false_type), msg) {}; \
+		constexpr DEPRECATE(void _(std::false_type), message) {}; \
 		constexpr void _(std::true_type) {}; \
-		constexpr CONCAT_EXPANDED(Warning, __LINE__)() {_(std::conditional_t<cond, std::true_type, std::false_type>());} \
+		constexpr CONCAT_EXPANDED(_Warning, __LINE__)() {_(std::conditional_t<condition, std::true_type, std::false_type>());} \
 	}
