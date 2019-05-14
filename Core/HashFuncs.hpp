@@ -110,13 +110,13 @@ namespace StdLib::Hash
         }
 		else if constexpr (sizeof(T) == 2)
 		{
-			x = ((x >> 8) ^ x) * 0x45d9f3b;
-			x = ((x >> 8) ^ x) * 0x45d9f3b;
-			x = (x >> 8) ^ x;
+			x = (((x >> 8) ^ x) * 0x45d9f3b) & 0xFFFF;
+			x = (((x >> 8) ^ x) * 0x45d9f3b) & 0xFFFF;
+			x = ((x >> 8) ^ x) & 0xFFFF;
 		}
 		else
 		{
-			x = x * 0x45d9f3b;
+			x = (x * 0x45d9f3b) & 0xFF;
 		}
         return x;
     }
@@ -139,13 +139,13 @@ namespace StdLib::Hash
 		}
 		else if constexpr (sizeof(T) == 2)
 		{
-			x = ((x >> 8) ^ x) * 0x119de1f3;
-			x = ((x >> 8) ^ x) * 0x119de1f3;
-			x = (x >> 8) ^ x;
+			x = (((x >> 8) ^ x) * 0x119de1f3) & 0xFFFF;
+			x = (((x >> 8) ^ x) * 0x119de1f3) & 0xFFFF;
+			x = ((x >> 8) ^ x) & 0xFFFF;
 		}
         else
         {
-            x = x * 0x119de1f3;
+            x = (x * 0x119de1f3) & 0xFF;
         }
         return x;
     }
