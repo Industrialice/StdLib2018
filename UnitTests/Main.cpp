@@ -69,6 +69,11 @@ void MiscTests()
     MovableAtomic<ui32> atomicTest2 = std::move(atomicTest);
     UTest(Equal, atomicTest2.load(), 15);
 
+    Logger::Message("finished misc tests\n");
+}
+
+void TupleHelpersTests()
+{
 	std::tuple<ui32, f32, bool> tuple;
 
 	using tuple0 = RemoveTupleElement<0, decltype(tuple)>;
@@ -87,7 +92,23 @@ void MiscTests()
 	using emptyTuple2 = RemoveTupleElement<0, decltype(emptyTuple)>;
 	static_assert(std::tuple_size_v<decltype(emptyTuple)> == std::tuple_size_v<emptyTuple2>);
 
-    Logger::Message("finished misc tests\n");
+	constexpr auto toArrayTuple = std::make_tuple(0, 1, 2, 3, 4);
+	constexpr auto arrayFromTuple = TupleToArray(toArrayTuple);
+	static_assert(arrayFromTuple.size() == 5);
+	UTest(Equal, arrayFromTuple, make_array(0, 1, 2, 3, 4));
+
+	constexpr auto toArrayEmptyTuple = std::tuple<>();
+	constexpr auto emptyArrayFromTuple = TupleToArray(toArrayEmptyTuple);
+	static_assert(emptyArrayFromTuple.empty());
+	static_assert(std::is_same_v<decltype(emptyArrayFromTuple)::value_type, std::tuple<>>);
+
+	constexpr auto emptyArrayFromTupleDefaulted = TupleToArray<decltype(toArrayEmptyTuple), StableTypeId>(toArrayEmptyTuple);
+	static_assert(emptyArrayFromTuple.empty());
+	static_assert(std::is_same_v<decltype(emptyArrayFromTupleDefaulted)::value_type, StableTypeId>);
+
+	constexpr auto tupleFromArray = ArrayToTuple(arrayFromTuple);
+	static_assert(std::tuple_size_v<decltype(tupleFromArray)>);
+	static_assert(tupleFromArray == std::make_tuple(0, 1, 2, 3, 4));
 }
 
 static void CompileTimeSortingTests()
@@ -1334,6 +1355,7 @@ static void DoTests(int argc, const char **argv)
     UTest(false, FileSystem::CreateNewFolder(folderForTests, {}, true));
 
     MiscTests();
+	TupleHelpersTests();
     CompileTimeSortingTests();
     CompileTimeStringsTests();
     EnumCombinableTests();

@@ -305,6 +305,32 @@ namespace StdLib::Funcs
         }
         return output;
     }
+	
+	// temporary emulation of std::make_array, taken from https://en.cppreference.com/w/cpp/experimental/make_array
+	namespace _details
+	{
+		template<class> struct is_ref_wrapper : std::false_type {};
+		template<class T> struct is_ref_wrapper<std::reference_wrapper<T>> : std::true_type {};
+
+		template<class T>
+		using not_ref_wrapper = std::negation<is_ref_wrapper<std::decay_t<T>>>;
+
+		template <class D, class...> struct return_type_helper { using type = D; };
+		template <class... Types>
+		struct return_type_helper<void, Types...> : std::common_type<Types...>
+		{
+			static_assert(std::conjunction_v<not_ref_wrapper<Types>...>,
+				"Types cannot contain reference_wrappers when D is void");
+		};
+
+		template <class D, class... Types>
+		using return_type = std::array<typename return_type_helper<D, Types...>::type, sizeof...(Types)>;
+	}
+
+	template <class D = void, class... Types> constexpr _details::return_type<D, Types...> make_array(Types &&... t)
+	{
+		return {std::forward<Types>(t)...};
+	}
 
 	template <size_t I, typename T> struct _RemoveTupleElement
 	{
@@ -328,6 +354,33 @@ namespace StdLib::Funcs
 	};
 
 	template <size_t I, typename T> using RemoveTupleElement = typename _RemoveTupleElement<I, T>::type;
+
+	template <typename T, typename DefaultType, uiw... Indexes> constexpr auto _TupleToArray(const T &source, std::index_sequence<Indexes...>)
+	{
+		if constexpr (sizeof...(Indexes) == 0)
+		{
+			return std::array<DefaultType, 0>{};
+		}
+		else
+		{
+			return make_array(std::get<Indexes>(source)...);
+		}
+	}
+
+	template <typename T, typename DefaultType = T> constexpr auto TupleToArray(const T &source)
+	{
+		return _TupleToArray<T, DefaultType>(source, std::make_index_sequence<std::tuple_size_v<T>>());
+	}
+
+	template <typename T, uiw... Indexes> constexpr auto _ArrayToTuple(const std::array<T, sizeof...(Indexes)> &source, std::index_sequence<Indexes...>)
+	{
+		return std::make_tuple(source[Indexes]...);
+	}
+
+	template <typename T, uiw size> constexpr auto ArrayToTuple(const std::array<T, size> &source)
+	{
+		return _ArrayToTuple(source, std::make_index_sequence<size>());
+	}
 }
 
 #define CountOf(a) Funcs::_CountOf<decltype(a)>()
