@@ -18,7 +18,9 @@ namespace StdLib::ApproxMath
             The constant 0x5f30c7f0 makes the relative error range from 0 to
             -0.061322.
             The constant 0x5f400000 makes the relative error range from 0 to
-            +0.088662. */
+            +0.088662.
+			MSVC 15.9.12 2500k x64: 2.39x
+			Clang 8.0.2 MT6589: 2.43x */
 
             union { i32 ix; f32 x; };
 
@@ -39,7 +41,9 @@ namespace StdLib::ApproxMath
             the best I can do is use 5f375a82, which gives rel err = 0 to
             -0.00175123). However, using that value seems to usually give a slightly
             larger relative error, according to Chris.
-            The routine can be adapted to IEEE double precision. */
+            The routine can be adapted to IEEE double precision.
+			MSVC 15.9.12 2500k x64: 2.09x
+			Clang 8.0.2 MT6589: 1.35x */
 
             union { i32 ix; f32 x; };
 
@@ -54,7 +58,9 @@ namespace StdLib::ApproxMath
             /* This is the same as Precision::Medium, but with an additional step
 			of the Newton iteration, for increased accuracy. The constant
 			0x5f37599e makes the relative error range from 0 to -0.00000463.
-            You can't balance the error by adjusting the constant. */
+            You can't balance the error by adjusting the constant. 
+			MSVC 15.9.12 2500k x64: 1.54x
+			Clang 8.0.2 MT6589: 0.95x */
 
             f32 xhalf = 0.5f * input;
             i32 i = *(i32 *)&input;
@@ -79,7 +85,9 @@ namespace StdLib::ApproxMath
 			/* This is a very approximate but very fast version of asqrt. It is just
 			two integer instructions (shift right and add), plus instructions
 			to load the constant.
-			The constant 0x1fbb4f2e balances the relative error at +-0.0347474. */
+			The constant 0x1fbb4f2e balances the relative error at +-0.0347474.
+			MSVC 15.9.12 2500k x64: 3.88x
+			Clang 8.0.2 MT6589: 4.67x */
 
 			union { i32 ix; f32 x; };
 
@@ -98,27 +106,31 @@ namespace StdLib::ApproxMath
 				Result for 0 is 3.96845e-20.
 			For denorms it is either within tolerance or gives a result < 1.0e-19.
 			Gives the correct result (inf) for x = inf.
-			Gives the correct result (NaN) for x = NaN. */
+			Gives the correct result (NaN) for x = NaN.
+			MSVC 15.9.12 2500k x64: 3.08x
+			Clang 8.0.2 MT6589: 1.99x */
 
 			union { i32 ix; f32 x; };
 
 			x = input;
 			ix = 0x1fbb67a8 + (ix >> 1); // Initial guess.
-			x = 0.5f*(x + input / x); // Newton step.
+			x = 0.5f * (x + input / x); // Newton step.
 			return x;
 		}
 		else
 		{
 			/* This is the same as Precision::Medium, but with an additional step
 			of the Newton iteration, for increased accuracy.
-			The relative error ranges from 0 to +0.00000023. */
+			The relative error ranges from 0 to +0.00000023.
+			MSVC 15.9.12 2500k x64: 1.58x
+			Clang 8.0.2 MT6589: 1.30x */
 
 			union { i32 ix; f32 x; };
 
 			x = input;
 			ix = 0x1fbb67a8 + (ix >> 1); // Initial guess.
-			x = 0.5f*(x + input / x); // Newton step.
-			x = 0.5f*(x + input / x); // Newton step again.
+			x = 0.5f * (x + input / x); // Newton step.
+			x = 0.5f * (x + input / x); // Newton step again.
 			return x;
 		}
     }
@@ -138,7 +150,9 @@ namespace StdLib::ApproxMath
 			/* This is a very approximate but very fast version of acbrt. It is just
 			two integer instructions (shift right and divide), plus instructions
 			to load the constant.
-			The constant 0x2a51067f balances the relative error at +-0.0316. */
+			The constant 0x2a51067f balances the relative error at +-0.0316.
+			MSVC 15.9.12 2500k x64: 5.29x
+			Clang 8.0.2 MT6589: 19.48x */
 
 			union { i32 ix; f32 x; };
 
@@ -157,7 +171,9 @@ namespace StdLib::ApproxMath
 				Result for 0 is 1.24e-13.
 			For denorms it is either within tolerance or gives a result < 2.1e-13.
 			Gives the correct result (inf) for x = inf.
-			Gives the correct result (NaN) for x = NaN. */
+			Gives the correct result (NaN) for x = NaN.
+			MSVC 15.9.12 2500k x64: 2.81x
+			Clang 8.0.2 MT6589: 6.84x */
 
 			union { i32 ix; f32 x; };
 
@@ -173,7 +189,9 @@ namespace StdLib::ApproxMath
 		{
 			/* This is the same as Precision::Medium, but with an additional step
 			of the Newton iteration, for increased accuracy.
-			The relative error ranges from 0 to +0.00000116. */
+			The relative error ranges from 0 to +0.00000116.
+			MSVC 15.9.12 2500k x64: 1.89x
+			Clang 8.0.2 MT6589: 4.64x */
 
 			union { i32 ix; f32 x; };
 
@@ -197,6 +215,8 @@ namespace StdLib::ApproxMath
 	{
 		// based on GLM, relative to std::cos precision on range 
 		// [-0.5pi-0.00001;2.5pi+0.00001] is [-0.000007;0.000007]
+		// MSVC 15.9.12 2500k x64: 2.48x
+		// Clang 8.0.2 MT6589 : 1.76x
 
 		ASSUME(value >= -MathPiHalf() - 0.00001f && value <= MathPiDouble() + MathPiHalf() + 0.00001f);
 
@@ -235,6 +255,8 @@ namespace StdLib::ApproxMath
 	{
 		// based on GLM, relative to std::sin precision on range 
 		// [-0.00001;3pi+0.00001] is [-0.000007;0.000007]
+		// MSVC 15.9.12 2500k x64: 2.19x
+		// Clang 8.0.2 MT6589 : 1.50x
 		ASSUME(value >= -0.00001f && value <= MathPiDouble() + MathPi() + 0.00001f);
 		return Cos<precision>((MathPiDouble() + MathPiHalf()) - value);
 	}
