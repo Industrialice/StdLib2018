@@ -1284,17 +1284,11 @@ static void PrintSystemInfo()
 	case SystemInfo::Arch::ARM:
 		arch = "ARM";
         break;
+	case SystemInfo::Arch::ARMT:
+		arch = "ARMT";
+		break;
 	case SystemInfo::Arch::ARM64:
 		arch = "ARM64";
-		break;
-	case SystemInfo::Arch::Itanium:
-		arch = "Itanium";
-		break;
-	case SystemInfo::Arch::MIPS64:
-		arch = "MIPS64";
-		break;
-	case SystemInfo::Arch::SH3:
-		arch = "SH3";
 		break;
 	case SystemInfo::Arch::Unwnown:
 		arch = "Unknown";
@@ -1304,6 +1298,9 @@ static void PrintSystemInfo()
 		break;
 	case SystemInfo::Arch::x86:
 		arch = "x86";
+		break;
+	case SystemInfo::Arch::Emscripten:
+		arch = "Emscripten";
 		break;
 	}
 	Logger::Message("  CPU architecture: %s\n", arch);
@@ -1338,7 +1335,12 @@ static void PrintSystemInfo()
 
 static void DoTests(int argc, const char **argv)
 {
-    Logger::Message("~~~Starting Tests~~~\n");
+	const char *buildType = "Release build";
+	#if defined(DEBUG) || defined(_DEBUG)
+		buildType = "Release build";
+	#endif
+
+    Logger::Message("---Starting Tests for %s---\n", buildType);
 
     std::string filesTestFolder = "FileTestsFolder";
     if (argc >= 2)

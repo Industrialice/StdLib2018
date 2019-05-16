@@ -11,10 +11,23 @@ namespace
     uiw PageSizeValue;
 }
 
-// TODO:
 auto SystemInfo::CPUArchitecture() -> Arch
 {
-    return Arch::Unwnown;
+	#if defined(__i386__) || defined(__i486__) || defined(__i586__) || defined(__i686__)
+		return Arch::x86;
+	#elif defined(__amd64__)
+		return Arch::x64;
+	#elif defined(__arm__)
+		return Arch::ARM;
+	#elif defined(__thumb__)
+		return Arch::ARMT;
+	#elif defined(__aarch64__)
+		return Arch::ARM64;
+	#elif defined(PLATFORM_EMSCRIPTEN)
+		return Arch::Emscripten;
+	#else
+		return Arch::Unwnown;
+	#endif
 }
 
 ui32 SystemInfo::LogicalCPUCores()
@@ -48,19 +61,15 @@ namespace StdLib::SystemInfo
 	{
 	    // TODO: find an adequate crossplatform solution
         AllocationAlignmentValue = 16;
-	    void *addresses[10];
-	    for (int i = 0; i < 10; ++i)
+	    void *addresses[16];
+	    for (int i = 0; i < 16; ++i)
         {
             addresses[i] = malloc(1);
             AllocationAlignmentValue = std::min<uiw>(AllocationAlignmentValue, 1u << Funcs::IndexOfLeastSignificantNonZeroBit((uiw)addresses[i]));
         }
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < 16; ++i)
         {
             free(addresses[i]);
-        }
-        if (AllocationAlignmentValue > 16)
-        {
-            AllocationAlignmentValue = 16;
         }
 
         LogicalCPUCoresValue = (ui32)sysconf(_SC_NPROCESSORS_CONF);

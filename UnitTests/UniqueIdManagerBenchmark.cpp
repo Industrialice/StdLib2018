@@ -70,6 +70,9 @@ static void PrepareShuffler(uiw requestSize, std::vector<std::pair<ui32, ui32>> 
 
 void UniqueIdManagerBenchmark()
 {
+	Logger::Message("Left time: requesting a unique id\n");
+	Logger::Message("Right time: requesting a particular id\n\n");
+
     f32 bestTime0 = f32_max, bestTime1 = f32_max;
     std::vector<ui32> ids(100'000);
     std::vector<std::pair<ui32, ui32>> shuffleIndexes;
@@ -107,5 +110,5 @@ void UniqueIdManagerBenchmark()
 
     Logger::Message("Done 10kk for %g : %g\n", bestTime0, bestTime1);
 
-    Logger::Message("~~~Finished benchmarking unique id manager~~~\n");
+    Logger::Message("~~~Finished benchmarking unique id manager~~~\n\n");
 }

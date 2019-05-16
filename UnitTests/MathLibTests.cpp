@@ -918,17 +918,17 @@ template <ApproxMath::Precision Precision> static void SinTests()
 	Logger::Message("\napprox sin 0 min %f at %f max %f at %f\n", c0Min, c0MinValue, c0Max, c0MaxValue);
 }
 
-template <typename TrigFuncType, TrigFuncType TrigFunc> static inline void TrigBenchmarksHelper(const char *name)
+template <typename TrigFuncType, TrigFuncType TrigFunc> static inline f64 TrigBenchmarksHelper(const char *name, f64 ref = 0)
 {
     struct Local
     {
-        f32 resultTable[256];
+        std::array<f32, 256> resultTable;
         ui32 counted = 0;
         f32 fvalue = 0.00001f;
 
         FORCEINLINE void Compute()
         {
-            resultTable[counted % CountOf(resultTable)] = TrigFunc(fvalue);
+            resultTable[counted % resultTable.size()] = TrigFunc(fvalue);
 
             fvalue += (counted & 15) * 0.2f;
             if (fvalue >= MathPiDouble())
@@ -962,40 +962,65 @@ template <typename TrigFuncType, TrigFuncType TrigFunc> static inline void TrigB
 	}
 
 	volatile f32 v = l.resultTable[rand() % 256];
-	Logger::Message("%s => %.2lfkk/s\n", name, l.counted / diff.ToSec_f64() / 1'000'000.0);
+	f64 curRef = l.counted / diff.ToSec_f64() / 1'000'000.0;
+	if (ref)
+	{
+		Logger::Message("%s => %.2lfkk/s %.2lfx\n", name, curRef, curRef / ref);
+	}
+	else
+	{
+		Logger::Message("%s => %.2lfkk/s\n", name, curRef);
+	}
+	return curRef;
+}
+
+inline f32 StdSinCos(f32 value)
+{
+	return std::sinf(value) + std::cosf(value);
+}
+
+inline f32 ApproxSinCos(f32 value)
+{
+	return ApproxMath::Sin<ApproxMath::Precision::High>(value) + ApproxMath::Cos<ApproxMath::Precision::High>(value);
+}
+
+static void SinCosBenchmarks()
+{
+	f64 ref = TrigBenchmarksHelper<decltype(StdSinCos), StdSinCos>(" std::sincos");
+	TrigBenchmarksHelper<decltype(ApproxSinCos), ApproxSinCos>("approxSinCos", ref);
 }
 
 static void CosBenchmarks()
 {
-	TrigBenchmarksHelper<decltype(std::cosf), std::cosf>(" std::cos");
-	TrigBenchmarksHelper<f32 (*)(f32), ApproxMath::Cos<ApproxMath::Precision::High>>("approxCos");
+	f64 ref = TrigBenchmarksHelper<decltype(std::cosf), std::cosf>(" std::cos");
+	TrigBenchmarksHelper<f32 (*)(f32), ApproxMath::Cos<ApproxMath::Precision::High>>("approxCos", ref);
 }
 
 static void SinBenchmarks()
 {
-	TrigBenchmarksHelper<decltype(std::sinf), std::sinf>(" std::sin");
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Sin<ApproxMath::Precision::High>>("approxSin");
+	f64 ref = TrigBenchmarksHelper<decltype(std::sinf), std::sinf>(" std::sin");
+	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Sin<ApproxMath::Precision::High>>("approxSin", ref);
 }
 
 static void SqrtBenchmarks()
 {
-	TrigBenchmarksHelper<decltype(std::sqrtf), std::sinf>("   std::sqrt");
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Sqrt<ApproxMath::Precision::High>>("approxSqrt H");
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Sqrt<ApproxMath::Precision::Medium>>("approxSqrt M");
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Sqrt<ApproxMath::Precision::Low>>("approxSqrt L");
+	f64 ref = TrigBenchmarksHelper<decltype(std::sqrtf), std::sinf>("   std::sqrt");
+	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Sqrt<ApproxMath::Precision::High>>("approxSqrt H", ref);
+	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Sqrt<ApproxMath::Precision::Medium>>("approxSqrt M", ref);
+	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Sqrt<ApproxMath::Precision::Low>>("approxSqrt L", ref);
 }
 
-auto StdRSqrt(f32 input) -> f32
+inline auto StdRSqrt(f32 input) -> f32
 {
 	return 1.0f / sqrt(input);
 }
 
 static void RSqrtBenchmarks()
 {
-	TrigBenchmarksHelper<decltype(StdRSqrt), StdRSqrt>("1.0f/std::sqrt");
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::RSqrt<ApproxMath::Precision::High>>(" approxRSqrt H");
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::RSqrt<ApproxMath::Precision::Medium>>(" approxRSqrt M");
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::RSqrt<ApproxMath::Precision::Low>>(" approxRSqrt L");
+	f64 ref = TrigBenchmarksHelper<decltype(StdRSqrt), StdRSqrt>("1.0f/std::sqrt");
+	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::RSqrt<ApproxMath::Precision::High>>(" approxRSqrt H", ref);
+	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::RSqrt<ApproxMath::Precision::Medium>>(" approxRSqrt M", ref);
+	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::RSqrt<ApproxMath::Precision::Low>>(" approxRSqrt L", ref);
 }
 
 inline f32 StdQurt(f32 input)
@@ -1005,10 +1030,10 @@ inline f32 StdQurt(f32 input)
 
 static void QurtBenchmarks()
 {
-	TrigBenchmarksHelper<decltype(StdQurt), StdQurt>("pow(v, 1.0f/3)");
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Qurt<ApproxMath::Precision::High>>("  approxQurt H");
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Qurt<ApproxMath::Precision::Medium>>("  approxQurt M");
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Qurt<ApproxMath::Precision::Low>>("  approxQurt L");
+	f64 ref = TrigBenchmarksHelper<decltype(StdQurt), StdQurt>("pow(v, 1.0f/3)");
+	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Qurt<ApproxMath::Precision::High>>("  approxQurt H", ref);
+	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Qurt<ApproxMath::Precision::Medium>>("  approxQurt M", ref);
+	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Qurt<ApproxMath::Precision::Low>>("  approxQurt L", ref);
 }
 
 void MathLibTests()
@@ -1055,6 +1080,8 @@ void MathLibTests()
 	//	counter /= index;
 	//	counter *= index;
 	//}
+	//printf("\n");
+	//SinCosBenchmarks();
 	//printf("\n");
 	//CosBenchmarks();
 	//printf("\n");

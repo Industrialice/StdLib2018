@@ -149,5 +149,5 @@ i64 CurrentTime()
     id = CLOCK_MONOTONIC;
 #endif
     clock_gettime(id, &t);
-    return t.tv_sec * 100000000ULL + (t.tv_nsec / 10); // TODO: possible overflow?
+    return t.tv_sec * 1'000'000'000ULL + (t.tv_nsec / 10); // TODO: possible overflow?
 }

@@ -4,7 +4,7 @@ namespace StdLib::SystemInfo
 {
 	enum class Arch
 	{
-		Unwnown, x86, x64, ARM, ARM64, Itanium, MIPS64, SH3
+		Unwnown, x86, x64, ARM, ARMT, ARM64, Emscripten
 	};
 
     enum class Platform

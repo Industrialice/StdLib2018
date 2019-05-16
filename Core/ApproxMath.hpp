@@ -19,8 +19,9 @@ namespace StdLib::ApproxMath
             -0.061322.
             The constant 0x5f400000 makes the relative error range from 0 to
             +0.088662.
-			MSVC 15.9.12 2500k x64: 2.39x
-			Clang 8.0.2 MT6589: 2.43x */
+			MSVC 15.9.12 2500k x64: 389.12kk 2.39x
+			Clang 8.0.2 MT6589: 57.60kk 2.46x 
+			Clang 8.0.2 MT8735M ARM64: 47.45kk 2.06x */
 
             union { i32 ix; f32 x; };
 
@@ -42,8 +43,9 @@ namespace StdLib::ApproxMath
             -0.00175123). However, using that value seems to usually give a slightly
             larger relative error, according to Chris.
             The routine can be adapted to IEEE double precision.
-			MSVC 15.9.12 2500k x64: 2.09x
-			Clang 8.0.2 MT6589: 1.35x */
+			MSVC 15.9.12 2500k x64: 342.06kk 2.09x
+			Clang 8.0.2 MT6589: 31.39kk 1.34x 
+			Clang 8.0.2 MT8735M ARM64: 24.38kk 1.06x */
 
             union { i32 ix; f32 x; };
 
@@ -59,8 +61,9 @@ namespace StdLib::ApproxMath
 			of the Newton iteration, for increased accuracy. The constant
 			0x5f37599e makes the relative error range from 0 to -0.00000463.
             You can't balance the error by adjusting the constant. 
-			MSVC 15.9.12 2500k x64: 1.54x
-			Clang 8.0.2 MT6589: 0.95x */
+			MSVC 15.9.12 2500k x64: 251.82kk 1.54x
+			Clang 8.0.2 MT6589: 22.08kk 0.94x 
+			Clang 8.0.2 MT8735M ARM64: 17.36kk 0.75x */
 
             f32 xhalf = 0.5f * input;
             i32 i = *(i32 *)&input;
@@ -86,8 +89,9 @@ namespace StdLib::ApproxMath
 			two integer instructions (shift right and add), plus instructions
 			to load the constant.
 			The constant 0x1fbb4f2e balances the relative error at +-0.0347474.
-			MSVC 15.9.12 2500k x64: 3.88x
-			Clang 8.0.2 MT6589: 4.67x */
+			MSVC 15.9.12 2500k x64: 405.29kk 3.88x
+			Clang 8.0.2 MT6589: 56.36kk 4.83x 
+			Clang 8.0.2 MT8735M ARM64: 47.77kk 3.54x */
 
 			union { i32 ix; f32 x; };
 
@@ -107,8 +111,9 @@ namespace StdLib::ApproxMath
 			For denorms it is either within tolerance or gives a result < 1.0e-19.
 			Gives the correct result (inf) for x = inf.
 			Gives the correct result (NaN) for x = NaN.
-			MSVC 15.9.12 2500k x64: 3.08x
-			Clang 8.0.2 MT6589: 1.99x */
+			MSVC 15.9.12 2500k x64: 320.82kk 3.08x
+			Clang 8.0.2 MT6589: 24.18kk 2.07x 
+			Clang 8.0.2 MT8735M ARM64: 23.06kk 1.71x */
 
 			union { i32 ix; f32 x; };
 
@@ -122,8 +127,9 @@ namespace StdLib::ApproxMath
 			/* This is the same as Precision::Medium, but with an additional step
 			of the Newton iteration, for increased accuracy.
 			The relative error ranges from 0 to +0.00000023.
-			MSVC 15.9.12 2500k x64: 1.58x
-			Clang 8.0.2 MT6589: 1.30x */
+			MSVC 15.9.12 2500k x64: 165.93kk 1.58x
+			Clang 8.0.2 MT6589: 15.86kk 1.36x 
+			Clang 8.0.2 MT8735M ARM64: 15.20kk 1.13x */
 
 			union { i32 ix; f32 x; };
 
@@ -151,8 +157,9 @@ namespace StdLib::ApproxMath
 			two integer instructions (shift right and divide), plus instructions
 			to load the constant.
 			The constant 0x2a51067f balances the relative error at +-0.0316.
-			MSVC 15.9.12 2500k x64: 5.29x
-			Clang 8.0.2 MT6589: 19.48x */
+			MSVC 15.9.12 2500k x64: 356.08kk 5.29x
+			Clang 8.0.2 MT6589: 48.03kk 19.31x 
+			Clang 8.0.2 MT8735M ARM64: 37.74kk 15.60x */
 
 			union { i32 ix; f32 x; };
 
@@ -172,8 +179,9 @@ namespace StdLib::ApproxMath
 			For denorms it is either within tolerance or gives a result < 2.1e-13.
 			Gives the correct result (inf) for x = inf.
 			Gives the correct result (NaN) for x = NaN.
-			MSVC 15.9.12 2500k x64: 2.81x
-			Clang 8.0.2 MT6589: 6.84x */
+			MSVC 15.9.12 2500k x64: 187.49kk 2.81x
+			Clang 8.0.2 MT6589: 16.91kk 6.80x 
+			Clang 8.0.2 MT8735M ARM64: 15.79kk 6.53x */
 
 			union { i32 ix; f32 x; };
 
@@ -190,8 +198,9 @@ namespace StdLib::ApproxMath
 			/* This is the same as Precision::Medium, but with an additional step
 			of the Newton iteration, for increased accuracy.
 			The relative error ranges from 0 to +0.00000116.
-			MSVC 15.9.12 2500k x64: 1.89x
-			Clang 8.0.2 MT6589: 4.64x */
+			MSVC 15.9.12 2500k x64: 127.52kk 1.89x
+			Clang 8.0.2 MT6589: 11.47kk 4.61x 
+			Clang 8.0.2 MT8735M ARM64: 11.01kk 4.55x */
 
 			union { i32 ix; f32 x; };
 
@@ -215,8 +224,9 @@ namespace StdLib::ApproxMath
 	{
 		// based on GLM, relative to std::cos precision on range 
 		// [-0.5pi-0.00001;2.5pi+0.00001] is [-0.000007;0.000007]
-		// MSVC 15.9.12 2500k x64: 2.48x
-		// Clang 8.0.2 MT6589 : 1.76x
+		// MSVC 15.9.12 2500k x64: 271.64kk 2.48x
+		// Clang 8.0.2 MT6589: 19.53kk 1.63x 
+		// Clang 8.0.2 MT8735M ARM64: 19.00kk 1.40x
 
 		ASSUME(value >= -MathPiHalf() - 0.00001f && value <= MathPiDouble() + MathPiHalf() + 0.00001f);
 
@@ -255,8 +265,9 @@ namespace StdLib::ApproxMath
 	{
 		// based on GLM, relative to std::sin precision on range 
 		// [-0.00001;3pi+0.00001] is [-0.000007;0.000007]
-		// MSVC 15.9.12 2500k x64: 2.19x
-		// Clang 8.0.2 MT6589 : 1.50x
+		// MSVC 15.9.12 2500k x64: 236.08kk 2.19x
+		// Clang 8.0.2 MT6589: 17.69kk 1.43x
+		// Clang 8.0.2 MT8735M ARM64: 15.79kk 1.18x
 		ASSUME(value >= -0.00001f && value <= MathPiDouble() + MathPi() + 0.00001f);
 		return Cos<precision>((MathPiDouble() + MathPiHalf()) - value);
 	}

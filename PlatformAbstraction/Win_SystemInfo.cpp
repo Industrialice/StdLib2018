@@ -7,7 +7,6 @@ using namespace StdLib;
 
 namespace
 {
-	SystemInfo::Arch ArchValue;
 	ui32 LogicalCPUCoresValue;
 	ui32 PhysicalCPUCoresValue;
     uiw PageSizeValue;
@@ -15,8 +14,21 @@ namespace
 
 auto SystemInfo::CPUArchitecture() -> Arch
 {
-	ASSUME(ArchValue != Arch::Unwnown);
-	return ArchValue;
+	#if defined(_M_AMD64)
+		return Arch::x64;
+	#elif defined(_M_IX86)
+		return Arch::x86;
+	#elif defined(_M_ARM)
+		return Arch::ARM;
+	#elif defined(_M_ARMT)
+		return Arch::ARMT;
+	#elif defined(_M_ARM64)
+		return Arch::ARM64;
+	#elif defined(PLATFORM_EMSCRIPTEN)
+		return Arch::Emscripten;
+	#else
+		return Arch::Unwnown;
+	#endif
 }
 
 ui32 SystemInfo::LogicalCPUCores()
@@ -52,26 +64,5 @@ namespace StdLib::SystemInfo
 		LogicalCPUCoresValue = sysinfo.dwNumberOfProcessors;
 		PhysicalCPUCoresValue = LogicalCPUCoresValue; // TODO: determine this value
         PageSizeValue = sysinfo.dwPageSize;
-
-		switch (sysinfo.wProcessorArchitecture)
-		{
-		case PROCESSOR_ARCHITECTURE_AMD64:
-			ArchValue = Arch::x64;
-			break;
-		case PROCESSOR_ARCHITECTURE_ARM:
-			ArchValue = Arch::ARM;
-			break;
-		case PROCESSOR_ARCHITECTURE_ARM64:
-			ArchValue = Arch::ARM64;
-			break;
-		case PROCESSOR_ARCHITECTURE_IA64:
-			ArchValue = Arch::Itanium;
-			break;
-		case PROCESSOR_ARCHITECTURE_INTEL:
-			ArchValue = Arch::x86;
-			break;
-		default:
-			ArchValue = Arch::Unwnown;
-		}
 	}
 }
