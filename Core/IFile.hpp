@@ -72,8 +72,8 @@ namespace StdLib
         virtual void Close() = 0;
         virtual bool IsOpened() const = 0;
 
-        virtual bool Read(void *target, ui32 len, ui32 *read = 0) = 0;
-        virtual bool Write(const void *source, ui32 len, ui32 *written = 0) = 0;
+        virtual bool Read(void *RSTR target, ui32 len, ui32 *RSTR read = 0) = 0;
+        virtual bool Write(const void *source, ui32 len, ui32 *RSTR written = 0) = 0;
 
         virtual bool Flush() = 0;
         virtual bool IsBufferingSupported() const = 0;

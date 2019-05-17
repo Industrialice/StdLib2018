@@ -33,8 +33,8 @@ namespace StdLib
         virtual void Close() override;
 		[[nodiscard]] virtual bool IsOpened() const override;
 
-		MUST_BE_OPEN virtual bool Read(void *target, ui32 len, ui32 *read = 0) override;
-		MUST_BE_OPEN virtual bool Write(const void *source, ui32 len, ui32 *written = 0) override;
+		MUST_BE_OPEN virtual bool Read(void *RSTR target, ui32 len, ui32 *RSTR read = 0) override;
+		MUST_BE_OPEN virtual bool Write(const void *source, ui32 len, ui32 *RSTR written = 0) override;
 
 		MUST_BE_OPEN [[nodiscard]] virtual bool Flush() override;
 		[[nodiscard]] virtual bool IsBufferingSupported() const override;

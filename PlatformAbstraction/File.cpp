@@ -175,7 +175,7 @@ NOINLINE bool File::Read(void *target, ui32 len, ui32 *read)
     return ReadFromFile(target, len, read);
 }
 
-NOINLINE bool File::Write(const void *source, ui32 len, ui32 *written)
+NOINLINE bool File::Write(const void *source, ui32 len, ui32 *RSTR written)
 {
     ASSUME(IsOpened());
     ASSUME(source || len == 0);

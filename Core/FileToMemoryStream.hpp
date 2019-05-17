@@ -22,8 +22,8 @@ namespace StdLib
         virtual void Close() override;
         virtual bool IsOpened() const override;
 
-        virtual bool Read(void *target, ui32 len, ui32 *read = 0) override;
-        virtual bool Write(const void *source, ui32 len, ui32 *written = 0) override;
+        virtual bool Read(void *RSTR target, ui32 len, ui32 *RSTR read = 0) override;
+        virtual bool Write(const void *source, ui32 len, ui32 *RSTR written = 0) override;
 
         virtual bool Flush() override;
         virtual bool IsBufferingSupported() const override;

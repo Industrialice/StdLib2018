@@ -253,7 +253,7 @@ bool FileToCFile::IsOpened() const
     return _file != 0;
 }
 
-bool FileToCFile::Read(void *target, ui32 len, ui32 *read)
+bool FileToCFile::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
 {
     ASSUME(IsOpened());
     ui32 actuallyRead = (ui32)fread(target, 1, len, _file);
@@ -261,7 +261,7 @@ bool FileToCFile::Read(void *target, ui32 len, ui32 *read)
     return true;
 }
 
-bool FileToCFile::Write(const void *source, ui32 len, ui32 *written)
+bool FileToCFile::Write(const void *source, ui32 len, ui32 *RSTR written)
 {
     ASSUME(IsOpened());
     ui32 actuallyWritten = (ui32)fwrite(source, 1, len, _file);

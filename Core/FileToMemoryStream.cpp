@@ -72,7 +72,7 @@ bool FileToMemoryStream::IsOpened() const
     return _stream != 0;
 }
 
-bool FileToMemoryStream::Read(void *target, ui32 len, ui32 *read)
+bool FileToMemoryStream::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
 {
     ASSUME(_stream && _procMode.Contains(FileProcModes::Read));
     ASSUME(len == 0 || target);
@@ -88,7 +88,7 @@ bool FileToMemoryStream::Read(void *target, ui32 len, ui32 *read)
     return true;
 }
 
-bool FileToMemoryStream::Write(const void *source, ui32 len, ui32 *written)
+bool FileToMemoryStream::Write(const void *source, ui32 len, ui32 *RSTR written)
 {
     ASSUME(_stream && _procMode.Contains(FileProcModes::Write));
     ASSUME(len == 0 || source);
