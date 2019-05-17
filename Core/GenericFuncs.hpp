@@ -124,7 +124,7 @@ namespace StdLib::Funcs
 
     template <typename T> [[nodiscard]] T ChangeEndianness(T value)
     {
-        static_assert(std::is_pod_v<T>, "val is not a POD type in ChangeEndianness");
+        static_assert(std::is_fundamental_v<T>, "val is not a POD type in ChangeEndianness");
         static_assert(sizeof(T) == 8 || sizeof(T) == 4 || sizeof(T) == 2 || sizeof(T) == 1, "incorrect size of value in ChangeEndianness");
         if constexpr (sizeof(value) == 8)
         {
@@ -181,7 +181,7 @@ namespace StdLib::Funcs
 
     template <typename T> [[nodiscard]] T RotateBitsLeft(T value, ui32 shift)
     {
-        static_assert(std::is_pod_v<T>, "val is not a POD type in RotateBitsLeft");
+        static_assert(std::is_fundamental_v<T>, "val is not a POD type in RotateBitsLeft");
         static_assert(sizeof(T) == 8 || sizeof(T) == 4 || sizeof(T) == 2 || sizeof(T) == 1, "incorrect size of value in RotateBitsLeft");
         ASSUME(shift < sizeof(T) * 8);
         if constexpr (sizeof(value) == 8)
@@ -209,7 +209,7 @@ namespace StdLib::Funcs
 
     template <typename T> [[nodiscard]] T RotateBitsRight(T value, ui32 shift)
     {
-        static_assert(std::is_pod_v<T>, "val is not a POD type in RotateBitsRight");
+        static_assert(std::is_fundamental_v<T>, "val is not a POD type in RotateBitsRight");
         static_assert(sizeof(T) == 8 || sizeof(T) == 4 || sizeof(T) == 2 || sizeof(T) == 1, "incorrect size of value in RotateBitsRight");
         ASSUME(shift < sizeof(T) * 8);
         if constexpr (sizeof(value) == 8)
