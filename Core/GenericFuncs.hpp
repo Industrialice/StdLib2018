@@ -124,27 +124,33 @@ namespace StdLib::Funcs
 
     template <typename T> [[nodiscard]] T ChangeEndianness(T value)
     {
-        static_assert(std::is_fundamental_v<T>, "val is not a POD type in ChangeEndianness");
-        static_assert(sizeof(T) == 8 || sizeof(T) == 4 || sizeof(T) == 2 || sizeof(T) == 1, "incorrect size of value in ChangeEndianness");
+        static_assert(std::is_fundamental_v<T>, "input value is not a fundamental type in ChangeEndianness");
         if constexpr (sizeof(value) == 8)
         {
             ui64 temp = *(ui64 *)&value;
             temp = _BYTESWAP64(temp);
             return *(T *)&temp;
         }
-        if constexpr (sizeof(value) == 4)
+        else if constexpr (sizeof(value) == 4)
         {
             ui32 temp = *(ui32 *)&value;
             temp = _BYTESWAP32(temp);
             return *(T *)&temp;
         }
-        if constexpr (sizeof(value) == 2)
+        else if constexpr (sizeof(value) == 2)
         {
             ui16 temp = *(ui16 *)&value;
             temp = _BYTESWAP16(temp);
             return *(T *)&temp;
         }
-        return value;
+		else if constexpr (sizeof(value) == 1)
+		{
+			return value;
+		}
+		else
+		{
+			static_assert(false, "incorrect size of value in ChangeEndianness");
+		}
     }
 
     template <typename T> [[nodiscard]] T NativeToLittleEndian(T value)
@@ -181,8 +187,7 @@ namespace StdLib::Funcs
 
     template <typename T> [[nodiscard]] T RotateBitsLeft(T value, ui32 shift)
     {
-        static_assert(std::is_fundamental_v<T>, "val is not a POD type in RotateBitsLeft");
-        static_assert(sizeof(T) == 8 || sizeof(T) == 4 || sizeof(T) == 2 || sizeof(T) == 1, "incorrect size of value in RotateBitsLeft");
+        static_assert(std::is_fundamental_v<T>, "input value is not a fundamental type in RotateBitsLeft");
         ASSUME(shift < sizeof(T) * 8);
         if constexpr (sizeof(value) == 8)
         {
@@ -190,27 +195,33 @@ namespace StdLib::Funcs
             temp = _ROTATE64L(temp, shift);
             return *(T *)&temp;
         }
-        if constexpr (sizeof(value) == 4)
+        else if constexpr (sizeof(value) == 4)
         {
             alignas(T) ui32 temp = *(ui32 *)&value;
             temp = _ROTATE32L(temp, shift);
             return *(T *)&temp;
         }
-        if constexpr (sizeof(value) == 2)
+        else if constexpr (sizeof(value) == 2)
         {
             alignas(T) ui16 temp = *(ui16 *)&value;
             temp = _ROTATE16L(temp, shift);
             return *(T *)&temp;
         }
-        alignas(T) ui8 temp = *(ui8 *)&value;
-        temp = _ROTATE8L(temp, shift);
-        return *(T *)&temp;
+		else if constexpr (sizeof(value) == 1)
+		{
+			alignas(T) ui8 temp = *(ui8 *)&value;
+			temp = _ROTATE8L(temp, shift);
+			return *(T *)&temp;
+		}
+		else
+		{
+			static_assert(false, "incorrect size of the input value in RotateBitsLeft");
+		}
     }
 
     template <typename T> [[nodiscard]] T RotateBitsRight(T value, ui32 shift)
     {
-        static_assert(std::is_fundamental_v<T>, "val is not a POD type in RotateBitsRight");
-        static_assert(sizeof(T) == 8 || sizeof(T) == 4 || sizeof(T) == 2 || sizeof(T) == 1, "incorrect size of value in RotateBitsRight");
+        static_assert(std::is_fundamental_v<T>, "val is not a fundamental type in RotateBitsRight");
         ASSUME(shift < sizeof(T) * 8);
         if constexpr (sizeof(value) == 8)
         {
@@ -218,21 +229,28 @@ namespace StdLib::Funcs
             temp = _ROTATE64R(temp, shift);
             return *(T *)&temp;
         }
-        if constexpr (sizeof(value) == 4)
+        else if constexpr (sizeof(value) == 4)
         {
             alignas(T) ui32 temp = *(ui32 *)&value;
             temp = _ROTATE32R(temp, shift);
             return *(T *)&temp;
         }
-        if constexpr (sizeof(value) == 2)
+        else if constexpr (sizeof(value) == 2)
         {
             alignas(T) ui16 temp = *(ui16 *)&value;
             temp = _ROTATE16R(temp, shift);
             return *(T *)&temp;
         }
-        alignas(T) ui8 temp = *(ui8 *)&value;
-        temp = _ROTATE8R(temp, shift);
-        return *(T *)&temp;
+		else if constexpr (sizeof(value) == 1)
+		{
+			alignas(T) ui8 temp = *(ui8 *)&value;
+			temp = _ROTATE8R(temp, shift);
+			return *(T *)&temp;
+		}
+		else
+		{
+			static_assert(false, "incorrect size of the input value in RotateBitsRight");
+		}
     }
 
     template <typename T>[[nodiscard]] std::shared_ptr<typename T::element_type> SharedPtrFromUniquePtr(T &&unique)
