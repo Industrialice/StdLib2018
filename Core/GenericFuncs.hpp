@@ -149,7 +149,7 @@ namespace StdLib::Funcs
 		}
 		else
 		{
-			static_assert(false, "incorrect size of value in ChangeEndianness");
+			static_assert(false_v<T>, "incorrect size of value in ChangeEndianness");
 		}
     }
 
@@ -215,7 +215,7 @@ namespace StdLib::Funcs
 		}
 		else
 		{
-			static_assert(false, "incorrect size of the input value in RotateBitsLeft");
+			static_assert(false_v<T>, "incorrect size of the input value in RotateBitsLeft");
 		}
     }
 
@@ -249,7 +249,7 @@ namespace StdLib::Funcs
 		}
 		else
 		{
-			static_assert(false, "incorrect size of the input value in RotateBitsRight");
+			static_assert(false_v<T>, "incorrect size of the input value in RotateBitsRight");
 		}
     }
 

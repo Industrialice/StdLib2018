@@ -40,3 +40,5 @@ namespace StdLib
 {
     extern f32 DefaultF32Epsilon;
 }
+
+template <typename...> inline constexpr bool false_v = false;
