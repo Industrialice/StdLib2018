@@ -4,6 +4,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <IncludePath>$(SolutionDir)/Core/;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)/PlatformAbstraction/;$(SolutionDir)/Miscellaneous/;</IncludePath>
+    <LibraryPath>$(SolutionDir)$(Configuration)_$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
