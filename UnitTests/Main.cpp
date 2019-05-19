@@ -535,7 +535,7 @@ static void AllocatorsTests()
 {
     uiw blockSize = 0;
 
-    void *memory = Allocator::Malloc::Allocate(100);
+    ui8 *memory = Allocator::Malloc::Allocate(100);
     UTest(true, memory);
 
 //#ifndef PLATFORM_ANDROID
@@ -570,13 +570,22 @@ static void AllocatorsTests()
 	memset(memory, 0x66, 111);
 	UTest(Equal, (uiw)memory & 3, 0u);
 	memory = Allocator::MallocAligned::Reallocate<4>(memory, 222);
-	//UTest(Equal, memchr())
+	for (uiw index = 0; index < 111; ++index)
+	{
+		UTest(Equal, memory[index], 0x66);
+	}
 	UTest(Equal, (uiw)memory & 3, 0u);
 	Allocator::MallocAligned::Free<4>(memory);
+
 	memory = Allocator::MallocAligned::Allocate<64>(31);
 	UTest(Equal, (uiw)memory & 63, 0u);
+	memset(memory, 0x77, 31);
 	memory = Allocator::MallocAligned::Reallocate<64>(memory, 11);
 	UTest(Equal, (uiw)memory & 63, 0u);
+	for (uiw index = 0; index < 11; ++index)
+	{
+		UTest(Equal, memory[index], 0x77);
+	}
 	Allocator::MallocAligned::Free<64>(memory);
 
     Logger::Message("finished allocators tests\n");
