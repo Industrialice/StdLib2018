@@ -535,49 +535,49 @@ static void AllocatorsTests()
 {
     uiw blockSize = 0;
 
-    void *memory = Allocator::MallocBased::Allocate(100);
+    void *memory = Allocator::Malloc::Allocate(100);
     UTest(true, memory);
 
 //#ifndef PLATFORM_ANDROID
-//    blockSize = Allocator::MallocBased::MemorySize(memory);
+//    blockSize = Allocator::Malloc::MemorySize(memory);
 //    UTest(LeftGreaterEqual, blockSize, 100u);
 //#endif
 //
-//    bool expandResult = Allocator::MallocBased::ReallocateInplace(memory, 200);
+//    bool expandResult = Allocator::Malloc::ReallocateInplace(memory, 200);
 //    if (expandResult)
 //    {
-//        blockSize = Allocator::MallocBased::MemorySize(memory);
+//        blockSize = Allocator::Malloc::MemorySize(memory);
 //        UTest(LeftGreaterEqual, blockSize, 200u);
 //    }
-//    memory = Allocator::MallocBased::Reallocate(memory, 300u);
+//    memory = Allocator::Malloc::Reallocate(memory, 300u);
 //    UTest(true, memory);
 //
 //#ifndef PLATFORM_ANDROID
-//    blockSize = Allocator::MallocBased::MemorySize(memory);
+//    blockSize = Allocator::Malloc::MemorySize(memory);
 //    UTest(LeftGreaterEqual, blockSize, 300u);
 //#endif
 
-    Allocator::MallocBased::Free(memory);
+    Allocator::Malloc::Free(memory);
 
-    memory = Allocator::MallocBased::Allocate(0);
-    memory = Allocator::MallocBased::Reallocate(memory, 0);
+    memory = Allocator::Malloc::Allocate(0);
+    memory = Allocator::Malloc::Reallocate(memory, 0);
 #ifdef PLATFORM_WINDOWS
-    UTest(true, Allocator::MallocBased::ReallocateInplace(memory, 0));
+    UTest(true, Allocator::Malloc::ReallocateInplace(memory, 0));
 #endif
-    Allocator::MallocBased::Free(memory);
+    Allocator::Malloc::Free(memory);
 
-	memory = Allocator::MallocBasedAligned::Allocate<4>(111);
+	memory = Allocator::MallocAligned::Allocate<4>(111);
 	memset(memory, 0x66, 111);
 	UTest(Equal, (uiw)memory & 3, 0u);
-	memory = Allocator::MallocBasedAligned::Reallocate<4>(memory, 222);
+	memory = Allocator::MallocAligned::Reallocate<4>(memory, 222);
 	//UTest(Equal, memchr())
 	UTest(Equal, (uiw)memory & 3, 0u);
-	Allocator::MallocBasedAligned::Free<4>(memory);
-	memory = Allocator::MallocBasedAligned::Allocate<64>(31);
+	Allocator::MallocAligned::Free<4>(memory);
+	memory = Allocator::MallocAligned::Allocate<64>(31);
 	UTest(Equal, (uiw)memory & 63, 0u);
-	memory = Allocator::MallocBasedAligned::Reallocate<64>(memory, 11);
+	memory = Allocator::MallocAligned::Reallocate<64>(memory, 11);
 	UTest(Equal, (uiw)memory & 63, 0u);
-	Allocator::MallocBasedAligned::Free<64>(memory);
+	Allocator::MallocAligned::Free<64>(memory);
 
     Logger::Message("finished allocators tests\n");
 }

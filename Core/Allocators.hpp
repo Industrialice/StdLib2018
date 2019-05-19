@@ -12,7 +12,7 @@ namespace StdLib::Allocator
 		static constexpr uiw MinimalGuaranteedAlignment = 8;
 	#endif
 
-    struct MallocBased
+    struct Malloc
     {
         template <typename T = ui8> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count)
         {
@@ -79,7 +79,7 @@ namespace StdLib::Allocator
     };
 
 	// TODO: optimize the non-Windows version
-	struct MallocBasedRuntimeAlignment
+	struct MallocRuntimeAlignment
 	{
 		template <typename T = ui8> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count, uiw alignment)
 		{
@@ -132,17 +132,17 @@ namespace StdLib::Allocator
 		// TODO: ReallocateInplace and MemorySize
 	};
 
-	template <uiw Alignment> struct MallocBasedAlignedPredefined
+	template <uiw Alignment> struct MallocAlignedPredefined
 	{
 		template <typename T = ui8> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count)
 		{
 			if constexpr (Alignment > MinimalGuaranteedAlignment)
 			{
-				return MallocBasedRuntimeAlignment::Allocate<T>(count, Alignment);
+				return MallocRuntimeAlignment::Allocate<T>(count, Alignment);
 			}
 			else
 			{
-				return MallocBased::Allocate<T>(count);
+				return Malloc::Allocate<T>(count);
 			}
 		}
 
@@ -150,11 +150,11 @@ namespace StdLib::Allocator
 		{
 			if constexpr (Alignment > MinimalGuaranteedAlignment)
 			{
-				return MallocBasedRuntimeAlignment::Reallocate(memory, count, Alignment);
+				return MallocRuntimeAlignment::Reallocate(memory, count, Alignment);
 			}
 			else
 			{
-				return MallocBased::Reallocate(memory, count);
+				return Malloc::Reallocate(memory, count);
 			}
 		}
 
@@ -162,32 +162,32 @@ namespace StdLib::Allocator
 		{
 			if constexpr (Alignment > MinimalGuaranteedAlignment)
 			{
-				return MallocBasedRuntimeAlignment::Free(memory);
+				return MallocRuntimeAlignment::Free(memory);
 			}
 			else
 			{
-				return MallocBased::Free(memory);
+				return Malloc::Free(memory);
 			}
 		}
 
 		// TODO: ReallocateInplace and MemorySize
 	};
 	
-    struct MallocBasedAligned
+    struct MallocAligned
     {
         template <uiw Alignment, typename T = ui8> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count)
         {
-			return MallocBasedAlignedPredefined<Alignment>::template Allocate<T>(count);
+			return MallocAlignedPredefined<Alignment>::template Allocate<T>(count);
         }
 
         template <uiw Alignment, typename T> [[nodiscard]] static T *Reallocate(T *memory, uiw count)
         {
-			return MallocBasedAlignedPredefined<Alignment>::template Reallocate(memory, count);
+			return MallocAlignedPredefined<Alignment>::template Reallocate(memory, count);
         }
 
         template <uiw Alignment, typename T> static void Free(T *memory)
         {
-			return MallocBasedAlignedPredefined<Alignment>::template Free(memory);
+			return MallocAlignedPredefined<Alignment>::template Free(memory);
         }
 
 		// TODO: ReallocateInplace and MemorySize

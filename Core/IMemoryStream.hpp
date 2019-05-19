@@ -152,7 +152,7 @@ namespace StdLib
     };
 
     // uses an allocator
-    template <typename AllocatorType = Allocator::MallocBased> class MemoryStreamAllocator final : public IMemoryStream
+    template <typename AllocatorType = Allocator::Malloc> class MemoryStreamAllocator final : public IMemoryStream
     {
         AllocatorType _allocator{};
         ui8 *_buffer = nullptr;
