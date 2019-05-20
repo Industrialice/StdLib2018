@@ -538,24 +538,20 @@ static void AllocatorsTests()
     ui8 *memory = Allocator::Malloc::Allocate(100);
     UTest(true, memory);
 
-//#ifndef PLATFORM_ANDROID
-//    blockSize = Allocator::Malloc::MemorySize(memory);
-//    UTest(LeftGreaterEqual, blockSize, 100u);
-//#endif
-//
-//    bool expandResult = Allocator::Malloc::ReallocateInplace(memory, 200);
-//    if (expandResult)
-//    {
-//        blockSize = Allocator::Malloc::MemorySize(memory);
-//        UTest(LeftGreaterEqual, blockSize, 200u);
-//    }
-//    memory = Allocator::Malloc::Reallocate(memory, 300u);
-//    UTest(true, memory);
-//
-//#ifndef PLATFORM_ANDROID
-//    blockSize = Allocator::Malloc::MemorySize(memory);
-//    UTest(LeftGreaterEqual, blockSize, 300u);
-//#endif
+    blockSize = Allocator::Malloc::MemorySize(memory);
+    UTest(LeftGreaterEqual, blockSize, 100u);
+
+    bool expandResult = Allocator::Malloc::ReallocateInplace(memory, 200);
+    if (expandResult)
+    {
+        blockSize = Allocator::Malloc::MemorySize(memory);
+        UTest(LeftGreaterEqual, blockSize, 200u);
+    }
+    memory = Allocator::Malloc::Reallocate(memory, 300u);
+    UTest(true, memory);
+
+    blockSize = Allocator::Malloc::MemorySize(memory);
+    UTest(LeftGreaterEqual, blockSize, 300u);
 
     Allocator::Malloc::Free(memory);
 

@@ -13,6 +13,12 @@ namespace StdLib
     f32 DefaultF32Epsilon{};
 }
 
+#if defined(PLATFORM_ANDROID) && __ANDROID_API__ < 17
+	#include <dlfcn.h>
+
+	uiw (*MallocUsableSize)(const void *ptr);
+#endif
+
 static void DefaultSoftBreakCallback(const char *file, i32 line, i32 counter);
 
 void _Private::SoftBreak(const char *file, i32 line, i32 counter)
@@ -30,6 +36,26 @@ void Initialization::Initialize(const CoreParameters &parameters)
     }
 
     DefaultF32Epsilon = parameters.defaultF32Epsilon;
+
+	#if defined(PLATFORM_ANDROID) && __ANDROID_API__ < 17
+		void *libc = dlopen("libc.so", RTLD_NOW);
+		ASSUME(libc);
+		MallocUsableSize = (decltype(MallocUsableSize))dlsym(libc, "malloc_usable_size");
+		if (MallocUsableSize == nullptr)
+		{
+			MallocUsableSize = [](const void *ptr) -> uiw
+			{
+				uiw size;
+				memcpy(&size, (uiw *)ptr - 1, sizeof(uiw));
+				return size;
+			};
+			__android_log_print(ANDROID_LOG_WARN, "StdLib info", "Didn't find malloc_usable_size, using a hack");
+		}
+		else
+		{
+			__android_log_print(ANDROID_LOG_INFO, "StdLib info", "Found malloc_usable_size, using it");
+		}
+	#endif
 }
 
 void DefaultSoftBreakCallback(const char *file, i32 line, i32 counter)

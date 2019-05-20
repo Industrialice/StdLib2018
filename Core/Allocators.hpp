@@ -1,5 +1,9 @@
 #pragma once
 
+#if defined(PLATFORM_ANDROID) && __ANDROID_API__ < 17
+	extern StdLib::uiw (*MallocUsableSize)(const void *ptr); // from StdCoreLib.cpp
+#endif
+
 namespace StdLib::Allocator
 {
 	#ifdef PLATFORM_WINDOWS
@@ -57,20 +61,22 @@ namespace StdLib::Allocator
         #endif
         }
 
-		// TODO: find solution for Android or find a way to work around it
-        //template <typename T> [[nodiscard]] static uiw MemorySize(const T *memory)
-        //{
-        //#ifdef PLATFORM_WINDOWS
-        //    return _msize((void *)memory);
-        //#elif defined(PLATFORM_ANDROID)
-		//	  NOIMPL;
-        //    return 0;
-        //#elif defined(PLATFORM_LINUX) || defined(PLATFORM_EMSCRIPTEN)
-        //    return malloc_usable_size((void *)memory);
-        //#else
-        //    return malloc_size((void *)memory);
-        //#endif
-        //}
+        template <typename T> [[nodiscard]] static uiw MemorySize(const T *memory)
+        {
+        #ifdef PLATFORM_WINDOWS
+            return _msize((void *)memory);
+        #elif defined(PLATFORM_ANDROID)
+			#if __ANDROID_API__ >= 17
+				return malloc_usable_size(memory);
+			#else
+				return MallocUsableSize(memory);
+			#endif
+        #elif defined(PLATFORM_LINUX) || defined(PLATFORM_EMSCRIPTEN)
+            return malloc_usable_size((void *)memory);
+        #else
+            return malloc_size((void *)memory);
+        #endif
+        }
 
         template <typename T> static void Free(T *memory)
         {
