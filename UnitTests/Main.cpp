@@ -584,6 +584,17 @@ static void AllocatorsTests()
 	}
 	Allocator::MallocAligned::Free<64>(memory);
 
+	// testing MemorySize specifically, on Android targets prior 17 there's an unreliable hack solution to get it
+    ui8 *mem = Allocator::Malloc::Allocate(0);
+    for (uiw index = 0; index < 1000; ++index)
+    {
+        uiw size = rand() % 256;
+        mem = Allocator::Malloc::Reallocate(mem, size);
+        uiw newSize = Allocator::Malloc::MemorySize(mem);
+        ASSUME(newSize >= size);
+    }
+    Allocator::Malloc::Free(mem);
+
     Logger::Message("finished allocators tests\n");
 }
 
