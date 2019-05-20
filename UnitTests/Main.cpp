@@ -1412,7 +1412,7 @@ static void DoTests(int argc, const char **argv)
     Error<> folderForTestsRemove = FileSystem::Remove(folderForTests);
     UTest(false, folderForTestsRemove);
 
-    Logger::Message("~~~Finished All Tests~~~\n");
+    Logger::Message("---Finished All Tests---\n");
 }
 
 int main(int argc, const char **argv)
@@ -1423,7 +1423,7 @@ int main(int argc, const char **argv)
 
     //UniqueIdManagerBenchmark();
 
-    Logger::Message("~~~Finished Everything~~~\n");
+    Logger::Message("---Finished Everything---\n");
 
 #ifdef PLATFORM_WINDOWS
     system("pause");
