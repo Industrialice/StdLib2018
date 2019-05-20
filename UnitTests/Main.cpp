@@ -571,6 +571,8 @@ static void AllocatorsTests()
 		UTest(Equal, memory[index], 0x66);
 	}
 	UTest(Equal, (uiw)memory & 3, 0u);
+	blockSize = Allocator::MallocAligned::MemorySize<4>(memory);
+	UTest(LeftGreaterEqual, blockSize, 222);
 	Allocator::MallocAligned::Free<4>(memory);
 
 	memory = Allocator::MallocAligned::Allocate<64>(31);
@@ -582,6 +584,8 @@ static void AllocatorsTests()
 	{
 		UTest(Equal, memory[index], 0x77);
 	}
+	blockSize = Allocator::MallocAligned::MemorySize<64>(memory);
+	UTest(LeftGreaterEqual, blockSize, 11);
 	Allocator::MallocAligned::Free<64>(memory);
 
 	// testing MemorySize specifically, on Android targets prior 17 there's an unreliable hack solution to get it

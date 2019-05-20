@@ -64,7 +64,7 @@ namespace StdLib::Allocator
         template <typename T> [[nodiscard]] static uiw MemorySize(const T *memory)
         {
         #ifdef PLATFORM_WINDOWS
-            return _msize((void *)memory);
+            return memory ? _msize((void *)memory) : 0;
         #elif defined(PLATFORM_ANDROID)
 			#if __ANDROID_API__ >= 17
 				return malloc_usable_size(memory);
@@ -85,7 +85,7 @@ namespace StdLib::Allocator
     };
 
 	// TODO: optimize the non-Windows version
-	struct MallocRuntimeAlignment
+	struct MallocAlignedRuntime
 	{
 		template <typename T = ui8> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count, uiw alignment)
 		{
@@ -135,7 +135,20 @@ namespace StdLib::Allocator
 			#endif
 		}
 
-		// TODO: ReallocateInplace and MemorySize
+		// TODO: any solutions?
+		template <typename T> [[nodiscard]] static bool ReallocateInplace(T *memory, uiw count)
+		{
+			return false;
+		}
+
+        template <typename T> [[nodiscard]] static uiw MemorySize(const T *memory, uiw alignment)
+        {
+			#ifdef PLATFORM_WINDOWS
+				return memory ? _aligned_msize((void *)memory, alignment, 0) : 0;
+			#else
+				return Malloc::MemorySize(memory);
+			#endif
+		}
 	};
 
 	template <uiw Alignment> struct MallocAlignedPredefined
@@ -144,7 +157,7 @@ namespace StdLib::Allocator
 		{
 			if constexpr (Alignment > MinimalGuaranteedAlignment)
 			{
-				return MallocRuntimeAlignment::Allocate<T>(count, Alignment);
+				return MallocAlignedRuntime::Allocate<T>(count, Alignment);
 			}
 			else
 			{
@@ -156,7 +169,7 @@ namespace StdLib::Allocator
 		{
 			if constexpr (Alignment > MinimalGuaranteedAlignment)
 			{
-				return MallocRuntimeAlignment::Reallocate(memory, count, Alignment);
+				return MallocAlignedRuntime::Reallocate(memory, count, Alignment);
 			}
 			else
 			{
@@ -168,7 +181,7 @@ namespace StdLib::Allocator
 		{
 			if constexpr (Alignment > MinimalGuaranteedAlignment)
 			{
-				return MallocRuntimeAlignment::Free(memory);
+				return MallocAlignedRuntime::Free(memory);
 			}
 			else
 			{
@@ -176,7 +189,29 @@ namespace StdLib::Allocator
 			}
 		}
 
-		// TODO: ReallocateInplace and MemorySize
+		template <typename T> [[nodiscard]] static bool ReallocateInplace(T *memory, uiw count)
+		{
+			if constexpr (Alignment > MinimalGuaranteedAlignment)
+			{
+				return MallocAlignedRuntime::ReallocateInplace(memory, count);
+			}
+			else
+			{
+				return Malloc::ReallocateInplace(memory, count);
+			}
+		}
+
+        template <typename T> [[nodiscard]] static uiw MemorySize(const T *memory)
+        {
+			if constexpr (Alignment > MinimalGuaranteedAlignment)
+			{
+				return MallocAlignedRuntime::MemorySize(memory, Alignment);
+			}
+			else
+			{
+				return Malloc::MemorySize(memory);
+			}
+		}
 	};
 	
     struct MallocAligned
@@ -196,6 +231,28 @@ namespace StdLib::Allocator
 			return MallocAlignedPredefined<Alignment>::template Free(memory);
         }
 
-		// TODO: ReallocateInplace and MemorySize
+		template <uiw Alignment, typename T> [[nodiscard]] static bool ReallocateInplace(T *memory, uiw count)
+		{
+			if constexpr (Alignment > MinimalGuaranteedAlignment)
+			{
+				return MallocAlignedRuntime::ReallocateInplace(memory, count);
+			}
+			else
+			{
+				return Malloc::ReallocateInplace(memory, count);
+			}
+		}
+
+        template <uiw Alignment, typename T> [[nodiscard]] static uiw MemorySize(const T *memory)
+        {
+			if constexpr (Alignment > MinimalGuaranteedAlignment)
+			{
+				return MallocAlignedRuntime::MemorySize(memory, Alignment);
+			}
+			else
+			{
+				return Malloc::MemorySize(memory);
+			}
+		}
     };
 }
