@@ -233,26 +233,12 @@ namespace StdLib::Allocator
 
 		template <uiw Alignment, typename T> [[nodiscard]] static bool ReallocateInplace(T *memory, uiw count)
 		{
-			if constexpr (Alignment > MinimalGuaranteedAlignment)
-			{
-				return MallocAlignedRuntime::ReallocateInplace(memory, count);
-			}
-			else
-			{
-				return Malloc::ReallocateInplace(memory, count);
-			}
+			return MallocAlignedPredefined<Alignment>::template ReallocateInplace(memory, count);
 		}
 
         template <uiw Alignment, typename T> [[nodiscard]] static uiw MemorySize(const T *memory)
         {
-			if constexpr (Alignment > MinimalGuaranteedAlignment)
-			{
-				return MallocAlignedRuntime::MemorySize(memory, Alignment);
-			}
-			else
-			{
-				return Malloc::MemorySize(memory);
-			}
+			return MallocAlignedPredefined<Alignment>::template MemorySize(memory);
 		}
     };
 }
