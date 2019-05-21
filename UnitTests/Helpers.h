@@ -1,9 +1,5 @@
 #pragma once
 
-#include <cstdio>
-#include <unordered_set>
-#include <StdMiscellaneousLib.hpp>
-
 #ifdef PLATFORM_WINDOWS
     #define NOGDICAPMASKS
     #define NOVIRTUALKEYCODES
@@ -48,15 +44,9 @@
     #include <Windows.h>
 #endif
 
-/*#ifdef PLATFORM_ANDROID
-    #include <android/log.h>
-#endif
-
-#ifdef PLATFORM_ANDROID
-    #define Logger::Message(...) __android_log_print(ANDROID_LOG_INFO, "StdLib", __VA_ARGS__)
-#else
-    #define Logger::Message(...) printf(__VA_ARGS__)
-#endif*/
+#include <cstdio>
+#include <unordered_set>
+#include <StdMiscellaneousLib.hpp>
 
 #include "Logger.hpp"
 

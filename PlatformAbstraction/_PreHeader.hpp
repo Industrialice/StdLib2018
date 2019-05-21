@@ -1,9 +1,5 @@
 #pragma once
 
-#define _SUPPRESS_CORE_INITIALIZE
-#include <StdCoreLib.hpp>
-#include "PlatformAbstractionCoreTypes.hpp"
-
 #ifdef PLATFORM_WINDOWS
     #define NOGDICAPMASKS
     #define NOVIRTUALKEYCODES
@@ -48,3 +44,7 @@
     #include <Windows.h>
     #include <io.h>
 #endif
+
+#define _SUPPRESS_CORE_INITIALIZE
+#include <StdCoreLib.hpp>
+#include "PlatformAbstractionCoreTypes.hpp"

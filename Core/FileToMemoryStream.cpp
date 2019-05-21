@@ -82,7 +82,7 @@ bool FileToMemoryStream::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
     {
         len = (ui32)(uiw_max - _offset);
     }
-    memcpy(target, _stream->Memory() + _offset, len);
+    MemOps::Copy((ui8 *)target, _stream->Memory() + _offset, len);
     _offset += len;
     if (read) *read = len;
     return true;
@@ -110,7 +110,7 @@ bool FileToMemoryStream::Write(const void *source, ui32 len, ui32 *RSTR written)
             len = (ui32)(newSize - _offset);
         }
     }
-    memcpy(_stream->Memory() + _offset, source, len);
+    MemOps::Copy(_stream->Memory() + _offset, (ui8 *)source, len);
     _offset += len;
     if (written) *written = len;
     return true;

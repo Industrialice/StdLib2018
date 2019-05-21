@@ -119,7 +119,7 @@ NOINLINE bool File::Read(void *target, ui32 len, ui32 *read)
 
     auto readFromBuffer = [this](void *target, ui32 len)
     {
-        memcpy(target, _internalBuffer.get() + _bufferPos, len);
+        MemOps::Copy((ui8 *)target, _internalBuffer.get() + _bufferPos, len);
         _bufferPos += len;
     #ifdef STDLIB_ENABLE_FILE_STATS
         ++_stats.readsFromBufferCount;
@@ -204,7 +204,7 @@ NOINLINE bool File::Write(const void *source, ui32 len, ui32 *RSTR written)
             return WriteToFile(source, len, written);
         }
 
-        memcpy(_internalBuffer.get() + _bufferPos, source, len);
+        MemOps::Copy(_internalBuffer.get() + _bufferPos, (ui8 *)source, len);
         _bufferPos += len;
     #ifdef STDLIB_ENABLE_FILE_STATS
         ++_stats.writesToBufferCount;

@@ -202,6 +202,7 @@
     <ClInclude Include="IFile.hpp" />
     <ClInclude Include="IMemoryStream.hpp" />
     <ClInclude Include="ListenerHandle.hpp" />
+    <ClInclude Include="MemOps.hpp" />
     <ClInclude Include="Message.hpp" />
     <ClInclude Include="MTMessageQueue.hpp" />
     <ClInclude Include="Result.hpp" />

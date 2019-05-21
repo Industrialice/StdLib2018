@@ -1,7 +1,5 @@
 #pragma once
 
-#include "CoreHeader.hpp"
-
 #ifdef PLATFORM_WINDOWS
     #define NOGDICAPMASKS
     #define NOVIRTUALKEYCODES
@@ -47,5 +45,7 @@
 #elif defined(PLATFORM_ANDROID)
     #include <android/log.h>
 #endif
+
+#include "CoreHeader.hpp"
 
 #include <set>

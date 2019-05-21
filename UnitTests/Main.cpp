@@ -7,14 +7,13 @@
 using namespace StdLib;
 using namespace Funcs;
 
-void MiscTests();
 void MathLibTests();
 void UniqueIdManagerTests();
 void UniqueIdManagerBenchmark();
 void LoggerTests();
 void MTTests();
 
-void MiscTests()
+static void MiscTests()
 {
     ui32 *arr = (ui32 *)ALLOCA(5, sizeof(ui32));
     std::fill(arr, arr + 5, 1);
@@ -72,7 +71,83 @@ void MiscTests()
     Logger::Message("finished misc tests\n");
 }
 
-void TupleHelpersTests()
+namespace
+{
+	ui32 InvalidParametersReceived;
+}
+
+static void MemOpsTests()
+{
+	std::array<ui8, 16> arr0;
+	std::array<ui8, 32> arr1;
+
+	auto checkMem = [](const auto &memory, ui8 value)
+	{
+		for (const ui8 &test : memory)
+		{
+			UTest(Equal, test, value);
+		}
+	};
+
+#ifdef PLATFORM_WINDOWS
+	auto myInvalidParameterHandler = [](const wchar_t *expression, const wchar_t *function,	const wchar_t *file, unsigned int line,	uintptr_t pReserved)
+	{
+		++InvalidParametersReceived;
+	};
+	_set_invalid_parameter_handler(myInvalidParameterHandler);
+#endif
+
+	UTest(Equal, MemOps::Set(arr0.data(), 1, arr0.size()), arr0.data());
+	checkMem(arr0, 1);
+
+	UTest(Equal, MemOps::SetChecked((ui8 *)nullptr, 23, 1, 10), false);
+	UTest(Equal, MemOps::SetChecked(arr0.data(), 5, 1, 10), false);
+	UTest(Equal, MemOps::SetChecked(arr0.data(), arr0.size(), 2, arr0.size()), true);
+	checkMem(arr0, 2);
+
+	UTest(Equal, MemOps::Chr(arr0.data(), 2, arr0.size()), arr0.data());
+	checkMem(arr0, 2);
+
+	UTest(Equal, MemOps::Set(arr1.data(), 3, arr1.size()), arr1.data());
+	UTest(Equal, MemOps::Chr(arr1.data(), 1, arr1.size()), nullptr);
+
+	UTest(Equal, MemOps::Compare(arr0.data(), arr1.data(), arr0.size()), -1);
+	UTest(Equal, MemOps::Compare(arr0.data(), arr0.data(), arr0.size()), 0);
+
+	UTest(Equal, MemOps::Copy(arr0.data(), arr1.data(), arr0.size()), arr0.data());
+	UTest(Equal, MemOps::Compare(arr0.data(), arr1.data(), arr0.size()), 0);
+	checkMem(arr0, 3);
+
+	UTest(Equal, MemOps::CopyChecked((ui8 *)nullptr, 42, arr0.data(), arr0.size()), false);
+	UTest(Equal, MemOps::CopyChecked(arr0.data(), 5, arr0.data(), arr0.size()), false);
+	UTest(Equal, MemOps::CopyChecked(arr0.data(), arr0.size(), arr1.data(), arr0.size()), true);
+	UTest(Equal, MemOps::Compare(arr0.data(), arr1.data(), arr0.size()), 0);
+	checkMem(arr0, 3);
+
+	UTest(Equal, MemOps::SetChecked((ui8 *)nullptr, 42, 1, 20), false);
+	UTest(Equal, MemOps::SetChecked(arr0.data(), 5, 1, 20), false);
+	UTest(Equal, MemOps::SetChecked(arr0.data(), arr0.size(), 4, arr0.size()), true);
+	checkMem(arr0, 4);
+
+	UTest(Equal, MemOps::Move(arr0.data(), arr1.data(), arr0.size()), arr0.data());
+	checkMem(arr0, 3);
+
+	UTest(Equal, MemOps::Set(arr0.data(), 6, arr0.size()), arr0.data());
+	checkMem(arr0, 6);
+
+	UTest(Equal, MemOps::MoveChecked((ui8 *)nullptr, 20, arr0.data(), 10), false);
+	UTest(Equal, MemOps::MoveChecked(arr0.data(), 5, arr0.data(), 10), false);
+	UTest(Equal, MemOps::MoveChecked(arr0.data(), arr0.size(), arr1.data(), arr0.size()), true);
+	checkMem(arr0, 3);
+
+#ifdef PLATFORM_WINDOWS
+	UTest(Equal, InvalidParametersReceived, 8);
+#endif
+
+	Logger::Message("finished MemOps tests\n");
+}
+
+static void TupleHelpersTests()
 {
 	std::tuple<ui32, f32, bool> tuple;
 
@@ -501,13 +576,13 @@ static void ResultTests()
 
 static void VirtualMemoryTests()
 {
-    void *memory = VirtualMemory::Reserve(999);
+    ui8 *memory = (ui8 *)VirtualMemory::Reserve(999);
     UTest(true, memory);
-    EXCEPTION_CHECK(memset(memory, 0, 10), true);
+    EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), true);
 
     auto commitError = VirtualMemory::Commit(memory, 500, VirtualMemory::PageModes::Read.Combined(VirtualMemory::PageModes::Write));
     UTest(true, commitError.IsOk());
-    EXCEPTION_CHECK(memset(memory, 0, 10), false);
+    EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), false);
 
     auto protection = VirtualMemory::PageModeGet(memory, VirtualMemory::PageSize());
 #ifdef PLATFORM_WINDOWS
@@ -518,13 +593,13 @@ static void VirtualMemoryTests()
 
     auto protectionSetResult = VirtualMemory::PageModeSet(memory, VirtualMemory::PageSize(), VirtualMemory::PageModes::Read);
     UTest(true, protectionSetResult.IsOk());
-    EXCEPTION_CHECK(memset(memory, 0, 10), true);
+    EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), true);
 
     UTest(true, VirtualMemory::Free(memory, 999));
 
-    memory = VirtualMemory::Alloc(999, VirtualMemory::PageModes::Read.Combined(VirtualMemory::PageModes::Write));
+    memory = (ui8 *)VirtualMemory::Alloc(999, VirtualMemory::PageModes::Read.Combined(VirtualMemory::PageModes::Write));
     UTest(true, memory);
-    EXCEPTION_CHECK(memset(memory, 0, 10), false);
+    EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), false);
 
     UTest(true, VirtualMemory::Free(memory, 999));
 
@@ -563,7 +638,7 @@ static void AllocatorsTests()
     Allocator::Malloc::Free(memory);
 
 	memory = Allocator::MallocAligned::Allocate<4>(111);
-	memset(memory, 0x66, 111);
+	MemOps::Set(memory, 0x66, 111);
 	UTest(Equal, (uiw)memory & 3, 0u);
 	memory = Allocator::MallocAligned::Reallocate<4>(memory, 222);
 	for (uiw index = 0; index < 111; ++index)
@@ -577,7 +652,7 @@ static void AllocatorsTests()
 
 	memory = Allocator::MallocAligned::Allocate<64>(31);
 	UTest(Equal, (uiw)memory & 63, 0u);
-	memset(memory, 0x77, 31);
+	MemOps::Set(memory, 0x77, 31);
 	memory = Allocator::MallocAligned::Reallocate<64>(memory, 11);
 	UTest(Equal, (uiw)memory & 63, 0u);
 	for (uiw index = 0; index < 11; ++index)
@@ -792,7 +867,7 @@ static void FileWriteRead(IFile &file)
     UTest(Equal, file.OffsetGet(FileOffsetMode::FromEnd).Unwrap(), -((i64)crapString0.length() - 32));
     UTest(true, file.Read(readBuf, (ui32)crapString0.length() - 32, &read));
     UTest(Equal, read, (ui32)crapString0.length() - 32);
-    UTest(true, !memcmp(readBuf, crapString0.data() + 32, crapString0.length() - 32));
+    UTest(true, !MemOps::Compare(readBuf, crapString0.data() + 32, crapString0.length() - 32));
     UTest(Equal, file.SizeGet().Unwrap(), crapString0.length());
     UTest(Equal, file.OffsetGet(FileOffsetMode::FromBegin).Unwrap(), (i64)crapString0.length());
     UTest(Equal, file.OffsetGet(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
@@ -811,7 +886,7 @@ static void FileWriteRead(IFile &file)
     crapString0.replace(crapString0.begin() + 64, crapString0.begin() + 64 + crapString1.length(), crapString1.data(), crapString1.length());
     UTest(true, file.Read(readBuf, (ui32)crapString0.length() + 999, &read)); // read outside the file, must truncate the requested size
     UTest(Equal, read, (ui32)crapString0.length());
-    UTest(true, !memcmp(readBuf, crapString0.data(), crapString0.length()));
+    UTest(true, !MemOps::Compare(readBuf, crapString0.data(), crapString0.length()));
 }
 
 static void TestFileToMemoryStream()
@@ -981,7 +1056,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     UTest(true, mapping.IsOpened());
     UTest(Equal, mapping.Size(), crapString.length());
     UTest(Equal, mapping.IsWritable(), true);
-    UTest(true, !memcmp(crapString.data(), mapping.Memory(), crapString.size()));
+    UTest(true, !MemOps::Compare((ui8 *)crapString.data(), mapping.Memory(), crapString.size()));
 
     MemoryMappedFile mappingDuplicate = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
     UTest(false, error);
@@ -993,28 +1068,28 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     UTest(true, mappingOffsetted.IsOpened());
 
     std::reverse(crapString.begin(), crapString.end());
-    UTest(false, !memcmp(crapString.data(), mapping.Memory(), crapString.size()));
+    UTest(false, !MemOps::Compare((ui8 *)crapString.data(), mapping.Memory(), crapString.size()));
 
     UTest(true, file.OffsetSet(FileOffsetMode::FromBegin, 0));
     UTest(true, file.Write(crapString.data(), (ui32)crapString.length()));
     UTest(true, file.Flush());
 
-    UTest(true, !memcmp(crapString.data(), mapping.Memory(), crapString.size()));
+    UTest(true, !MemOps::Compare((ui8 *)crapString.data(), mapping.Memory(), crapString.size()));
     std::reverse(crapString.begin(), crapString.end());
-    UTest(false, !memcmp(crapString.data(), mapping.Memory(), crapString.size()));
+    UTest(false, !MemOps::Compare((ui8 *)crapString.data(), mapping.Memory(), crapString.size()));
 
-    memcpy(mapping.Memory(), crapString.data(), crapString.length());
+    MemOps::Copy(mapping.Memory(), (ui8 *)crapString.data(), crapString.length());
     mapping.Flush();
     UTest(true, file.OffsetSet(FileOffsetMode::FromBegin, 0));
     UTest(true, file.Read(tempBuf, (ui32)crapString.length()));
-    UTest(true, !memcmp(crapString.data(), tempBuf, crapString.length()));
+    UTest(true, !MemOps::Compare(crapString.data(), tempBuf, crapString.length()));
 
     file.Close();
-    UTest(true, !memcmp(crapString.data(), mapping.Memory(), crapString.size()));
+    UTest(true, !MemOps::Compare((ui8 *)crapString.data(), mapping.Memory(), crapString.size()));
 
-    UTest(true, !memcmp(mapping.Memory(), mappingDuplicate.Memory(), crapString.size())); // different mapping should be coherent
+    UTest(true, !MemOps::Compare(mapping.Memory(), mappingDuplicate.Memory(), crapString.size())); // different mapping should be coherent
 
-    UTest(true, !memcmp(mapping.Memory() + 2, mappingOffsetted.Memory(), crapString.size() - 2));
+    UTest(true, !MemOps::Compare(mapping.Memory() + 2, mappingOffsetted.Memory(), crapString.size() - 2));
 
     file = File(folderForTests / TSTR("memMapped2.txt"), FileOpenMode::CreateAlways, FileProcModes::Read.Combined(FileProcModes::Write));
     UTest(true, file.IsOpened());
@@ -1039,7 +1114,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     MemoryMappedFile appendedFileMapping = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
     UTest(false, error);
     UTest(true, appendedFileMapping.IsOpened());
-    UTest(true, !memcmp(appendedFileMapping.Memory(), currentPartStr.data(), currentPartStr.size()));
+    UTest(true, !MemOps::Compare(appendedFileMapping.Memory(), (ui8 *)currentPartStr.data(), currentPartStr.size()));
 
     Logger::Message("finished memory mapped file tests\n");
 }
@@ -1162,17 +1237,17 @@ static void MemoryStreamTests()
     {
         UTest(true, ms.IsReadable());
         UTest(Equal, ms.Size(), test0.length() + test1.length());
-        UTest(true, !memcmp(ms.CMemory(), test0.data(), test0.length()));
-        UTest(true, !memcmp(ms.CMemory() + test0.length(), test1.data(), test1.length()));
+        UTest(true, !MemOps::Compare(ms.CMemory(), (ui8 *)test0.data(), test0.length()));
+        UTest(true, !MemOps::Compare(ms.CMemory() + test0.length(), (ui8 *)test1.data(), test1.length()));
     };
 
     auto writeAndCheck = [test0, test1, checkContent](IMemoryStream &ms)
     {
         UTest(true, ms.IsReadable());
         UTest(Equal, ms.Resize(test0.length()), test0.length());
-        memcpy(ms.Memory(), test0.data(), test0.length());
+        MemOps::Copy(ms.Memory(), (ui8 *)test0.data(), test0.length());
         UTest(Equal, ms.Resize(ms.Size() + test1.size()), test0.length() + test1.length());
-        memcpy(ms.Memory() + test0.length(), test1.data(), test1.size());
+		MemOps::Copy(ms.Memory() + test0.length(), (ui8 *)test1.data(), test1.size());
         checkContent(ms);
     };
 
@@ -1390,6 +1465,7 @@ static void DoTests(int argc, const char **argv)
     UTest(false, FileSystem::CreateNewFolder(folderForTests, {}, true));
 
     MiscTests();
+	MemOpsTests();
 	TupleHelpersTests();
     CompileTimeSortingTests();
     CompileTimeStringsTests();

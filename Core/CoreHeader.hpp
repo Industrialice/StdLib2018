@@ -35,6 +35,7 @@ using namespace std::literals;
 #include "CoreTypes.hpp"
 #include "PlatformDefines.hpp"
 #include "CoreDefines.hpp"
+#include "MemOps.hpp"
 
 namespace StdLib
 {

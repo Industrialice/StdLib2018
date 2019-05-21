@@ -107,6 +107,9 @@
     <ClInclude Include="Message.hpp">
       <Filter>MT Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MemOps.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StdCoreLib.cpp">

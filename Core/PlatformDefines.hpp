@@ -14,6 +14,7 @@
 
 #ifndef PLATFORM_WINDOWS
     #include <signal.h>
+	using errno_t = int;
 #endif
 
 namespace StdLib
