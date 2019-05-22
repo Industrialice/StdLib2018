@@ -2,9 +2,8 @@
 
 #include "CoreHeader.hpp"
 
+// TODO: refactor Rectangle and write proper tests
 // TODO: Rectangle3D
-// TODO: validate values for Rectangle
-// TODO: tests for Rectangle
 // TODO: more tests for Quaternion
 
 namespace StdLib
@@ -530,22 +529,31 @@ namespace StdLib
         [[nodiscard]] bool EqualsWithEpsilon(const Quaternion &other, f32 epsilon = DefaultF32Epsilon) const;
     };
 
-    template <typename T, bool isTopLessThanBottom = true> struct Rectangle
+    template <typename T, bool IsTopLessThanBottom = true> struct Rectangle
     {
-        T left = std::numeric_limits<T>::min();
-        T right = std::numeric_limits<T>::min();
-        T top = std::numeric_limits<T>::min();
-        T bottom = std::numeric_limits<T>::min();
+		static constexpr T undefinedValue = std::is_signed_v<T> ? std::numeric_limits<T>::min() : std::numeric_limits<T>::max();
+		using type = T;
+		static constexpr bool isTopLessThanBottom = IsTopLessThanBottom;
+
+		T left = undefinedValue;
+		T right = undefinedValue;
+		T top = undefinedValue;
+		T bottom = undefinedValue;
 
         static constexpr Rectangle FromPoint(T x, T y);
 
         [[nodiscard]] bool IsIntersected(const Rectangle &other) const; // undefined rectangles are considered instersected
-        [[nodiscard]] T Distance(T x, T y) const;
+		[[nodiscard]] bool Contains(T x, T y) const;
+        //[[nodiscard]] T SquareDistance(T x, T y) const;
+
+		// expands the rectangle to include the specified rectangle or point
         Rectangle &Expand(const Rectangle &other);
         Rectangle &Expand(T x, T y);
         [[nodiscard]] Rectangle GetExpanded(const Rectangle &other) const;
         [[nodiscard]] Rectangle GetExpanded(T x, T y) const;
+
         [[nodiscard]] bool IsDefined() const;
+
         [[nodiscard]] T Width() const;
         [[nodiscard]] T Height() const;
 

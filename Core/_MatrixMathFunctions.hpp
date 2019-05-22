@@ -557,77 +557,91 @@ namespace StdLib
     // Rectangle //
     ///////////////
 
-    template <typename T, bool isTopLessThanBottom> inline bool Rectangle<T, isTopLessThanBottom>::IsIntersected(const Rectangle &other) const
+    template <typename T, bool IsTopLessThanBottom> inline bool Rectangle<T, IsTopLessThanBottom>::IsIntersected(const Rectangle &other) const
     {
         ASSUME(left <= right);
-        ASSUME(isTopLessThanBottom ? (top <= bottom) : (bottom <= top));
+        ASSUME(IsTopLessThanBottom ? (top <= bottom) : (bottom <= top));
 
         if (right < other.left || left > other.right)
             return false;
 
-        if (isTopLessThanBottom)
+        if constexpr (IsTopLessThanBottom)
             return bottom >= other.top && top <= other.bottom;
-
-        return top >= other.bottom && bottom <= other.top;
+		else
+			return top >= other.bottom && bottom <= other.top;
     }
 
-    template <typename T, bool isTopLessThanBottom> inline T Rectangle<T, isTopLessThanBottom>::Distance(T x, T y) const
-    {
-        if constexpr (std::is_same_v<T, bool>)
-        {
-            return left != x || right != x || top != y || bottom != y;
-        }
-        else
-        {
-            T centreX = (left + right);
-            T centreY = (top + bottom);
-            T halfWidth = Width();
-            T halfHeight = Height();
+	template <typename T, bool IsTopLessThanBottom> inline bool Rectangle<T, IsTopLessThanBottom>::Contains(T x, T y) const
+	{
+		ASSUME(left <= right);
+		ASSUME(IsTopLessThanBottom ? (top <= bottom) : (bottom <= top));
 
-            if constexpr (std::is_floating_point_v<T>)
-            {
-                centreX *= T(0.5);
-                centreY *= T(0.5);
-                halfWidth *= T(0.5);
-                halfHeight *= T(0.5);
-            }
-            else
-            {
-                centreX /= 2;
-                centreY /= 2;
-                halfWidth /= 2;
-                halfHeight /= 2;
-            }
+		if (x > right || x < left)
+			return false;
 
-			T xDiff = x - centreX;
-			T yDiff = y - centreY;
+		if constexpr (IsTopLessThanBottom)
+			return y <= bottom && y >= top;
+		else
+			return y <= top && y >= bottom;
+	}
 
-			if constexpr (std::is_signed_v<T>)
-			{
-				xDiff = std::abs(xDiff);
-				yDiff = std::abs(yDiff);
-			}
+  //  template <typename T, bool IsTopLessThanBottom> inline T Rectangle<T, IsTopLessThanBottom>::SquareDistance(T x, T y) const
+  //  {
+		//ASSUME(left <= right);
+		//ASSUME(IsTopLessThanBottom ? (top <= bottom) : (bottom <= top));
 
-            T dx = std::max(xDiff - halfWidth, T(0));
-            T dy = std::max(yDiff - halfHeight, T(0));
+  //      T centreX = (left + right);
+  //      T centreY = (top + bottom);
+  //      T halfWidth = Width();
+  //      T halfHeight = Height();
 
-            return dx * dx + dy * dy;
-        }
-    }
+  //      if constexpr (std::is_floating_point_v<T>)
+  //      {
+  //          centreX *= T(0.5);
+  //          centreY *= T(0.5);
+  //          halfWidth *= T(0.5);
+  //          halfHeight *= T(0.5);
+  //      }
+  //      else
+  //      {
+  //          centreX /= 2;
+  //          centreY /= 2;
+  //          halfWidth /= 2;
+  //          halfHeight /= 2;
+  //      }
 
-    template <typename T, bool isTopLessThanBottom> inline auto Rectangle<T, isTopLessThanBottom>::Expand(const Rectangle &other) -> Rectangle &
+		//T xDiff, yDiff;
+
+		//if constexpr (std::is_signed_v<T>)
+		//{
+		//	xDiff = std::abs(x - centreX);
+		//	yDiff = std::abs(y - centreY);
+		//}
+		//else
+		//{
+		//	xDiff = x > centreX ? x - centreX : centreX - x;
+		//	yDiff = y > centreY ? y - centreY : centreY - y;
+		//}
+
+  //      T dx = std::max(xDiff - halfWidth, T(0));
+  //      T dy = std::max(yDiff - halfHeight, T(0));
+
+  //      return dx * dx + dy * dy;
+  //  }
+
+    template <typename T, bool IsTopLessThanBottom> inline auto Rectangle<T, IsTopLessThanBottom>::Expand(const Rectangle &other) -> Rectangle &
     {
         *this = GetExpanded(other);
         return *this;
     }
 
-    template <typename T, bool isTopLessThanBottom> inline auto Rectangle<T, isTopLessThanBottom>::Expand(T x, T y) -> Rectangle &
+    template <typename T, bool IsTopLessThanBottom> inline auto Rectangle<T, IsTopLessThanBottom>::Expand(T x, T y) -> Rectangle &
     {
         *this = GetExpanded(x, y);
         return *this;
     }
 
-    template <typename T, bool isTopLessThanBottom> inline auto Rectangle<T, isTopLessThanBottom>::GetExpanded(const Rectangle &other) const -> Rectangle
+    template <typename T, bool IsTopLessThanBottom> inline auto Rectangle<T, IsTopLessThanBottom>::GetExpanded(const Rectangle &other) const -> Rectangle
     {
         if (IsDefined())
         {
@@ -637,7 +651,7 @@ namespace StdLib
                 T r = std::max(right, other.right);
                 T t, b;
 
-                if constexpr(isTopLessThanBottom)
+                if constexpr(IsTopLessThanBottom)
                 {
                     t = std::min(top, other.top);
                     b = std::max(bottom, other.bottom);
@@ -660,7 +674,7 @@ namespace StdLib
         }
     }
 
-    template <typename T, bool isTopLessThanBottom> inline auto Rectangle<T, isTopLessThanBottom>::GetExpanded(T x, T y) const -> Rectangle
+    template <typename T, bool IsTopLessThanBottom> inline auto Rectangle<T, IsTopLessThanBottom>::GetExpanded(T x, T y) const -> Rectangle
     {
         if (IsDefined())
         {
@@ -668,7 +682,7 @@ namespace StdLib
             T r = std::max(right, x);
             T t, b;
 
-            if constexpr(isTopLessThanBottom)
+            if constexpr(IsTopLessThanBottom)
             {
                 t = std::min(top, y);
                 b = std::max(bottom, y);
@@ -684,37 +698,37 @@ namespace StdLib
         return Rectangle::FromPoint(x, y);
     }
 
-    template <typename T, bool isTopLessThanBottom> inline bool Rectangle<T, isTopLessThanBottom>::IsDefined() const
+    template <typename T, bool IsTopLessThanBottom> inline bool Rectangle<T, IsTopLessThanBottom>::IsDefined() const
     {
         ASSUME(left <= right);
-        ASSUME(isTopLessThanBottom ? (top <= bottom) : (bottom <= top));
+        ASSUME(IsTopLessThanBottom ? (top <= bottom) : (bottom <= top));
 
         // suffice to check just one side, right side definitely mustn't be T::min in a defined rectangle
-        return right != std::numeric_limits<T>::min();
+        return right != undefinedValue;
     }
 
-    template <typename T, bool isTopLessThanBottom> inline T Rectangle<T, isTopLessThanBottom>::Width() const
+    template <typename T, bool IsTopLessThanBottom> inline T Rectangle<T, IsTopLessThanBottom>::Width() const
     {
         ASSUME(left <= right);
-        ASSUME(isTopLessThanBottom ? (top <= bottom) : (bottom <= top));
+        ASSUME(IsTopLessThanBottom ? (top <= bottom) : (bottom <= top));
 
         return right - left;
     }
 
-    template <typename T, bool isTopLessThanBottom> inline T Rectangle<T, isTopLessThanBottom>::Height() const
+    template <typename T, bool IsTopLessThanBottom> inline T Rectangle<T, IsTopLessThanBottom>::Height() const
     {
         ASSUME(left <= right);
-        ASSUME(isTopLessThanBottom ? (top <= bottom) : (bottom <= top));
+        ASSUME(IsTopLessThanBottom ? (top <= bottom) : (bottom <= top));
 
-        return isTopLessThanBottom ? (bottom - top) : (top - bottom);
+        return IsTopLessThanBottom ? (bottom - top) : (top - bottom);
     }
 
-    template <typename T, bool isTopLessThanBottom> inline bool Rectangle<T, isTopLessThanBottom>::operator == (const Rectangle &other) const
+    template <typename T, bool IsTopLessThanBottom> inline bool Rectangle<T, IsTopLessThanBottom>::operator == (const Rectangle &other) const
     {
         return left == other.left && right == other.right && top == other.top && bottom == other.bottom;
     }
 
-    template <typename T, bool isTopLessThanBottom> inline bool Rectangle<T, isTopLessThanBottom>::operator != (const Rectangle &other) const
+    template <typename T, bool IsTopLessThanBottom> inline bool Rectangle<T, IsTopLessThanBottom>::operator != (const Rectangle &other) const
     {
         return !(this->operator==(other));
     }

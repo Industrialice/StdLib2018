@@ -462,9 +462,9 @@ static void QuaternionTests()
 	revMat = q0.ToMatrix();
 	UTest(true, revMat.EqualsWithEpsilon(mat));
 
-    for (ui32 index = 0; index < TestIterations; ++index)
+    /*for (ui32 index = 0; index < TestIterations; ++index)
     {
-        /*auto radDist = [](Vector3 left, Vector3 right)
+        auto radDist = [](Vector3 left, Vector3 right)
         {
             f32 x = RadDistance(left.x, right.x);
             f32 y = RadDistance(left.y, right.y);
@@ -478,8 +478,8 @@ static void QuaternionTests()
         toEuler = q0.ToEuler();
         Vector3 dist = radDist(toEuler, euler);
         UTest(true, dist.EqualsWithEpsilon({0, 0, 0}));
-        euler = euler;*/
-    }
+        euler = euler;
+    }*/
 }
 
 template <typename T> static void MatrixTestsHelper()
@@ -768,6 +768,20 @@ static void Matrix4x4Tests()
 	MatrixDecomposeTest<Matrix4x4>();
 }
 
+template <typename T> void RectangleTestsHelper()
+{
+	using type = typename T::type;
+	T rect = T::FromPoint(0, 0);
+	UTest(true, rect.IsDefined());
+
+	rect.right += 15;
+	rect.bottom += 25;
+
+	UTest(true, rect.Contains(5, 10));
+	UTest(Equal, rect.Height(), type(25));
+	UTest(Equal, rect.Width(), type(15));
+}
+
 static void BaseVectorTests()
 {
 	BaseVectorTestsHelper<i32Vector2>();
@@ -816,6 +830,13 @@ static void MatrixTests()
     Matrix3x4Tests();
     Matrix4x3Tests();
     Matrix4x4Tests();
+}
+
+static void RectangleTests()
+{
+	RectangleTestsHelper<RectangleF32>();
+	RectangleTestsHelper<RectangleI32>();
+	RectangleTestsHelper<RectangleUI32>();
 }
 
 template <ApproxMath::Precision Precision> static void CosTests()
