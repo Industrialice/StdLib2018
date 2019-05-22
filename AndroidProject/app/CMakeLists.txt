@@ -21,7 +21,7 @@ else()
     add_definitions(-DNDEBUG -D_NDEBUG)
 endif()
 
-add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++17> $<$<COMPILE_LANGUAGE:C>:-std=c11>)
+add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++2a> $<$<COMPILE_LANGUAGE:C>:-std=c11>)
 add_compile_options(-Wno-missing-braces -Wno-inconsistent-missing-override -Wpessimizing-move -Wlarge-by-value-copy -Winstantiation-after-specialization -Wself-assign)
 add_compile_options(-fno-stack-protector -D_FORTIFY_SOURCE=0 -fno-sanitize=memory -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden)
 

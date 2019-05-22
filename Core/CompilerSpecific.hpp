@@ -11,6 +11,8 @@
 		#pragma warning(1 : 4266) /* 'function': no override available for virtual member function from base 'type'; function is hidden */
 	#endif
 
+	#define SPACESHIP_SUPPORTED
+
     #define RSTR __restrict
     #define ALLOCA(count, sizeOfElement) _alloca((count) * (sizeOfElement))
     #define UNIQUEPTRRETURN __declspec(restrict)

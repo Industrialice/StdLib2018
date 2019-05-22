@@ -32,35 +32,37 @@ TimeDifference &TimeDifference::operator += (const TimeDifference &other)
     return *this;
 }
 
-bool TimeDifference::operator < (const TimeDifference &other) const
-{
-    return _counter < other._counter;
-}
+#ifndef SPACESHIP_SUPPORTED
+	bool TimeDifference::operator < (const TimeDifference &other) const
+	{
+		return _counter < other._counter;
+	}
 
-bool TimeDifference::operator <= (const TimeDifference &other) const
-{
-    return _counter <= other._counter;
-}
+	bool TimeDifference::operator <= (const TimeDifference &other) const
+	{
+		return _counter <= other._counter;
+	}
 
-bool TimeDifference::operator > (const TimeDifference &other) const
-{
-    return _counter > other._counter;
-}
+	bool TimeDifference::operator > (const TimeDifference &other) const
+	{
+		return _counter > other._counter;
+	}
 
-bool TimeDifference::operator >= (const TimeDifference &other) const
-{
-    return _counter >= other._counter;
-}
+	bool TimeDifference::operator >= (const TimeDifference &other) const
+	{
+		return _counter >= other._counter;
+	}
 
-bool TimeDifference::operator == (const TimeDifference &other) const
-{
-    return _counter == other._counter;
-}
+	bool TimeDifference::operator == (const TimeDifference &other) const
+	{
+		return _counter == other._counter;
+	}
 
-bool TimeDifference::operator != (const TimeDifference &other) const
-{
-    return _counter != other._counter;
-}
+	bool TimeDifference::operator != (const TimeDifference &other) const
+	{
+		return _counter != other._counter;
+	}
+#endif
 
 ////////////////
 // TimeMoment //
@@ -106,35 +108,37 @@ TimeMoment &TimeMoment::operator -= (const TimeDifference &difference)
     return *this;
 }
 
-bool TimeMoment::operator < (const TimeMoment &other) const
-{
-    return _counter < other._counter;
-}
+#ifndef SPACESHIP_SUPPORTED
+	bool TimeMoment::operator < (const TimeMoment &other) const
+	{
+		return _counter < other._counter;
+	}
 
-bool TimeMoment::operator <= (const TimeMoment &other) const
-{
-    return _counter <= other._counter;
-}
+	bool TimeMoment::operator <= (const TimeMoment &other) const
+	{
+		return _counter <= other._counter;
+	}
 
-bool TimeMoment::operator > (const TimeMoment &other) const
-{
-    return _counter > other._counter;
-}
+	bool TimeMoment::operator > (const TimeMoment &other) const
+	{
+		return _counter > other._counter;
+	}
 
-bool TimeMoment::operator >= (const TimeMoment &other) const
-{
-    return _counter >= other._counter;
-}
+	bool TimeMoment::operator >= (const TimeMoment &other) const
+	{
+		return _counter >= other._counter;
+	}
 
-bool TimeMoment::operator == (const TimeMoment &other) const
-{
-    return _counter == other._counter;
-}
+	bool TimeMoment::operator == (const TimeMoment &other) const
+	{
+		return _counter == other._counter;
+	}
 
-bool TimeMoment::operator != (const TimeMoment &other) const
-{
-    return _counter != other._counter;
-}
+	bool TimeMoment::operator != (const TimeMoment &other) const
+	{
+		return _counter != other._counter;
+	}
+#endif
 
 TimeMoment::operator bool() const
 {

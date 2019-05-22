@@ -599,8 +599,17 @@ namespace StdLib
                 halfHeight /= 2;
             }
 
-            T dx = std::max(std::abs(x - centreX) - halfWidth, T(0));
-            T dy = std::max(std::abs(y - centreY) - halfHeight, T(0));
+			T xDiff = x - centreX;
+			T yDiff = y - centreY;
+
+			if constexpr (std::is_signed_v<T>)
+			{
+				xDiff = std::abs(xDiff);
+				yDiff = std::abs(yDiff);
+			}
+
+            T dx = std::max(xDiff - halfWidth, T(0));
+            T dy = std::max(yDiff - halfHeight, T(0));
 
             return dx * dx + dy * dy;
         }

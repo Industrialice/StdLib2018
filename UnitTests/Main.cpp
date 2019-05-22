@@ -239,9 +239,13 @@ static void CompileTimeStringsTests()
 
 static void EnumCombinableTests()
 {
-    static constexpr struct Values : EnumCombinable<Values, ui32>
-    {} One = Values::Create(Funcs::BitPos(0)),
+    static constexpr struct Values : EnumCombinable<Values, ui32, true>
+    {} Default = Values::Create(0),
+		One = Values::Create(Funcs::BitPos(0)),
         Two = Values::Create(Funcs::BitPos(1));
+
+	Values one = One;
+	Values two = Two;
 
     UTest(Equal, One.AsInteger(), 1);
     UTest(Equal, Two.AsInteger(), 2);
@@ -249,6 +253,15 @@ static void EnumCombinableTests()
     UTest(NotEqual, One, Two);
     UTest(LeftLesser, One, Two);
     UTest(LeftGreater, Two, One);
+	UTest(Equal, One, one);
+	UTest(Equal, one, one);
+	UTest(Equal, one, One);
+	UTest(NotEqual, One, two);
+	UTest(NotEqual, one, Two);
+	UTest(NotEqual, one, two);
+	UTest(LeftLesser, One, two);
+	UTest(LeftLesser, one, Two);
+	UTest(LeftLesser, one, two);
 
     Values value = One;
     value.Add(Two);
@@ -647,7 +660,7 @@ static void AllocatorsTests()
 	}
 	UTest(Equal, (uiw)memory & 3, 0u);
 	blockSize = Allocator::MallocAligned::MemorySize<4>(memory);
-	UTest(LeftGreaterEqual, blockSize, 222);
+	UTest(LeftGreaterEqual, blockSize, 222u);
 	Allocator::MallocAligned::Free<4>(memory);
 
 	memory = Allocator::MallocAligned::Allocate<64>(31);
@@ -660,7 +673,7 @@ static void AllocatorsTests()
 		UTest(Equal, memory[index], 0x77);
 	}
 	blockSize = Allocator::MallocAligned::MemorySize<64>(memory);
-	UTest(LeftGreaterEqual, blockSize, 11);
+	UTest(LeftGreaterEqual, blockSize, 11u);
 	Allocator::MallocAligned::Free<64>(memory);
 
 	// testing MemorySize specifically, on Android targets prior 17 there's an unreliable hack solution to get it

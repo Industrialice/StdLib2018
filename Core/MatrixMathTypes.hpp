@@ -539,7 +539,6 @@ namespace StdLib
 
         static constexpr Rectangle FromPoint(T x, T y);
 
-        constexpr Rectangle() = default;
         [[nodiscard]] bool IsIntersected(const Rectangle &other) const; // undefined rectangles are considered instersected
         [[nodiscard]] T Distance(T x, T y) const;
         Rectangle &Expand(const Rectangle &other);

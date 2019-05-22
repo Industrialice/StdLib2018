@@ -4,19 +4,27 @@
 
 namespace StdLib
 {
-    template <bool hasDefaultConstructor> struct _OptionalDefaultConstructior
+    template <bool hasDefaultConstructor> class _OptionalDefaultConstructior
     {
     protected:
         constexpr _OptionalDefaultConstructior() = default;
+
+//#ifdef SPACESHIP_SUPPORTED
+//	public:
+//		[[nodiscard]] constexpr auto operator <=> (const _OptionalDefaultConstructior &) const = default;
+//#endif
     };
 
-    template <> struct _OptionalDefaultConstructior<true>
+    template <> class _OptionalDefaultConstructior<true>
     {
     public:
         constexpr _OptionalDefaultConstructior() = default;
+//#ifdef SPACESHIP_SUPPORTED
+//		[[nodiscard]] constexpr auto operator <=> (const _OptionalDefaultConstructior &) const = default;
+//#endif
     };
 
-    template <typename WrapperType, typename ValueType, bool hasDefaultValue = false> class EnumCombinable : _OptionalDefaultConstructior<hasDefaultValue>
+    template <typename WrapperType, typename ValueType, bool hasDefaultValue = false> class EnumCombinable : public _OptionalDefaultConstructior<hasDefaultValue>
     {
         static_assert(std::is_integral_v<ValueType>, "ValueType must be integral");
 
@@ -31,7 +39,7 @@ namespace StdLib
 
         constexpr EnumCombinable() = default;
 
-        static constexpr WrapperType Create(ValueType value)
+		[[nodiscard]] static constexpr WrapperType Create(ValueType value)
         {
             return {value};
         }
@@ -41,69 +49,76 @@ namespace StdLib
             return _value != 0;
         }
 
-        constexpr bool operator == (const EnumCombinable &other) const
-        {
-            return _value == other._value;
-        }
+//#ifdef SPACESHIP_SUPPORTED
+//		[[nodiscard]] constexpr auto operator <=> (const EnumCombinable &other) const
+//		{
+//			return _value <=> other._value;
+//		}
+//#else
+		constexpr bool operator == (const EnumCombinable &other) const
+		{
+			return _value == other._value;
+		}
 
-        constexpr bool operator != (const EnumCombinable &other) const
-        {
-            return !operator==(other);
-        }
+		constexpr bool operator != (const EnumCombinable &other) const
+		{
+			return !operator==(other);
+		}
 
-        constexpr bool operator < (const EnumCombinable &other) const
-        {
-            return _value < other._value;
-        }
+		constexpr bool operator < (const EnumCombinable &other) const
+		{
+			return _value < other._value;
+		}
 
-        constexpr bool operator <= (const EnumCombinable &other) const
-        {
-            return _value <= other._value;
-        }
+		constexpr bool operator <= (const EnumCombinable &other) const
+		{
+			return _value <= other._value;
+		}
 
-        constexpr bool operator > (const EnumCombinable &other) const
-        {
-            return _value > other._value;
-        }
+		constexpr bool operator > (const EnumCombinable &other) const
+		{
+			return _value > other._value;
+		}
 
-        constexpr bool operator >= (const EnumCombinable &other) const
-        {
-            return _value >= other._value;
-        }
+		constexpr bool operator >= (const EnumCombinable &other) const
+		{
+			return _value >= other._value;
+		}
+//#endif
 
-        constexpr WrapperType Combined(const EnumCombinable &other) const
+		[[nodiscard]] constexpr WrapperType Combined(const EnumCombinable &other) const
         {
             return {(ValueType)(_value | other._value)};
         }
 
-        constexpr WrapperType &Add(const EnumCombinable &other)
+		constexpr WrapperType &Add(const EnumCombinable &other)
         {
             _value |= other._value;
             return (WrapperType &)*this;
         }
 
-        constexpr WrapperType &Remove(const EnumCombinable &other)
+		constexpr WrapperType &Remove(const EnumCombinable &other)
         {
             _value &= ~other._value;
             return (WrapperType &)*this;
         }
 
-        constexpr bool Contains(const EnumCombinable &other) const
+		[[nodiscard]] constexpr bool Contains(const EnumCombinable &other) const
         {
             return (_value & other._value) == other._value;
         }
 
-        constexpr bool Intersects(const EnumCombinable &other) const
+		[[nodiscard]] constexpr bool Intersects(const EnumCombinable &other) const
         {
             return (_value & other._value) != 0;
         }
 
-        constexpr ValueType &AsInteger()
+		[[nodiscard]] constexpr ValueType &AsInteger()
         {
             return _value;
         }
 
-        constexpr const ValueType &AsInteger() const
+		[[nodiscard]] constexpr const ValueType &AsInteger() const
         {
             return _value;
         }

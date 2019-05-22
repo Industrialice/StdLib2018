@@ -45,8 +45,8 @@ namespace StdLib
     template struct _Matrix<4, 4>;
 
     template struct Rectangle<f32>;
-    template struct Rectangle<bool>;
-    template struct Rectangle<i32>;
+	template struct Rectangle<i32>;
+	template struct Rectangle<ui32>;
 }
 
 template <uiw Rows, uiw Columns> static inline void _TransposeSquareMatrix(_Matrix<Rows, Columns> &matrix)

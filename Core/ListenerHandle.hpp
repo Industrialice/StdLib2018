@@ -41,7 +41,7 @@ namespace StdLib
             return *this;
         }
 
-        bool operator == (const TListenerHandle &other) const
+        [[nodiscard]] bool operator == (const TListenerHandle &other) const
         {
             return _id == other._id && Funcs::AreSharedPointersEqual(_owner, other._owner);
         }
@@ -58,17 +58,17 @@ namespace StdLib
 			return _owner < other._owner;
 		}
 
-        IdType Id() const
+		[[nodiscard]] IdType Id() const
         {
             return _id;
         }
 
-        const std::weak_ptr<OwnerType> &Owner() const
+		[[nodiscard]] const std::weak_ptr<OwnerType> &Owner() const
         {
             return _owner;
         }
 
-		std::weak_ptr<OwnerType> &Owner()
+		[[nodiscard]] std::weak_ptr<OwnerType> &Owner()
         {
             return _owner;
         }

@@ -126,12 +126,16 @@ namespace StdLib
         TimeDifference &operator -= (const TimeDifference &other);
         TimeDifference &operator += (const TimeDifference &other);
 
-        [[nodiscard]] bool operator < (const TimeDifference &other) const;
-        [[nodiscard]] bool operator <= (const TimeDifference &other) const;
-        [[nodiscard]] bool operator > (const TimeDifference &other) const;
-        [[nodiscard]] bool operator >= (const TimeDifference &other) const;
-        [[nodiscard]] bool operator == (const TimeDifference &other) const;
-        [[nodiscard]] bool operator != (const TimeDifference &other) const;
+#ifdef SPACESHIP_SUPPORTED
+		[[nodiscard]] auto operator <=> (const TimeDifference &) const = default;
+#else
+		[[nodiscard]] bool operator < (const TimeDifference &other) const;
+		[[nodiscard]] bool operator <= (const TimeDifference &other) const;
+		[[nodiscard]] bool operator > (const TimeDifference &other) const;
+		[[nodiscard]] bool operator >= (const TimeDifference &other) const;
+		[[nodiscard]] bool operator == (const TimeDifference &other) const;
+		[[nodiscard]] bool operator != (const TimeDifference &other) const;
+#endif
     };
 
     // note that TimeMoment is undefined after the default contructor had 
@@ -155,12 +159,16 @@ namespace StdLib
         [[nodiscard]] TimeMoment operator - (const TimeDifference &difference) const;
         TimeMoment &operator -= (const TimeDifference &difference);
 
-        [[nodiscard]] bool operator < (const TimeMoment &other) const;
-        [[nodiscard]] bool operator <= (const TimeMoment &other) const;
-        [[nodiscard]] bool operator > (const TimeMoment &other) const;
-        [[nodiscard]] bool operator >= (const TimeMoment &other) const;
-        [[nodiscard]] bool operator == (const TimeMoment &other) const;
-        [[nodiscard]] bool operator != (const TimeMoment &other) const;
+#ifdef SPACESHIP_SUPPORTED
+		[[nodiscard]] auto operator <=> (const TimeMoment &) const = default;
+#else
+		[[nodiscard]] bool operator < (const TimeMoment &other) const;
+		[[nodiscard]] bool operator <= (const TimeMoment &other) const;
+		[[nodiscard]] bool operator > (const TimeMoment &other) const;
+		[[nodiscard]] bool operator >= (const TimeMoment &other) const;
+		[[nodiscard]] bool operator == (const TimeMoment &other) const;
+		[[nodiscard]] bool operator != (const TimeMoment &other) const;
+#endif
 
         [[nodiscard]] explicit operator bool() const;
 
