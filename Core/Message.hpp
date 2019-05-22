@@ -6,58 +6,62 @@ namespace StdLib
 {
     template <typename T> struct ArgConverter
     {
-        typedef T stored;
+        using stored = T;
 
-        static T &FromStored(stored &arg)
-        {
-            return arg;
-        }
-
-        template <typename X> static T ToStored(X &&arg)
+		template <typename X> [[nodiscard]] static auto FromStored(X &&arg)
         {
             return std::forward<T>(arg);
         }
 
-        /*template <typename = std::enable_if_t<std::is_arithmetic<T>::value == false>> static T &ToStored(T &arg)
+        template <typename X> [[nodiscard]] static auto ToStored(X &&arg)
         {
-            return arg;
-        }
-
-        template <typename = std::enable_if_t<std::is_arithmetic<T>::value == true>> static T ToStored(T arg)
-        {
-            return arg;
-        }*/
-    };
-
-    /*template < typename T > struct ArgConverter < T & >
-    {
-        typedef T stored;
-
-        static T &FromStored( stored &arg )
-        {
-            static_assert( false, "modifiable references are forbidden" );
-        }
-
-        static T &ToStored( T &arg )
-        {
-            static_assert( false, "modifiable references are forbidden" );
+            return std::forward<T>(arg);
         }
     };
 
-    template < typename T > struct ArgConverter < const T & >
+    template <typename T> struct ArgConverter<T &>
     {
-        typedef T stored;
+		static constexpr bool isArray = std::is_array_v<T>;
+		using stored = std::conditional_t<isArray, std::remove_all_extents_t<T> *, T>;
 
-        static const T &FromStored( const stored &arg )
+		[[nodiscard]] static decltype(auto) FromStored(stored &arg)
         {
-            return arg;
+			if constexpr (isArray)
+				return arg;
+			else
+				return (T &)arg;
         }
 
-        static const T &ToStored( const T &arg )
+		[[nodiscard]] static decltype(auto) ToStored(T &arg)
         {
-            return arg;
+			if constexpr (isArray)
+				return (stored)arg;
+			else
+				return (stored &)arg;
         }
-    };*/
+    };
+
+	template <typename T> struct ArgConverter<const T &>
+	{
+		static constexpr bool isArray = std::is_array_v<T>;
+		using stored = const std::conditional_t<isArray, std::remove_all_extents_t<T> *, T>;
+
+		[[nodiscard]] static decltype(auto) FromStored(stored &arg)
+		{
+			if constexpr (isArray)
+				return arg;
+			else
+				return (const T &)arg;
+		}
+
+		[[nodiscard]] static decltype(auto) ToStored(const T &arg)
+		{
+			if constexpr (isArray)
+				return (stored)arg;
+			else
+				return (stored &)arg;
+		}
+	};
 
     template <typename T> struct ArgConverter<T *>
     {
@@ -68,7 +72,7 @@ namespace StdLib
             return arg;
         }
 
-		[[nodiscard]] static T *ToStored(T *arg)
+		[[nodiscard]] static stored ToStored(T *arg)
         {
             return arg;
         }
@@ -83,67 +87,7 @@ namespace StdLib
             return arg;
         }
 
-		[[nodiscard]] static const T *ToStored(const T *arg)
-        {
-            return arg;
-        }
-    };
-
-    template <typename T> struct ArgConverter<T[]>
-    {
-        using stored = T *;
-
-		[[nodiscard]] static T *FromStored(stored *arg)
-        {
-            return arg;
-        }
-
-		[[nodiscard]] static T *ToStored(T *arg)
-        {
-            return arg;
-        }
-    };
-
-    template <typename T> struct ArgConverter<const T[]>
-    {
-        using stored = const T *;
-
-		[[nodiscard]] static const T *FromStored(stored arg)
-        {
-            return arg;
-        }
-
-		[[nodiscard]] static const T *ToStored(const T *arg)
-        {
-            return arg;
-        }
-    };
-
-    template <typename T, size_t size> struct ArgConverter<T[size]>
-    {
-        using stored = T *;
-
-		[[nodiscard]] static T *FromStored(stored *arg)
-        {
-            return arg;
-        }
-
-		[[nodiscard]] static T *ToStored(T *arg)
-        {
-            return arg;
-        }
-    };
-
-    template <typename T, size_t size> struct ArgConverter<const T[size]>
-    {
-        using stored = const T *;
-
-		[[nodiscard]] static const T *FromStored(stored arg)
-        {
-            return arg;
-        }
-
-		[[nodiscard]] static const T *ToStored(const T *arg)
+		[[nodiscard]] static stored ToStored(const T *arg)
         {
             return arg;
         }
@@ -158,70 +102,9 @@ namespace StdLib
             return std::move(arg);
         }
 
-		[[nodiscard]] static T &ToStored(T &&arg)
+		[[nodiscard]] static stored ToStored(T &&arg)
         {
             return std::move(arg);
-        }
-    };
-
-    template <int...> struct seq
-    {};
-
-    template <int N, int... S> struct gens : gens<N - 1, N - 1, S...>
-    {};
-
-    template <int... S> struct gens<0, S...>
-    {
-        typedef seq<S...> type;
-    };
-
-    template <typename T> struct GetCallablePointer;
-
-    template <typename T> struct GetCallablePointer<T *>
-    {
-		[[nodiscard]] static T *Get(T *caller)
-        {
-            return caller;
-        }
-    };
-
-    template <typename T> struct GetCallablePointer<const T *>
-    {
-		[[nodiscard]] static const T *Get(const T *caller)
-        {
-            return caller;
-        }
-    };
-
-    template <typename T> struct GetCallablePointer<T * const>
-    {
-		[[nodiscard]] static T *Get(T *caller)
-        {
-            return caller;
-        }
-    };
-
-    template <typename T> struct GetCallablePointer<const T * const>
-    {
-		[[nodiscard]] static const T *Get(const T *caller)
-        {
-            return caller;
-        }
-    };
-
-    template <typename T> struct GetCallablePointer<T &>
-    {
-		[[nodiscard]] static T *Get(T &caller)
-        {
-            return &caller;
-        }
-    };
-
-    template <typename T> struct GetCallablePointer<const T &>
-    {
-		[[nodiscard]] static const T *Get(const T &caller)
-        {
-            return &caller;
         }
     };
 
@@ -239,17 +122,17 @@ namespace StdLib
 		void(*_execute)(Action action, MessageBase *) = 0;
     };
 
-    template <typename Base, typename Caller, auto methodToCall, typename... MessageArgs> struct MessageDelegate : public MessageBase<Base>
+    template <typename Base, typename Caller, auto MethodToCall, typename... MessageArgs> struct MessageDelegate : public MessageBase<Base>
     {
         Caller caller;
         std::tuple<typename ArgConverter<MessageArgs>::stored...> args;
 
-		template <int... S> static void callFunc(i32 action, MessageBase<Base> *object, seq<S...>)
+		template <uiw... S> static void callFunc(i32 action, MessageBase<Base> *object, std::index_sequence<S...>)
 		{
 			MessageDelegate *helper = (MessageDelegate *)object;
 			if (action & 1)
 			{
-				(GetCallablePointer<Caller>::Get(helper->caller)->*methodToCall)(ArgConverter<MessageArgs>::FromStored(std::get<S>(helper->args))...);
+				std::invoke(MethodToCall, helper->caller, ArgConverter<MessageArgs>::FromStored(std::get<S>(helper->args))...);
 			}
 			if (action & 2)
 			{
@@ -259,7 +142,7 @@ namespace StdLib
 
         static void CallFunc(typename MessageBase<Base>::Action action, MessageBase<Base> *object)
         {
-            callFunc((i32)action, object, typename gens<sizeof...(MessageArgs)>::type());
+            callFunc((i32)action, object, std::make_index_sequence<sizeof...(MessageArgs)>());
         }
 
         template <typename TCaller, typename... TMessageArgs> MessageDelegate(TCaller &&caller, TMessageArgs &&... args) :
@@ -274,7 +157,7 @@ namespace StdLib
     {
         std::tuple<typename ArgConverter<MessageArgs>::stored...> args;
 
-        template <int... S> static void callFunc(i32 action, MessageBase<Base> *object, seq<S...>)
+        template <uiw... S> static void callFunc(i32 action, MessageBase<Base> *object, std::index_sequence<S...>)
         {
             MessageFuncInline *helper = (MessageFuncInline *)object;
 			if (action & 1)
@@ -289,7 +172,7 @@ namespace StdLib
 
         static void CallFunc(typename MessageBase<Base>::Action action, MessageBase<Base> *object)
         {
-            callFunc((i32)action, object, typename gens<sizeof...(MessageArgs)>::type());
+            callFunc((i32)action, object, std::make_index_sequence<sizeof...(MessageArgs)>());
         }
 
         template <typename... TMessageArgs> MessageFuncInline(TMessageArgs &&... args) :
@@ -304,7 +187,7 @@ namespace StdLib
         FuncType func;
         std::tuple<typename ArgConverter<MessageArgs>::stored...> args;
 
-        template <int... S> static void callFunc(i32 action, MessageBase<Base> *object, seq<S...>)
+        template <uiw... S> static void callFunc(i32 action, MessageBase<Base> *object, std::index_sequence<S...>)
         {
             MessageFuncPointer *helper = (MessageFuncPointer *)object;
 			if (action & 1)
@@ -319,7 +202,7 @@ namespace StdLib
 
         static void CallFunc(typename MessageBase<Base>::Action action, MessageBase<Base> *object)
         {
-            callFunc((i32)action, object, typename gens<sizeof...(MessageArgs)>::type());
+            callFunc((i32)action, object, std::make_index_sequence<sizeof...(MessageArgs)>());
         }
 
         template <typename... TMessageArgs> MessageFuncPointer(FuncType func, TMessageArgs &&... args) :

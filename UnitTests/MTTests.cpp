@@ -1,5 +1,6 @@
 #include "_PreHeader.hpp"
 #include <DIWRSpinLock.hpp>
+#include <MTMessageQueue.hpp>
 
 using namespace StdLib;
 using std::nullopt;
@@ -95,9 +96,96 @@ static void SpinLockTests()
 	lock.Unlock();
 }
 
+struct MessageQueueTestStruct
+{
+	void Call(ui32 &calledTimes)
+	{
+		++calledTimes;
+	}
+};
+
+static void MessageQueueTestFunc(ui32 &calledTimes)
+{
+	++calledTimes;
+}
+
+static void MessageQueueTests()
+{
+	MTMessageQueue messageQueue;
+
+	ui32 calledTimes = 0;
+
+	auto toCall = [](ui32 &calledTimes)
+	{
+		++calledTimes;
+	};
+
+	auto toCallConstRef = [](const ui32 &calledTimes)
+	{};
+
+	auto toCallPtr = [](ui32 *calledTimes)
+	{
+		++*calledTimes;
+	};
+
+	auto toCallConstPtr = [](const ui32 *calledTimes)
+	{};
+
+	auto funcWithUniqueArgument = [](std::unique_ptr<int> arg)
+	{
+		UTest(Equal, *arg, 15);
+	};
+
+	auto funcWithArrayRef = [](int(&arr)[10])
+	{
+		for (uiw index = 1; index < 10; ++index)
+		{
+			UTest(Equal, arr[index - 1], index);
+		}
+	};
+
+	auto funcWithArray = [](int *arr)
+	{
+		for (uiw index = 1; index < 10; ++index)
+		{
+			UTest(Equal, arr[index - 1], index);
+		}
+	};
+
+	int arr[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+	MessageQueueTestStruct object;
+
+	auto sharedObject = std::make_shared<MessageQueueTestStruct>();
+	auto uniqueObject = std::make_unique<MessageQueueTestStruct>();
+
+	auto uniqueArgument = std::make_unique<int>(15);
+
+	messageQueue.Add(toCall, std::ref(calledTimes));
+	messageQueue.Add(toCallConstRef, std::cref(calledTimes));
+	messageQueue.Add(toCallConstRef, std::ref(calledTimes));
+	messageQueue.Add(toCallConstRef, calledTimes);
+	messageQueue.Add(toCall, calledTimes); // don't pass as a reference, should create a copy
+	messageQueue.Add(toCallPtr, &calledTimes);
+	messageQueue.Add(toCallConstPtr, &calledTimes);
+	messageQueue.Add(funcWithUniqueArgument, move(uniqueArgument));
+	messageQueue.Add(funcWithArray, arr);
+	messageQueue.Add(funcWithArrayRef, std::ref(arr));
+	messageQueue.Add<MessageQueueTestFunc>(std::ref(calledTimes));
+	messageQueue.Add<&MessageQueueTestStruct::Call>(object, std::ref(calledTimes));
+	messageQueue.Add<&MessageQueueTestStruct::Call>(sharedObject, std::ref(calledTimes));
+	messageQueue.Add<&MessageQueueTestStruct::Call>(uniqueObject, std::ref(calledTimes));
+	messageQueue.Add<&MessageQueueTestStruct::Call>(move(uniqueObject), std::ref(calledTimes));
+	
+	while (messageQueue.ExecNoWait());
+
+	UTest(Equal, calledTimes, 7);
+}
+
 void MTTests()
 {
 	SpinLockTests();
+	MessageQueueTests();
 
     Logger::Message("finished multithreaded tests\n");
 }

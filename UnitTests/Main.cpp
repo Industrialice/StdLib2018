@@ -144,7 +144,7 @@ static void MemOpsTests()
 	UTest(Equal, InvalidParametersReceived, 8);
 #endif
 
-	Logger::Message("finished MemOps tests\n");
+	Logger::Message("finished memory operations tests\n");
 }
 
 static void TupleHelpersTests()
@@ -724,7 +724,7 @@ void FilePathTests()
     path.ReplaceFileNameExt(TSTR("new.fil"));
     UTest(Equal, path.PlatformPath(), TSTR("C:/folder/new.fil"));
 
-    Logger::Message("finished FilePath tests\n");
+    Logger::Message("finished file path tests\n");
 }
 
 static void FileWrite(IFile &file)
@@ -1458,7 +1458,7 @@ static void DoTests(int argc, const char **argv)
 {
 	const char *buildType = "Release build";
 	#if defined(DEBUG) || defined(_DEBUG)
-		buildType = "Release build";
+		buildType = "Debug build";
 	#endif
 
     Logger::Message("---Starting Tests for %s---\n", buildType);

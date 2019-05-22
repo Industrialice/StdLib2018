@@ -21,28 +21,28 @@ namespace StdLib
         std::condition_variable _newWorkNotifier{};
 
     public:
-        template <typename MethodType, MethodType method, typename Caller, typename... VArgs> void AddDelegate(Caller &&caller, VArgs &&... args)
+        template <auto Method, typename Caller, typename = std::enable_if_t<std::is_member_function_pointer_v<decltype(Method)>>, typename... VArgs> void Add(Caller &&caller, VArgs &&... args)
         {
-            using messageType = MessageDelegate<MessageWithNext, Caller, MethodType, method, typename std::remove_reference<VArgs>::type...>;
-            auto newMessage = new messageType(std::forward<Caller>(caller), std::forward<typename std::remove_reference<VArgs>::type>(args)...);
+            using messageType = MessageDelegate<MessageWithNext, Caller, Method, VArgs...>;
+            auto newMessage = new messageType(std::forward<Caller>(caller), std::forward<VArgs>(args)...);
             std::scoped_lock lock{_mutex};
             NewMessage(newMessage);
             _newWorkNotifier.notify_all();
         }
 
-        template <typename FuncType, FuncType *func, typename... VArgs> void AddFunctionInline(VArgs &&... args)
+        template <auto Func, typename... VArgs> void Add(VArgs &&... args)
         {
-            using messageType = MessageFuncInline<MessageWithNext, FuncType, func, typename std::remove_reference<VArgs>::type...>;
-            auto newMessage = new messageType(std::forward<typename std::remove_reference<VArgs>::type>(args)...);
+            using messageType = MessageFuncInline<MessageWithNext, Func, VArgs...>;
+            auto newMessage = new messageType(std::forward<VArgs>(args)...);
             std::scoped_lock lock{_mutex};
             NewMessage(newMessage);
             _newWorkNotifier.notify_all();
         }
 
-        template <typename FuncType, typename... VArgs> void AddFunctionPointer(FuncType func, VArgs &&... args)
+        template <typename FuncType, typename... VArgs> void Add(FuncType func, VArgs &&... args)
         {
-            using messageType = MessageFuncPointer<MessageWithNext, FuncType, typename std::remove_reference<VArgs>::type...>;
-            auto newMessage = new messageType(func, std::forward<typename std::remove_reference<VArgs>::type>(args)...);
+            using messageType = MessageFuncPointer<MessageWithNext, FuncType, VArgs...>;
+            auto newMessage = new messageType(func, std::forward<VArgs>(args)...);
             std::scoped_lock lock{_mutex};
             NewMessage(newMessage);
             _newWorkNotifier.notify_all();
