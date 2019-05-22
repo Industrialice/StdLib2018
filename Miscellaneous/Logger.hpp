@@ -80,10 +80,10 @@ namespace StdLib
         Logger &operator = (Logger &&source) noexcept;
 
         using _LoggerMessageMethod<MetaType, IsThreadSafe>::Message;
-        ListenerHandle OnMessage(const ListenerCallbackType &listener, LogLevels::LogLevel levelMask = LogLevels::_All);
+		[[nodiscard]] ListenerHandle OnMessage(const ListenerCallbackType &listener, LogLevels::LogLevel levelMask = LogLevels::_All);
         void RemoveListener(ListenerHandle &handle);
         void IsEnabled(bool isEnabled);
-        bool IsEnabled() const;
+		[[nodiscard]] bool IsEnabled() const;
 
     private:
         void MessageImpl(LogLevels::LogLevel level, const void *meta, const char *format, va_list args);

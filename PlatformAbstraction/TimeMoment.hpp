@@ -172,6 +172,6 @@ namespace StdLib
 
         [[nodiscard]] explicit operator bool() const;
 
-        static TimeMoment Now();
+		[[nodiscard]] static TimeMoment Now();
     };
 }

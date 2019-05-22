@@ -12,10 +12,10 @@ namespace StdLib::SystemInfo
         Unknown, Android, Windows, Emscripten, iOS, macOS, Linux
     };
 
-	Arch CPUArchitecture();
-	ui32 LogicalCPUCores();
-	ui32 PhysicalCPUCores();
-	uiw AllocationAlignment();
-    uiw MemoryPageSize(); // size in bytes
-    Platform CurrentPlatform();
+	[[nodiscard]] Arch CPUArchitecture();
+	[[nodiscard]] ui32 LogicalCPUCores();
+	[[nodiscard]] ui32 PhysicalCPUCores();
+	[[nodiscard]] uiw AllocationAlignment();
+	[[nodiscard]] uiw MemoryPageSize(); // size in bytes
+	[[nodiscard]] Platform CurrentPlatform();
 }

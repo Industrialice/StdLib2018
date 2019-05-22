@@ -253,10 +253,10 @@ namespace StdLib::Funcs
 		}
     }
 
-    template <typename T>[[nodiscard]] std::shared_ptr<typename T::element_type> SharedPtrFromUniquePtr(T &&unique)
-    {
-        return std::shared_ptr<typename T::element_type>(unique.release(), unique.get_deleter());
-    }
+	template <typename T> [[nodiscard]] std::shared_ptr<typename T::element_type> SharedPtrFromUniquePtr(T &&unique)
+	{
+		return std::shared_ptr<typename T::element_type>(unique.release(), unique.get_deleter());
+	}
 
     template <typename T> [[nodiscard]] std::shared_ptr<typename T::element_type> MakeSharedFromUniquePtr(T &&unique)
     {
@@ -345,7 +345,7 @@ namespace StdLib::Funcs
 		using return_type = std::array<typename return_type_helper<D, Types...>::type, sizeof...(Types)>;
 	}
 
-	template <class D = void, class... Types> constexpr _details::return_type<D, Types...> make_array(Types &&... t)
+	template <class D = void, class... Types> [[nodiscard]] constexpr _details::return_type<D, Types...> make_array(Types &&... t)
 	{
 		return {std::forward<Types>(t)...};
 	}
@@ -385,7 +385,7 @@ namespace StdLib::Funcs
 		}
 	}
 
-	template <typename T, typename DefaultType = T> constexpr auto TupleToArray(const T &source)
+	template <typename T, typename DefaultType = T> [[nodiscard]] constexpr auto TupleToArray(const T &source)
 	{
 		return _TupleToArray<T, DefaultType>(source, std::make_index_sequence<std::tuple_size_v<T>>());
 	}
@@ -395,7 +395,7 @@ namespace StdLib::Funcs
 		return std::make_tuple(source[Indexes]...);
 	}
 
-	template <typename T, uiw size> constexpr auto ArrayToTuple(const std::array<T, size> &source)
+	template <typename T, uiw size> [[nodiscard]] constexpr auto ArrayToTuple(const std::array<T, size> &source)
 	{
 		return _ArrayToTuple(source, std::make_index_sequence<size>());
 	}

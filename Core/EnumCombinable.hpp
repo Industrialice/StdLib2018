@@ -55,32 +55,32 @@ namespace StdLib
 //			return _value <=> other._value;
 //		}
 //#else
-		constexpr bool operator == (const EnumCombinable &other) const
+		[[nodiscard]] constexpr bool operator == (const EnumCombinable &other) const
 		{
 			return _value == other._value;
 		}
 
-		constexpr bool operator != (const EnumCombinable &other) const
+		[[nodiscard]] constexpr bool operator != (const EnumCombinable &other) const
 		{
 			return !operator==(other);
 		}
 
-		constexpr bool operator < (const EnumCombinable &other) const
+		[[nodiscard]] constexpr bool operator < (const EnumCombinable &other) const
 		{
 			return _value < other._value;
 		}
 
-		constexpr bool operator <= (const EnumCombinable &other) const
+		[[nodiscard]] constexpr bool operator <= (const EnumCombinable &other) const
 		{
 			return _value <= other._value;
 		}
 
-		constexpr bool operator > (const EnumCombinable &other) const
+		[[nodiscard]] constexpr bool operator > (const EnumCombinable &other) const
 		{
 			return _value > other._value;
 		}
 
-		constexpr bool operator >= (const EnumCombinable &other) const
+		[[nodiscard]] constexpr bool operator >= (const EnumCombinable &other) const
 		{
 			return _value >= other._value;
 		}

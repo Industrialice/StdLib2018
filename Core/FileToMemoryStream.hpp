@@ -20,24 +20,24 @@ namespace StdLib
         Error<> Open(IMemoryStream &stream, FileProcModes::FileProcMode procMode, ui64 offset = 0);
 
         virtual void Close() override;
-        virtual bool IsOpened() const override;
+        [[nodiscard]] virtual bool IsOpened() const override;
 
         virtual bool Read(void *RSTR target, ui32 len, ui32 *RSTR read = 0) override;
         virtual bool Write(const void *source, ui32 len, ui32 *RSTR written = 0) override;
 
-        virtual bool Flush() override;
-        virtual bool IsBufferingSupported() const override;
+		virtual bool Flush() override;
+		[[nodiscard]] virtual bool IsBufferingSupported() const override;
         virtual bool BufferSet(ui32 size, bufferType &&buffer = {nullptr, nullptr}) override;
-        virtual std::pair<ui32, const void *> BufferGet() const override;
+		[[nodiscard]] virtual std::pair<ui32, const void *> BufferGet() const override;
 
-        virtual bool IsSeekSupported() const override;
-        virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) override;
+		[[nodiscard]] virtual bool IsSeekSupported() const override;
+		[[nodiscard]] virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) override;
         virtual Result<i64> OffsetSet(FileOffsetMode offsetMode, i64 offset) override;
 
-        virtual Result<ui64> SizeGet() override;
+		[[nodiscard]] virtual Result<ui64> SizeGet() override;
         virtual Error<> SizeSet(ui64 newSize) override;
 
-        virtual FileProcModes::FileProcMode ProcMode() const override;
-        virtual FileCacheModes::FileCacheMode CacheMode() const override;
+		[[nodiscard]] virtual FileProcModes::FileProcMode ProcMode() const override;
+		[[nodiscard]] virtual FileCacheModes::FileCacheMode CacheMode() const override;
     };
 }

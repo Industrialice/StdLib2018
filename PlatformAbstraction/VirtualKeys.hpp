@@ -58,21 +58,21 @@ namespace StdLib
 
     namespace VirtualKeys
     {
-        bool IsLetter(KeyCode key);
-        bool IsDigit(KeyCode key);
-        bool IsNPadKey(KeyCode key);
-        bool IsNPadDigit(KeyCode key);
-        bool IsNPadArrow(KeyCode key);
-        bool IsMouseButton(KeyCode key);
-        bool IsArrowKey(KeyCode key);
-        bool IsFKey(KeyCode key);
-        bool IsShift(KeyCode key); // either LShift or RShift
-        bool IsControl(KeyCode key); // either LControl or RControl
-        bool IsAlt(KeyCode key); // either LAlt or RAlt
-        bool IsSystem(KeyCode key); // either LSystem or RSystem
-        bool IsEnter(KeyCode key); // either LEnter or REnter
-        bool IsDelete(KeyCode key); // either LDelete or RDelete
-        std::optional<ui32> KeyNumber(KeyCode key); // returns 1 for KeyCode::F1, returns 0 dor Digit0, NPad0 and MButton0, returns std::nullopt for the others
-        char ToAlpha(KeyCode key, bool isUpperCase = true); // accepts A-Z keys, returns '\0' if key is not a letter
+		[[nodiscard]] bool IsLetter(KeyCode key);
+		[[nodiscard]] bool IsDigit(KeyCode key);
+		[[nodiscard]] bool IsNPadKey(KeyCode key);
+		[[nodiscard]] bool IsNPadDigit(KeyCode key);
+		[[nodiscard]] bool IsNPadArrow(KeyCode key);
+		[[nodiscard]] bool IsMouseButton(KeyCode key);
+		[[nodiscard]] bool IsArrowKey(KeyCode key);
+		[[nodiscard]] bool IsFKey(KeyCode key);
+		[[nodiscard]] bool IsShift(KeyCode key); // either LShift or RShift
+		[[nodiscard]] bool IsControl(KeyCode key); // either LControl or RControl
+		[[nodiscard]] bool IsAlt(KeyCode key); // either LAlt or RAlt
+		[[nodiscard]] bool IsSystem(KeyCode key); // either LSystem or RSystem
+		[[nodiscard]] bool IsEnter(KeyCode key); // either LEnter or REnter
+		[[nodiscard]] bool IsDelete(KeyCode key); // either LDelete or RDelete
+		[[nodiscard]] std::optional<ui32> KeyNumber(KeyCode key); // returns 1 for KeyCode::F1, returns 0 dor Digit0, NPad0 and MButton0, returns std::nullopt for the others
+		[[nodiscard]] char ToAlpha(KeyCode key, bool isUpperCase = true); // accepts A-Z keys, returns '\0' if key is not a letter
     }
 }

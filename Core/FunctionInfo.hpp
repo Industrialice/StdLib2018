@@ -4,17 +4,13 @@
 
 namespace StdLib::FunctionInfo
 {
-    template <typename T>
-    struct Info {};
+    template <typename T> struct Info {};
 
-    template <typename T>
-    struct Info<T *> {};
+    template <typename T> struct Info<T *> {};
 
-    template <typename T, typename Class>
-    struct Info<T(Class::*)> {};
+    template <typename T, typename Class> struct Info<T(Class::*)> {};
 
-    template <typename Result, typename... Args>
-    struct Info<Result(Args...)>
+    template <typename Result, typename... Args> struct Info<Result(Args...)>
     {
         using args = std::tuple<Args...>;
         using result = Result;
@@ -22,8 +18,7 @@ namespace StdLib::FunctionInfo
         using parentClass = void;
     };
 
-    template <typename Result, typename... Args>
-    struct Info<Result(*)(Args...)>
+    template <typename Result, typename... Args> struct Info<Result(*)(Args...)>
     {
         using args = std::tuple<Args...>;
         using result = Result;
@@ -31,8 +26,7 @@ namespace StdLib::FunctionInfo
         using parentClass = void;
     };
 
-    template <typename Class, typename Result, typename... Args>
-    struct Info<Result(Class::*)(Args...)>
+    template <typename Class, typename Result, typename... Args> struct Info<Result(Class::*)(Args...)>
     {
         using args = std::tuple<Args...>;
         using result = Result;
@@ -40,8 +34,7 @@ namespace StdLib::FunctionInfo
         using parentClass = Class;
     };
 
-    template <typename Class, typename Result, typename... Args>
-    struct Info<Result(Class::*)(Args...) const>
+    template <typename Class, typename Result, typename... Args> struct Info<Result(Class::*)(Args...) const>
     {
         using args = std::tuple<Args...>;
         using result = Result;
@@ -49,8 +42,7 @@ namespace StdLib::FunctionInfo
         using parentClass = Class;
     };
 
-    template <typename Class, typename Result, typename... Args>
-    struct Info<Result(Class::*)(Args...) volatile>
+    template <typename Class, typename Result, typename... Args> struct Info<Result(Class::*)(Args...) volatile>
     {
         using args = std::tuple<Args...>;
         using result = Result;
@@ -58,8 +50,7 @@ namespace StdLib::FunctionInfo
         using parentClass = Class;
     };
 
-    template <typename Class, typename Result, typename... Args>
-    struct Info<Result(Class::*)(Args...) volatile const>
+    template <typename Class, typename Result, typename... Args> struct Info<Result(Class::*)(Args...) volatile const>
     {
         using args = std::tuple<Args...>;
         using result = Result;
@@ -67,8 +58,7 @@ namespace StdLib::FunctionInfo
         using parentClass = Class;
     };
 
-    template <typename Result, typename... Args>
-    struct Info<Result(Args...) noexcept>
+    template <typename Result, typename... Args> struct Info<Result(Args...) noexcept>
     {
         using args = std::tuple<Args...>;
         using result = Result;
@@ -76,8 +66,7 @@ namespace StdLib::FunctionInfo
         using parentClass = void;
     };
 
-    template <typename Result, typename... Args>
-    struct Info<Result(*)(Args...) noexcept>
+    template <typename Result, typename... Args> struct Info<Result(*)(Args...) noexcept>
     {
         using args = std::tuple<Args...>;
         using result = Result;
@@ -85,8 +74,7 @@ namespace StdLib::FunctionInfo
         using parentClass = void;
     };
 
-    template <typename Class, typename Result, typename... Args>
-    struct Info<Result(Class::*)(Args...) noexcept>
+    template <typename Class, typename Result, typename... Args> struct Info<Result(Class::*)(Args...) noexcept>
     {
         using args = std::tuple<Args...>;
         using result = Result;
@@ -94,8 +82,7 @@ namespace StdLib::FunctionInfo
         using parentClass = Class;
     };
 
-    template <typename Class, typename Result, typename... Args>
-    struct Info<Result(Class::*)(Args...) const noexcept>
+    template <typename Class, typename Result, typename... Args> struct Info<Result(Class::*)(Args...) const noexcept>
     {
         using args = std::tuple<Args...>;
         using result = Result;
@@ -103,8 +90,7 @@ namespace StdLib::FunctionInfo
         using parentClass = Class;
     };
 
-    template <typename Class, typename Result, typename... Args>
-    struct Info<Result(Class::*)(Args...) volatile noexcept>
+    template <typename Class, typename Result, typename... Args> struct Info<Result(Class::*)(Args...) volatile noexcept>
     {
         using args = std::tuple<Args...>;
         using result = Result;
@@ -112,8 +98,7 @@ namespace StdLib::FunctionInfo
         using parentClass = Class;
     };
 
-    template <typename Class, typename Result, typename... Args>
-    struct Info<Result(Class::*)(Args...) volatile const noexcept>
+    template <typename Class, typename Result, typename... Args> struct Info<Result(Class::*)(Args...) volatile const noexcept>
     {
         using args = std::tuple<Args...>;
         using result = Result;
@@ -121,8 +106,7 @@ namespace StdLib::FunctionInfo
         using parentClass = Class;
     };
 
-    template <typename Result, typename... Args>
-    struct Info<std::function< Result(Args...) >>
+    template <typename Result, typename... Args> struct Info<std::function< Result(Args...) >>
     {
         using args = std::tuple<Args...>;
         using result = Result;

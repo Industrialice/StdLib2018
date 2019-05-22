@@ -102,12 +102,12 @@ namespace StdLib
         MUST_BE_OPEN [[nodiscard]] virtual FileCacheModes::FileCacheMode CacheMode() const override;
 
     private:
-        bool PerformFlush(bool isFlushSystemCaches);
+		bool PerformFlush(bool isFlushSystemCaches);
         void FlushSystemCaches();
-        bool WriteToFile(const void *source, ui32 len, ui32 *written);
-        bool ReadFromFile(void *target, ui32 len, ui32 *read);
-        bool CancelCachedRead();
-        Result<i64> CurrentFileOffset() const;
+		[[nodiscard]] bool WriteToFile(const void *source, ui32 len, ui32 *written);
+		[[nodiscard]] bool ReadFromFile(void *target, ui32 len, ui32 *read);
+		[[nodiscard]] bool CancelCachedRead();
+		[[nodiscard]] Result<i64> CurrentFileOffset() const;
     };
 
 #undef MUST_BE_OPEN

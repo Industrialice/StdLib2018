@@ -63,12 +63,12 @@ namespace StdLib
     {
         using stored = T *;
 
-        static T *FromStored(stored arg)
+		[[nodiscard]] static T *FromStored(stored arg)
         {
             return arg;
         }
 
-        static T *ToStored(T *arg)
+		[[nodiscard]] static T *ToStored(T *arg)
         {
             return arg;
         }
@@ -78,12 +78,12 @@ namespace StdLib
     {
         using stored = const T *;
 
-        static const T *FromStored(stored arg)
+		[[nodiscard]] static const T *FromStored(stored arg)
         {
             return arg;
         }
 
-        static const T *ToStored(const T *arg)
+		[[nodiscard]] static const T *ToStored(const T *arg)
         {
             return arg;
         }
@@ -93,12 +93,12 @@ namespace StdLib
     {
         using stored = T *;
 
-        static T *FromStored(stored *arg)
+		[[nodiscard]] static T *FromStored(stored *arg)
         {
             return arg;
         }
 
-        static T *ToStored(T *arg)
+		[[nodiscard]] static T *ToStored(T *arg)
         {
             return arg;
         }
@@ -108,12 +108,12 @@ namespace StdLib
     {
         using stored = const T *;
 
-        static const T *FromStored(stored arg)
+		[[nodiscard]] static const T *FromStored(stored arg)
         {
             return arg;
         }
 
-        static const T *ToStored(const T *arg)
+		[[nodiscard]] static const T *ToStored(const T *arg)
         {
             return arg;
         }
@@ -123,12 +123,12 @@ namespace StdLib
     {
         using stored = T *;
 
-        static T *FromStored(stored *arg)
+		[[nodiscard]] static T *FromStored(stored *arg)
         {
             return arg;
         }
 
-        static T *ToStored(T *arg)
+		[[nodiscard]] static T *ToStored(T *arg)
         {
             return arg;
         }
@@ -138,12 +138,12 @@ namespace StdLib
     {
         using stored = const T *;
 
-        static const T *FromStored(stored arg)
+		[[nodiscard]] static const T *FromStored(stored arg)
         {
             return arg;
         }
 
-        static const T *ToStored(const T *arg)
+		[[nodiscard]] static const T *ToStored(const T *arg)
         {
             return arg;
         }
@@ -153,12 +153,12 @@ namespace StdLib
     {
         using stored = T;
 
-        static T &&FromStored(stored &arg)
+		[[nodiscard]] static T &&FromStored(stored &arg)
         {
             return std::move(arg);
         }
 
-        static T &ToStored(T &&arg)
+		[[nodiscard]] static T &ToStored(T &&arg)
         {
             return std::move(arg);
         }
@@ -179,7 +179,7 @@ namespace StdLib
 
     template <typename T> struct GetCallablePointer<T *>
     {
-        static T *Get(T *caller)
+		[[nodiscard]] static T *Get(T *caller)
         {
             return caller;
         }
@@ -187,7 +187,7 @@ namespace StdLib
 
     template <typename T> struct GetCallablePointer<const T *>
     {
-        static const T *Get(const T *caller)
+		[[nodiscard]] static const T *Get(const T *caller)
         {
             return caller;
         }
@@ -195,7 +195,7 @@ namespace StdLib
 
     template <typename T> struct GetCallablePointer<T * const>
     {
-        static T *Get(T *caller)
+		[[nodiscard]] static T *Get(T *caller)
         {
             return caller;
         }
@@ -203,7 +203,7 @@ namespace StdLib
 
     template <typename T> struct GetCallablePointer<const T * const>
     {
-        static const T *Get(const T *caller)
+		[[nodiscard]] static const T *Get(const T *caller)
         {
             return caller;
         }
@@ -211,7 +211,7 @@ namespace StdLib
 
     template <typename T> struct GetCallablePointer<T &>
     {
-        static T *Get(T &caller)
+		[[nodiscard]] static T *Get(T &caller)
         {
             return &caller;
         }
@@ -219,7 +219,7 @@ namespace StdLib
 
     template <typename T> struct GetCallablePointer<const T &>
     {
-        static const T *Get(const T &caller)
+		[[nodiscard]] static const T *Get(const T &caller)
         {
             return &caller;
         }

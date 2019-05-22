@@ -46,12 +46,12 @@ namespace StdLib
             return _id == other._id && Funcs::AreSharedPointersEqual(_owner, other._owner);
         }
 
-        bool operator != (const TListenerHandle &other) const
+		[[nodiscard]] bool operator != (const TListenerHandle &other) const
         {
             return !this->operator == (other);
         }
 
-		bool operator < (const TListenerHandle &other) const
+		[[nodiscard]] bool operator < (const TListenerHandle &other) const
 		{
 			if (Funcs::AreSharedPointersEqual(_owner, other._owner))
 				return _id < other._id;

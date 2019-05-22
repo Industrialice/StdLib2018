@@ -18,7 +18,7 @@ namespace StdLib::VirtualMemory
     bool Free(void *memory, uiw memorySize);
     [[nodiscard]] Result<PageModes::PageMode> PageModeGet(const void *memory, uiw size); // Possible errors are InconsistentProtection on Windows, always returns Unsupported on POSIX
     Error<> PageModeSet(void *memory, uiw size, PageModes::PageMode pageMode); // can commit uncommitted memory
-    uiw PageSize();
+	[[nodiscard]] uiw PageSize();
 
     ERROR_CODE_DEFINITION(0, InconsistentProtection);
     [[nodiscard]] inline Error<> InconsistentProtection() { return Error<>(_ErrorCodes::InconsistentProtection(), "VirtualMemory", nullptr); }

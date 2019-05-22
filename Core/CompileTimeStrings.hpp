@@ -48,14 +48,14 @@ namespace StdLib
             target[length - 1] = '\0';
         }
 
-		template <uiw Length, ui64... encoded> constexpr std::array<char, Length> DecodeASCIIToArray()
+		template <uiw Length, ui64... encoded> [[nodiscard]] constexpr std::array<char, Length> DecodeASCIIToArray()
 		{
 			std::array<char, Length> name{};
 			DecodeASCII<encoded...>(name.data(), name.size());
 			return name;
 		}
 
-        template <ui64... encoded> constexpr uiw DecodeASCIIToLength()
+        template <ui64... encoded> [[nodiscard]] constexpr uiw DecodeASCIIToLength()
         {
             auto decodeNumber = [](ui64 number, uiw &start) constexpr
             {

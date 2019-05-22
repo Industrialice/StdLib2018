@@ -70,25 +70,25 @@ namespace StdLib
         virtual ~IFile() = default;
 
         virtual void Close() = 0;
-        virtual bool IsOpened() const = 0;
+		[[nodiscard]] virtual bool IsOpened() const = 0;
 
         virtual bool Read(void *RSTR target, ui32 len, ui32 *RSTR read = 0) = 0;
         virtual bool Write(const void *source, ui32 len, ui32 *RSTR written = 0) = 0;
 
         virtual bool Flush() = 0;
-        virtual bool IsBufferingSupported() const = 0;
+		[[nodiscard]] virtual bool IsBufferingSupported() const = 0;
         virtual bool BufferSet(ui32 size, bufferType &&buffer = {nullptr, nullptr}) = 0; // will reject this call if buffering isn't supported, pass nullptr as a buffer to use an auto allocated buffer, pass 0 as size to disable buffering
-        virtual std::pair<ui32, const void *> BufferGet() const = 0; // will return nullptr if there's no buffer
+		[[nodiscard]] virtual std::pair<ui32, const void *> BufferGet() const = 0; // will return nullptr if there's no buffer
 
-        virtual bool IsSeekSupported() const = 0;
-        virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) = 0;
+		[[nodiscard]] virtual bool IsSeekSupported() const = 0;
+		[[nodiscard]] virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) = 0;
         virtual Result<i64> OffsetSet(FileOffsetMode offsetMode, i64 offset) = 0; // negative offset with FileOffsetMode::Begin and positive offset with FileOffsetMode::FromEnd is undefined behavior
 
-        virtual Result<ui64> SizeGet() = 0;
+		[[nodiscard]] virtual Result<ui64> SizeGet() = 0;
         virtual Error<> SizeSet(ui64 newSize) = 0; // if the file is extended, the extended part's content is undefined
 
-        virtual FileProcModes::FileProcMode ProcMode() const = 0;
-        virtual FileCacheModes::FileCacheMode CacheMode() const = 0;
+		[[nodiscard]] virtual FileProcModes::FileProcMode ProcMode() const = 0;
+		[[nodiscard]] virtual FileCacheModes::FileCacheMode CacheMode() const = 0;
 
         [[nodiscard]] explicit operator bool() const
         {

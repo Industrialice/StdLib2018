@@ -109,7 +109,7 @@ namespace StdLib
             }
         }
 
-        template <typename T> T &Get()
+        template <typename T> [[nodiscard]] T &Get()
         {
         #ifdef DEBUG
             ASSUME(!_isDestroyed && !_isMovedFrom);
@@ -124,7 +124,7 @@ namespace StdLib
             }
         }
 
-        template <typename T> const T &Get() const
+        template <typename T> [[nodiscard]] const T &Get() const
         {
         #ifdef DEBUG
             ASSUME(!_isDestroyed && !_isMovedFrom);
@@ -139,7 +139,7 @@ namespace StdLib
             }
         }
 
-        template <typename T> constexpr bool IsPlacedLocally() const
+        template <typename T> [[nodiscard]] constexpr bool IsPlacedLocally() const
         {
             return sizeof(T) <= size;
         }

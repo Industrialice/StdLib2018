@@ -216,7 +216,7 @@ namespace std
 
 	template <> struct hash<StdLib::StableTypeId>
 	{
-		size_t operator()(const StdLib::StableTypeId &value) const
+		[[nodiscard]] size_t operator()(const StdLib::StableTypeId &value) const
 		{
 			return (size_t)value.Hash();
 		}

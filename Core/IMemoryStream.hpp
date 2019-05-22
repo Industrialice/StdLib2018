@@ -294,7 +294,7 @@ namespace StdLib
             return false;
         }
 
-        template <typename T> static MemoryStreamFromDataHolder New(holderType &&data, uiw size, decltype(_provide) provide, decltype(_flush) flush = nullptr)
+        template <typename T> [[nodiscard]] static MemoryStreamFromDataHolder New(holderType &&data, uiw size, decltype(_provide) provide, decltype(_flush) flush = nullptr)
         {
             auto destroy = [](holderType &data)
             {

@@ -86,8 +86,8 @@ namespace StdLib::Hash
 		}
 	}
 
-	ui32 CRC32(const ui8 *message); // zero terminated
-	ui32 CRC32(const ui8 *message, uiw length);
+	[[nodiscard]] ui32 CRC32(const ui8 *message); // zero terminated
+	[[nodiscard]] ui32 CRC32(const ui8 *message, uiw length);
 
     // based on Thomas Mueller's answer from 
     // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key
