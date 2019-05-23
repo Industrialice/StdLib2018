@@ -165,14 +165,24 @@ namespace StdLib
 		struct SimpleStruct
 		{};
 
+		struct Derived : SimpleStruct
+		{};
+
 		static_assert(_ArrayStringEquals(NameOfType<int>, "int"));
 		static_assert(_ArrayStringEquals(NameOfType<double>, "double"));
 
 		#ifdef _MSC_VER
 			static_assert(_ArrayStringEquals(NameOfType<SimpleStruct>, "struct StdLib::_Private::SimpleStruct"));
 			static_assert(_ArrayStringEquals(NameOfType<SimpleStruct, true>, "StdLib::_Private::SimpleStruct"));
+
+			static_assert(_ArrayStringEquals(NameOfType<Derived>, "struct StdLib::_Private::Derived"));
+			static_assert(_ArrayStringEquals(NameOfType<Derived>, "StdLib::_Private::Derived"));
 		#else
 			static_assert(_ArrayStringEquals(NameOfType<SimpleStruct>, "StdLib::_Private::SimpleStruct"));
+			static_assert(_ArrayStringEquals(NameOfType<SimpleStruct, true>, "StdLib::_Private::SimpleStruct"));
+
+			static_assert(_ArrayStringEquals(NameOfType<Derived>, "StdLib::_Private::Derived"));
+			static_assert(_ArrayStringEquals(NameOfType<Derived, true>, "StdLib::_Private::Derived"));
 		#endif
 	}
 }
