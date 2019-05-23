@@ -688,7 +688,7 @@ static void AllocatorsTests()
     Logger::Message("finished allocators tests\n");
 }
 
-void FilePathTests()
+static void FilePathTests()
 {
     FilePath path{TSTR("C:\\ext\\\\no.txt")};
 
@@ -723,6 +723,11 @@ void FilePathTests()
     UTest(Equal, path.PlatformPath(), TSTR("C:/folder/new.fil"));
 
     Logger::Message("finished file path tests\n");
+}
+
+template <typename T> static void FileTypeTest(IFile &file)
+{
+	UTest(Equal, T().Type(), file.Type());
 }
 
 static void FileWrite(IFile &file)
@@ -909,6 +914,8 @@ static void TestFileToMemoryStream()
     UTest(true, !fileError && file.IsOpened());
     FileWrite(file);
 
+	FileTypeTest<FileToMemoryStream>(file);
+
     file = FileToMemoryStream(memoryStream, FileProcModes::Read, 0, &fileError);
     UTest(true, !fileError && file.IsOpened());
     FileRead(file);
@@ -932,7 +939,7 @@ static void TestFileToMemoryStream()
     Logger::Message("finished file memory stream tests\n");
 }
 
-template <typename T> void TestFile(const FilePath &folderForTests)
+template <typename T> static void TestFile(const FilePath &folderForTests)
 {
     auto internalTest = [folderForTests](ui32 bufferSize, std::function<File::bufferType()> allocBufFunc)
     {
@@ -942,6 +949,8 @@ template <typename T> void TestFile(const FilePath &folderForTests)
         file.BufferSet(bufferSize, allocBufFunc());
         FileWrite(file);
         file.Close();
+
+		FileTypeTest<T>(file);
 
         file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcModes::Read, 0, FileCacheModes::Default, FileShareModes::Read, &fileError);
         UTest(true, !fileError && file.IsOpened());
@@ -991,7 +1000,7 @@ template <typename T> void TestFile(const FilePath &folderForTests)
     Logger::Message("finished template file tests\n");
 }
 
-template <typename T> void TestFileSharing(const FilePath &folderForTests)
+template <typename T> static void TestFileSharing(const FilePath &folderForTests)
 {
     Error<> fileError = DefaultError::Ok();
     T file = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::CreateAlways, FileProcModes::Write, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
@@ -1222,7 +1231,6 @@ static void DataHolderTests()
     UTest(Equal, data._value, 17);
     UTest(LeftGreater, data._moveCalledTimes, 0);
     holder2.Destroy<NonCopyable>();
-    //holder.Destroy<NonCopyable>();
 
     Holder16 holder3 = Holder16(NonCopyable3());
     UTest(false, holder3.IsPlacedLocally<NonCopyable3>());
@@ -1234,7 +1242,6 @@ static void DataHolderTests()
     UTest(Equal, data2._value, 17);
     UTest(LeftGreater, data2._moveCalledTimes, 0);
     holder4.Destroy<NonCopyable>();
-    //holder3.Destroy<NonCopyable>();
 
     Logger::Message("finished data holder tests\n");
 }
