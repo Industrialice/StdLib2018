@@ -82,9 +82,9 @@ namespace StdLib
 	template <typename T> struct EMPTY_BASES TypeIdentifiable : TypeIdentifiableBase
 	{
 	private:
-		static constexpr uiw staticNameLength = NameOfType<T>.size() - 1;
-		static constexpr std::array<char, staticNameLength + 1> staticName = NameOfType<T>;
-		static constexpr TypeId::idType stableId = StdLib::Hash::FNVHashCT<std::is_same_v<TypeId::idType, ui64> ? StdLib::Hash::Precision::P64 : StdLib::Hash::Precision::P32, char, staticNameLength>(staticName.data());
+		static constexpr auto staticNameToHash = NameOfType<T>;
+		static constexpr auto staticName = NameOfType<T, true>;
+		static constexpr TypeId::idType stableId = StdLib::Hash::FNVHashCT<std::is_same_v<TypeId::idType, ui64> ? StdLib::Hash::Precision::P64 : StdLib::Hash::Precision::P32, char, staticNameToHash.size() - 1>(staticNameToHash.data());
 
 	public:
 		[[nodiscard]] static constexpr TypeId GetTypeId()
@@ -98,33 +98,13 @@ namespace StdLib
 
 		[[nodiscard]] static constexpr std::string_view GetTypeName()
 		{
-			return { staticName.data(), staticNameLength };
+			return { staticName.data(), staticName.size() - 1 };
 		}
 	};
-
-    //template <TypeId::InternalIdType id, bool isWriteable> struct TypeIdToType;
 }
-
-/*#define GENERATE_TYPE_ID_TO_TYPE(T) \
-    template <> struct TypeIdToType<T::GetTypeId().InternalId(), true> \
-    { \
-        using type = T; \
-    }; \
-    template <> struct TypeIdToType<T::GetTypeId().InternalId(), false> \
-    { \
-        using type = const T; \
-    }*/
 
 namespace std
 {
-    //template <> struct hash<StdLib::TypeId>
-    //{
-    //    size_t operator()(const StdLib::TypeId &value) const
-    //    {
-    //        return (size_t)value.Hash();
-    //    }
-    //};
-
 	template <> struct hash<StdLib::TypeId>
 	{
 		[[nodiscard]] size_t operator()(const StdLib::TypeId &value) const

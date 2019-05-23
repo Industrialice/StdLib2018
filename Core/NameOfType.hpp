@@ -9,7 +9,7 @@ namespace StdLib
 {
 	template <typename T> struct __NameOfType
 	{
-		template <uiw Size> static constexpr uiw StrStr(const std::array<char, Size> &source, const char *str)
+		template <uiw Size> static constexpr uiw StrStr(const std::array<char, Size> &source, uiw offset, const char *str)
 		{
 			auto equals = [](const char *left, const char *right) constexpr
 			{
@@ -23,7 +23,7 @@ namespace StdLib
 				return true;
 			};
 
-			for (uiw index = 0; index < source.size(); ++index)
+			for (uiw index = offset; index < source.size(); ++index)
 			{
 				if (equals(&source[index], str))
 				{
@@ -34,27 +34,47 @@ namespace StdLib
 			return 0; // unreachable
 		}
 
-		template <uiw SourceSize, uiw TargetSize = 0> static constexpr uiw Convert(const std::array<char, SourceSize> & source, std::array<char, TargetSize> * target)
+		template <bool IsGetReadable, uiw Size> static constexpr auto Convert(const std::array<char, Size> &source)
 		{
 			constexpr char leftName[] = "NameOfType<";
-			constexpr char rightName[] = ">::Get";
+			constexpr char rightNameGet[] = ">::Get";
+			constexpr char rightNameGetReadable[] = ">::GetReadable";
 
 			constexpr uiw leftLength = CountOf(leftName) - 1;
 
-			uiw leftIndex = StrStr(source, leftName) + leftLength;
-			uiw rightIndex = StrStr(source, rightName);
+			uiw leftIndex = StrStr(source, 0, leftName) + leftLength;
+			uiw rightIndex = StrStr(source, leftIndex, IsGetReadable ? rightNameGetReadable : rightNameGet);
 
-			uiw length = rightIndex - leftIndex;
-
-			if (target)
+			if constexpr (IsGetReadable)
 			{
-				for (uiw index = 0; index < length; ++index)
+				constexpr char structName[] = "struct ";
+				constexpr char className[] = "class ";
+				constexpr char anoNamespaceName[] = "`anonymous namespace'::";
+
+				if (StrStr(source, leftIndex, structName) == leftIndex && leftIndex < rightIndex)
 				{
-					(*target)[index] = source[leftIndex + index];
+					leftIndex += CountOf(structName) - 1;
+				}
+				if (StrStr(source, leftIndex, className) == leftIndex && leftIndex < rightIndex)
+				{
+					leftIndex += CountOf(className) - 1;
+				}
+				if (StrStr(source, leftIndex, anoNamespaceName) == leftIndex && leftIndex < rightIndex)
+				{
+					leftIndex += CountOf(anoNamespaceName) - 1;
 				}
 			}
 
-			return length;
+			uiw length = rightIndex - leftIndex;
+
+			std::array<char, Size> target{};
+
+			for (uiw index = 0; index < length; ++index)
+			{
+				target[index] = source[leftIndex + index];
+			}
+
+			return std::make_pair(target, length + 1);
 		}
 
 		template <uiw Size> static constexpr std::array<char, Size> ArrayFromChar(const char *str)
@@ -67,11 +87,21 @@ namespace StdLib
 			return result;
 		}
 
+		template <uiw TargetSize, uiw SourceSize> static constexpr std::array<char, TargetSize> Strip(const std::array<char, SourceSize> &source)
+		{
+			std::array<char, TargetSize> target{};
+			for (uiw index = 0; index < TargetSize; ++index)
+			{
+				target[index] = source[index];
+			}
+			return target;
+		}
+
 		static constexpr auto Get()
 		{
 			constexpr const char *cname = PRETTY_FUNCTION;
 
-			constexpr uiw length = [](const char *name) constexpr->uiw
+			constexpr uiw length = [](const char *name) constexpr -> uiw
 			{
 				uiw length = 0;
 				for (; name[length]; ++length);
@@ -80,16 +110,43 @@ namespace StdLib
 
 			constexpr std::array<char, length> name = ArrayFromChar<length>(cname);
 
-			constexpr uiw finalLength = Convert<length, 0>(name, nullptr);
+			constexpr auto converted = Convert<false>(name);
 
-			std::array<char, finalLength + 1> finalName{};
-			Convert(name, &finalName);
+			return Strip<converted.second>(converted.first);
+		}
 
-			return finalName;
+		static constexpr auto GetReadable()
+		{
+			constexpr const char *cname = PRETTY_FUNCTION;
+
+			constexpr uiw length = [](const char *name) constexpr -> uiw
+			{
+				uiw length = 0;
+				for (; name[length]; ++length);
+				return length;
+			}(cname)+1;
+
+			constexpr std::array<char, length> name = ArrayFromChar<length>(cname);
+
+			constexpr auto converted = Convert<true>(name);
+
+			return Strip<converted.second>(converted.first);
+		}
+
+		template <bool IsFormatForReadability> static constexpr auto GetConditional()
+		{
+			if constexpr (IsFormatForReadability)
+			{
+				return GetReadable();
+			}
+			else
+			{
+				return Get();
+			}
 		}
 	};
 
-	template <typename T> constexpr auto NameOfType = __NameOfType<T>::Get();
+	template <typename T, bool IsFormatForReadability = false> constexpr auto NameOfType = __NameOfType<T>::template GetConditional<IsFormatForReadability>();
 
 	namespace _Private
 	{
@@ -113,6 +170,7 @@ namespace StdLib
 
 		#ifdef _MSC_VER
 			static_assert(_ArrayStringEquals(NameOfType<SimpleStruct>, "struct StdLib::_Private::SimpleStruct"));
+			static_assert(_ArrayStringEquals(NameOfType<SimpleStruct, true>, "StdLib::_Private::SimpleStruct"));
 		#else
 			static_assert(_ArrayStringEquals(NameOfType<SimpleStruct>, "StdLib::_Private::SimpleStruct"));
 		#endif
