@@ -10,47 +10,47 @@
 
 namespace StdLib
 {
-	class StableTypeId
+	class TypeId
 	{
 	public:
 		using idType = ui32;
 
-		constexpr StableTypeId() = default;
+		constexpr TypeId() = default;
 
-		constexpr StableTypeId(idType id) : _id(id)
+		constexpr TypeId(idType id) : _id(id)
 		{}
 
 #ifdef USE_ID_NAMES
-		constexpr StableTypeId(idType id, const char *name) : _id(id), _name{ name }
+		constexpr TypeId(idType id, const char *name) : _id(id), _name{ name }
 		{}
 #endif
 
-		[[nodiscard]] constexpr bool operator == (const StableTypeId &other) const
+		[[nodiscard]] constexpr bool operator == (const TypeId &other) const
 		{
 			return _id == other._id;
 		}
 
-		[[nodiscard]] constexpr bool operator != (const StableTypeId &other) const
+		[[nodiscard]] constexpr bool operator != (const TypeId &other) const
 		{
 			return _id != other._id;
 		}
 
-		[[nodiscard]] constexpr bool operator < (const StableTypeId &other) const
+		[[nodiscard]] constexpr bool operator < (const TypeId &other) const
 		{
 			return _id < other._id;
 		}
 
-		[[nodiscard]] constexpr bool operator <= (const StableTypeId &other) const
+		[[nodiscard]] constexpr bool operator <= (const TypeId &other) const
 		{
 			return _id <= other._id;
 		}
 
-		[[nodiscard]] constexpr bool operator > (const StableTypeId &other) const
+		[[nodiscard]] constexpr bool operator > (const TypeId &other) const
 		{
 			return _id > other._id;
 		}
 
-		[[nodiscard]] constexpr bool operator >= (const StableTypeId &other) const
+		[[nodiscard]] constexpr bool operator >= (const TypeId &other) const
 		{
 			return _id >= other._id;
 		}
@@ -76,18 +76,18 @@ namespace StdLib
 #endif
 	};
 
-	struct StableTypeIdentifiableBase
+	struct TypeIdentifiableBase
 	{};
     
-	template <typename T> struct EMPTY_BASES TypeIdentifiable : StableTypeIdentifiableBase
+	template <typename T> struct EMPTY_BASES TypeIdentifiable : TypeIdentifiableBase
 	{
 	private:
 		static constexpr uiw staticNameLength = NameOfType<T>.size() - 1;
 		static constexpr std::array<char, staticNameLength + 1> staticName = NameOfType<T>;
-		static constexpr StableTypeId::idType stableId = StdLib::Hash::FNVHashCT<std::is_same_v<StableTypeId::idType, ui64> ? StdLib::Hash::Precision::P64 : StdLib::Hash::Precision::P32, char, staticNameLength>(staticName.data());
+		static constexpr TypeId::idType stableId = StdLib::Hash::FNVHashCT<std::is_same_v<TypeId::idType, ui64> ? StdLib::Hash::Precision::P64 : StdLib::Hash::Precision::P32, char, staticNameLength>(staticName.data());
 
 	public:
-		[[nodiscard]] static constexpr StableTypeId GetTypeId()
+		[[nodiscard]] static constexpr TypeId GetTypeId()
 		{
 #ifdef USE_ID_NAMES
 			return { stableId, staticName.data() };
@@ -101,28 +101,6 @@ namespace StdLib
 			return { staticName.data(), staticNameLength };
 		}
 	};
-
-    template <StableTypeId::idType stableId, ui64 encoded0 = 0, ui64 encoded1 = 0, ui64 encoded2 = 0> struct EMPTY_BASES StableTypeIdentifiable : StableTypeIdentifiableBase
-    {
-    private:
-        static constexpr uiw staticNameLength = CompileTimeStrings::DecodeASCIIToLength<encoded0, encoded1, encoded2>();
-		static constexpr std::array<char, staticNameLength + 1> staticName = CompileTimeStrings::DecodeASCIIToArray<staticNameLength + 1, encoded0, encoded1, encoded2>();
-
-    public:
-        [[nodiscard]] static constexpr StableTypeId GetTypeId()
-        {
-        #ifdef USE_ID_NAMES
-            return {stableId, staticName.data()};
-        #else
-            return stableId;
-        #endif
-        }
-
-        [[nodiscard]] static constexpr std::string_view GetTypeName()
-        {
-            return {staticName.data(), staticNameLength};
-        }
-    };
 
     //template <TypeId::InternalIdType id, bool isWriteable> struct TypeIdToType;
 }
@@ -147,16 +125,11 @@ namespace std
     //    }
     //};
 
-	template <> struct hash<StdLib::StableTypeId>
+	template <> struct hash<StdLib::TypeId>
 	{
-		[[nodiscard]] size_t operator()(const StdLib::StableTypeId &value) const
+		[[nodiscard]] size_t operator()(const StdLib::TypeId &value) const
 		{
 			return (size_t)value.Hash();
 		}
 	};
 }
-
-#define NAME_TO_STABLE_ID(name) StableTypeIdentifiable<StdLib::Hash::FNVHashCT<std::is_same_v<StableTypeId::idType, ui64> ? StdLib::Hash::Precision::P64 : StdLib::Hash::Precision::P32, char, CountOf(TOSTR(name)), true>(TOSTR(name)), \
-    StdLib::CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), StdLib::CompileTimeStrings::CharsPerNumber * 0), \
-    StdLib::CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), StdLib::CompileTimeStrings::CharsPerNumber * 1), \
-    StdLib::CompileTimeStrings::EncodeASCII(TOSTR(name), CountOf(TOSTR(name)), StdLib::CompileTimeStrings::CharsPerNumber * 2)>

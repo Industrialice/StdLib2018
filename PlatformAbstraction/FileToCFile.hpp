@@ -10,7 +10,7 @@ WARNING_DISABLE_ATTRIBUTE_IS_NOT_RECOGNIZED
 
 namespace StdLib
 {
-	class FileToCFile final : public IFile, public NAME_TO_STABLE_ID(StdLib::FileToCFile)
+	class FileToCFile final : public IFile, public TypeIdentifiable<FileToCFile>
     {
         FILE *_file = nullptr;
         FileOpenMode _openMode;
@@ -32,7 +32,7 @@ namespace StdLib
 
 		[[must_be_open]] [[nodiscard]] FileOpenMode OpenModeGet() const;
 
-		[[nodiscard]] virtual StableTypeId Type() const override;
+		[[nodiscard]] virtual TypeId Type() const override;
 
         virtual void Close() override;
 		[[nodiscard]] virtual bool IsOpened() const override;

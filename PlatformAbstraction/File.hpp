@@ -9,7 +9,7 @@ WARNING_DISABLE_ATTRIBUTE_IS_NOT_RECOGNIZED
 
 namespace StdLib
 {
-    class File : public IFile, public NAME_TO_STABLE_ID(StdLib::File)
+    class File : public IFile, public TypeIdentifiable<File>
     {
         friend class MemoryMappedFile;
 
@@ -80,7 +80,7 @@ namespace StdLib
 
 		[[must_be_open]] bool FlushInternal(); // flushes only internal buffers, doesn't flush system caches
 
-		[[nodiscard]] virtual StableTypeId Type() const override;
+		[[nodiscard]] virtual TypeId Type() const override;
 
         virtual void Close() override;
         [[nodiscard]] virtual bool IsOpened() const override;

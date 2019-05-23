@@ -70,7 +70,7 @@ namespace StdLib
 
         virtual ~IFile() = default;
 
-		[[nodiscard]] virtual StableTypeId Type() const = 0;
+		[[nodiscard]] virtual TypeId Type() const = 0;
 
         virtual void Close() = 0;
 		[[nodiscard]] virtual bool IsOpened() const = 0;

@@ -177,9 +177,9 @@ static void TupleHelpersTests()
 	static_assert(emptyArrayFromTuple.empty());
 	static_assert(std::is_same_v<decltype(emptyArrayFromTuple)::value_type, std::tuple<>>);
 
-	constexpr auto emptyArrayFromTupleDefaulted = TupleToArray<decltype(toArrayEmptyTuple), StableTypeId>(toArrayEmptyTuple);
+	constexpr auto emptyArrayFromTupleDefaulted = TupleToArray<decltype(toArrayEmptyTuple), TypeId>(toArrayEmptyTuple);
 	static_assert(emptyArrayFromTuple.empty());
-	static_assert(std::is_same_v<decltype(emptyArrayFromTupleDefaulted)::value_type, StableTypeId>);
+	static_assert(std::is_same_v<decltype(emptyArrayFromTupleDefaulted)::value_type, TypeId>);
 
 	constexpr auto tupleFromArray = ArrayToTuple(arrayFromTuple);
 	static_assert(std::tuple_size_v<decltype(tupleFromArray)>);
@@ -286,15 +286,15 @@ static void TypeIdentifiableTests()
 	struct S1 {};
 	struct S2 {};
 
-	constexpr StableTypeId s1Id = TypeIdentifiable<S1>::GetTypeId();
-	constexpr StableTypeId s2Id = TypeIdentifiable<S2>::GetTypeId();
+	constexpr TypeId s1Id = TypeIdentifiable<S1>::GetTypeId();
+	constexpr TypeId s2Id = TypeIdentifiable<S2>::GetTypeId();
 	UTest(NotEqual, s1Id, s2Id);
 	ui64 s1Hash = s1Id.Hash();
 	ui64 s2Hash = s2Id.Hash();
 	UTest(NotEqual, s1Hash, s2Hash);
 
-	constexpr StableTypeId ui32Id = TypeIdentifiable<ui32>::GetTypeId();
-	constexpr StableTypeId ui8Id = TypeIdentifiable<ui8>::GetTypeId();
+	constexpr TypeId ui32Id = TypeIdentifiable<ui32>::GetTypeId();
+	constexpr TypeId ui8Id = TypeIdentifiable<ui8>::GetTypeId();
 	UTest(NotEqual, ui32Id, ui8Id);
 	ui64 ui32Hash = ui32Id.Hash();
 	ui64 ui8Hash = ui8Id.Hash();
@@ -302,20 +302,20 @@ static void TypeIdentifiableTests()
 	UTest(Equal, TypeIdentifiable<i32>::GetTypeName(), "int");
 	UTest(Equal, TypeIdentifiable<ui8>::GetTypeName(), "unsigned char");
 
-    using stableTypeId = NAME_TO_STABLE_ID(Test);
-    using stableTypeId2 = NAME_TO_STABLE_ID(Test2);
-	constexpr StableTypeId stableId = stableTypeId::GetTypeId();
-	constexpr StableTypeId stableId2 = stableTypeId2::GetTypeId();
-	UTest(NotEqual, stableId, stableId2);
-	constexpr ui64 stableIdHash = stableId.Hash();
-	constexpr ui64 stableId2Hash = stableId2.Hash();
-	UTest(NotEqual, stableIdHash, stableId2Hash);
-    UTest(Equal, stableTypeId::GetTypeName(), "Test");
-    UTest(Equal, stableTypeId2::GetTypeName(), "Test2");
+	using TypeId3 = TypeIdentifiable<int>;
+	using TypeId4 = TypeIdentifiable<float>;
+	constexpr TypeId id3 = TypeId3::GetTypeId();
+	constexpr TypeId id4 = TypeId4::GetTypeId();
+	UTest(NotEqual, id3, id4);
+	constexpr ui64 id3Hash = id3.Hash();
+	constexpr ui64 id4Hash = id4.Hash();
+	UTest(NotEqual, id3Hash, id4Hash);
+    UTest(Equal, TypeId3::GetTypeName(), "int");
+    UTest(Equal, TypeId4::GetTypeName(), "float");
 
 #ifdef DEBUG
-    constexpr StableTypeId stableIdDebug = NAME_TO_STABLE_ID(Test)::GetTypeId();
-    UTest(Equal, std::string(stableIdDebug.Name()), "Test"s);
+    constexpr TypeId idDebug = TypeIdentifiable<int>::GetTypeId();
+    UTest(Equal, std::string(idDebug.Name()), "int"s);
 #endif
 
 	Logger::Message("finished type identifiable tests\n");

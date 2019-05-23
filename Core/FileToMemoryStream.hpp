@@ -9,7 +9,7 @@ WARNING_DISABLE_ATTRIBUTE_IS_NOT_RECOGNIZED
 
 namespace StdLib
 {
-    class FileToMemoryStream final : public IFile, public NAME_TO_STABLE_ID(StdLib::FileToMemoryStream)
+    class FileToMemoryStream final : public IFile, public TypeIdentifiable<FileToMemoryStream>
     {
         IMemoryStream *_stream = nullptr;
         ui64 _offset;  //  _startOffset + current offset
@@ -23,7 +23,7 @@ namespace StdLib
         FileToMemoryStream &operator = (FileToMemoryStream &&source) noexcept;
         Error<> Open(IMemoryStream &stream, FileProcModes::FileProcMode procMode, ui64 offset = 0);
 
-		[[nodiscard]] virtual StableTypeId Type() const override;
+		[[nodiscard]] virtual TypeId Type() const override;
 
         virtual void Close() override;
         [[nodiscard]] virtual bool IsOpened() const override;

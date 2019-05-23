@@ -22,11 +22,11 @@ namespace StdLib
         [[nodiscard]] virtual const ui8 *CMemory() const = 0;
         [[nodiscard]] virtual bool IsReadable() const = 0;
         [[nodiscard]] virtual bool IsWritable() const = 0;
-		[[nodiscard]] virtual StableTypeId Type() const = 0;
+		[[nodiscard]] virtual TypeId Type() const = 0;
     };
 
     // uses a fixed sized buffer
-    template <uiw size> class MemoryStreamFixed final : public IMemoryStream//, public NAME_TO_STABLE_ID(StdLib::MemoryStreamFixed)
+    template <uiw size> class MemoryStreamFixed final : public IMemoryStream, public TypeIdentifiable<MemoryStreamFixed<size>>
     {
         ui8 _buffer[size];
         uiw _currentSize = 0;
@@ -77,7 +77,7 @@ namespace StdLib
             return true;
         }
 
-		[[nodiscard]] virtual StableTypeId Type() const override
+		[[nodiscard]] virtual TypeId Type() const override
 		{
 			//return GetTypeId();
 			return {};
@@ -85,7 +85,7 @@ namespace StdLib
     };
 
     // uses an externally provided buffer
-    class MemoryStreamFixedExternal final : public IMemoryStream, public NAME_TO_STABLE_ID(StdLib::MemoryStreamFixedExternal)
+    class MemoryStreamFixedExternal final : public IMemoryStream, public TypeIdentifiable<MemoryStreamFixedExternal>
     {
         ui8 *_writeBuffer = nullptr;
         const ui8 *_readBuffer = nullptr;
@@ -161,14 +161,14 @@ namespace StdLib
             return _writeBuffer != 0;
         }
 
-		[[nodiscard]] virtual StableTypeId Type() const override
+		[[nodiscard]] virtual TypeId Type() const override
 		{
 			return GetTypeId();
 		}
     };
 
     // uses an allocator
-    template <typename AllocatorType = Allocator::Malloc> class MemoryStreamAllocator final : public IMemoryStream//, public NAME_TO_STABLE_ID(StdLib::MemoryStreamAllocator)
+    template <typename AllocatorType = Allocator::Malloc> class MemoryStreamAllocator final : public IMemoryStream, public TypeIdentifiable<MemoryStreamAllocator<AllocatorType>>
     {
         AllocatorType _allocator{};
         ui8 *_buffer = nullptr;
@@ -227,14 +227,14 @@ namespace StdLib
             return true;
         }
 
-		[[nodiscard]] virtual StableTypeId Type() const override
+		[[nodiscard]] virtual TypeId Type() const override
 		{
 			//return GetTypeId();
 			return {};
 		}
     };
 
-    template <uiw LocalSize, uiw LocalAlignment = 8> class MemoryStreamFromDataHolder final : public IMemoryStream//, public NAME_TO_STABLE_ID(StdLib::MemoryStreamFromDataHolder)
+    template <uiw LocalSize, uiw LocalAlignment = 8> class MemoryStreamFromDataHolder final : public IMemoryStream, public TypeIdentifiable<MemoryStreamFromDataHolder<LocalSize, LocalAlignment>>
     {
         using holderType = DataHolder<LocalSize, LocalAlignment>;
 
@@ -316,7 +316,7 @@ namespace StdLib
             return false;
         }
 
-		[[nodiscard]] virtual StableTypeId Type() const override
+		[[nodiscard]] virtual TypeId Type() const override
 		{
 			//return GetTypeId();
 			return {};

@@ -106,7 +106,7 @@ bool File::FlushInternal()
     return PerformFlush(false);
 }
 
-StableTypeId File::Type() const
+TypeId File::Type() const
 {
 	return GetTypeId();
 }
