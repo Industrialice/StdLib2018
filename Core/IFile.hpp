@@ -3,6 +3,7 @@
 #include "Result.hpp"
 #include "GenericFuncs.hpp"
 #include "EnumCombinable.hpp"
+#include "TypeIdentifiable.hpp"
 
 namespace StdLib
 {
@@ -68,6 +69,8 @@ namespace StdLib
         using bufferType = std::unique_ptr<ui8, void(*)(ui8 *)>;
 
         virtual ~IFile() = default;
+
+		[[nodiscard]] virtual StableTypeId Type() const = 0;
 
         virtual void Close() = 0;
 		[[nodiscard]] virtual bool IsOpened() const = 0;

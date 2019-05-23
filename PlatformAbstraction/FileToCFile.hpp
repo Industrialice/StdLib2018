@@ -4,11 +4,13 @@
 #include "IMemoryStream.hpp"
 #include "IFile.hpp"
 
+WARNING_PUSH
+WARNING_DISABLE_INTEGRAL_CONSTANT_OVERFLOW
+WARNING_DISABLE_ATTRIBUTE_IS_NOT_RECOGNIZED
+
 namespace StdLib
 {
-	#define MUST_BE_OPEN
-
-	class FileToCFile final : public IFile
+	class FileToCFile final : public IFile, public NAME_TO_STABLE_ID(StdLib::FileToCFile)
     {
         FILE *_file = nullptr;
         FileOpenMode _openMode;
@@ -28,29 +30,31 @@ namespace StdLib
 
         Error<> Open(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, FileShareModes::FileShareMode shareMode = FileShareModes::None);
 
-		MUST_BE_OPEN[[nodiscard]] FileOpenMode OpenModeGet() const;
+		[[must_be_open]] [[nodiscard]] FileOpenMode OpenModeGet() const;
+
+		[[nodiscard]] virtual StableTypeId Type() const override;
 
         virtual void Close() override;
 		[[nodiscard]] virtual bool IsOpened() const override;
 
-		MUST_BE_OPEN virtual bool Read(void *RSTR target, ui32 len, ui32 *RSTR read = 0) override;
-		MUST_BE_OPEN virtual bool Write(const void *source, ui32 len, ui32 *RSTR written = 0) override;
+		[[must_be_open]] virtual bool Read(void *RSTR target, ui32 len, ui32 *RSTR read = 0) override;
+		[[must_be_open]] virtual bool Write(const void *source, ui32 len, ui32 *RSTR written = 0) override;
 
-		MUST_BE_OPEN [[nodiscard]] virtual bool Flush() override;
+		[[must_be_open]] [[nodiscard]] virtual bool Flush() override;
 		[[nodiscard]] virtual bool IsBufferingSupported() const override;
-		MUST_BE_OPEN virtual bool BufferSet(ui32 size, bufferType &&buffer = {nullptr, nullptr}) override;
-		MUST_BE_OPEN [[nodiscard]] virtual std::pair<ui32, const void *> BufferGet() const override;
+		[[must_be_open]] virtual bool BufferSet(ui32 size, bufferType &&buffer = {nullptr, nullptr}) override;
+		[[must_be_open]] [[nodiscard]] virtual std::pair<ui32, const void *> BufferGet() const override;
 
 		[[nodiscard]] virtual bool IsSeekSupported() const override;
-		MUST_BE_OPEN [[nodiscard]] virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) override;
-		MUST_BE_OPEN virtual Result<i64> OffsetSet(FileOffsetMode offsetMode, i64 offset) override;
+		[[must_be_open]] [[nodiscard]] virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) override;
+		[[must_be_open]] virtual Result<i64> OffsetSet(FileOffsetMode offsetMode, i64 offset) override;
 
-		MUST_BE_OPEN [[nodiscard]] virtual Result<ui64> SizeGet() override;
-		MUST_BE_OPEN virtual Error<> SizeSet(ui64 newSize) override;
+		[[must_be_open]] [[nodiscard]] virtual Result<ui64> SizeGet() override;
+		[[must_be_open]] virtual Error<> SizeSet(ui64 newSize) override;
 
-		MUST_BE_OPEN [[nodiscard]] virtual FileProcModes::FileProcMode ProcMode() const override;
-		MUST_BE_OPEN [[nodiscard]] virtual FileCacheModes::FileCacheMode CacheMode() const override;
+		[[must_be_open]] [[nodiscard]] virtual FileProcModes::FileProcMode ProcMode() const override;
+		[[must_be_open]] [[nodiscard]] virtual FileCacheModes::FileCacheMode CacheMode() const override;
     };
-
-	#undef MUST_BE_OPEN
 }
+
+WARNING_POP

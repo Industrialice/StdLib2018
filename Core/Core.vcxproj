@@ -207,6 +207,7 @@
     <ClInclude Include="MTMessageQueue.hpp" />
     <ClInclude Include="Result.hpp" />
     <ClInclude Include="TypeIdentifiable.hpp" />
+    <ClInclude Include="NameOfType.hpp" />
     <ClInclude Include="_ErrorCodes.hpp" />
     <ClInclude Include="GenericFuncs.hpp" />
     <ClInclude Include="MathFunctions.hpp" />

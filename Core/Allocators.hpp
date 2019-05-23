@@ -118,7 +118,7 @@ namespace StdLib::Allocator
 				{
 					void *temp;
 					posix_memalign(&temp, alignment, count);
-					memcpy(temp, memory, count);
+					MemOps::Copy((ui8 *)temp, (ui8 *)memory, count);
 					free(memory);
 					memory = (T *)temp;
 				}

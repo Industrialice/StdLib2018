@@ -21,7 +21,7 @@ namespace StdLib
             }
             if (!_description)
             {
-                _description = code.Label();
+                _description = "";
             }
         }
 

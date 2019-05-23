@@ -106,6 +106,11 @@ bool File::FlushInternal()
     return PerformFlush(false);
 }
 
+StableTypeId File::Type() const
+{
+	return GetTypeId();
+}
+
 bool File::IsOpened() const
 {
     return _handle != fileHandle_undefined;

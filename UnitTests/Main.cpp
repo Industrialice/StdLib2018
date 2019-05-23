@@ -170,7 +170,7 @@ static void TupleHelpersTests()
 	constexpr auto toArrayTuple = std::make_tuple(0, 1, 2, 3, 4);
 	constexpr auto arrayFromTuple = TupleToArray(toArrayTuple);
 	static_assert(arrayFromTuple.size() == 5);
-	UTest(Equal, arrayFromTuple, make_array(0, 1, 2, 3, 4));
+	UTest(Equal, arrayFromTuple, std::make_array(0, 1, 2, 3, 4));
 
 	constexpr auto toArrayEmptyTuple = std::tuple<>();
 	constexpr auto emptyArrayFromTuple = TupleToArray(toArrayEmptyTuple);
@@ -279,28 +279,28 @@ static void EnumCombinableTests()
     Logger::Message("finished enum combinable tests\n");
 }
 
-#ifdef _MSC_VER
-    __pragma(warning(push))
-    __pragma(warning(disable : 4307)) // FNVHashCT generates warning C4307: '*': integral constant overflow
-#endif
+WARNING_PUSH
+WARNING_DISABLE_INTEGRAL_CONSTANT_OVERFLOW
 static void TypeIdentifiableTests()
 {
-	//struct S1 {};
-	//struct S2 {};
+	struct S1 {};
+	struct S2 {};
 
-	//constexpr TypeId s1Id = TypeIdentifiable<S1>::GetTypeId();
-	//constexpr TypeId s2Id = TypeIdentifiable<S2>::GetTypeId();
-	//UTest(NotEqual, s1Id, s2Id);
-	//ui64 s1Hash = s1Id.Hash();
-	//ui64 s2Hash = s2Id.Hash();
-	//UTest(NotEqual, s1Hash, s2Hash);
+	constexpr StableTypeId s1Id = TypeIdentifiable<S1>::GetTypeId();
+	constexpr StableTypeId s2Id = TypeIdentifiable<S2>::GetTypeId();
+	UTest(NotEqual, s1Id, s2Id);
+	ui64 s1Hash = s1Id.Hash();
+	ui64 s2Hash = s2Id.Hash();
+	UTest(NotEqual, s1Hash, s2Hash);
 
-	//constexpr TypeId ui32Id = TypeIdentifiable<ui32>::GetTypeId();
-	//constexpr TypeId ui8Id = TypeIdentifiable<ui8>::GetTypeId();
-	//UTest(NotEqual, ui32Id, ui8Id);
-	//ui64 ui32Hash = ui32Id.Hash();
-	//ui64 ui8Hash = ui8Id.Hash();
-	//UTest(NotEqual, ui32Hash, ui8Hash);
+	constexpr StableTypeId ui32Id = TypeIdentifiable<ui32>::GetTypeId();
+	constexpr StableTypeId ui8Id = TypeIdentifiable<ui8>::GetTypeId();
+	UTest(NotEqual, ui32Id, ui8Id);
+	ui64 ui32Hash = ui32Id.Hash();
+	ui64 ui8Hash = ui8Id.Hash();
+	UTest(NotEqual, ui32Hash, ui8Hash);
+	UTest(Equal, TypeIdentifiable<i32>::GetTypeName(), "int");
+	UTest(Equal, TypeIdentifiable<ui8>::GetTypeName(), "unsigned char");
 
     using stableTypeId = NAME_TO_STABLE_ID(Test);
     using stableTypeId2 = NAME_TO_STABLE_ID(Test2);
@@ -377,9 +377,7 @@ static void HashFuncsTest()
 
 	Logger::Message("finished hash tests\n");
 }
-#ifdef _MSC_VER
-    __pragma(warning(pop))
-#endif
+WARNING_POP
 
 static void IntegerPropertiesTest()
 {

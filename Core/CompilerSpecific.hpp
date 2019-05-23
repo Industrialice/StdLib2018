@@ -25,6 +25,13 @@
     #define PRINTF_VERIFY_FRONT _In_z_ _Printf_format_string_
     #define PRINTF_VERIFY_BACK(...)
 	#define DEPRECATE(foo, msg) __declspec(deprecated(msg)) foo
+	#define PRETTY_FUNCTION __FUNCTION__
+
+	#define WARNING_PUSH __pragma(warning(push)) 
+	#define WARNING_POP __pragma(warning(pop)) 
+	#define WARNING_DISABLE_INTEGRAL_CONSTANT_OVERFLOW __pragma(warning(disable : 4307))
+	#define WARNING_DISABLE_ATTRIBUTE_IS_NOT_RECOGNIZED __pragma(warning(disable : 5030))
+	#define WARNING_DISABLE_LARGE_BY_VALUE_COPY
 
     #define _UNREACHABLE __assume(0)
 
@@ -82,6 +89,22 @@
     #define PRINTF_VERIFY_FRONT
     #define PRINTF_VERIFY_BACK(stringIndex, argumentIndex) __attribute__((format(printf, stringIndex, argumentIndex))) /* when counting arguments, the first argument has index 1, you should also account for this argument */
 	#define DEPRECATE(foo, msg) foo __attribute__((deprecated(msg)))
+	#define PRETTY_FUNCTION __PRETTY_FUNCTION__
+
+	#ifdef __clang__
+		#define WARNING_PUSH _Pragma("clang diagnostic push")
+		#define WARNING_POP _Pragma("clang diagnostic pop")
+		#define WARNING_DISABLE_INTEGRAL_CONSTANT_OVERFLOW _Pragma("clang diagnostic ignored \"-Winteger-overflow\"")
+		#define WARNING_DISABLE_ATTRIBUTE_IS_NOT_RECOGNIZED _Pragma("clang diagnostic ignored \"-Wunknown-attributes\"")
+		#define WARNING_DISABLE_LARGE_BY_VALUE_COPY _Pragma("clang diagnostic ignored \"-Wlarge-by-value-copy\"")
+	#else
+		/* TODO: implement */
+		#define WARNING_PUSH
+		#define WARNING_POP 
+		#define WARNING_DISABLE_INTEGRAL_CONSTANT_OVERFLOW
+		#define WARNING_DISABLE_ATTRIBUTE_IS_NOT_RECOGNIZED
+		#define WARNING_DISABLE_LARGE_BY_VALUE_COPY
+	#endif
 
     #define _UNREACHABLE __builtin_unreachable()
 

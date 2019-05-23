@@ -62,6 +62,11 @@ Error<> FileToMemoryStream::Open(IMemoryStream &stream, FileProcModes::FileProcM
     return DefaultError::Ok();
 }
 
+StableTypeId FileToMemoryStream::Type() const
+{
+	return GetTypeId();
+}
+
 void FileToMemoryStream::Close()
 {
     _stream = 0;

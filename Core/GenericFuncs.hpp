@@ -9,14 +9,6 @@ namespace StdLib::Funcs
         return left.owner_before(right) == false && right.owner_before(left) == false;
     }
 
-    template <typename Tin> [[nodiscard]] constexpr uiw _CountOf()
-    {
-        using T = typename std::remove_reference_t<Tin>;
-        static_assert(std::is_array_v<T>, "CountOf() requires an array argument");
-        static_assert(std::extent_v<T> > 0, "zero- or unknown-size array");
-        return std::extent_v<T>;
-    }
-
     template <ui32 size> struct _NearestInt;
     template <> struct _NearestInt<1> { using type = ui8; };
     template <> struct _NearestInt<2> { using type = ui16; };
@@ -323,32 +315,6 @@ namespace StdLib::Funcs
         }
         return output;
     }
-	
-	// temporary emulation of std::make_array, taken from https://en.cppreference.com/w/cpp/experimental/make_array
-	namespace _details
-	{
-		template<class> struct is_ref_wrapper : std::false_type {};
-		template<class T> struct is_ref_wrapper<std::reference_wrapper<T>> : std::true_type {};
-
-		template<class T>
-		using not_ref_wrapper = std::negation<is_ref_wrapper<std::decay_t<T>>>;
-
-		template <class D, class...> struct return_type_helper { using type = D; };
-		template <class... Types>
-		struct return_type_helper<void, Types...> : std::common_type<Types...>
-		{
-			static_assert(std::conjunction_v<not_ref_wrapper<Types>...>,
-				"Types cannot contain reference_wrappers when D is void");
-		};
-
-		template <class D, class... Types>
-		using return_type = std::array<typename return_type_helper<D, Types...>::type, sizeof...(Types)>;
-	}
-
-	template <class D = void, class... Types> [[nodiscard]] constexpr _details::return_type<D, Types...> make_array(Types &&... t)
-	{
-		return {std::forward<Types>(t)...};
-	}
 
 	template <size_t I, typename T> struct _RemoveTupleElement
 	{
@@ -381,7 +347,7 @@ namespace StdLib::Funcs
 		}
 		else
 		{
-			return make_array(std::get<Indexes>(source)...);
+			return std::make_array(std::get<Indexes>(source)...);
 		}
 	}
 
@@ -400,5 +366,3 @@ namespace StdLib::Funcs
 		return _ArrayToTuple(source, std::make_index_sequence<size>());
 	}
 }
-
-#define CountOf(a) Funcs::_CountOf<decltype(a)>()

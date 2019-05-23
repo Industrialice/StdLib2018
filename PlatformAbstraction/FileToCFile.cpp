@@ -239,6 +239,11 @@ FileOpenMode FileToCFile::OpenModeGet() const
 	return _openMode;
 }
 
+StableTypeId FileToCFile::Type() const
+{
+	return GetTypeId();
+}
+
 void FileToCFile::Close()
 {
     if (_file)
