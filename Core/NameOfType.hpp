@@ -176,7 +176,7 @@ namespace StdLib
 			static_assert(_ArrayStringEquals(NameOfType<SimpleStruct, true>, "StdLib::_Private::SimpleStruct"));
 
 			static_assert(_ArrayStringEquals(NameOfType<Derived>, "struct StdLib::_Private::Derived"));
-			static_assert(_ArrayStringEquals(NameOfType<Derived>, "StdLib::_Private::Derived"));
+			static_assert(_ArrayStringEquals(NameOfType<Derived, true>, "StdLib::_Private::Derived"));
 		#else
 			static_assert(_ArrayStringEquals(NameOfType<SimpleStruct>, "StdLib::_Private::SimpleStruct"));
 			static_assert(_ArrayStringEquals(NameOfType<SimpleStruct, true>, "StdLib::_Private::SimpleStruct"));
