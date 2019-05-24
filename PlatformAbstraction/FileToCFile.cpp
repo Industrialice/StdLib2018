@@ -41,7 +41,7 @@ FileToCFile::FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcMo
     if (error) *error = result;
 }
 
-FileToCFile::FileToCFile(FileToCFile &&source)
+FileToCFile::FileToCFile(FileToCFile &&source) noexcept
 {
     this->_file = source._file;
     source._file = nullptr;
@@ -50,7 +50,7 @@ FileToCFile::FileToCFile(FileToCFile &&source)
     this->_procMode = source._procMode;
 }
 
-FileToCFile &FileToCFile::operator = (FileToCFile &&source)
+FileToCFile &FileToCFile::operator = (FileToCFile &&source) noexcept
 {
     ASSUME(this != &source);
     Close();

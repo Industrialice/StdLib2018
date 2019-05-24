@@ -25,8 +25,8 @@ namespace StdLib
         FileToCFile() = default;
         FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, FileShareModes::FileShareMode shareMode = FileShareModes::None, Error<> *error = 0);
 
-        FileToCFile(FileToCFile &&source);
-        FileToCFile &operator = (FileToCFile &&source);
+        FileToCFile(FileToCFile &&source) noexcept;
+        FileToCFile &operator = (FileToCFile &&source) noexcept;
 
         Error<> Open(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, FileShareModes::FileShareMode shareMode = FileShareModes::None);
 

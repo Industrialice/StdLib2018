@@ -22,8 +22,8 @@ namespace StdLib
             char empty;
             T value;
         };
-        ValueStore _value;
-        ErrorType _error;
+		ValueStore _value{};
+		ErrorType _error{};
 
     public:
         ~Result()

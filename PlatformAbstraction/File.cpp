@@ -20,7 +20,7 @@ File::File(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, u
     if (error) *error = tempError;
 }
 
-File::File(File &&other)
+File::File(File &&other) noexcept
 {
     _handle = other._handle;
     other._handle = fileHandle_undefined;
@@ -41,7 +41,7 @@ File::File(File &&other)
 #endif
 }
 
-File &File::operator = (File &&other)
+File &File::operator = (File &&other) noexcept
 {
     File::Close();
 

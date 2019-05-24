@@ -9,7 +9,7 @@ MemoryMappedFile::MemoryMappedFile(File &file, uiw offset, uiw size, bool isCopy
     if (error) *error = result;
 }
 
-MemoryMappedFile::MemoryMappedFile(MemoryMappedFile &&source)
+MemoryMappedFile::MemoryMappedFile(MemoryMappedFile &&source) noexcept
 {
     _memory = source._memory;
     source._memory = nullptr;
@@ -23,7 +23,7 @@ MemoryMappedFile::MemoryMappedFile(MemoryMappedFile &&source)
 #endif
 }
 
-MemoryMappedFile &MemoryMappedFile::operator = (MemoryMappedFile &&source)
+MemoryMappedFile &MemoryMappedFile::operator = (MemoryMappedFile &&source) noexcept
 {
     Close();
 

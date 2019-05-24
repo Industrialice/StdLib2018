@@ -25,8 +25,8 @@ namespace StdLib
         ~MemoryMappedFile();
         MemoryMappedFile() = default;
         MemoryMappedFile(File &file, uiw offset = 0, uiw size = uiw_max, bool isCopyOnWrite = false, bool isPrecommitSpace = false, Error<> *error = nullptr);
-        MemoryMappedFile(MemoryMappedFile &&source);
-        MemoryMappedFile &operator = (MemoryMappedFile &&source);
+        MemoryMappedFile(MemoryMappedFile &&source) noexcept;
+        MemoryMappedFile &operator = (MemoryMappedFile &&source) noexcept;
         Error<> Open(File &file, uiw offset, uiw size, bool isCopyOnWrite, bool isPrecommitSpace);
         void Close();
         [[nodiscard]] bool IsOpened() const;
