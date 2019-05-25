@@ -19,8 +19,8 @@ namespace StdLib
             ValueStore()
             {}
 
-            char empty;
-            T value;
+			char empty;
+			T value;
         };
 		ValueStore _value{};
 		ErrorType _error{};

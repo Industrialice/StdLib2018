@@ -117,22 +117,14 @@
     <Import Project="..\PropertySheetWinXP.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\;$(IncludePath)</IncludePath>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">
     <IncludePath>C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\;C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\ucrt\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\;$(IncludePath)</IncludePath>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|x64'">
     <IncludePath>C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
