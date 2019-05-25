@@ -157,7 +157,7 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
         {
             if (!shareMode.Contains(FileShareModes::Write))
             {
-                return DefaultError::InvalidArgument("FileShareModes::Read without FileShareModes::Write is not a valid sharable option for a file that is opened for write");
+                return DefaultError::InvalidArgument("FileShareModes::Read without FileShareModes::Write is not a valid sharable option for a file that is open for write");
             }
         }
     }
@@ -235,7 +235,7 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
 
 FileOpenMode FileToCFile::OpenModeGet() const
 {
-	ASSUME(IsOpened());
+	ASSUME(IsOpen());
 	return _openMode;
 }
 
@@ -253,14 +253,14 @@ void FileToCFile::Close()
     _file = 0;
 }
 
-bool FileToCFile::IsOpened() const
+bool FileToCFile::IsOpen() const
 {
     return _file != 0;
 }
 
 bool FileToCFile::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     ui32 actuallyRead = (ui32)fread(target, 1, len, _file);
     if (read) *read = actuallyRead;
     return true;
@@ -268,7 +268,7 @@ bool FileToCFile::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
 
 bool FileToCFile::Write(const void *source, ui32 len, ui32 *RSTR written)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     ui32 actuallyWritten = (ui32)fwrite(source, 1, len, _file);
     if (written) *written = actuallyWritten;
     return true;
@@ -276,13 +276,13 @@ bool FileToCFile::Write(const void *source, ui32 len, ui32 *RSTR written)
 
 bool FileToCFile::Flush()
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return fflush(_file) == 0;
 }
 
 bool FileToCFile::IsBufferingSupported() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
 
     bool isCachingDisabled = _cacheMode.Contains(FileCacheModes::DisableSystemWriteCache) || _cacheMode.Contains(FileCacheModes::DisableSystemReadCache);
 
@@ -291,7 +291,7 @@ bool FileToCFile::IsBufferingSupported() const
 
 bool FileToCFile::BufferSet(ui32 size, bufferType &&buffer)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
 
     if (!this->IsBufferingSupported())
     {
@@ -316,7 +316,7 @@ bool FileToCFile::BufferSet(ui32 size, bufferType &&buffer)
 
 std::pair<ui32, const void *> FileToCFile::BufferGet() const
 {
-	ASSUME(IsOpened());
+	ASSUME(IsOpen());
     return {_bufferSize, _customBufferPtr.get()};
 }
 
@@ -327,7 +327,7 @@ bool FileToCFile::IsSeekSupported() const
 
 Result<i64> FileToCFile::OffsetGet(FileOffsetMode offsetMode)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
 
     if (offsetMode == FileOffsetMode::FromCurrent)
     {
@@ -370,7 +370,7 @@ Result<i64> FileToCFile::OffsetGet(FileOffsetMode offsetMode)
 
 Result<i64> FileToCFile::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
 
     int moveMethod;
 
@@ -422,7 +422,7 @@ Result<i64> FileToCFile::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 
 Result<ui64> FileToCFile::SizeGet()
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
 
 #ifdef PLATFORM_WINDOWS
 
@@ -473,7 +473,7 @@ Result<ui64> FileToCFile::SizeGet()
 
 Error<> FileToCFile::SizeSet(ui64 newSize)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
 
     newSize += _offsetToStart;
 
@@ -496,13 +496,13 @@ Error<> FileToCFile::SizeSet(ui64 newSize)
 
 FileProcModes::FileProcMode FileToCFile::ProcMode() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return _procMode;
 }
 
 FileCacheModes::FileCacheMode FileToCFile::CacheMode() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return FileCacheModes::Default;
 }
 

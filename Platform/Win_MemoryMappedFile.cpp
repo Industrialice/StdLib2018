@@ -14,9 +14,9 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
 {
     Close();
 
-    if (!file.IsOpened())
+    if (!file.IsOpen())
     {
-        return DefaultError::InvalidArgument("File isn't opened");
+        return DefaultError::InvalidArgument("File isn't open");
     }
     if (!file._procMode.Contains(FileProcModes::Read))
     {
@@ -105,7 +105,7 @@ void MemoryMappedFile::Close()
 
 void MemoryMappedFile::Flush() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     BOOL result = FlushViewOfFile(_memory, _size);
     ASSUME(result);
 }

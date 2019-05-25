@@ -69,32 +69,32 @@ File &File::operator = (File &&other) noexcept
 #ifdef STDLIB_ENABLE_FILE_STATS
 auto File::StatsGet() const -> FileStats
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return _stats;
 }
 
 void File::StatsReset()
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     _stats = {};
 }
 #endif
 
 FileOpenMode File::OpenMode() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return _openMode;
 }
 
 fileHandle File::OsFileDescriptor() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return _handle;
 }
 
 fileHandle File::CloseAndGetOsFileDescriptor()
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     _isOwningFileHandle = false;
     fileHandle handle = _handle;
     File::Close();
@@ -111,14 +111,14 @@ TypeId File::Type() const
 	return GetTypeId();
 }
 
-bool File::IsOpened() const
+bool File::IsOpen() const
 {
     return _handle != fileHandle_undefined;
 }
 
 NOINLINE bool File::Read(void *target, ui32 len, ui32 *read)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     ASSUME(target || len == 0);
     ASSUME(_procMode.Contains(FileProcModes::Read));
 
@@ -182,7 +182,7 @@ NOINLINE bool File::Read(void *target, ui32 len, ui32 *read)
 
 NOINLINE bool File::Write(const void *source, ui32 len, ui32 *RSTR written)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     ASSUME(source || len == 0);
     ASSUME(_procMode.Contains(FileProcModes::Write));
     ASSUME(_bufferPos <= _bufferSize);
@@ -238,7 +238,7 @@ bool File::IsBufferingSupported() const
 
 NOINLINE bool File::BufferSet(ui32 size, bufferType &&buffer)
 {
-	ASSUME(IsOpened());
+	ASSUME(IsOpen());
     ASSUME(size || buffer.get() == nullptr);
 
     if (buffer.get() == _internalBuffer.get() && buffer.get_deleter() == _internalBuffer.get_deleter() && size == _bufferSize)
@@ -272,7 +272,7 @@ NOINLINE bool File::BufferSet(ui32 size, bufferType &&buffer)
 
 std::pair<ui32, const void *> File::BufferGet() const
 {
-	ASSUME(IsOpened());
+	ASSUME(IsOpen());
     return {_bufferSize, _internalBuffer.get()};
 }
 
@@ -283,7 +283,7 @@ bool File::IsSeekSupported() const
 
 Result<i64> File::OffsetGet(FileOffsetMode offsetMode)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
 
     if (offsetMode == FileOffsetMode::FromCurrent)
     {
@@ -336,19 +336,19 @@ Result<i64> File::OffsetGet(FileOffsetMode offsetMode)
 
 FileProcModes::FileProcMode File::ProcMode() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return _procMode;
 }
 
 FileCacheModes::FileCacheMode File::CacheMode() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return _cacheMode;
 }
 
 NOINLINE bool File::PerformFlush(bool isFlushSystemCaches)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     ASSUME(_bufferPos <= _bufferSize);
 
     if (isFlushSystemCaches)

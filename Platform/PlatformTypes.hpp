@@ -13,6 +13,8 @@ namespace StdLib
     using string_utf32 = std::basic_string<utf32char>;
 
 #ifdef PLATFORM_WINDOWS
+	using consoleHandle = void *;
+	static const consoleHandle consoleHandle_undefined = (void *)-1;
     using fileHandle = void *;
     static const fileHandle fileHandle_undefined = (void *)-1;
     using pathChar = wchar_t;
@@ -27,6 +29,8 @@ namespace StdLib
 #define PTHSTR "%ls"
 #define TSTR(str) L##str
 #else
+	using consoleHandle = int;
+	static constexpr consoleHandle consoleHandle_undefined = -1;
     using fileHandle = int;
     static constexpr fileHandle fileHandle_undefined = -1;
     using pathChar = char;

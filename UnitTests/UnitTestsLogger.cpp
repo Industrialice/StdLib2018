@@ -22,23 +22,23 @@ bool UnitTestsLogger::IsMessagePoppingSupported()
 void UnitTestsLogger::PopLastMessage()
 {
 #if defined(PLATFORM_WINDOWS)
-    static HANDLE outputHandle;
-    if (!outputHandle)
+    static NativeConsole console;
+    if (!console)
     {
-        outputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+		console.Open(true);
+		if (!console)
+		{
+			console.Open(false);
+		}
     }
-    CONSOLE_SCREEN_BUFFER_INFO info;
-    GetConsoleScreenBufferInfo(outputHandle, &info);
-    COORD newCoord = {0, info.dwCursorPosition.Y};
-    SetConsoleCursorPosition(outputHandle, newCoord);
+	console.CursorPosition(0, std::nullopt);
     static char message[4096];
     if (!message[0])
     {
         std::fill(message, message + CountOf(message), ' ');
     }
-    DWORD written;
-    WriteConsoleA(outputHandle, message, std::min<ui32>((ui32)CountOf(message), _lastMessageLength), &written, 0);
-    SetConsoleCursorPosition(outputHandle, newCoord);
+	console.WriteASCII({message, std::min<ui32>((ui32)CountOf(message), _lastMessageLength)});
+	console.CursorPosition(0, std::nullopt);
 #elif defined(PLATFORM_ANDROID)
     ::PopLastMessage(_lastMessageLength);
 #else

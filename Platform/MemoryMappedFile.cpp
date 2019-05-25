@@ -41,44 +41,44 @@ MemoryMappedFile &MemoryMappedFile::operator = (MemoryMappedFile &&source) noexc
     return *this;
 }
 
-bool MemoryMappedFile::IsOpened() const
+bool MemoryMappedFile::IsOpen() const
 {
     return _memory != nullptr;
 }
 
 bool MemoryMappedFile::IsWritable() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return _isWritable;
 }
 
 ui8 *MemoryMappedFile::Memory()
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return (ui8 *)_memory + _offset;
 }
 
 const ui8 *MemoryMappedFile::Memory() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return (ui8 *)_memory + _offset;
 }
 
 const ui8 *MemoryMappedFile::CMemory() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return (ui8 *)_memory + _offset;
 }
 
 uiw MemoryMappedFile::Size()
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return _size;
 }
 
 MemoryStreamFixedExternal MemoryMappedFile::ToMemoryStream()
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     if (_isWritable)
     {
         return {_memory, _size, _size};
@@ -88,17 +88,17 @@ MemoryStreamFixedExternal MemoryMappedFile::ToMemoryStream()
 
 MemoryStreamFixedExternal MemoryMappedFile::ToMemoryStream() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return {CMemory(), _size, _size};
 }
 
 MemoryStreamFixedExternal MemoryMappedFile::ToCMemoryStream() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     return {CMemory(), _size, _size};
 }
 
 MemoryMappedFile::operator bool() const
 {
-    return IsOpened();
+    return IsOpen();
 }

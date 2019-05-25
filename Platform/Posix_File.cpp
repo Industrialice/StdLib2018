@@ -168,7 +168,7 @@ Error<> File::Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwne
 
 Result<FilePath> File::PNN() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     char proc[MaxPathLength];
     snprintf(proc, CountOf(proc), "/proc/self/fd/%i", _handle);
     char buf[MaxPathLength];
@@ -182,7 +182,7 @@ Result<FilePath> File::PNN() const
 
 void File::Close()
 {
-    if (!IsOpened())
+    if (!IsOpen())
     {
         return;
     }
@@ -199,7 +199,7 @@ void File::Close()
 
 Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
 
     if (!CancelCachedRead() || !PerformFlush(false)) // TODO: optimize
     {
@@ -253,7 +253,7 @@ Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 
 Result<ui64> File::SizeGet()
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     if (!PerformFlush(false)) // flushing first because file pointer may not be at the end of the file, in that case we can't just return FileSize + BufferSize
     {
         return DefaultError::UnknownError();
@@ -269,7 +269,7 @@ Result<ui64> File::SizeGet()
 
 Error<> File::SizeSet(ui64 newSize)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
 
     if (!CancelCachedRead() || !PerformFlush(false))
     {
@@ -292,14 +292,14 @@ Error<> File::SizeSet(ui64 newSize)
 
 void File::FlushSystemCaches()
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     int result = fsync(_handle);
     ASSUME(result == 0);
 }
 
 bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     ASSUME(source || len == 0);
 
 #ifdef STDLIB_ENABLE_FILE_STATS
@@ -323,7 +323,7 @@ bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
 
 bool File::ReadFromFile(void *target, ui32 len, ui32 *readRet)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     ASSUME(target || len == 0);
 
 #ifdef STDLIB_ENABLE_FILE_STATS
@@ -347,7 +347,7 @@ bool File::ReadFromFile(void *target, ui32 len, ui32 *readRet)
 
 NOINLINE bool File::CancelCachedRead()
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     if (_bufferPos >= _readBufferCurrentSize)
     {
         ASSUME(_readBufferCurrentSize == 0 || _bufferPos == _readBufferCurrentSize);

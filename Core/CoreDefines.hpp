@@ -18,7 +18,11 @@ namespace StdLib::_Private
     #define HARDBREAK _UNREACHABLE
     #define SOFTBREAK
     #define UNREACHABLE _UNREACHABLE
-    #define ASSUME(condition) _ASSUME(condition)
+	#ifdef STDLIB_ENABLE_ASSUME_RELEASE_CHECKS
+		#define ASSUME(condition) SOFTBREAK
+	#else
+		#define ASSUME(condition) _ASSUME(condition)
+	#endif
 #endif
 
 #define NOIMPL HARDBREAK

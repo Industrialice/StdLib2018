@@ -72,7 +72,7 @@ void FileToMemoryStream::Close()
     _stream = 0;
 }
 
-bool FileToMemoryStream::IsOpened() const
+bool FileToMemoryStream::IsOpen() const
 {
     return _stream != 0;
 }

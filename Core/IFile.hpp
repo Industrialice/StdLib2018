@@ -73,7 +73,7 @@ namespace StdLib
 		[[nodiscard]] virtual TypeId Type() const = 0;
 
         virtual void Close() = 0;
-		[[nodiscard]] virtual bool IsOpened() const = 0;
+		[[nodiscard]] virtual bool IsOpen() const = 0;
 
         virtual bool Read(void *RSTR target, ui32 len, ui32 *RSTR read = 0) = 0;
         virtual bool Write(const void *source, ui32 len, ui32 *RSTR written = 0) = 0;
@@ -95,7 +95,7 @@ namespace StdLib
 
         [[nodiscard]] explicit operator bool() const
         {
-            return IsOpened();
+            return IsOpen();
         }
     };
 }

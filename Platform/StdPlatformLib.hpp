@@ -15,6 +15,7 @@
 #include "MemoryMappedFile.hpp"
 #include "SystemInfo.hpp"
 #include "VirtualKeys.hpp"
+#include "NativeConsole.hpp"
 
 namespace StdLib::Initialization
 {

@@ -4,7 +4,7 @@
 
 namespace StdLib
 {
-    //  Note that the file must be opened as readable, writable is optional
+    //  Note that the file must be open as readable, writable is optional
     //  If you pass isCopyOnWrite, you can write even if the file isn't writable (the actual file will not be affected by your changes)
     //  Parameter "size" will be clamped by the size of the file
     //  You can close the file right after the mapping was created
@@ -29,7 +29,7 @@ namespace StdLib
         MemoryMappedFile &operator = (MemoryMappedFile &&source) noexcept;
         Error<> Open(File &file, uiw offset, uiw size, bool isCopyOnWrite, bool isPrecommitSpace);
         void Close();
-        [[nodiscard]] bool IsOpened() const;
+        [[nodiscard]] bool IsOpen() const;
         void Flush() const;
         [[nodiscard]] bool IsWritable() const;
         [[nodiscard]] ui8 *Memory();

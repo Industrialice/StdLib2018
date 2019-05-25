@@ -83,7 +83,7 @@ namespace StdLib
 		[[nodiscard]] virtual TypeId Type() const override;
 
         virtual void Close() override;
-        [[nodiscard]] virtual bool IsOpened() const override;
+        [[nodiscard]] virtual bool IsOpen() const override;
 
 		[[must_be_open]] virtual bool Read(void *RSTR target, ui32 len, ui32 *RSTR read = 0) override;
 		[[must_be_open]] virtual bool Write(const void *source, ui32 len, ui32 *RSTR written = 0) override;

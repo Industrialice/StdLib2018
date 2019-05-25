@@ -123,7 +123,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::Fi
         {
             if (!shareMode.Contains(FileShareModes::Write))
             {
-                return DefaultError::InvalidArgument("FileShareModes::Read without FileShareModes::Write is not a valid sharable option for a file that is opened for write");
+                return DefaultError::InvalidArgument("FileShareModes::Read without FileShareModes::Write is not a valid sharable option for a file that is open for write");
             }
         }
         dwShareMode |= FILE_SHARE_READ;
@@ -185,7 +185,7 @@ Error<> File::Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwne
 
 Result<FilePath> File::PNN() const
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
 
     if (StdLib_GetFinalPathNameByHandleW)
     {
@@ -205,7 +205,7 @@ Result<FilePath> File::PNN() const
 
 void File::Close()
 {
-    if (!IsOpened())
+    if (!IsOpen())
     {
         return;
     }
@@ -222,7 +222,7 @@ void File::Close()
 
 Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
 
     DWORD moveMethod;
 
@@ -277,7 +277,7 @@ Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
 
 Result<ui64> File::SizeGet()
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     if (!PerformFlush(false)) // flushing first because file pointer may not be at the end of the file, in that case we can't just return FileSize + BufferSize
     {
         return DefaultError::UnknownError();
@@ -297,7 +297,7 @@ Result<ui64> File::SizeGet()
 
 Error<> File::SizeSet(ui64 newSize)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
 
     if (!CancelCachedRead() || !PerformFlush(false))
     {
@@ -342,7 +342,7 @@ Error<> File::SizeSet(ui64 newSize)
 
 void File::FlushSystemCaches()
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     if (_procMode.Contains(FileProcModes::Write))
     {
         BOOL result = FlushFileBuffers(_handle);
@@ -352,7 +352,7 @@ void File::FlushSystemCaches()
 
 bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     ASSUME(source || len == 0);
 
 #if STDLIB_ENABLE_FILE_STATS
@@ -376,7 +376,7 @@ bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
 
 bool File::ReadFromFile(void *target, ui32 len, ui32 *read)
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     ASSUME(target || len == 0);
 
 #if STDLIB_ENABLE_FILE_STATS
@@ -400,7 +400,7 @@ bool File::ReadFromFile(void *target, ui32 len, ui32 *read)
 
 NOINLINE bool File::CancelCachedRead()
 {
-    ASSUME(IsOpened());
+    ASSUME(IsOpen());
     if (_bufferPos >= _readBufferCurrentSize)
     {
         ASSUME(_readBufferCurrentSize == 0 || _bufferPos == _readBufferCurrentSize);
