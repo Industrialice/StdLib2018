@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MiscellaneousCoreTypes.hpp"
+#include "MiscTypes.hpp"
 
 namespace StdLib
 {

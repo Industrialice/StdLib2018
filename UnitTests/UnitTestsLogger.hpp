@@ -1,6 +1,6 @@
 #pragma once
 
-class Logger
+class UnitTestsLogger
 {
     static inline StdLib::ui32 _lastMessageLength;
 

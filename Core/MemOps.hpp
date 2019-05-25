@@ -1,54 +1,54 @@
 #pragma once
 
-#ifdef __cplusplus
-	#ifndef PLATFORM_WINDOWS
-		inline errno_t memcpy_s(void *RSTR destination, size_t destinationCapacity, const void *RSTR source, size_t size)
-		{
-			if (!destination && destinationCapacity)
-			{
-				return -1;
-			}
-			if (!source && size)
-			{
-				return -1;
-			}
-			if (destinationCapacity < size)
-			{
-				return -1;
-			}
-			memcpy(destination, source, size);
-			return 0;
-		}
+extern "C" {
 
-		inline errno_t memmove_s(void *RSTR destination, size_t destinationCapacity, const void *RSTR source, size_t size)
-		{
-			if (!destination && destinationCapacity)
-			{
-				return -1;
-			}
-			if (!source && size)
-			{
-				return -1;
-			}
-			if (destinationCapacity < size)
-			{
-				return -1;
-			}
-			memmove(destination, source, size);
-			return 0;
-		}
-	#endif
-
-	inline errno_t memset_s(void *target, size_t destinationCapacity, int value, size_t size)
+#ifndef PLATFORM_WINDOWS
+	inline errno_t memcpy_s(void *RSTR destination, size_t destinationCapacity, const void *RSTR source, size_t size)
 	{
-		if (destinationCapacity < size || !target)
+		if (!destination && destinationCapacity)
 		{
-			return memcpy_s(nullptr, 1, nullptr, 1); // emulate a call of an actual _s function with wrong parameters
+			return -1;
 		}
-		memset(target, value, size);
+		if (!source && size)
+		{
+			return -1;
+		}
+		if (destinationCapacity < size)
+		{
+			return -1;
+		}
+		memcpy(destination, source, size);
+		return 0;
+	}
+
+	inline errno_t memmove_s(void *RSTR destination, size_t destinationCapacity, const void *RSTR source, size_t size)
+	{
+		if (!destination && destinationCapacity)
+		{
+			return -1;
+		}
+		if (!source && size)
+		{
+			return -1;
+		}
+		if (destinationCapacity < size)
+		{
+			return -1;
+		}
+		memmove(destination, source, size);
 		return 0;
 	}
 #endif
+
+inline errno_t memset_s(void *target, size_t destinationCapacity, int value, size_t size)
+{
+	if (destinationCapacity < size || !target)
+	{
+		return memcpy_s(nullptr, 1, nullptr, 1); // emulate a call of an actual _s function with wrong parameters
+	}
+	memset(target, value, size);
+	return 0;
+}
 
 #ifndef STDLIB_DISABLE_MEMOPS_DEPRECATION
 	namespace StdLib::__OriginalMemoryFuncs
@@ -164,6 +164,8 @@
 	#define _CallOriginalMemSetS memset_s
 	#define _CallOriginalMemChr memchr
 #endif
+
+} // finish extern "C"
 
 // void * types are not allowed
 // According to the docs target must always be a non-null pointer even when the size is 0, but

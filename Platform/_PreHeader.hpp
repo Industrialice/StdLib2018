@@ -47,4 +47,4 @@
 
 #define _SUPPRESS_CORE_INITIALIZE
 #include <StdCoreLib.hpp>
-#include "PlatformAbstractionCoreTypes.hpp"
+#include "PlatformTypes.hpp"

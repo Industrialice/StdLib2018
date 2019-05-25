@@ -14,12 +14,6 @@
     <ClInclude Include="UniqueIdManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StdMiscellaneousLib.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MiscellaneousCoreTypes.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="_PreHeader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -29,15 +23,21 @@
     <ClInclude Include="AssignListenerId.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="StdMiscLib.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MiscTypes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="UniqueIdManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StdMiscellaneousLib.cpp">
+    <ClCompile Include="_PreHeader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_PreHeader.cpp">
+    <ClCompile Include="StdMiscLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

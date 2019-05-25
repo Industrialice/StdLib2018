@@ -1,7 +1,5 @@
 #pragma once
 
-#include "PlatformAbstractionCoreTypes.hpp"
-
 namespace StdLib
 {
 	template <typename T, typename E> struct _TimeBase

@@ -1,6 +1,6 @@
 #include "_PreHeader.hpp"
 #include <Logger.hpp>
-#include "Logger.hpp"
+#include "UnitTestsLogger.hpp"
 
 using namespace StdLib;
 
@@ -31,7 +31,7 @@ void LoggerTests()
     isShouldBeCalled = false;
     logger.Message(LogLevels::Info, "");
 
-    auto logger2 = StdLib::Logger<std::string, true>();
+    auto logger2 = Logger<std::string, true>();
 
     isShouldBeCalled = true;
     auto testDest2 = [&isShouldBeCalled, &currentLevel, &currentReference](LogLevels::LogLevel level, std::string_view message, const std::string &meta)
@@ -46,5 +46,5 @@ void LoggerTests()
     currentReference = "testing meta";
     logger2.Message(LogLevels::Info, std::string{"meta test"}, "testing meta");
 
-    ::Logger::Message("finished logger tests\n");
+	UnitTestsLogger::Message("finished logger tests\n");
 }

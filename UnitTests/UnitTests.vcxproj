@@ -202,7 +202,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="UnitTestsLogger.cpp" />
     <ClCompile Include="LoggerTests.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MathLibTests.cpp" />
@@ -221,7 +221,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Helpers.h" />
-    <ClInclude Include="Logger.hpp" />
+    <ClInclude Include="UnitTestsLogger.hpp" />
     <ClInclude Include="_PreHeader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

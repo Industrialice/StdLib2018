@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MiscellaneousCoreTypes.hpp"
+#include "MiscTypes.hpp"
 #include "AssignListenerId.hpp"
 #include <ListenerHandle.hpp>
 #include <atomic>

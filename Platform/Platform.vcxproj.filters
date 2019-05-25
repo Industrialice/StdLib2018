@@ -14,13 +14,7 @@
     <ClInclude Include="VirtualMemory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StdPlatformAbstractionLib.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="FilePath.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PlatformAbstractionCoreTypes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FileToCFile.hpp">
@@ -47,15 +41,21 @@
     <ClInclude Include="VirtualKeys.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NativeConsole.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlatformTypes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StdPlatformLib.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win_VirtualMemory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Posix_VirtualMemory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StdPlatformAbstractionLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FilePath.cpp">
@@ -110,6 +110,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VirtualKeys.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StdPlatformLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

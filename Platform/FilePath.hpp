@@ -1,7 +1,5 @@
 #pragma once
 
-#include "PlatformAbstractionCoreTypes.hpp"
-
 namespace StdLib
 {
     // std::filesystem is still not available on platforms like Android

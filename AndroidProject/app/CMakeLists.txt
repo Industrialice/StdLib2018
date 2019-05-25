@@ -32,8 +32,8 @@ add_compile_options(-fno-stack-protector -D_FORTIFY_SOURCE=0 -fno-sanitize=memor
 add_definitions(-DPLATFORM_ANDROID)
 
 file(GLOB CORE_FILES "../../Core/*.cpp")
-file(GLOB PLATFORMABSTRACTION_FILES "../../PlatformAbstraction/*.cpp")
-file(GLOB MISCELLANEOUS_FILES "../../Miscellaneous/*.cpp")
+file(GLOB PLATFORMABSTRACTION_FILES "../../Platform/*.cpp")
+file(GLOB MISCELLANEOUS_FILES "../../Misc/*.cpp")
 file(GLOB UNITTEST_FILES "../../UnitTests/*.cpp")
 
 foreach(item ${PLATFORMABSTRACTION_FILES})
@@ -64,8 +64,8 @@ add_library(
 
 include_directories(
     ../../Core/
-    ../../PlatformAbstraction/
-    ../../Miscellaneous/
+    ../../Platform/
+    ../../Misc/
     ../../UnitTests/
 )
 

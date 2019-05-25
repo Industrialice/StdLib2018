@@ -2,15 +2,15 @@ CC=emcc
 
 CPPSOURCES := $(wildcard *.cpp)
 CPPSOURCES += $(wildcard ../Core/*.cpp)
-CPPSOURCES += $(wildcard ../PlatformAbstraction/*.cpp)
-CPPSOURCES += $(wildcard ../Miscellaneous/*.cpp)
+CPPSOURCES += $(wildcard ../Platform/*.cpp)
+CPPSOURCES += $(wildcard ../Misc/*.cpp)
 CPPSOURCES += $(wildcard ../UnitTests/*.cpp)
-CPPSOURCES := $(filter-out $(wildcard ../PlatformAbstraction/Win_*.cpp), $(CPPSOURCES))
-CPPSOURCES := $(filter-out $(wildcard ../Miscellaneous/Win_*.cpp), $(CPPSOURCES))
+CPPSOURCES := $(filter-out $(wildcard ../Platform/Win_*.cpp), $(CPPSOURCES))
+CPPSOURCES := $(filter-out $(wildcard ../Misc/Win_*.cpp), $(CPPSOURCES))
 
 INC1 = ../Core
-INC2 = ../PlatformAbstraction
-INC3 = ../Miscellaneous
+INC2 = ../Platform
+INC3 = ../Misc
 
 INC = $(INC1) $(INC2) $(INC3)
 INC_PARAMS = $(foreach d, $(INC), -I$d)

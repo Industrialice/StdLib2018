@@ -187,5 +187,5 @@ void MTTests()
 	SpinLockTests();
 	MessageQueueTests();
 
-    Logger::Message("finished multithreaded tests\n");
+    UnitTestsLogger::Message("finished multithreaded tests\n");
 }

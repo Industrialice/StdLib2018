@@ -12,12 +12,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTests", "UnitTests\Unit
 		{10CBD4DC-3EF9-4D17-A0A8-88EC76ED59A2} = {10CBD4DC-3EF9-4D17-A0A8-88EC76ED59A2}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlatformAbstraction", "PlatformAbstraction\PlatformAbstraction.vcxproj", "{BEF88DA3-8D9C-4F6A-9EA8-813BBA9B6C9C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Platform", "Platform\Platform.vcxproj", "{BEF88DA3-8D9C-4F6A-9EA8-813BBA9B6C9C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{10CBD4DC-3EF9-4D17-A0A8-88EC76ED59A2} = {10CBD4DC-3EF9-4D17-A0A8-88EC76ED59A2}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Miscellaneous", "Miscellaneous\Miscellaneous.vcxproj", "{9E235A7E-A59B-49A6-89CD-044E24FA10C8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Misc", "Misc\Misc.vcxproj", "{9E235A7E-A59B-49A6-89CD-044E24FA10C8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

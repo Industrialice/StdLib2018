@@ -1,6 +1,6 @@
 #include "_PreHeader.hpp"
 #include <StdCoreLib.hpp>
-#include "Logger.hpp"
+#include "UnitTestsLogger.hpp"
 #include <stdarg.h>
 
 using namespace StdLib;
@@ -10,7 +10,7 @@ using namespace StdLib;
     void PopLastMessage(unsigned int length);
 #endif
 
-bool Logger::IsMessagePoppingSupported()
+bool UnitTestsLogger::IsMessagePoppingSupported()
 {
 #if defined(PLATFORM_WINDOWS) || defined(PLATFORM_ANDROID)
     return true;
@@ -19,7 +19,7 @@ bool Logger::IsMessagePoppingSupported()
 #endif
 }
 
-void Logger::PopLastMessage()
+void UnitTestsLogger::PopLastMessage()
 {
 #if defined(PLATFORM_WINDOWS)
     static HANDLE outputHandle;
@@ -46,7 +46,7 @@ void Logger::PopLastMessage()
 #endif
 }
 
-void Logger::Message(const char *fmt, ...)
+void UnitTestsLogger::Message(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);

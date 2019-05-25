@@ -863,13 +863,13 @@ template <ApproxMath::Precision Precision> static void CosTests()
 			c0MaxValue = value;
 		}
 
-        if (Logger::IsMessagePoppingSupported())
+        if (UnitTestsLogger::IsMessagePoppingSupported())
         {
             ++counter;
             if (counter >= 1'000'000)
             {
-                Logger::PopLastMessage();
-                Logger::Message("%.14f", value);
+                UnitTestsLogger::PopLastMessage();
+                UnitTestsLogger::Message("%.14f", value);
                 counter = 0;
             }
         }
@@ -885,7 +885,7 @@ template <ApproxMath::Precision Precision> static void CosTests()
 		repeat(value);
 	}
 
-	Logger::Message("\napprox cos 0 min %f at %f max %f at %f\n", c0Min, c0MinValue, c0Max, c0MaxValue);
+	UnitTestsLogger::Message("\napprox cos 0 min %f at %f max %f at %f\n", c0Min, c0MinValue, c0Max, c0MaxValue);
 }
 
 template <ApproxMath::Precision Precision> static void SinTests()
@@ -914,13 +914,13 @@ template <ApproxMath::Precision Precision> static void SinTests()
 			c0MaxValue = value;
 		}
 
-        if (Logger::IsMessagePoppingSupported())
+        if (UnitTestsLogger::IsMessagePoppingSupported())
         {
             ++counter;
             if (counter >= 1'000'000)
             {
-                Logger::PopLastMessage();
-                Logger::Message("%.14f", value);
+                UnitTestsLogger::PopLastMessage();
+                UnitTestsLogger::Message("%.14f", value);
                 counter = 0;
             }
         }
@@ -936,7 +936,7 @@ template <ApproxMath::Precision Precision> static void SinTests()
 		repeat(value);
 	}
 
-	Logger::Message("\napprox sin 0 min %f at %f max %f at %f\n", c0Min, c0MinValue, c0Max, c0MaxValue);
+	UnitTestsLogger::Message("\napprox sin 0 min %f at %f max %f at %f\n", c0Min, c0MinValue, c0Max, c0MaxValue);
 }
 
 template <typename TrigFuncType, TrigFuncType TrigFunc> static inline f64 TrigBenchmarksHelper(const char *name, f64 ref = 0)
@@ -986,11 +986,11 @@ template <typename TrigFuncType, TrigFuncType TrigFunc> static inline f64 TrigBe
 	f64 curRef = l.counted / diff.ToSec_f64() / 1'000'000.0;
 	if (ref)
 	{
-		Logger::Message("%s => %.2lfkk/s %.2lfx\n", name, curRef, curRef / ref);
+		UnitTestsLogger::Message("%s => %.2lfkk/s %.2lfx\n", name, curRef, curRef / ref);
 	}
 	else
 	{
-		Logger::Message("%s => %.2lfkk/s\n", name, curRef);
+		UnitTestsLogger::Message("%s => %.2lfkk/s\n", name, curRef);
 	}
 	return curRef;
 }
@@ -1085,7 +1085,7 @@ void MathLibTests()
 			it = index;
 		}
 	}
-    Logger::Message("iteration %i took %.4g\n", it, fastest);
+    UnitTestsLogger::Message("iteration %i took %.4g\n", it, fastest);
 #endif
 
 #if defined(PLATFORM_WINDOWS) && (defined(_M_AMD64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2))
@@ -1115,5 +1115,5 @@ void MathLibTests()
 	//QurtBenchmarks();
 	//printf("\n");
 
-    Logger::Message("finished math lib tests\n");
+    UnitTestsLogger::Message("finished math lib tests\n");
 }

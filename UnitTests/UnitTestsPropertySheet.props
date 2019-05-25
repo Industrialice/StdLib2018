@@ -3,12 +3,12 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <IncludePath>$(SolutionDir)/Core/;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)/PlatformAbstraction/;$(SolutionDir)/Miscellaneous/;</IncludePath>
+    <IncludePath>$(SolutionDir)/Core/;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)/Platform/;$(SolutionDir)/Misc/</IncludePath>
     <LibraryPath>$(SolutionDir)$(Configuration)_$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
-      <AdditionalDependencies>Core.lib;PlatformAbstraction.lib;Miscellaneous.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Core.lib;Platform.lib;Misc.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <FixedBaseAddress>true</FixedBaseAddress>
     </Link>

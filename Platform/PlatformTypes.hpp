@@ -2,8 +2,6 @@
 
 #define _SUPPRESS_CORE_INITIALIZE
 #include <StdCoreLib.hpp>
-#include <string>
-#include <string_view>
 
 namespace StdLib
 {

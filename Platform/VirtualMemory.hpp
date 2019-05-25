@@ -1,7 +1,5 @@
 #pragma once
 
-#include "PlatformAbstractionCoreTypes.hpp"
-
 namespace StdLib::VirtualMemory
 {
     struct PageModes

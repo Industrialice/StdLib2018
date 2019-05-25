@@ -68,7 +68,7 @@ static void MiscTests()
     MovableAtomic<ui32> atomicTest2 = std::move(atomicTest);
     UTest(Equal, atomicTest2.load(), 15);
 
-    Logger::Message("finished misc tests\n");
+    UnitTestsLogger::Message("finished misc tests\n");
 }
 
 namespace
@@ -144,7 +144,7 @@ static void MemOpsTests()
 	UTest(Equal, InvalidParametersReceived, 8);
 #endif
 
-	Logger::Message("finished memory operations tests\n");
+	UnitTestsLogger::Message("finished memory operations tests\n");
 }
 
 static void TupleHelpersTests()
@@ -209,7 +209,7 @@ static void CompileTimeSortingTests()
         UTest(Equal, result2[index].value, ref[index].value);
     }
 
-    Logger::Message("finished compile time sorting tests\n");
+    UnitTestsLogger::Message("finished compile time sorting tests\n");
 }
 
 static void CompileTimeStringsTests()
@@ -234,7 +234,7 @@ static void CompileTimeStringsTests()
 
     //printf("decoded string is %s\n", result.data());
 
-    Logger::Message("finished compile time strings tests\n");
+    UnitTestsLogger::Message("finished compile time strings tests\n");
 }
 
 static void EnumCombinableTests()
@@ -276,7 +276,7 @@ static void EnumCombinableTests()
 
     UTest(true, value.Combined(One).Contains(One));
 
-    Logger::Message("finished enum combinable tests\n");
+    UnitTestsLogger::Message("finished enum combinable tests\n");
 }
 
 WARNING_PUSH
@@ -318,7 +318,7 @@ static void TypeIdentifiableTests()
     UTest(Equal, std::string(idDebug.Name()), "int"s);
 #endif
 
-	Logger::Message("finished type identifiable tests\n");
+	UnitTestsLogger::Message("finished type identifiable tests\n");
 }
 
 template <typename T> static void TestIntegerHashes()
@@ -375,7 +375,7 @@ static void HashFuncsTest()
     TestIntegerHashes<ui32>();
     TestIntegerHashes<ui64>();
 
-	Logger::Message("finished hash tests\n");
+	UnitTestsLogger::Message("finished hash tests\n");
 }
 WARNING_POP
 
@@ -388,7 +388,7 @@ static void IntegerPropertiesTest()
 	UTest(false, IsPowerOf2(15));
 	UTest(false, IsPowerOf2(-5));
 
-	Logger::Message("finished integer properties tests\n");
+	UnitTestsLogger::Message("finished integer properties tests\n");
 }
 
 static void SetBitTests()
@@ -403,7 +403,7 @@ static void SetBitTests()
     ui64 value64 = SetBit<ui64>(0, 63, 1);
     UTest(Equal, value64, 0x8000'0000'0000'0000ULL);
 
-    Logger::Message("finished set bit tests\n");
+    UnitTestsLogger::Message("finished set bit tests\n");
 }
 
 static void SignificantBitTests()
@@ -458,7 +458,7 @@ static void SignificantBitTests()
     UTest(Equal, IndexOfMostSignificantZeroBit(i8value), 6u);
     UTest(Equal, IndexOfLeastSignificantZeroBit(i8value), 1u);
 
-    Logger::Message("finished significant bit tests\n");
+    UnitTestsLogger::Message("finished significant bit tests\n");
 }
 
 static void ChangeEndiannessTests()
@@ -472,7 +472,7 @@ static void ChangeEndiannessTests()
     ui8 ui8value = 0xFF;
     UTest(Equal, ChangeEndianness(ui8value), 0xFF);
 
-    Logger::Message("finished change endianness tests\n");
+    UnitTestsLogger::Message("finished change endianness tests\n");
 }
 
 static void RotateBitsTests()
@@ -498,7 +498,7 @@ static void RotateBitsTests()
     ui8value = RotateBitsLeft(ui8value, 2);
     UTest(Equal, ui8value, 0b001);
 
-    Logger::Message("finished rotate bits tests\n");
+    UnitTestsLogger::Message("finished rotate bits tests\n");
 }
 
 static void ErrorTests()
@@ -553,7 +553,7 @@ static void ErrorTests()
     UTest(Equal, customErrorWithAttachmentAndCustomDescription.Attachment(), -45);
     UTest(Equal, customErrorWithAttachmentAndCustomDescription.Description(), "UnitTesting "s + std::to_string(-45));
 
-    Logger::Message("finished error tests\n");
+    UnitTestsLogger::Message("finished error tests\n");
 }
 
 static void ResultTests()
@@ -564,7 +564,7 @@ static void ResultTests()
     UTest(Equal, intResult.GetError(), DefaultError::Ok());
     UTest(Equal, intResult.Unwrap(), 43);
 
-    Logger::Message("finished result tests\n");
+    UnitTestsLogger::Message("finished result tests\n");
 }
 
 #ifdef PLATFORM_WINDOWS
@@ -614,7 +614,7 @@ static void VirtualMemoryTests()
 
     UTest(true, VirtualMemory::Free(memory, 999));
 
-    Logger::Message("finished virtual memory tests\n");
+    UnitTestsLogger::Message("finished virtual memory tests\n");
 }
 
 static void AllocatorsTests()
@@ -685,7 +685,7 @@ static void AllocatorsTests()
     }
     Allocator::Malloc::Free(mem);
 
-    Logger::Message("finished allocators tests\n");
+    UnitTestsLogger::Message("finished allocators tests\n");
 }
 
 static void FilePathTests()
@@ -722,7 +722,7 @@ static void FilePathTests()
     path.ReplaceFileNameExt(TSTR("new.fil"));
     UTest(Equal, path.PlatformPath(), TSTR("C:/folder/new.fil"));
 
-    Logger::Message("finished file path tests\n");
+    UnitTestsLogger::Message("finished file path tests\n");
 }
 
 template <typename T> static void FileTypeTest(IFile &file)
@@ -936,7 +936,7 @@ static void TestFileToMemoryStream()
     UTest(true, !fileError && file.IsOpened());
     FileWriteRead(file);
 
-    Logger::Message("finished file memory stream tests\n");
+    UnitTestsLogger::Message("finished file memory stream tests\n");
 }
 
 template <typename T> static void TestFile(const FilePath &folderForTests)
@@ -997,7 +997,7 @@ template <typename T> static void TestFile(const FilePath &folderForTests)
     internalTest(2, allocNullBuff);
     internalTest(10, std::bind(allocSizedBuff, 10));
 
-    Logger::Message("finished template file tests\n");
+    UnitTestsLogger::Message("finished template file tests\n");
 }
 
 template <typename T> static void TestFileSharing(const FilePath &folderForTests)
@@ -1017,7 +1017,7 @@ template <typename T> static void TestFileSharing(const FilePath &folderForTests
     file = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::OpenExisting, FileProcModes::Read, 0, FileCacheModes::Default, FileShareModes::Write, &fileError);
     UTest(true, !fileError && file.IsOpened());
 
-    Logger::Message("finished template file sharing tests\n");
+    UnitTestsLogger::Message("finished template file sharing tests\n");
 }
 
 static void TestFileSystem(const FilePath &folderForTests)
@@ -1053,7 +1053,7 @@ static void TestFileSystem(const FilePath &folderForTests)
     UTest(false, FileSystem::IsReadOnlySet(tempFileRenamedPath, false));
     UTest(Equal, FileSystem::IsReadOnlyGet(tempFileRenamedPath).Unwrap(), false);
 
-    Logger::Message("finished filesystem tests\n");
+    UnitTestsLogger::Message("finished filesystem tests\n");
 }
 
 static void TestMemoryMappedFile(const FilePath &folderForTests)
@@ -1136,7 +1136,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     UTest(true, appendedFileMapping.IsOpened());
     UTest(true, !MemOps::Compare(appendedFileMapping.Memory(), (ui8 *)currentPartStr.data(), currentPartStr.size()));
 
-    Logger::Message("finished memory mapped file tests\n");
+    UnitTestsLogger::Message("finished memory mapped file tests\n");
 }
 
 static void TimeMomentTests()
@@ -1185,7 +1185,7 @@ static void TimeMomentTests()
     testWithRef(-2_s, -2'000'000);
     UTest(LeftLesser, TimeDifference(0.2_s), TimeDifference(0.5_s));
 
-    Logger::Message("finished time moment tests\n");
+    UnitTestsLogger::Message("finished time moment tests\n");
 }
 
 static void DataHolderTests()
@@ -1243,7 +1243,7 @@ static void DataHolderTests()
     UTest(LeftGreater, data2._moveCalledTimes, 0);
     holder4.Destroy<NonCopyable>();
 
-    Logger::Message("finished data holder tests\n");
+    UnitTestsLogger::Message("finished data holder tests\n");
 }
 
 static void MemoryStreamTests()
@@ -1315,7 +1315,7 @@ static void MemoryStreamTests()
         std::exchange(streams, {});
     }
 
-    Logger::Message("finished memory stream tests\n");
+    UnitTestsLogger::Message("finished memory stream tests\n");
 }
 
 static void FunctionInfoTests()
@@ -1349,7 +1349,7 @@ static void FunctionInfoTests()
     UTest(true, std::is_same_v<test4::result, void>);
     UTest(Equal, std::tuple_size_v<test4::args>, 0);
 
-    Logger::Message("finished function info tests\n");
+    UnitTestsLogger::Message("finished function info tests\n");
 }
 
 template <KeyCode... Codes> void TestKeys(bool(*func)(KeyCode key))
@@ -1394,16 +1394,16 @@ static void VirtualKeysTests()
     TestKeys<KeyCode::LDelete, KeyCode::RDelete>(VirtualKeys::IsDelete);
     TestKeys<KeyCode::MButton0, KeyCode::MButton1, KeyCode::MButton2, KeyCode::MButton3, KeyCode::MButton4, KeyCode::MButton5, KeyCode::MButton6>(VirtualKeys::IsMouseButton);
 
-    Logger::Message("finished virtual keys tests\n");
+    UnitTestsLogger::Message("finished virtual keys tests\n");
 }
 
 static void PrintSystemInfo()
 {
-	Logger::Message("System info:\n");
-	Logger::Message("  Logical CPU cores: %u\n", SystemInfo::LogicalCPUCores());
-	Logger::Message("  Physical CPU cores: %u\n", SystemInfo::PhysicalCPUCores());
-	Logger::Message("  Memory allocation alignment: %u\n", (ui32)SystemInfo::AllocationAlignment());
-    Logger::Message("  Memory page size: %u\n", (ui32)SystemInfo::MemoryPageSize());
+	UnitTestsLogger::Message("System info:\n");
+	UnitTestsLogger::Message("  Logical CPU cores: %u\n", SystemInfo::LogicalCPUCores());
+	UnitTestsLogger::Message("  Physical CPU cores: %u\n", SystemInfo::PhysicalCPUCores());
+	UnitTestsLogger::Message("  Memory allocation alignment: %u\n", (ui32)SystemInfo::AllocationAlignment());
+    UnitTestsLogger::Message("  Memory page size: %u\n", (ui32)SystemInfo::MemoryPageSize());
 	const char *arch = nullptr;
 	switch (SystemInfo::CPUArchitecture())
 	{
@@ -1429,7 +1429,7 @@ static void PrintSystemInfo()
 		arch = "Emscripten";
 		break;
 	}
-	Logger::Message("  CPU architecture: %s\n", arch);
+	UnitTestsLogger::Message("  CPU architecture: %s\n", arch);
     const char *platform = nullptr;
     switch (SystemInfo::CurrentPlatform())
     {
@@ -1455,8 +1455,8 @@ static void PrintSystemInfo()
         platform = "Windows";
         break;
     }
-    Logger::Message("  Platform: %s\n", platform);
-    Logger::Message("Finished printing system info\n");
+    UnitTestsLogger::Message("  Platform: %s\n", platform);
+    UnitTestsLogger::Message("Finished printing system info\n");
 }
 
 static void DoTests(int argc, const char **argv)
@@ -1466,7 +1466,7 @@ static void DoTests(int argc, const char **argv)
 		buildType = "Debug build";
 	#endif
 
-    Logger::Message("---Starting Tests for %s---\n", buildType);
+    UnitTestsLogger::Message("---Starting Tests for %s---\n", buildType);
 
     std::string filesTestFolder = "FileTestsFolder";
     if (argc >= 2)
@@ -1521,7 +1521,7 @@ static void DoTests(int argc, const char **argv)
     Error<> folderForTestsRemove = FileSystem::Remove(folderForTests);
     UTest(false, folderForTestsRemove);
 
-    Logger::Message("---Finished All Tests---\n");
+    UnitTestsLogger::Message("---Finished All Tests---\n");
 }
 
 int main(int argc, const char **argv)
@@ -1532,7 +1532,7 @@ int main(int argc, const char **argv)
 
     //UniqueIdManagerBenchmark();
 
-    Logger::Message("---Finished Everything---\n");
+    UnitTestsLogger::Message("---Finished Everything---\n");
 
 #ifdef PLATFORM_WINDOWS
     system("pause");

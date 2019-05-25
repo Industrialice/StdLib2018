@@ -18,9 +18,9 @@ namespace StdLib::Initialization
         f32 defaultF32Epsilon = 0.00001f;
     };
 
-#ifndef _SUPPRESS_CORE_INITIALIZE
-    void Initialize(const CoreParameters &parameters);
-#endif
+	#ifndef _SUPPRESS_CORE_INITIALIZE
+		void Initialize(const CoreParameters &parameters);
+	#endif
 }
 
 #define _STD_CORE_LIB_INCLUDED

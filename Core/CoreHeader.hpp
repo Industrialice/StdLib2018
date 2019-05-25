@@ -13,7 +13,6 @@
 #include <variant>
 #include <malloc.h>
 #include <atomic>
-#include <compare>
 
 using namespace std::literals;
 
@@ -37,6 +36,10 @@ using namespace std::literals;
 #include "PlatformDefines.hpp"
 #include "CoreDefines.hpp"
 #include "MemOps.hpp"
+
+#ifdef SPACESHIP_SUPPORTED
+	#include <compare>
+#endif
 
 namespace StdLib
 {

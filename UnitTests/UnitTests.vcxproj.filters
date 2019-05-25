@@ -29,13 +29,13 @@
     <ClCompile Include="XNARef.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LoggerTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MTTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTestsLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -46,7 +46,7 @@
     <ClInclude Include="_PreHeader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Logger.hpp">
+    <ClInclude Include="UnitTestsLogger.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

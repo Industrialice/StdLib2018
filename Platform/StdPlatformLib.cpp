@@ -1,5 +1,5 @@
 #include "_PreHeader.hpp"
-#include "StdPlatformAbstractionLib.hpp"
+#include "StdPlatformLib.hpp"
 
 namespace StdLib::VirtualMemory
 {
@@ -26,7 +26,7 @@ namespace StdLib::Initialization
 	void Initialize(const CoreParameters &parameters);
 }
 
-void StdLib::Initialization::Initialize(const PlatformAbstractionParameters &parameters)
+void StdLib::Initialization::Initialize(const PlatformParameters &parameters)
 {
     Initialize((const CoreParameters &)parameters);
 
