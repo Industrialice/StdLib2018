@@ -959,7 +959,7 @@ template <typename TrigFuncType, TrigFuncType TrigFunc> static inline f64 TrigBe
 
             ++counted;
         }
-    } l;
+	} l{};
 
 	TimeMoment start = TimeMoment::Now();
 	TimeDifference diff;

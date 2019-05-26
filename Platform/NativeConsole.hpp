@@ -37,13 +37,15 @@ namespace StdLib
 		~NativeConsole();
 		NativeConsole() = default;
 		NativeConsole(bool isAttachToExisting, Error<> *error = nullptr);
+		NativeConsole(NativeConsole &&source) noexcept;
+		NativeConsole &operator = (NativeConsole &&source) noexcept;
 		Error<> Open(bool isAttachToExisting);
 		void Close();
 		[[nodiscard]] bool IsOpen() const;
 		[[must_be_open]] NativeConsole &CursorPosition(std::optional<ui32> x, std::optional<ui32> y);
 		[[must_be_open]] [[nodiscard]] std::pair<ui32, ui32> CursorPosition() const;
-		[[must_be_open]] NativeConsole &Write(pathStringView text);
-		[[must_be_open]] NativeConsole &WriteASCII(std::string_view text);
+		[[must_be_open]] NativeConsole &Write(pathStringView text, ui32 *printed = nullptr);
+		[[must_be_open]] NativeConsole &WriteASCII(std::string_view text, ui32 *printed = nullptr);
 		[[must_be_open]] NativeConsole &Title(pathStringView title);
 		[[must_be_open]] NativeConsole &TitleASCII(std::string_view title);
 		[[nodiscard]] pathString Title() const;

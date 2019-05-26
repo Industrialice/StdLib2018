@@ -19,6 +19,15 @@ NativeConsole::NativeConsole(bool isAttachToExisting, Error<> *error)
 	}
 }
 
+NativeConsole::NativeConsole(NativeConsole &&source) noexcept
+{
+}
+
+NativeConsole &NativeConsole::operator = (NativeConsole &&source) noexcept
+{
+	return *this;
+}
+
 Error<> NativeConsole::Open(bool isAttachToExisting)
 {
 	return DefaultError::Unsupported();
@@ -44,13 +53,13 @@ std::pair<ui32, ui32> NativeConsole::CursorPosition() const
 	return {};
 }
 
-NativeConsole &NativeConsole::Write(pathStringView text)
+NativeConsole &NativeConsole::Write(pathStringView text, ui32 *printed)
 {
 	HARDBREAK;
 	return *this;
 }
 
-NativeConsole &NativeConsole::WriteASCII(std::string_view text)
+NativeConsole &NativeConsole::WriteASCII(std::string_view text, ui32 *printed)
 {
 	HARDBREAK;
 	return *this;

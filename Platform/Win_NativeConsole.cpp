@@ -69,6 +69,24 @@ NativeConsole::NativeConsole(bool isAttachToExisting, Error<> *error)
 	}
 }
 
+NativeConsole::NativeConsole(NativeConsole &&source) noexcept : _inputHandle(source._inputHandle), _outputHandle(source._outputHandle), _isAttached(source._isAttached)
+{
+	ASSUME(this != &source);
+	source._inputHandle = consoleHandle_undefined;
+	source._outputHandle = consoleHandle_undefined;
+}
+
+NativeConsole &NativeConsole::operator = (NativeConsole &&source) noexcept
+{
+	ASSUME(this != &source);
+	_inputHandle = source._inputHandle;
+	source._inputHandle = consoleHandle_undefined;
+	_outputHandle = source._outputHandle;
+	source._outputHandle = consoleHandle_undefined;
+	_isAttached = source._isAttached;
+	return *this;
+}
+
 Error<> NativeConsole::Open(bool isAttachToExisting)
 {
 	Close();
@@ -140,24 +158,32 @@ std::pair<ui32, ui32> NativeConsole::CursorPosition() const
 	return {(ui32)info.dwCursorPosition.X, (ui32)info.dwCursorPosition.Y};
 }
 
-NativeConsole &NativeConsole::Write(pathStringView text)
+NativeConsole &NativeConsole::Write(pathStringView text, ui32 *printed)
 {
 	ASSUME(IsOpen());
 
 	DWORD written;
 	BOOL result = WriteConsoleW(_outputHandle, text.data(), (DWORD)text.size(), &written, nullptr);
 	ASSUME(result);
+	if (printed)
+	{
+		*printed = written;
+	}
 
 	return *this;
 }
 
-NativeConsole &NativeConsole::WriteASCII(std::string_view text)
+NativeConsole &NativeConsole::WriteASCII(std::string_view text, ui32 *printed)
 {
 	ASSUME(IsOpen());
 
 	DWORD written;
 	BOOL result = WriteConsoleA(_outputHandle, text.data(), (DWORD)text.size(), &written, nullptr);
 	ASSUME(result);
+	if (printed)
+	{
+		*printed = written;
+	}
 
 	return *this;
 }
