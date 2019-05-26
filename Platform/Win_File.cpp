@@ -355,23 +355,17 @@ bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
     ASSUME(IsOpen());
     ASSUME(source || len == 0);
 
-#if STDLIB_ENABLE_FILE_STATS
-    ++_stats.writesToFileCount;
-#endif
-
     DWORD wapiWritten;
-    if (len && !WriteFile(_handle, source, len, &wapiWritten, 0))
-    {
-        if (written) *written = 0;
-        return false;
-    }
+	BOOL result = WriteFile(_handle, source, len, &wapiWritten, 0);
 
-#if STDLIB_ENABLE_FILE_STATS
-    _stats.bytesToFileWritten += len;
-#endif
+	#if STDLIB_ENABLE_FILE_STATS
+		++_stats.writesToFileCount;
+		_stats.bytesToFileWritten += wapiWritten;
+	#endif
 
-    if (written) *written = len;
-    return true;
+    if (written) *written = wapiWritten;
+
+    return result;
 }
 
 bool File::ReadFromFile(void *target, ui32 len, ui32 *read)
@@ -379,23 +373,17 @@ bool File::ReadFromFile(void *target, ui32 len, ui32 *read)
     ASSUME(IsOpen());
     ASSUME(target || len == 0);
 
-#if STDLIB_ENABLE_FILE_STATS
-    ++_stats.readsFromFileCount;
-#endif
+    DWORD wapiRead;
+	BOOL result = ReadFile(_handle, target, len, &wapiRead, 0);
 
-    DWORD wapiRead = 0;
-    if (len && !ReadFile(_handle, target, len, &wapiRead, 0))
-    {
-        if (read) *read = 0;
-        return false;
-    }
+	#if STDLIB_ENABLE_FILE_STATS
+		++_stats.readsFromFileCount;
+		_stats.bytesFromFileRead += wapiRead;
+	#endif
 
-#if STDLIB_ENABLE_FILE_STATS
-    _stats.bytesFromFileRead += wapiRead;
-#endif
+	if (read) *read = wapiRead;
 
-    if (read) *read = wapiRead;
-    return true;
+    return result;
 }
 
 NOINLINE bool File::CancelCachedRead()
@@ -437,6 +425,6 @@ namespace StdLib::FileInitialization
             return;
         }
 		using type = decltype(StdLib_GetFinalPathNameByHandleW);
-        StdLib_GetFinalPathNameByHandleW = (type)GetProcAddress(k32, "GetFinalPathNameByHandleW");
+        StdLib_GetFinalPathNameByHandleW = (type)GetProcAddress(k32, "GetFinalPathNameByHandleW"); // exists since Vista
     }
 }
