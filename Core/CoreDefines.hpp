@@ -14,6 +14,7 @@ namespace StdLib::_Private
     #else
         #define ASSUME(condition) do { if (!(condition)) HARDBREAK; } while(0)
     #endif
+	#define ASSUME_DEBUG_ONLY(condition) ASSUME(condition)
 #else
     #define HARDBREAK _UNREACHABLE
     #define SOFTBREAK
@@ -23,6 +24,7 @@ namespace StdLib::_Private
 	#else
 		#define ASSUME(condition) _ASSUME(condition)
 	#endif
+	#define ASSUME_DEBUG_ONLY(condition)
 #endif
 
 #define NOIMPL HARDBREAK

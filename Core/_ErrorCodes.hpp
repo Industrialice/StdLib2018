@@ -10,7 +10,7 @@ namespace StdLib::_ErrorCodes
         const char *_label;
 
     private:
-        ErrorCodeBase() = default;
+		ErrorCodeBase() = delete;
 
         friend struct Ok;
         friend struct UnknownError;
@@ -36,16 +36,19 @@ namespace StdLib::_ErrorCodes
             return 128;
         }
 
+		constexpr ErrorCodeBase(ui32 code, const char *label, std::nullptr_t) : _code(code), _label(label)
+		{}
+
     public:
-        ErrorCodeBase(ui32 code, const char *label) : _code(CustomCodeStart() + code), _label(label)
+		constexpr ErrorCodeBase(ui32 code, const char *label) : _code(CustomCodeStart() + code), _label(label)
         {}
 
-        [[nodiscard]] ui32 Code() const
+        [[nodiscard]] constexpr ui32 Code() const
         {
             return _code;
         }
 
-        [[nodiscard]] const char *Label() const
+        [[nodiscard]] constexpr const char *Label() const
         {
             return _label;
         }
@@ -57,11 +60,8 @@ namespace StdLib::_ErrorCodes
     { \
         struct Name : public ::StdLib::_ErrorCodes::ErrorCodeBase \
         { \
-            Name() \
-            { \
-                _code = Code; \
-                _label = TOSTR(Name); \
-            } \
+            constexpr Name() : ErrorCodeBase(Code, TOSTR(Name), std::nullptr_t{}) \
+            {} \
         }; \
     }
 
@@ -90,7 +90,7 @@ ERROR_CODE_DEFINITION(16, Timeouted)
     { \
         struct Name : public ::StdLib::_ErrorCodes::ErrorCodeBase \
         { \
-            Name() : ErrorCodeBase(Code, TOSTR(Name)) \
+            constexpr Name() : ErrorCodeBase(Code, TOSTR(Name)) \
             {} \
         }; \
     }

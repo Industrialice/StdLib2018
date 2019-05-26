@@ -503,7 +503,7 @@ static void RotateBitsTests()
 
 static void ErrorTests()
 {
-    auto okError = DefaultError::Ok();
+    constexpr auto okError = DefaultError::Ok();
     UTest(true, okError.IsOk());
     UTest(false, okError);
     UTest(Equal, okError, DefaultError::Ok());

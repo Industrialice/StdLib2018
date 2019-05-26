@@ -34,7 +34,7 @@ namespace StdLib
 
 		Result() = delete;
 
-		Result(Result &&source) noexcept : _error(std::move(source._error))
+		constexpr Result(Result &&source) noexcept : _error(std::move(source._error))
 		{
 			ASSUME(this != &source);
 			if (_error.IsOk())
@@ -43,7 +43,7 @@ namespace StdLib
 			}
 		}
 
-		Result &operator = (Result &&source) noexcept
+		constexpr Result &operator = (Result &&source) noexcept
 		{
 			ASSUME(this != &source);
 			_error = std::move(source._error);
@@ -54,29 +54,29 @@ namespace StdLib
 			return *this;
 		}
 
-        Result(const T &value) : _error(ErrorType::FromDefaultError(DefaultError::Ok()))
+		constexpr Result(const T &value) : _error(ErrorType::FromDefaultError(DefaultError::Ok()))
         {
 			new (&_value.value) T(value);
         }
 
-        Result(T &&value) : _error(ErrorType::FromDefaultError(DefaultError::Ok()))
+		constexpr Result(T &&value) : _error(ErrorType::FromDefaultError(DefaultError::Ok()))
         {
             new (&_value.value) T(std::move(value));
         }
 
-        Result(const ErrorType &error) : _error(error)
+		constexpr Result(const ErrorType &error) : _error(error)
         {
             ASSUME(!_error.IsOk());
         }
 
-        Result(ErrorType &&error) : _error(std::move(error))
+		constexpr Result(ErrorType &&error) : _error(std::move(error))
         {
             ASSUME(!_error.IsOk());
         }
 
-        [[nodiscard]] T Unwrap()
+        [[nodiscard]] constexpr T Unwrap()
         {
-            ASSUME(_error != AlreadyUnwrapped());
+			ASSUME_DEBUG_ONLY(_error != AlreadyUnwrapped());
             ASSUME(_error.IsOk());
 			#ifdef DEBUG
 				_error = ErrorType::FromDefaultError(AlreadyUnwrapped());
@@ -84,9 +84,9 @@ namespace StdLib
             return std::move(_value.value);
         }
 
-        template <typename E> [[nodiscard]] T UnwrapOrGet(E &&defaultValue)
+        template <typename E> [[nodiscard]] constexpr T UnwrapOrGet(E &&defaultValue)
         {
-            ASSUME(_error != AlreadyUnwrapped());
+			ASSUME_DEBUG_ONLY(_error != AlreadyUnwrapped());
             if (_error.IsOk())
             {
 				#ifdef DEBUG
@@ -97,19 +97,19 @@ namespace StdLib
             return std::forward<E>(defaultValue);
         }
 
-        [[nodiscard]] bool IsOk() const
+        [[nodiscard]] constexpr bool IsOk() const
         {
-            ASSUME(_error != AlreadyUnwrapped());
+			ASSUME_DEBUG_ONLY(_error != AlreadyUnwrapped());
             return _error.IsOk();
         }
 
-        [[nodiscard]] const ErrorType &GetError() const
+        [[nodiscard]] constexpr const ErrorType &GetError() const
         {
-            ASSUME(_error != AlreadyUnwrapped());
+			ASSUME_DEBUG_ONLY(_error != AlreadyUnwrapped());
             return _error;
         }
 
-        [[nodiscard]] explicit operator bool() const
+        [[nodiscard]] constexpr explicit operator bool() const
         {
             return _error.IsOk();
         }
