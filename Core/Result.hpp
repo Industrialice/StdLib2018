@@ -34,6 +34,26 @@ namespace StdLib
             }
         }
 
+		Result(Result &&source) noexcept : _error(std::move(source._error))
+		{
+			ASSUME(this != &source);
+			if (_error.IsOk())
+			{
+				new (&_value.value) T(std::move(source._value.value));
+			}
+		}
+
+		Result &operator = (Result &&source) noexcept
+		{
+			ASSUME(this != &source);
+			_error = std::move(source._error);
+			if (_error.IsOk())
+			{
+				new (&_value.value) T(std::move(source._value.value));
+			}
+			return *this;
+		}
+
         Result(const T &value) : _error(ErrorType::FromDefaultError(DefaultError::Ok()))
         {
             _value.value = value;
@@ -41,7 +61,7 @@ namespace StdLib
 
         Result(T &&value) : _error(ErrorType::FromDefaultError(DefaultError::Ok()))
         {
-            _value.value = std::move(value);
+            new (&_value.value) T(std::move(value));
         }
 
         Result(const ErrorType &error) : _error(error)

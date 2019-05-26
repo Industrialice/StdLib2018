@@ -564,6 +564,15 @@ static void ResultTests()
     UTest(Equal, intResult.GetError(), DefaultError::Ok());
     UTest(Equal, intResult.Unwrap(), 43);
 
+	Result<std::string> stringResult("testString");
+	UTest(Equal, stringResult.Unwrap(), "testString");
+	stringResult = std::string("testString");
+	Result<std::string> stringResult2 = std::move(stringResult);
+	UTest(Equal, stringResult2.Unwrap(), "testString");
+	stringResult2 = std::string("testString");
+	stringResult = std::move(stringResult2);
+	UTest(Equal, stringResult.Unwrap(), "testString");
+
     UnitTestsLogger::Message("finished result tests\n");
 }
 
@@ -943,40 +952,47 @@ template <typename T> static void TestFile(const FilePath &folderForTests)
 {
     auto internalTest = [folderForTests](ui32 bufferSize, std::function<File::bufferType()> allocBufFunc)
     {
+		FilePath path = folderForTests / TSTR("TestFile.txt");
+
         Error<> fileError = DefaultError::Ok();
-        T file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::CreateAlways, FileProcModes::Write, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
+        T file = T(path, FileOpenMode::CreateAlways, FileProcModes::Write, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
         UTest(true, !fileError && file.IsOpen());
         file.BufferSet(bufferSize, allocBufFunc());
         FileWrite(file);
+		// TODO: fix
+		//if constexpr (std::is_same_v<T, File>)
+		//{
+		//	UTest(true, FileSystem::IsPointToTheSameFile(file.PNN().Unwrap(), path));
+		//}
         file.Close();
 
 		FileTypeTest<T>(file);
 
-        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcModes::Read, 0, FileCacheModes::Default, FileShareModes::Read, &fileError);
+        file = T(path, FileOpenMode::OpenExisting, FileProcModes::Read, 0, FileCacheModes::Default, FileShareModes::Read, &fileError);
         UTest(true, !fileError && file.IsOpen());
         file.BufferSet(bufferSize, allocBufFunc());
         FileRead(file);
         file.Close();
 
-        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcModes::Read, 2, FileCacheModes::Default, FileShareModes::Read, &fileError);
+        file = T(path, FileOpenMode::OpenExisting, FileProcModes::Read, 2, FileCacheModes::Default, FileShareModes::Read, &fileError);
         UTest(true, !fileError && file.IsOpen());
         file.BufferSet(bufferSize, allocBufFunc());
         FileReadOffsetted(file, 2);
         file.Close();
 
-        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcModes::Write, uiw_max, FileCacheModes::Default, FileShareModes::None, &fileError);
+        file = T(path, FileOpenMode::OpenExisting, FileProcModes::Write, uiw_max, FileCacheModes::Default, FileShareModes::None, &fileError);
         UTest(true, !fileError && file.IsOpen());
         file.BufferSet(bufferSize, allocBufFunc());
         FileAppendWrite(file);
         file.Close();
 
-        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::OpenExisting, FileProcModes::Read, 0, FileCacheModes::Default, FileShareModes::Read, &fileError);
+        file = T(path, FileOpenMode::OpenExisting, FileProcModes::Read, 0, FileCacheModes::Default, FileShareModes::Read, &fileError);
         UTest(true, !fileError && file.IsOpen());
         file.BufferSet(bufferSize, allocBufFunc());
         FileAppendRead(file);
         file.Close();
 
-        file = T(folderForTests / TSTR("fileToCFILE.txt"), FileOpenMode::CreateAlways, FileProcModes::Read.Combined(FileProcModes::Write), 0, FileCacheModes::Default, FileShareModes::Read.Combined(FileShareModes::Write), &fileError);
+        file = T(path, FileOpenMode::CreateAlways, FileProcModes::Read.Combined(FileProcModes::Write), 0, FileCacheModes::Default, FileShareModes::Read.Combined(FileShareModes::Write), &fileError);
         UTest(true, !fileError && file.IsOpen());
         file.BufferSet(bufferSize, allocBufFunc());
         FileWriteRead(file);

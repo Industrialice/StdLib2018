@@ -36,7 +36,7 @@ File::File(File &&other) noexcept
 #ifdef STDLIB_ENABLE_FILE_STATS
     _stats = other._stats;
 #endif
-#ifdef PLATFORM_WINDOWS
+#ifdef PLATFORM_WINXP
     _pnn = std::move(other._pnn);
 #endif
 }
@@ -59,7 +59,7 @@ File &File::operator = (File &&other) noexcept
 #ifdef STDLIB_ENABLE_FILE_STATS
     _stats = other._stats;
 #endif
-#ifdef PLATFORM_WINDOWS
+#ifdef PLATFORM_WINXP
     _pnn = std::move(other._pnn);
 #endif
 

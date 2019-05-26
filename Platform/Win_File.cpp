@@ -5,7 +5,7 @@ using namespace StdLib;
 
 namespace
 {
-    DWORD(WINAPI *StdLib_GetFinalPathNameByHandleW)(HANDLE hFile, LPWSTR lpszFilePath, DWORD cchFilePath, DWORD dwFlags);
+	DWORD(WINAPI *StdLib_GetFinalPathNameByHandleW)(HANDLE hFile, LPWSTR lpszFilePath, DWORD cchFilePath, DWORD dwFlags);
 }
 
 extern NOINLINE Error<> StdLib_FileError();
@@ -28,10 +28,12 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::Fi
         return DefaultError::InvalidArgument("Path is invalid");
     }
 
-    if (!StdLib_GetFinalPathNameByHandleW)
-    {
-        _pnn = pnn.GetAbsolute();
-    }
+	#ifdef PLATFORM_WINXP
+		if (!StdLib_GetFinalPathNameByHandleW)
+		{
+			_pnn = pnn.GetAbsolute();
+		}
+	#endif
 
     ASSUME(procMode.Contains(FileProcModes::Read) || procMode.Contains(FileProcModes::Write));
 
@@ -187,20 +189,24 @@ Result<FilePath> File::PNN() const
 {
     ASSUME(IsOpen());
 
-    if (StdLib_GetFinalPathNameByHandleW)
-    {
-        wchar_t tempBuf[MaxPathLength];
-        DWORD result = StdLib_GetFinalPathNameByHandleW(_handle, tempBuf, MaxPathLength - 1, FILE_NAME_NORMALIZED);
-        if (result < 2 || result >= MaxPathLength)
-        {
-            return DefaultError::UnknownError("GetFinalPathNameByHandle failed");
-        }
-        return FilePath(tempBuf);
-    }
-    else
-    {
-        return _pnn;
-    }
+	#ifdef PLATFORM_WINXP
+		if (StdLib_GetFinalPathNameByHandleW)
+		{
+	#endif
+			wchar_t tempBuf[MaxPathLength];
+			DWORD result = StdLib_GetFinalPathNameByHandleW(_handle, tempBuf, MaxPathLength - 1, FILE_NAME_NORMALIZED);
+			if (result < 2 || result >= MaxPathLength)
+			{
+				return DefaultError::UnknownError("GetFinalPathNameByHandle failed");
+			}
+			return FilePath(tempBuf);
+	#ifdef PLATFORM_WINXP
+		}
+		else
+		{
+			return _pnn;
+		}
+	#endif
 }
 
 void File::Close()
@@ -418,13 +424,17 @@ namespace StdLib::FileInitialization
 {
     void Initialize()
     {
-        HMODULE k32 = GetModuleHandleA("kernel32.dll");
-        if (!k32)
-        {
-            HARDBREAK;
-            return;
-        }
-		using type = decltype(StdLib_GetFinalPathNameByHandleW);
-        StdLib_GetFinalPathNameByHandleW = (type)GetProcAddress(k32, "GetFinalPathNameByHandleW"); // exists since Vista
+		#ifdef PLATFORM_WINXP
+			HMODULE k32 = GetModuleHandleA("kernel32.dll");
+			if (!k32)
+			{
+				HARDBREAK;
+				return;
+			}
+			using type = decltype(StdLib_GetFinalPathNameByHandleW);
+			StdLib_GetFinalPathNameByHandleW = (type)GetProcAddress(k32, "GetFinalPathNameByHandleW"); // exists since Vista
+		#else
+			StdLib_GetFinalPathNameByHandleW = GetFinalPathNameByHandleW;
+		#endif
     }
 }

@@ -49,7 +49,7 @@ namespace StdLib
         FileProcModes::FileProcMode _procMode = FileProcModes::Read;
         FileCacheModes::FileCacheMode _cacheMode;
 
-    #ifdef PLATFORM_WINDOWS
+    #ifdef PLATFORM_WINXP
         FilePath _pnn; // used only on WindowsXP where you can't get PNN from the file handle
     #endif
 
