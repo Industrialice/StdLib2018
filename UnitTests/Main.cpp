@@ -572,6 +572,9 @@ static void ResultTests()
 	stringResult2 = std::string("testString");
 	stringResult = std::move(stringResult2);
 	UTest(Equal, stringResult.Unwrap(), "testString");
+	stringResult = DefaultError::AccessDenied();
+	UTest(false, stringResult.IsOk());
+	UTest(Equal, stringResult.UnwrapOrGet("failed"), std::string("failed"));
 
     UnitTestsLogger::Message("finished result tests\n");
 }
