@@ -11,58 +11,28 @@ namespace StdLib
     {
         using ErrorType = Error<ErrorAttachmentType, ErrorDescriptionType>;
 
-        union ValueStore
-        {
-            ~ValueStore()
-            {}
-
-            ValueStore()
-            {}
-
-			char empty;
-			T value;
-        };
-		ValueStore _value{};
 		ErrorType _error{};
+		std::variant<std::monostate, T> _value{};
 
     public:
-        ~Result()
-        {
-            if (_error.IsOk())
-            {
-                _value.value.~T();
-            }
-        }
-
-		Result(Result &&source) noexcept : _error(std::move(source._error))
+		Result(Result &&source) noexcept : _error(std::move(source._error)), _value(std::move(source._value))
 		{
 			ASSUME(this != &source);
-			if (_error.IsOk())
-			{
-				new (&_value.value) T(std::move(source._value.value));
-			}
 		}
 
 		Result &operator = (Result &&source) noexcept
 		{
 			ASSUME(this != &source);
 			_error = std::move(source._error);
-			if (_error.IsOk())
-			{
-				new (&_value.value) T(std::move(source._value.value));
-			}
+			_value = std::move(source._value);
 			return *this;
 		}
 
-        Result(const T &value) : _error(ErrorType::FromDefaultError(DefaultError::Ok()))
-        {
-            _value.value = value;
-        }
+        Result(const T &value) : _error(ErrorType::FromDefaultError(DefaultError::Ok())), _value(value)
+        {}
 
-        Result(T &&value) : _error(ErrorType::FromDefaultError(DefaultError::Ok()))
-        {
-            new (&_value.value) T(std::move(value));
-        }
+        Result(T &&value) : _error(ErrorType::FromDefaultError(DefaultError::Ok())), _value(std::move(value))
+        {}
 
         Result(const ErrorType &error) : _error(error)
         {
@@ -84,7 +54,7 @@ namespace StdLib
             ASSUME(_error != AlreadyUnwrapped());
             ASSUME(_error.IsOk());
             _error = ErrorType::FromDefaultError(AlreadyUnwrapped());
-            return std::move(_value.value);
+            return std::move(std::get<T>(_value));
         }
 
         template <typename E> [[nodiscard]] T UnwrapOrGet(E &&defaultValue)
@@ -93,7 +63,7 @@ namespace StdLib
             if (_error.IsOk())
             {
                 _error = ErrorType::FromDefaultError(AlreadyUnwrapped());
-                return std::move(_value.value);
+				return std::move(std::get<T>(_value));
             }
             return std::forward(defaultValue);
         }
