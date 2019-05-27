@@ -142,7 +142,7 @@ namespace StdLib
 	// IMPLEMENTATION //
 	////////////////////
 
-	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Message(LogLevels::LogLevel level, const MetaType &meta, const char *format, ...)
+	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Message(LogLevels::LogLevel level, const MetaType &meta, PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -150,7 +150,7 @@ namespace StdLib
 		va_end(args);
 	}
 
-	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Info(const MetaType &meta, const char *format, ...)
+	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Info(const MetaType &meta, PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -158,7 +158,7 @@ namespace StdLib
 		va_end(args);
 	}
 
-	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Error(const MetaType &meta, const char *format, ...)
+	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Error(const MetaType &meta, PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -166,7 +166,7 @@ namespace StdLib
 		va_end(args);
 	}
 
-	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Warning(const MetaType &meta, const char *format, ...)
+	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Warning(const MetaType &meta, PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -174,7 +174,7 @@ namespace StdLib
 		va_end(args);
 	}
 
-	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Critical(const MetaType &meta, const char *format, ...)
+	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Critical(const MetaType &meta, PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -182,7 +182,7 @@ namespace StdLib
 		va_end(args);
 	}
 
-	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Debug(const MetaType &meta, const char *format, ...)
+	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Debug(const MetaType &meta, PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -190,7 +190,7 @@ namespace StdLib
 		va_end(args);
 	}
 
-	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Attention(const MetaType &meta, const char *format, ...)
+	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Attention(const MetaType &meta, PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -198,7 +198,7 @@ namespace StdLib
 		va_end(args);
 	}
 
-	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Other(const MetaType &meta, const char *format, ...)
+	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Other(const MetaType &meta, PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -246,7 +246,7 @@ namespace StdLib
 		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Other, &meta, format, args);
 	}
 
-	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Message(LogLevels::LogLevel level, const char *format, ...)
+	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Message(LogLevels::LogLevel level, PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -254,7 +254,7 @@ namespace StdLib
 		va_end(args);
 	}
 
-	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Info(const char *format, ...)
+	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Info(PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -262,7 +262,7 @@ namespace StdLib
 		va_end(args);
 	}
 
-	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Error(const char *format, ...)
+	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Error(PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -270,7 +270,7 @@ namespace StdLib
 		va_end(args);
 	}
 
-	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Warning(const char *format, ...)
+	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Warning(PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -278,7 +278,7 @@ namespace StdLib
 		va_end(args);
 	}
 
-	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Critical(const char *format, ...)
+	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Critical(PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -286,7 +286,7 @@ namespace StdLib
 		va_end(args);
 	}
 
-	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Debug(const char *format, ...)
+	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Debug(PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -294,7 +294,7 @@ namespace StdLib
 		va_end(args);
 	}
 
-	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Attention(const char *format, ...)
+	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Attention(PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
@@ -302,7 +302,7 @@ namespace StdLib
 		va_end(args);
 	}
 
-	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Other(const char *format, ...)
+	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Other(PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);

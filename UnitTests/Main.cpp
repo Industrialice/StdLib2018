@@ -770,7 +770,7 @@ static void FileWrite(IFile &file)
         UTest(Equal, file.OffsetGet().Unwrap(), oldOffset);
     }
 
-    auto startSize = "test0123456789 start"s.length();
+    uiw startSize = "test0123456789 start"s.length();
     UTest(Equal, file.SizeGet().Unwrap(), startSize);
     UTest(false, file.SizeSet(startSize - 1));
     UTest(Equal, file.SizeGet().Unwrap(), startSize - 1);
@@ -1233,12 +1233,12 @@ static void DataHolderTests()
 
     struct NonCopyable2 : NonCopyable
     {
-        ui8 _crap[56];
+		ui8 _crap[56]{};
     };
 
     struct NonCopyable3 : NonCopyable2
     {
-        i32 _extra0, _extra1;
+		i32 _extra0{}, _extra1{};
     };
 
     Holder64 holder = Holder64(NonCopyable());
@@ -1303,7 +1303,7 @@ static void MemoryStreamTests()
     struct HolderTestData
     {
         char str[13] = "LunaCelestia";
-    } holderTestData;
+	} holderTestData{};
 
     using memoryStreamType = MemoryStreamFromDataHolder<32>;
 
