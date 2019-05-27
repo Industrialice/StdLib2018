@@ -10,6 +10,9 @@
 
 #define _SUPPRESS_PLATFORM_INITIALIZE
 
+#include <atomic>
+#include <mutex>
+#include <cstdarg>
 #include <StdPlatformLib.hpp>
 #include "UniqueIdManager.hpp"
 #include "Logger.hpp"

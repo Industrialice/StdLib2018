@@ -40,13 +40,13 @@ static void MiscTests()
 		ReinitializeTest(const ReinitializeTest &) = default;
 		ReinitializeTest &operator = (const ReinitializeTest &) = default;
 
-		ReinitializeTest(ReinitializeTest &&source) : value(source.value)
+		ReinitializeTest(ReinitializeTest &&source) noexcept : value(source.value)
 		{
 			source.isMovedOut = true;
 			isMovedOut = false;
 		}
 
-		ReinitializeTest &operator = (ReinitializeTest &&source)
+		ReinitializeTest &operator = (ReinitializeTest &&source) noexcept
 		{
 			value = source.value;
 			source.isMovedOut = true;
@@ -1054,7 +1054,9 @@ static void TestFileSystem(const FilePath &folderForTests)
     Error<> fileError = DefaultError::Ok();
     FilePath tempFilePath = dirTestPath / TSTR("tempFile.txt");
     UTest(Equal, FileSystem::Classify(tempFilePath).GetError(), DefaultError::NotFound());
-    FileToCFile(tempFilePath, FileOpenMode::CreateAlways, FileProcModes::Write, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
+    FileToCFile tempFile(tempFilePath, FileOpenMode::CreateAlways, FileProcModes::Write, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
+	UTest(true, tempFile.IsOpen());
+	tempFile.Close();
     UTest(false, fileError);
     UTest(Equal, FileSystem::IsFolderEmpty(dirTestPath).Unwrap(), false);
     UTest(Equal, FileSystem::Classify(tempFilePath).Unwrap(), FileSystem::ObjectType::File);

@@ -46,7 +46,7 @@ void UnitTestsLogger::PopLastMessage()
 #endif
 }
 
-void UnitTestsLogger::Message(const char *fmt, ...)
+void UnitTestsLogger::Message(PRINTF_VERIFY_FRONT const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);

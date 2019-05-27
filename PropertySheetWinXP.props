@@ -11,6 +11,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>PLATFORM_WINXP;STDLIB_ENABLE_FILE_STATS;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;PLATFORM_WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link />
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>

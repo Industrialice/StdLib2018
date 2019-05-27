@@ -21,15 +21,15 @@ void LoggerTests()
     auto handle = logger.OnMessage(testDest);
     
     currentReference = "test";
-    logger.Message(LogLevels::Attention, "test");
+    logger.Attention("test");
 
     currentLevel = LogLevels::Info;
     currentReference = "123_12";
-    logger.Message(LogLevels::Info, "%s_%i", "123", 12);
+    logger.Info("%s_%i", "123", 12);
 
     logger.IsEnabled(false);
     isShouldBeCalled = false;
-    logger.Message(LogLevels::Info, "");
+    logger.Info("");
 
     auto logger2 = Logger<std::string, true>();
 
@@ -44,7 +44,7 @@ void LoggerTests()
     auto handle2 = logger2.OnMessage(testDest2);
 
     currentReference = "testing meta";
-    logger2.Message(LogLevels::Info, std::string{"meta test"}, "testing meta");
+    logger2.Info(std::string{"meta test"}, "testing meta");
 
 	UnitTestsLogger::Message("finished logger tests\n");
 }
