@@ -12,6 +12,9 @@ namespace StdLib::_ErrorCodes
     private:
 		ErrorCodeBase() = delete;
 
+		constexpr ErrorCodeBase(ui32 code, const char *label, std::nullptr_t) : _code(code), _label(label)
+		{}
+
         friend struct Ok;
         friend struct UnknownError;
         friend struct InvalidArgument;
@@ -35,9 +38,6 @@ namespace StdLib::_ErrorCodes
         {
             return 128;
         }
-
-		constexpr ErrorCodeBase(ui32 code, const char *label, std::nullptr_t) : _code(code), _label(label)
-		{}
 
     public:
 		constexpr ErrorCodeBase(ui32 code, const char *label) : _code(CustomCodeStart() + code), _label(label)

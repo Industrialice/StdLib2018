@@ -10,6 +10,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SmallerTypeCheck>true</SmallerTypeCheck>
       <StringPooling>false</StringPooling>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup />
