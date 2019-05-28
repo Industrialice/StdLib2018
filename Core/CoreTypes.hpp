@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cinttypes>
-
 namespace StdLib
 {
     using uiw = uintptr_t;
