@@ -46,10 +46,8 @@ namespace StdLib
                 new (_local) clearT(std::forward<T>(source));
                 _onMoving = [](DataHolder &target, DataHolder &sourceHolder)
                 {
-                #ifdef DEBUG
-                    ASSUME(!sourceHolder._isDestroyed);
-                    ASSUME(!sourceHolder._isMovedFrom);
-                #endif
+					ASSUME_DEBUG_ONLY(!sourceHolder._isDestroyed);
+					ASSUME_DEBUG_ONLY(!sourceHolder._isMovedFrom);
                     new (target._local) clearT(std::move(sourceHolder.Get<clearT>()));
                     ((clearT *)sourceHolder._local)->~clearT();
                     target._onMoving = sourceHolder._onMoving;
@@ -65,10 +63,8 @@ namespace StdLib
                 _address = new clearT(std::forward<T>(source));
                 _onMoving = [](DataHolder &target, DataHolder &sourceHolder)
                 {
-                #ifdef DEBUG
-                    ASSUME(!sourceHolder._isDestroyed);
-                    ASSUME(!sourceHolder._isMovedFrom);
-                #endif
+                    ASSUME_DEBUG_ONLY(!sourceHolder._isDestroyed);
+					ASSUME_DEBUG_ONLY(!sourceHolder._isMovedFrom);
                     target._address = sourceHolder._address;
                     sourceHolder._address = nullptr;
                     target._onMoving = sourceHolder._onMoving;
@@ -111,9 +107,7 @@ namespace StdLib
 
         template <typename T> [[nodiscard]] T &Get()
         {
-        #ifdef DEBUG
-            ASSUME(!_isDestroyed && !_isMovedFrom);
-        #endif
+            ASSUME_DEBUG_ONLY(!_isDestroyed && !_isMovedFrom);
             if constexpr (sizeof(T) <= size)
             {
                 return *(T *)_local;
@@ -126,9 +120,7 @@ namespace StdLib
 
         template <typename T> [[nodiscard]] const T &Get() const
         {
-        #ifdef DEBUG
-            ASSUME(!_isDestroyed && !_isMovedFrom);
-        #endif
+            ASSUME_DEBUG_ONLY(!_isDestroyed && !_isMovedFrom);
             if constexpr (sizeof(T) <= size)
             {
                 return *(T *)_local;
