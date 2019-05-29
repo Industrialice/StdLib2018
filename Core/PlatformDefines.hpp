@@ -10,6 +10,10 @@
     #define PLATFORM_EMSCRIPTEN
 #endif
 
+#ifndef PLATFORM_WINDOWS
+	#define PLATFORM_POSIX
+#endif
+
 // TODO: check for multiple defined platforms
 
 #ifdef PLATFORM_POSIX

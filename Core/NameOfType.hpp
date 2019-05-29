@@ -32,6 +32,13 @@ namespace StdLib
 			return 0; // unreachable
 		}
 
+		static constexpr uiw StrLen(const char *str)
+		{
+			uiw length = 0;
+			for (; str[length]; ++length);
+			return length;
+		}
+
 		template <bool IsGetReadable, uiw Size> static constexpr auto Convert(const std::array<char, Size> &source)
 		{
 			constexpr char leftName[] = "NameOfType<";
@@ -98,36 +105,18 @@ namespace StdLib
 		static constexpr auto Get()
 		{
 			constexpr const char *cname = PRETTY_FUNCTION;
-
-			constexpr uiw length = [](const char *name) constexpr -> uiw
-			{
-				uiw length = 0;
-				for (; name[length]; ++length);
-				return length;
-			}(cname)+1;
-
+			constexpr uiw length = StrLen(cname) + 1;
 			constexpr std::array<char, length> name = ArrayFromChar<length>(cname);
-
 			constexpr auto converted = Convert<false>(name);
-
 			return Strip<converted.second>(converted.first);
 		}
 
 		static constexpr auto GetReadable()
 		{
 			constexpr const char *cname = PRETTY_FUNCTION;
-
-			constexpr uiw length = [](const char *name) constexpr -> uiw
-			{
-				uiw length = 0;
-				for (; name[length]; ++length);
-				return length;
-			}(cname)+1;
-
+			constexpr uiw length = StrLen(cname) + 1;
 			constexpr std::array<char, length> name = ArrayFromChar<length>(cname);
-
 			constexpr auto converted = Convert<true>(name);
-
 			return Strip<converted.second>(converted.first);
 		}
 

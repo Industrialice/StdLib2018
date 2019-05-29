@@ -43,6 +43,12 @@ ui32 SystemInfo::PhysicalCPUCores()
     return LogicalCPUCoresValue;
 }
 
+// TODO: implementation
+auto SystemInfo::AcquireCacheInfo() -> std::pair<const CacheInfo *, uiw>
+{
+	return {nullptr, 0u};
+}
+
 uiw SystemInfo::AllocationAlignment()
 {
     ASSUME(AllocationAlignmentValue > 0);
@@ -53,6 +59,12 @@ uiw SystemInfo::MemoryPageSize()
 {
     ASSUME(PageSizeValue > 0);
     return PageSizeValue;
+}
+
+// TODO: implementation
+bool SystemInfo::IsDebuggerAttached()
+{
+	return false;
 }
 
 namespace StdLib::SystemInfo
