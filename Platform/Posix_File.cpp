@@ -186,7 +186,7 @@ void File::Close()
     {
         return;
     }
-    PerformFlush(false);
+    FlushWriteBuffers(false);
     if (_isOwningFileHandle)
     {
         int result = close(_handle);
@@ -201,9 +201,9 @@ Result<i64> File::Offset(FileOffsetMode offsetMode, i64 offset)
 {
     ASSUME(IsOpen());
 
-    if (!CancelCachedRead() || !PerformFlush(false)) // TODO: optimize
+    if (!CancelCachedRead() || !FlushWriteBuffers(false)) // TODO: optimize
     {
-        return DefaultError::UnknownError();
+        return DefaultError::UnknownError("Flushing buffers failed");
     }
 
     int whence;
@@ -254,9 +254,9 @@ Result<i64> File::Offset(FileOffsetMode offsetMode, i64 offset)
 Result<ui64> File::Size()
 {
     ASSUME(IsOpen());
-    if (!PerformFlush(false)) // flushing first because file pointer may not be at the end of the file, in that case we can't just return FileSize + BufferSize
+    if (!FlushWriteBuffers(false)) // flushing first because file pointer may not be at the end of the file, in that case we can't just return FileSize + BufferSize
     {
-        return DefaultError::UnknownError();
+        return DefaultError::UnknownError("Flushing write buffers failed");
     }
     struct stat64 stats;
     if (fstat64(_handle, &stats) != 0)
@@ -271,9 +271,9 @@ Error<> File::Size(ui64 newSize)
 {
     ASSUME(IsOpen());
 
-    if (!CancelCachedRead() || !PerformFlush(false))
+    if (!CancelCachedRead() || !FlushWriteBuffers(false))
     {
-        return DefaultError::UnknownError();
+        return DefaultError::UnknownError("Flushing buffers failed");
     }
 
     newSize += (ui64)_offsetToStart;
@@ -345,7 +345,7 @@ bool File::ReadFromFile(void *target, ui32 len, ui32 *readRet)
     return true;
 }
 
-NOINLINE bool File::CancelCachedRead()
+bool File::CancelCachedRead()
 {
     ASSUME(IsOpen());
     if (_bufferPos >= _readBufferCurrentSize)

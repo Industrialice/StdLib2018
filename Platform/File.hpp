@@ -86,7 +86,7 @@ namespace StdLib
         [[nodiscard]] virtual bool IsOpen() const override;
 
 		[[must_be_open]] virtual bool Read(void *RSTR target, ui32 len, ui32 *RSTR read = 0) override;
-		[[must_be_open]] virtual bool Write(const void *source, ui32 len, ui32 *RSTR written = 0) override;
+		[[must_be_open]] virtual bool Write(const void *RSTR source, ui32 len, ui32 *RSTR written = 0) override;
 
 		[[must_be_open]] virtual bool Flush() override;
 
@@ -106,7 +106,7 @@ namespace StdLib
 		[[must_be_open]] [[nodiscard]] virtual FileCacheModes::FileCacheMode CacheMode() const override;
 
     private:
-		bool PerformFlush(bool isFlushSystemCaches);
+		bool FlushWriteBuffers(bool isFlushSystemCaches);
         void FlushSystemCaches();
 		[[nodiscard]] bool WriteToFile(const void *source, ui32 len, ui32 *written);
 		[[nodiscard]] bool ReadFromFile(void *target, ui32 len, ui32 *read);

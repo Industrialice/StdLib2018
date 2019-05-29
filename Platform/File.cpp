@@ -103,7 +103,7 @@ fileHandle File::CloseAndGetOsFileDescriptor()
 
 bool File::FlushInternal()
 {
-    return PerformFlush(false);
+    return FlushWriteBuffers(false);
 }
 
 TypeId File::Type() const
@@ -116,7 +116,7 @@ bool File::IsOpen() const
     return _handle != fileHandle_undefined;
 }
 
-NOINLINE bool File::Read(void *target, ui32 len, ui32 *read)
+NOINLINE bool File::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
 {
     ASSUME(IsOpen());
     ASSUME(target || len == 0);
@@ -132,55 +132,51 @@ NOINLINE bool File::Read(void *target, ui32 len, ui32 *read)
     #endif
     };
 
-    if (read) *read = 0;
+	if (read) *read = 0;
 
-    if (_bufferSize)
+    if (!FlushWriteBuffers(false)) // flush any pending writes
     {
-    #ifdef STDLIB_ENABLE_FILE_STATS
-        ++_stats.bufferedReads;
-    #endif
+        return false;
+    }
 
-        if (!PerformFlush(false))
+    ASSUME(_bufferPos <= _readBufferCurrentSize);
+
+    if (_readBufferCurrentSize - _bufferPos <= len) // we don't have enough info in the read buffer to fulfill the request
+    {
+        ui32 cpyLen = _readBufferCurrentSize - _bufferPos;
+        readFromBuffer(target, cpyLen);
+        len -= cpyLen;
+        target = (ui8 *)target + cpyLen;
+
+        if (len >= _bufferSize)
+        {
+			#ifdef STDLIB_ENABLE_FILE_STATS
+				++_stats.unbufferedReads;
+			#endif
+            return ReadFromFile(target, len, read);
+        }
+
+        if (read) *read = cpyLen;
+        _readBufferCurrentSize = 0;
+        _bufferPos = 0;
+        if (!ReadFromFile(_internalBuffer.get(), _bufferSize, &_readBufferCurrentSize))
         {
             return false;
         }
-
-        ASSUME(_bufferPos <= _readBufferCurrentSize);
-
-        if (_readBufferCurrentSize - _bufferPos < len)
-        {
-            ui32 cpyLen = _readBufferCurrentSize - _bufferPos;
-            readFromBuffer(target, cpyLen);
-            len -= cpyLen;
-            target = (ui8 *)target + cpyLen;
-
-            if (len >= _bufferSize)
-            {
-                return ReadFromFile(target, len, read);
-            }
-
-            if (read) *read = cpyLen;
-            _readBufferCurrentSize = 0;
-            _bufferPos = 0;
-            if (!ReadFromFile(_internalBuffer.get(), _bufferSize, &_readBufferCurrentSize))
-            {
-                return false;
-            }
-        }
-
-        ui32 cpyLen = std::min(_readBufferCurrentSize - _bufferPos, len);
-        readFromBuffer(target, cpyLen);
-        if (read) *read += cpyLen;
-
-        return true;
     }
-#ifdef STDLIB_ENABLE_FILE_STATS
-    ++_stats.unbufferedReads;
-#endif
-    return ReadFromFile(target, len, read);
+
+    ui32 cpyLen = std::min(_readBufferCurrentSize - _bufferPos, len);
+    readFromBuffer(target, cpyLen);
+    if (read) *read += cpyLen;
+
+	#ifdef STDLIB_ENABLE_FILE_STATS
+		++_stats.bufferedReads;
+	#endif
+
+    return true;
 }
 
-NOINLINE bool File::Write(const void *source, ui32 len, ui32 *RSTR written)
+NOINLINE bool File::Write(const void *RSTR source, ui32 len, ui32 *RSTR written)
 {
     ASSUME(IsOpen());
     ASSUME(source || len == 0);
@@ -189,46 +185,41 @@ NOINLINE bool File::Write(const void *source, ui32 len, ui32 *RSTR written)
 
     if (written) *written = 0;
 
-    if (_bufferSize)
+    if (!CancelCachedRead()) // if there's any cached read data, we need to flush it and restore the file pointer
     {
-    #ifdef STDLIB_ENABLE_FILE_STATS
-        ++_stats.bufferedWrites;
-    #endif
+        return false;
+    }
 
-        if (!CancelCachedRead())
+    if (_bufferSize - _bufferPos < len) // not enough space in the buffer to hold the new data
+    {
+        if (!FlushWriteBuffers(false)) // write the current contents of the buffer
         {
             return false;
         }
-
-        if (_bufferSize - _bufferPos < len)
-        {
-            if (!PerformFlush(false))
-            {
-                return false;
-            }
-            return WriteToFile(source, len, written);
-        }
-
-        MemOps::Copy(_internalBuffer.get() + _bufferPos, (ui8 *)source, len);
-        _bufferPos += len;
-    #ifdef STDLIB_ENABLE_FILE_STATS
-        ++_stats.writesToBufferCount;
-        _stats.bytesToBufferWritten += len;
-    #endif
-
-        if (written) *written = len;
-        return true;
+		#ifdef STDLIB_ENABLE_FILE_STATS
+			++_stats.unbufferedWrites;
+		#endif
+        return WriteToFile(source, len, written);
     }
 
-#ifdef STDLIB_ENABLE_FILE_STATS
-    ++_stats.unbufferedWrites;
-#endif
-    return WriteToFile(source, len, written);
+	#ifdef STDLIB_ENABLE_FILE_STATS
+		++_stats.bufferedWrites;
+	#endif
+
+    MemOps::Copy(_internalBuffer.get() + _bufferPos, (ui8 *)source, len);
+    _bufferPos += len;
+	#ifdef STDLIB_ENABLE_FILE_STATS
+		++_stats.writesToBufferCount;
+		_stats.bytesToBufferWritten += len;
+	#endif
+
+    if (written) *written = len;
+    return true;
 }
 
-NOINLINE bool File::Flush()
+bool File::Flush()
 {
-    return PerformFlush(true);
+    return CancelCachedRead() && FlushWriteBuffers(true);
 }
 
 bool File::IsBufferingSupported() const
@@ -245,7 +236,7 @@ NOINLINE bool File::Buffer(ui32 size, bufferType &&buffer)
     {
         return true;
     }
-	if (!PerformFlush(false) || !File::CancelCachedRead())
+	if (!FlushWriteBuffers(false) || !CancelCachedRead())
 	{
 		return false;
 	}
@@ -292,9 +283,9 @@ Result<i64> File::Offset(FileOffsetMode offsetMode)
 
     if (offsetMode == FileOffsetMode::FromEnd)
     {
-        if (!CancelCachedRead() || !PerformFlush(false))
+        if (!CancelCachedRead() || !FlushWriteBuffers(false))
         {
-            return DefaultError::UnknownError();
+            return DefaultError::UnknownError("Flushing buffers failed");
         }
     }
 
@@ -346,7 +337,7 @@ FileCacheModes::FileCacheMode File::CacheMode() const
     return _cacheMode;
 }
 
-NOINLINE bool File::PerformFlush(bool isFlushSystemCaches)
+bool File::FlushWriteBuffers(bool isFlushSystemCaches)
 {
     ASSUME(IsOpen());
     ASSUME(_bufferPos <= _bufferSize);
@@ -356,7 +347,7 @@ NOINLINE bool File::PerformFlush(bool isFlushSystemCaches)
         FlushSystemCaches();
     }
 
-    if (_readBufferCurrentSize)
+    if (_readBufferCurrentSize) // the buffer is currently used for reading, nothing to flush
     {
         return true;
     }

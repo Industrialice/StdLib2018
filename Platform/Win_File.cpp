@@ -215,7 +215,7 @@ void File::Close()
     {
         return;
     }
-    PerformFlush(false);
+    FlushWriteBuffers(false);
     if (_isOwningFileHandle)
     {
         BOOL result = CloseHandle(_handle);
@@ -232,9 +232,9 @@ Result<i64> File::Offset(FileOffsetMode offsetMode, i64 offset)
 
     DWORD moveMethod;
 
-    if (!CancelCachedRead() || !PerformFlush(false))
+    if (!CancelCachedRead() || !FlushWriteBuffers(false))
     {
-        return DefaultError::UnknownError();
+        return DefaultError::UnknownError("Flushing buffers failed");
     }
 
     if (offsetMode == FileOffsetMode::FromBegin)
@@ -284,9 +284,9 @@ Result<i64> File::Offset(FileOffsetMode offsetMode, i64 offset)
 Result<ui64> File::Size()
 {
     ASSUME(IsOpen());
-    if (!PerformFlush(false)) // flushing first because file pointer may not be at the end of the file, in that case we can't just return FileSize + BufferSize
+    if (!FlushWriteBuffers(false)) // flushing first because file pointer may not be at the end of the file, in that case we can't just return FileSize + BufferSize
     {
-        return DefaultError::UnknownError();
+        return DefaultError::UnknownError("Flushing write buffers failed");
     }
     LARGE_INTEGER size;
     if (!GetFileSizeEx(_handle, &size))
@@ -305,9 +305,9 @@ Error<> File::Size(ui64 newSize)
 {
     ASSUME(IsOpen());
 
-    if (!CancelCachedRead() || !PerformFlush(false))
+    if (!CancelCachedRead() || !FlushWriteBuffers(false))
     {
-        return DefaultError::UnknownError();
+        return DefaultError::UnknownError("Flushing buffers failed");
     }
 
     newSize += (ui64)_offsetToStart;
@@ -392,7 +392,7 @@ bool File::ReadFromFile(void *target, ui32 len, ui32 *read)
     return result;
 }
 
-NOINLINE bool File::CancelCachedRead()
+bool File::CancelCachedRead()
 {
     ASSUME(IsOpen());
     if (_bufferPos >= _readBufferCurrentSize)

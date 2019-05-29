@@ -275,7 +275,7 @@ bool StandardFile::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
     return true;
 }
 
-bool StandardFile::Write(const void *source, ui32 len, ui32 *RSTR written)
+bool StandardFile::Write(const void *RSTR source, ui32 len, ui32 *RSTR written)
 {
     ASSUME(IsOpen());
     ui32 actuallyWritten = (ui32)fwrite(source, 1, len, _file);

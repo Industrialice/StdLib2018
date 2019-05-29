@@ -600,7 +600,7 @@ static void ResultTests()
 static void VirtualMemoryTests()
 {
 #ifdef PLATFORM_WINDOWS
-	if (SystemInfo::IsDebuggerAttached())
+	if (SystemInfo::IsDebuggerAttached()) // debugger will throw an exception even for intercepted exceptions
 	{
 		UnitTestsLogger::Message("debugger is present, skipping virtual memory tests\n");
 		return;
@@ -883,7 +883,7 @@ static void FileWriteRead(IFile &file)
         ch = 32 + rand() % 96;
     }
 
-    ui32 written, read;
+    ui32 written = 0xBAADDEAD, read = 0xFACCF00D;
 
     char readBuf[256];
 

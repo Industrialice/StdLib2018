@@ -93,7 +93,7 @@ bool MemoryStreamFile::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
     return true;
 }
 
-bool MemoryStreamFile::Write(const void *source, ui32 len, ui32 *RSTR written)
+bool MemoryStreamFile::Write(const void *RSTR source, ui32 len, ui32 *RSTR written)
 {
     ASSUME(_stream && _procMode.Contains(FileProcModes::Write));
     ASSUME(len == 0 || source);
