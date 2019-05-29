@@ -1,3 +1,6 @@
 #pragma once
 
-#include <PlatformTypes.hpp>
+#include <atomic>
+#include <mutex>
+#include <cstdarg>
+#include <StdPlatformLib.hpp>

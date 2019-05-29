@@ -1,6 +1,4 @@
 #include "_PreHeader.hpp"
-#include <MathFunctions.hpp>
-#include <ApproxMath.hpp>
 
 using namespace StdLib;
 using namespace Funcs;

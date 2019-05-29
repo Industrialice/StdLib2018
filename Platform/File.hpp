@@ -1,7 +1,6 @@
 #pragma once
 
 #include "FilePath.hpp"
-#include <IFile.hpp>
 
 WARNING_PUSH
 WARNING_DISABLE_INTEGRAL_CONSTANT_OVERFLOW

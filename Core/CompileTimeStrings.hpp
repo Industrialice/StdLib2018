@@ -1,7 +1,5 @@
 #pragma once
 
-#include "CoreHeader.hpp"
-
 namespace StdLib
 {
     namespace CompileTimeStrings

@@ -1,5 +1,5 @@
 #include "_PreHeader.hpp"
-#include "StdCoreLib.hpp"
+#include "_CoreInitialization.hpp"
 
 using namespace StdLib;
 

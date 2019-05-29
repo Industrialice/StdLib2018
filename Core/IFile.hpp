@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Result.hpp"
-#include "GenericFuncs.hpp"
 #include "EnumCombinable.hpp"
+#include "Result.hpp"
 #include "TypeIdentifiable.hpp"
 
 namespace StdLib

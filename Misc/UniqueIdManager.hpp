@@ -1,7 +1,5 @@
 #pragma once
 
-#include "MiscTypes.hpp"
-
 namespace StdLib
 {
     class UniqueIdManager

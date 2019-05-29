@@ -50,6 +50,9 @@
     <ClInclude Include="StandardFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="_PlatformInitialization.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win_VirtualMemory.cpp">

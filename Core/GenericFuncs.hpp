@@ -1,7 +1,5 @@
 #pragma once
 
-#include "CoreHeader.hpp"
-
 namespace StdLib::Funcs
 {
     template <typename T, typename R> [[nodiscard]] bool AreSharedPointersEqual(T &&left, R &&right)

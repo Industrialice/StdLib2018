@@ -10,22 +10,9 @@
 
 #define _SUPPRESS_PLATFORM_INITIALIZE
 
-#include <atomic>
-#include <mutex>
-#include <cstdarg>
-#include <StdPlatformLib.hpp>
+#include "MiscTypes.hpp"
 #include "UniqueIdManager.hpp"
 #include "Logger.hpp"
-
-namespace StdLib::Initialization
-{
-    struct MiscParameters : PlatformParameters
-    {
-    };
-
-	#ifndef _SUPPRESS_MISC_INITIALIZE
-		void Initialize(const MiscParameters &parameters);
-	#endif
-}
+#include "_MiscInitialization.hpp"
 
 #define _STD_MISC_LIB_INCLUDED

@@ -45,6 +45,8 @@
 #endif
 
 #include <cstdio>
+#include <random>
+#include <stdarg.h>
 #include <unordered_set>
 #include <StdMiscLib.hpp>
 

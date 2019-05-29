@@ -1,7 +1,5 @@
 #pragma once
 
-#include "CoreHeader.hpp"
-
 namespace StdLib::Hash
 {
 	enum class Precision { P32, P64 };

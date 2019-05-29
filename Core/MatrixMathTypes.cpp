@@ -1,8 +1,7 @@
 #include "_PreHeader.hpp"
-#include "MatrixMathTypes.hpp"
-#include "_MatrixMathFunctions.hpp"
 #include "MathFunctions.hpp"
 #include "ApproxMath.hpp"
+#include "_MatrixMathFunctions.hpp"
 
 using namespace StdLib;
 

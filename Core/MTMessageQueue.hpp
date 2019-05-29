@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Message.hpp"
-#include <condition_variable>
 
 namespace StdLib
 {

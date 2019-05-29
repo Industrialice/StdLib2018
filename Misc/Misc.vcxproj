@@ -191,6 +191,7 @@
     <ClInclude Include="MiscTypes.hpp" />
     <ClInclude Include="StdMiscLib.hpp" />
     <ClInclude Include="UniqueIdManager.hpp" />
+    <ClInclude Include="_MiscInitialization.hpp" />
     <ClInclude Include="_PreHeader.hpp" />
   </ItemGroup>
   <ItemGroup>

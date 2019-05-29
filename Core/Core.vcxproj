@@ -217,6 +217,7 @@
     <ClInclude Include="_MathValidation.hpp" />
     <ClInclude Include="_MatrixMathFunctions.hpp" />
     <ClInclude Include="_PreHeader.hpp" />
+    <ClInclude Include="_CoreInitialization.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DIWRSpinLock.cpp" />

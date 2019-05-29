@@ -1,5 +1,5 @@
 #include "_PreHeader.hpp"
-#include "StdPlatformLib.hpp"
+#include "_PlatformInitialization.hpp"
 
 namespace StdLib::VirtualMemory
 {

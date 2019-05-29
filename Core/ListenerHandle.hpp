@@ -22,7 +22,7 @@ namespace StdLib
         }
 
         TListenerHandle() = default;
-
+		
         TListenerHandle(const std::weak_ptr<OwnerType> &owner, IdType id) : _owner(owner), _id(id)
         {}
 

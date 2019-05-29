@@ -1,9 +1,8 @@
 #pragma once
 
-#include "CoreHeader.hpp"
+#include "TypeIdentifiable.hpp"
 #include "Allocators.hpp"
 #include "DataHolder.hpp"
-#include "TypeIdentifiable.hpp"
 
 WARNING_PUSH
 WARNING_DISABLE_INTEGRAL_CONSTANT_OVERFLOW

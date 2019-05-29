@@ -1,8 +1,5 @@
 #pragma once
 
-#include "CoreHeader.hpp"
-#include "MathFunctions.hpp"
-
 namespace StdLib::ApproxMath
 {
     enum class Precision { Low, Medium, High };

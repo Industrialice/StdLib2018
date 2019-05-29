@@ -1,8 +1,6 @@
 #pragma once
 
-#include "MiscTypes.hpp"
 #include "AssignListenerId.hpp"
-#include <ListenerHandle.hpp>
 
 namespace StdLib
 {
@@ -29,7 +27,7 @@ namespace StdLib
 		std::atomic<bool> _isEnabled{true};
 		std::mutex _mutex{};
 	};
-
+	
 	template <typename MetaType, bool IsThreadSafe> struct _LoggerMessageMethod
 	{
 		void Message(LogLevels::LogLevel level, const MetaType &meta, PRINTF_VERIFY_FRONT const char *format, ...) PRINTF_VERIFY_BACK(4, 5);

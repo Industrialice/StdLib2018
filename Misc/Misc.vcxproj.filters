@@ -29,6 +29,9 @@
     <ClInclude Include="MiscTypes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="_MiscInitialization.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="UniqueIdManager.cpp">

@@ -1,5 +1,4 @@
 #include "_PreHeader.hpp"
-#include <Logger.hpp>
 #include "UnitTestsLogger.hpp"
 
 using namespace StdLib;

@@ -1,8 +1,4 @@
 #include "_PreHeader.hpp"
-#include <MemoryStreamFile.hpp>
-#include <StandardFile.hpp>
-#include <thread>
-#include <MathFunctions.hpp>
 
 using namespace StdLib;
 using namespace Funcs;

@@ -16,16 +16,7 @@
 #include "SystemInfo.hpp"
 #include "VirtualKeys.hpp"
 #include "NativeConsole.hpp"
-
-namespace StdLib::Initialization
-{
-    struct PlatformParameters : CoreParameters
-    {
-    };
-
-	#ifndef _SUPPRESS_PLATFORM_INITIALIZE
-		void Initialize(const PlatformParameters &parameters);
-	#endif
-}
+#include "StandardFile.hpp"
+#include "_PlatformInitialization.hpp"
 
 #define _STD_PLATFORM_LIB_INCLUDED

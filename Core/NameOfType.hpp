@@ -1,7 +1,5 @@
 #pragma once
 
-#include "CoreHeader.hpp"
-
 WARNING_PUSH
 WARNING_DISABLE_LARGE_BY_VALUE_COPY
 

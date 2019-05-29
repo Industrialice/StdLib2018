@@ -12,7 +12,7 @@
 
 // TODO: check for multiple defined platforms
 
-#ifndef PLATFORM_WINDOWS
+#ifdef PLATFORM_POSIX
     #include <signal.h>
 	using errno_t = int;
 #endif

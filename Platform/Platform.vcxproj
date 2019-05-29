@@ -198,6 +198,7 @@
     <ClInclude Include="TimeMoment.hpp" />
     <ClInclude Include="VirtualKeys.hpp" />
     <ClInclude Include="VirtualMemory.hpp" />
+    <ClInclude Include="_PlatformInitialization.hpp" />
     <ClInclude Include="_PreHeader.hpp" />
   </ItemGroup>
   <ItemGroup>

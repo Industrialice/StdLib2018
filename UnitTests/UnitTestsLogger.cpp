@@ -1,7 +1,5 @@
 #include "_PreHeader.hpp"
-#include <StdCoreLib.hpp>
 #include "UnitTestsLogger.hpp"
-#include <stdarg.h>
 
 using namespace StdLib;
 
