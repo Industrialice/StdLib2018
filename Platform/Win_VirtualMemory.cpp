@@ -61,7 +61,7 @@ bool VirtualMemory::Free(void *memory, uiw memorySize)
     return VirtualFree(memory, 0, MEM_RELEASE) != 0;
 }
 
-auto VirtualMemory::PageModeGet(const void *memory, uiw size) -> Result<PageModes::PageMode>
+auto VirtualMemory::PageMode(const void *memory, uiw size) -> Result<PageModes::PageMode>
 {
     if ((size % PageSize()) != 0)
     {
@@ -89,7 +89,7 @@ auto VirtualMemory::PageModeGet(const void *memory, uiw size) -> Result<PageMode
     return DefaultError::UnknownError("Encountered unknown WinAPI protection mode");
 }
 
-Error<> VirtualMemory::PageModeSet(void *memory, uiw size, PageModes::PageMode pageMode)
+Error<> VirtualMemory::PageMode(void *memory, uiw size, PageModes::PageMode pageMode)
 {
     ASSUME(memory && size);
     DWORD oldProtect;

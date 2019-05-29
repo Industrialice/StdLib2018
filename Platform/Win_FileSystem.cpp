@@ -218,7 +218,7 @@ NOINLINE Result<bool> FileSystem::IsFolderEmpty(const FilePath &pnn)
     return isEmpty;
 }
 
-Result<bool> FileSystem::IsReadOnlyGet(const FilePath &pnn)
+Result<bool> FileSystem::IsReadOnly(const FilePath &pnn)
 {
     DWORD attribs = GetFileAttributesW(pnn.PlatformPath().data());
     if (attribs == INVALID_FILE_ATTRIBUTES)
@@ -229,7 +229,7 @@ Result<bool> FileSystem::IsReadOnlyGet(const FilePath &pnn)
     return (attribs & FILE_ATTRIBUTE_READONLY) != 0;
 }
 
-NOINLINE Error<> FileSystem::IsReadOnlySet(const FilePath &pnn, bool isReadOnly)
+NOINLINE Error<> FileSystem::IsReadOnly(const FilePath &pnn, bool isReadOnly)
 {
     DWORD new_attribs;
     DWORD old_attribs = GetFileAttributesW(pnn.PlatformPath().data());

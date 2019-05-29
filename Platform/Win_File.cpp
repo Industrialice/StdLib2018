@@ -226,7 +226,7 @@ void File::Close()
     _readBufferCurrentSize = 0;
 }
 
-Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
+Result<i64> File::Offset(FileOffsetMode offsetMode, i64 offset)
 {
     ASSUME(IsOpen());
 
@@ -281,7 +281,7 @@ Result<i64> File::OffsetSet(FileOffsetMode offsetMode, i64 offset)
     return move.QuadPart - _offsetToStart;
 }
 
-Result<ui64> File::SizeGet()
+Result<ui64> File::Size()
 {
     ASSUME(IsOpen());
     if (!PerformFlush(false)) // flushing first because file pointer may not be at the end of the file, in that case we can't just return FileSize + BufferSize
@@ -301,7 +301,7 @@ Result<ui64> File::SizeGet()
     return size.QuadPart - _offsetToStart;
 }
 
-Error<> File::SizeSet(ui64 newSize)
+Error<> File::Size(ui64 newSize)
 {
     ASSUME(IsOpen());
 

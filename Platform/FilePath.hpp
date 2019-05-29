@@ -84,7 +84,7 @@ namespace StdLib
 		[[nodiscard]] FilePath GetNormalized() const;
 		[[nodiscard]] bool IsValid() const; // false if too big or isn't supported by the platform
 
-        void MakeAbsolute();
+		FilePath &MakeAbsolute();
 		[[nodiscard]] FilePath GetAbsolute() const;
 		[[nodiscard]] bool IsAbsolute() const;
 

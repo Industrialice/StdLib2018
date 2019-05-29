@@ -24,7 +24,7 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
     }
 
     uiw fileSize;
-    if (auto fileSizeResult = file.SizeGet(); fileSizeResult)
+    if (auto fileSizeResult = file.Size(); fileSizeResult)
     {
         ui64 fileSizeUnwrapped = fileSizeResult.Unwrap();
         if ((fileSizeUnwrapped + file._offsetToStart) >= uiw_max)

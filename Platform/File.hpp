@@ -91,16 +91,16 @@ namespace StdLib
 		[[must_be_open]] virtual bool Flush() override;
 
         [[nodiscard]] virtual bool IsBufferingSupported() const override;
-		[[must_be_open]] virtual bool BufferSet(ui32 size, bufferType &&buffer = {nullptr, nullptr}) override;
-		[[must_be_open]] [[nodiscard]] virtual std::pair<ui32, const void *> BufferGet() const override;
+		[[must_be_open]] virtual bool Buffer(ui32 size, bufferType &&buffer = {nullptr, nullptr}) override;
+		[[must_be_open]] [[nodiscard]] virtual std::pair<ui32, const void *> Buffer() const override;
 
         [[nodiscard]] virtual bool IsSeekSupported() const override;
 
-		[[must_be_open]] [[nodiscard]] virtual Result<i64> OffsetGet(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) override;
-		[[must_be_open]] virtual Result<i64> OffsetSet(FileOffsetMode offsetMode, i64 offset) override;
+		[[must_be_open]] [[nodiscard]] virtual Result<i64> Offset(FileOffsetMode offsetMode = FileOffsetMode::FromBegin) override;
+		[[must_be_open]] virtual Result<i64> Offset(FileOffsetMode offsetMode, i64 offset) override;
 
-		[[must_be_open]] [[nodiscard]] virtual Result<ui64> SizeGet() override;
-		[[must_be_open]] virtual Error<> SizeSet(ui64 newSize) override;
+		[[must_be_open]] [[nodiscard]] virtual Result<ui64> Size() override;
+		[[must_be_open]] virtual Error<> Size(ui64 newSize) override;
 
 		[[must_be_open]] [[nodiscard]] virtual FileProcModes::FileProcMode ProcMode() const override;
 		[[must_be_open]] [[nodiscard]] virtual FileCacheModes::FileCacheMode CacheMode() const override;

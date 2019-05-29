@@ -61,12 +61,12 @@ bool VirtualMemory::Free(void *memory, uiw memorySize)
     return munmap(memory, memorySize) == 0;
 }
 
-auto VirtualMemory::PageModeGet(const void *memory, uiw size) -> Result<PageModes::PageMode>
+auto VirtualMemory::PageMode(const void *memory, uiw size) -> Result<PageModes::PageMode>
 {
     return DefaultError::Unsupported();
 }
 
-Error<> VirtualMemory::PageModeSet(void *memory, uiw size, PageModes::PageMode pageMode)
+Error<> VirtualMemory::PageMode(void *memory, uiw size, PageModes::PageMode pageMode)
 {
     ASSUME(memory && size);
     int protection = PageModeToPosix(pageMode);

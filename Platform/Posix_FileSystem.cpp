@@ -234,7 +234,7 @@ NOINLINE Result<bool> FileSystem::IsFolderEmpty(const FilePath &pnn)
     return !isFilesFound;
 }
 
-Result<bool> FileSystem::IsReadOnlyGet(const FilePath &pnn)
+Result<bool> FileSystem::IsReadOnly(const FilePath &pnn)
 {
     struct stat fileStats;
     if (stat(pnn.PlatformPath().data(), &fileStats) != 0)
@@ -246,7 +246,7 @@ Result<bool> FileSystem::IsReadOnlyGet(const FilePath &pnn)
     return mode == (S_IRUSR | S_IRGRP | S_IROTH);
 }
 
-Error<> FileSystem::IsReadOnlySet(const FilePath &pnn, bool isReadOnly)
+Error<> FileSystem::IsReadOnly(const FilePath &pnn, bool isReadOnly)
 {
     mode_t mode = isReadOnly ? (S_IRUSR | S_IRGRP | S_IROTH) : (S_IRWXU | S_IRWXG | S_IRWXO);
     if (chmod(pnn.PlatformPath().data(), mode) != 0)

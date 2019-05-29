@@ -22,42 +22,42 @@ namespace
     constexpr f64 RevFreqUSFP64 = 0.001;
 }
 
-TimeDifference::TimeDifference(MinutesFP64 time)
+TimeDifference::TimeDifference(TimeMinutesFP64 time)
 {
     _counter = (i64)(time * FreqMFP64);
 }
 
-TimeDifference::TimeDifference(MinutesI64 time)
+TimeDifference::TimeDifference(TimeMinutesI64 time)
 {
     _counter = time * FreqMInt;
 }
 
-TimeDifference::TimeDifference(SecondsFP64 time)
+TimeDifference::TimeDifference(TimeSecondsFP64 time)
 {
     _counter = (i64)(time * FreqFP64);
 }
 
-TimeDifference::TimeDifference(SecondsI64 time)
+TimeDifference::TimeDifference(TimeSecondsI64 time)
 {
     _counter = time * FreqInt;
 }
 
-TimeDifference::TimeDifference(MilliSecondsFP64 time)
+TimeDifference::TimeDifference(TimeMilliSecondsFP64 time)
 {
     _counter = (i64)(time * FreqMSFP64);
 }
 
-TimeDifference::TimeDifference(MilliSecondsI64 time)
+TimeDifference::TimeDifference(TimeMilliSecondsI64 time)
 {
     _counter = time * FreqInt / 1'000;
 }
 
-TimeDifference::TimeDifference(MicroSecondsFP64 time)
+TimeDifference::TimeDifference(TimeMicroSecondsFP64 time)
 {
     _counter = (i64)(time * FreqUSFP64);
 }
 
-TimeDifference::TimeDifference(MicroSecondsI64 time)
+TimeDifference::TimeDifference(TimeMicroSecondsI64 time)
 {
     _counter = time * FreqInt / 1'000'000;
 }

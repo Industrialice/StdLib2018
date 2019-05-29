@@ -1,15 +1,15 @@
 #include "_PreHeader.hpp"
-#include "FileToMemoryStream.hpp"
+#include "MemoryStreamFile.hpp"
 
 using namespace StdLib;
 
-FileToMemoryStream::FileToMemoryStream(IMemoryStream &stream, FileProcModes::FileProcMode procMode, ui64 offset, Error<> *error)
+MemoryStreamFile::MemoryStreamFile(IMemoryStream &stream, FileProcModes::FileProcMode procMode, ui64 offset, Error<> *error)
 {
     Error<> dummyError = this->Open(stream, procMode, offset);
     if (error) *error = dummyError;
 }
 
-FileToMemoryStream::FileToMemoryStream(FileToMemoryStream &&source) noexcept
+MemoryStreamFile::MemoryStreamFile(MemoryStreamFile &&source) noexcept
 {
     this->_stream = source._stream;
     source._stream = 0;
@@ -18,7 +18,7 @@ FileToMemoryStream::FileToMemoryStream(FileToMemoryStream &&source) noexcept
     this->_startOffset = source._startOffset;
 }
 
-FileToMemoryStream &FileToMemoryStream::operator = (FileToMemoryStream &&source) noexcept
+MemoryStreamFile &MemoryStreamFile::operator = (MemoryStreamFile &&source) noexcept
 {
     ASSUME(this != &source);
     this->_stream = source._stream;
@@ -29,7 +29,7 @@ FileToMemoryStream &FileToMemoryStream::operator = (FileToMemoryStream &&source)
     return *this;
 }
 
-Error<> FileToMemoryStream::Open(IMemoryStream &stream, FileProcModes::FileProcMode procMode, ui64 offset)
+Error<> MemoryStreamFile::Open(IMemoryStream &stream, FileProcModes::FileProcMode procMode, ui64 offset)
 {
     _stream = 0;
     _offset = 0;
@@ -62,22 +62,22 @@ Error<> FileToMemoryStream::Open(IMemoryStream &stream, FileProcModes::FileProcM
     return DefaultError::Ok();
 }
 
-TypeId FileToMemoryStream::Type() const
+TypeId MemoryStreamFile::Type() const
 {
 	return GetTypeId();
 }
 
-void FileToMemoryStream::Close()
+void MemoryStreamFile::Close()
 {
     _stream = 0;
 }
 
-bool FileToMemoryStream::IsOpen() const
+bool MemoryStreamFile::IsOpen() const
 {
     return _stream != 0;
 }
 
-bool FileToMemoryStream::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
+bool MemoryStreamFile::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
 {
     ASSUME(_stream && _procMode.Contains(FileProcModes::Read));
     ASSUME(len == 0 || target);
@@ -93,7 +93,7 @@ bool FileToMemoryStream::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
     return true;
 }
 
-bool FileToMemoryStream::Write(const void *source, ui32 len, ui32 *RSTR written)
+bool MemoryStreamFile::Write(const void *source, ui32 len, ui32 *RSTR written)
 {
     ASSUME(_stream && _procMode.Contains(FileProcModes::Write));
     ASSUME(len == 0 || source);
@@ -121,34 +121,34 @@ bool FileToMemoryStream::Write(const void *source, ui32 len, ui32 *RSTR written)
     return true;
 }
 
-bool FileToMemoryStream::Flush()
+bool MemoryStreamFile::Flush()
 {
     ASSUME(_stream);
     _stream->Flush();
     return true;
 }
 
-bool FileToMemoryStream::IsBufferingSupported() const
+bool MemoryStreamFile::IsBufferingSupported() const
 {
     return false;
 }
 
-bool FileToMemoryStream::BufferSet(ui32 size, bufferType &&buffer)
+bool MemoryStreamFile::Buffer(ui32 size, bufferType &&buffer)
 {
     return false;
 }
 
-std::pair<ui32, const void *> FileToMemoryStream::BufferGet() const
+std::pair<ui32, const void *> MemoryStreamFile::Buffer() const
 {
     return {0, nullptr};
 }
 
-bool FileToMemoryStream::IsSeekSupported() const
+bool MemoryStreamFile::IsSeekSupported() const
 {
     return true;
 }
 
-Result<i64> FileToMemoryStream::OffsetGet(FileOffsetMode offsetMode)
+Result<i64> MemoryStreamFile::Offset(FileOffsetMode offsetMode)
 {
     ASSUME(_stream);
     if (offsetMode == FileOffsetMode::FromBegin)
@@ -166,7 +166,7 @@ Result<i64> FileToMemoryStream::OffsetGet(FileOffsetMode offsetMode)
     }
 }
 
-Result<i64> FileToMemoryStream::OffsetSet(FileOffsetMode offsetMode, i64 offset)
+Result<i64> MemoryStreamFile::Offset(FileOffsetMode offsetMode, i64 offset)
 {
     ASSUME(_stream);
     ASSUME(_startOffset <= _stream->Size());
@@ -246,13 +246,13 @@ Result<i64> FileToMemoryStream::OffsetSet(FileOffsetMode offsetMode, i64 offset)
     return _offset - _startOffset;
 }
 
-Result<ui64> FileToMemoryStream::SizeGet()
+Result<ui64> MemoryStreamFile::Size()
 {
     ASSUME(_stream);
     return _stream->Size() - _startOffset;
 }
 
-Error<> FileToMemoryStream::SizeSet(ui64 newSize)
+Error<> MemoryStreamFile::Size(ui64 newSize)
 {
     ASSUME(_stream);
     newSize += _startOffset;
@@ -266,13 +266,13 @@ Error<> FileToMemoryStream::SizeSet(ui64 newSize)
     return DefaultError::OutOfMemory();
 }
 
-FileProcModes::FileProcMode FileToMemoryStream::ProcMode() const
+FileProcModes::FileProcMode MemoryStreamFile::ProcMode() const
 {
     ASSUME(_stream);
     return _procMode;
 }
 
-FileCacheModes::FileCacheMode FileToMemoryStream::CacheMode() const
+FileCacheModes::FileCacheMode MemoryStreamFile::CacheMode() const
 {
     ASSUME(_stream);
     return FileCacheModes::Default;

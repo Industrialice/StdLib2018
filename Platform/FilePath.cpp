@@ -81,7 +81,7 @@ bool FilePath::IsValid() const
     return true;
 }
 
-void FilePath::MakeAbsolute()
+FilePath &FilePath::MakeAbsolute()
 {
     wchar_t tempBuf[maxPathLength];
     DWORD result = ::GetFullPathNameW(_path.c_str(), maxPathLength, tempBuf, 0);
@@ -90,6 +90,7 @@ void FilePath::MakeAbsolute()
         ASSUME(tempBuf[result - 1] == _path.back()); // I don't think GetFullPathName can remove/change the last (back)slash?
         _path = tempBuf;
     }
+	return *this;
 }
 
 FilePath FilePath::GetAbsolute() const
@@ -186,9 +187,10 @@ bool FilePath::IsValid() const
     return true;
 }
 
-void FilePath::MakeAbsolute()
+FilePath &FilePath::MakeAbsolute()
 {
     NOIMPL;
+	return *this;
 }
 
 FilePath FilePath::GetAbsolute() const

@@ -26,9 +26,9 @@ namespace StdLib
     };
 
     // uses a fixed sized buffer
-    template <uiw size> class MemoryStreamFixed final : public IMemoryStream, public TypeIdentifiable<MemoryStreamFixed<size>>
+    template <uiw FixedSize> class MemoryStreamFixed final : public IMemoryStream, public TypeIdentifiable<MemoryStreamFixed<FixedSize>>
     {
-        ui8 _buffer[size];
+        ui8 _buffer[FixedSize];
         uiw _currentSize = 0;
 
     public:
@@ -41,9 +41,9 @@ namespace StdLib
 
         [[nodiscard]] virtual ui64 Resize(ui64 newSize) override
         {
-            if (newSize > size)
+            if (newSize > FixedSize)
             {
-                newSize = size;
+                newSize = FixedSize;
             }
             _currentSize = (uiw)newSize;
             return _currentSize;

@@ -17,8 +17,8 @@ namespace StdLib::FileSystem
 	[[nodiscard]] Error<> VolumeDriveName(const FilePath &path, char *RSTR output, uiw maxLen); // maxLen include null-symbol, if buffer was too small, returns a zero
 	[[nodiscard]] Result<bool> IsPointToTheSameFile(const FilePath &pnn0, const FilePath &pnn1); // the function may fail if it cannot open one of the files
 	[[nodiscard]] Result<bool> IsFolderEmpty(const FilePath &pnn);
-	[[nodiscard]] Result<bool> IsReadOnlyGet(const FilePath &pnn);
-	Error<> IsReadOnlySet(const FilePath &pnn, bool isReadOnly);
+	[[nodiscard]] Result<bool> IsReadOnly(const FilePath &pnn);
+	Error<> IsReadOnly(const FilePath &pnn, bool isReadOnly);
 	Error<> CreateNewFolder(const FilePath &where, const FilePath &name, bool isOverrideExisting);
 	[[nodiscard]] Result<FilePath> CurrentWorkingPathGet();
 	Error<> CurrentWorkingPathSet(const FilePath &path);

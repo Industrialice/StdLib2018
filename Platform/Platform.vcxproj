@@ -188,7 +188,7 @@
   <ItemGroup>
     <ClInclude Include="File.hpp" />
     <ClInclude Include="FileSystem.hpp" />
-    <ClInclude Include="FileToCFile.hpp" />
+    <ClInclude Include="StandardFile.hpp" />
     <ClInclude Include="MemoryMappedFile.hpp" />
     <ClInclude Include="NativeConsole.hpp" />
     <ClInclude Include="PlatformTypes.hpp" />
@@ -259,7 +259,7 @@
     <ClCompile Include="TimeMoment.cpp" />
     <ClCompile Include="Win_File.cpp" />
     <ClCompile Include="Win_FileSystem.cpp" />
-    <ClCompile Include="FileToCFile.cpp" />
+    <ClCompile Include="StandardFile.cpp" />
     <ClCompile Include="Posix_VirtualMemory.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>

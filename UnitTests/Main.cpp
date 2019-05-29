@@ -1,6 +1,6 @@
 #include "_PreHeader.hpp"
-#include <FileToMemoryStream.hpp>
-#include <FileToCFile.hpp>
+#include <MemoryStreamFile.hpp>
+#include <StandardFile.hpp>
 #include <thread>
 #include <MathFunctions.hpp>
 
@@ -615,14 +615,14 @@ static void VirtualMemoryTests()
     UTest(true, commitError.IsOk());
     EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), false);
 
-    auto protection = VirtualMemory::PageModeGet(memory, VirtualMemory::PageSize());
+    auto protection = VirtualMemory::PageMode(memory, VirtualMemory::PageSize());
 #ifdef PLATFORM_WINDOWS
     UTest(Equal, protection.Unwrap(), VirtualMemory::PageModes::Read.Combined(VirtualMemory::PageModes::Write));
 #else
     UTest(Equal, protection.GetError(), DefaultError::Unsupported());
 #endif
 
-    auto protectionSetResult = VirtualMemory::PageModeSet(memory, VirtualMemory::PageSize(), VirtualMemory::PageModes::Read);
+    auto protectionSetResult = VirtualMemory::PageMode(memory, VirtualMemory::PageSize(), VirtualMemory::PageModes::Read);
     UTest(true, protectionSetResult.IsOk());
     EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), true);
 
@@ -753,7 +753,7 @@ template <typename T> static void FileTypeTest(IFile &file)
 static void FileWrite(IFile &file)
 {
     UTest(Equal, file.ProcMode().Combined(FileProcModes::Write), file.ProcMode());
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromBegin).Unwrap(), 0);
+    UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), 0);
     
     std::string_view str = "test0123456789 start";
     ui32 written = 0;
@@ -761,53 +761,53 @@ static void FileWrite(IFile &file)
     UTest(Equal, written, str.length());
     UTest(true, file.Write(nullptr, 0, &written));
     UTest(Equal, written, 0);
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromBegin).Unwrap(), str.length());
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromCurrent).Unwrap(), 0);
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromEnd).Unwrap(), 0);
+    UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), str.length());
+    UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), 0);
+    UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), 0);
     
     if (file.IsSeekSupported())
     {
-        i64 oldOffset = file.OffsetGet().Unwrap();
-        UTest(true, file.OffsetSet(FileOffsetMode::FromCurrent, -5));
-        UTest(Equal, file.OffsetGet(FileOffsetMode::FromBegin).Unwrap(), str.length() - 5);
-        UTest(Equal, file.OffsetGet(FileOffsetMode::FromCurrent).Unwrap(), 0);
-        UTest(Equal, file.OffsetGet(FileOffsetMode::FromEnd).Unwrap(), -5);
+        i64 oldOffset = file.Offset().Unwrap();
+        UTest(true, file.Offset(FileOffsetMode::FromCurrent, -5));
+        UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), str.length() - 5);
+        UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), 0);
+        UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), -5);
         str = "trats";
         UTest(true, file.Write(str.data(), (ui32)str.length(), &written));
         UTest(Equal, written, str.length());
-        UTest(Equal, file.OffsetGet().Unwrap(), oldOffset);
+        UTest(Equal, file.Offset().Unwrap(), oldOffset);
     }
 
     uiw startSize = "test0123456789 start"s.length();
-    UTest(Equal, file.SizeGet().Unwrap(), startSize);
-    UTest(false, file.SizeSet(startSize - 1));
-    UTest(Equal, file.SizeGet().Unwrap(), startSize - 1);
-    UTest(false, file.SizeSet(startSize + 1));
-    UTest(Equal, file.SizeGet().Unwrap(), startSize + 1);
-    UTest(false, file.SizeSet(startSize - 1));
-    UTest(Equal, file.SizeGet().Unwrap(), startSize - 1);
+    UTest(Equal, file.Size().Unwrap(), startSize);
+    UTest(false, file.Size(startSize - 1));
+    UTest(Equal, file.Size().Unwrap(), startSize - 1);
+    UTest(false, file.Size(startSize + 1));
+    UTest(Equal, file.Size().Unwrap(), startSize + 1);
+    UTest(false, file.Size(startSize - 1));
+    UTest(Equal, file.Size().Unwrap(), startSize - 1);
 }
 
 static void FileRead(IFile &file)
 {
     UTest(Equal, file.ProcMode(), FileProcModes::Read);
-    UTest(Equal, file.OffsetGet().Unwrap(), 0);
+    UTest(Equal, file.Offset().Unwrap(), 0);
 
     std::string_view str = file.IsSeekSupported() ? "test0123456789 trat" : "test0123456789 star";
-    UTest(LeftGreaterEqual, file.SizeGet().Unwrap(), str.length());
+    UTest(LeftGreaterEqual, file.Size().Unwrap(), str.length());
     ui32 read = 0;
     std::string target(str.length(), '\0');
     UTest(true, file.Read(target.data(), (ui32)target.length(), &read));
     UTest(Equal, read, str.length());
     UTest(Equal, str, target);
-    UTest(Equal, file.OffsetGet().Unwrap(), str.length());
+    UTest(Equal, file.Offset().Unwrap(), str.length());
     UTest(true, file.Read(nullptr, 0, &read));
     UTest(Equal, read, 0);
-    UTest(Equal, file.OffsetGet().Unwrap(), str.length());
+    UTest(Equal, file.Offset().Unwrap(), str.length());
 
     if (file.IsSeekSupported())
     {
-        UTest(true, file.OffsetSet(FileOffsetMode::FromCurrent, -4));
+        UTest(true, file.Offset(FileOffsetMode::FromCurrent, -4));
         str = file.IsSeekSupported() ? "trat" : "star";
         target.resize(str.length());
         UTest(true, file.Read(target.data(), (ui32)target.length(), &read));
@@ -819,23 +819,23 @@ static void FileRead(IFile &file)
 static void FileReadOffsetted(IFile &file, uiw offset)
 {
     UTest(Equal, file.ProcMode(), FileProcModes::Read);
-    UTest(Equal, file.OffsetGet().Unwrap(), 0);
+    UTest(Equal, file.Offset().Unwrap(), 0);
 
     std::string_view str = (file.IsSeekSupported() ? "test0123456789 trat" : "test0123456789 star") + offset;
-    UTest(LeftGreaterEqual, file.SizeGet().Unwrap(), str.length());
+    UTest(LeftGreaterEqual, file.Size().Unwrap(), str.length());
     ui32 read = 0;
     std::string target(str.length(), '\0');
     UTest(true, file.Read(target.data(), (ui32)target.length(), &read));
     UTest(Equal, read, str.length());
     UTest(Equal, str, target);
-    UTest(Equal, file.OffsetGet().Unwrap(), str.length());
+    UTest(Equal, file.Offset().Unwrap(), str.length());
     UTest(true, file.Read(nullptr, 0, &read));
     UTest(Equal, read, 0);
-    UTest(Equal, file.OffsetGet().Unwrap(), str.length());
+    UTest(Equal, file.Offset().Unwrap(), str.length());
 
     if (file.IsSeekSupported())
     {
-        UTest(true, file.OffsetSet(FileOffsetMode::FromCurrent, -4));
+        UTest(true, file.Offset(FileOffsetMode::FromCurrent, -4));
         str = file.IsSeekSupported() ? "trat" : "star";
         target.resize(str.length());
         UTest(true, file.Read(target.data(), (ui32)target.length(), &read));
@@ -847,21 +847,21 @@ static void FileReadOffsetted(IFile &file, uiw offset)
 static void FileAppendWrite(IFile &file)
 {
     UTest(Equal, file.ProcMode().Combined(FileProcModes::Write), file.ProcMode());
-    UTest(Equal, file.OffsetGet().Unwrap(), 0);
+    UTest(Equal, file.Offset().Unwrap(), 0);
     std::string_view str = "9184";
     ui32 written = 0;
     UTest(true, file.Write(str.data(), (ui32)str.length(), &written));
     UTest(Equal, written, str.length());
-    UTest(Equal, file.OffsetGet().Unwrap(), str.length());
-    UTest(Equal, file.SizeGet().Unwrap(), str.length());
+    UTest(Equal, file.Offset().Unwrap(), str.length());
+    UTest(Equal, file.Size().Unwrap(), str.length());
 }
 
 static void FileAppendRead(IFile &file)
 {
     UTest(Equal, file.ProcMode(), FileProcModes::Read);
-    UTest(Equal, file.OffsetGet().Unwrap(), 0);
+    UTest(Equal, file.Offset().Unwrap(), 0);
     std::string_view str = file.IsSeekSupported() ? "test0123456789 trat9184" : "test0123456789 star9184";
-    UTest(Equal, file.SizeGet().Unwrap(), str.length());
+    UTest(Equal, file.Size().Unwrap(), str.length());
     std::string target(str.length(), '\0');
     ui32 read = 0;
     UTest(true, file.Read(target.data(), (ui32)target.length(), &read));
@@ -889,36 +889,36 @@ static void FileWriteRead(IFile &file)
 
     UTest(Equal, file.ProcMode().Combined(FileProcModes::Write).Combined(FileProcModes::Read), file.ProcMode());
 
-    UTest(Equal, file.OffsetGet().Unwrap(), 0);
+    UTest(Equal, file.Offset().Unwrap(), 0);
     UTest(true, file.Write(crapString0.data(), (ui32)crapString0.length(), &written));
     UTest(Equal, written, (ui32)crapString0.length());
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromBegin).Unwrap(), (i64)crapString0.length());
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromEnd).Unwrap(), (i64)0);
-    UTest(Equal, file.SizeGet().Unwrap(), crapString0.length());
+    UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), (i64)crapString0.length());
+    UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
+    UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), (i64)0);
+    UTest(Equal, file.Size().Unwrap(), crapString0.length());
 
-    UTest(true, file.OffsetSet(FileOffsetMode::FromBegin, (i64)32));
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromBegin).Unwrap(), (i64)32);
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromEnd).Unwrap(), -((i64)crapString0.length() - 32));
+    UTest(true, file.Offset(FileOffsetMode::FromBegin, (i64)32));
+    UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), (i64)32);
+    UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
+    UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), -((i64)crapString0.length() - 32));
     UTest(true, file.Read(readBuf, (ui32)crapString0.length() - 32, &read));
     UTest(Equal, read, (ui32)crapString0.length() - 32);
     UTest(true, !MemOps::Compare(readBuf, crapString0.data() + 32, crapString0.length() - 32));
-    UTest(Equal, file.SizeGet().Unwrap(), crapString0.length());
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromBegin).Unwrap(), (i64)crapString0.length());
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromEnd).Unwrap(), (i64)0);
+    UTest(Equal, file.Size().Unwrap(), crapString0.length());
+    UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), (i64)crapString0.length());
+    UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
+    UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), (i64)0);
 
-    UTest(true, file.OffsetSet(FileOffsetMode::FromBegin, 64));
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromBegin).Unwrap(), (i64)64);
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
-    UTest(Equal, file.OffsetGet(FileOffsetMode::FromEnd).Unwrap(), -(i64)(crapString0.length() - 64));
-    UTest(Equal, file.SizeGet().Unwrap(), crapString0.length());
+    UTest(true, file.Offset(FileOffsetMode::FromBegin, 64));
+    UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), (i64)64);
+    UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
+    UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), -(i64)(crapString0.length() - 64));
+    UTest(Equal, file.Size().Unwrap(), crapString0.length());
     UTest(true, file.Write(crapString1.data(), (ui32)crapString1.length(), &written));
     UTest(Equal, written, (ui32)crapString1.length());
 
-    UTest(true, file.OffsetSet(FileOffsetMode::FromBegin, 0));
-    UTest(Equal, file.SizeGet().Unwrap(), crapString0.length());
+    UTest(true, file.Offset(FileOffsetMode::FromBegin, 0));
+    UTest(Equal, file.Size().Unwrap(), crapString0.length());
     crapString0.replace(crapString0.begin() + 64, crapString0.begin() + 64 + crapString1.length(), crapString1.data(), crapString1.length());
     UTest(true, file.Read(readBuf, (ui32)crapString0.length() + 999, &read)); // read outside the file, must truncate the requested size
     UTest(Equal, read, (ui32)crapString0.length());
@@ -930,29 +930,29 @@ static void TestFileToMemoryStream()
     MemoryStreamAllocator<> memoryStream;
     
     Error<> fileError = DefaultError::Ok();
-    FileToMemoryStream file = FileToMemoryStream(memoryStream, FileProcModes::Write, 0, &fileError);
+    MemoryStreamFile file = MemoryStreamFile(memoryStream, FileProcModes::Write, 0, &fileError);
     UTest(true, !fileError && file);
     FileWrite(file);
 
-	FileTypeTest<FileToMemoryStream>(file);
+	FileTypeTest<MemoryStreamFile>(file);
 
-    file = FileToMemoryStream(memoryStream, FileProcModes::Read, 0, &fileError);
+    file = MemoryStreamFile(memoryStream, FileProcModes::Read, 0, &fileError);
     UTest(true, !fileError && file);
     FileRead(file);
 
-    file = FileToMemoryStream(memoryStream, FileProcModes::Read, 2, &fileError);
+    file = MemoryStreamFile(memoryStream, FileProcModes::Read, 2, &fileError);
     UTest(true, !fileError && file);
     FileReadOffsetted(file, 2);
 
-    file = FileToMemoryStream(memoryStream, FileProcModes::Write, uiw_max, &fileError);
+    file = MemoryStreamFile(memoryStream, FileProcModes::Write, uiw_max, &fileError);
     UTest(true, !fileError && file);
     FileAppendWrite(file);
 
-    file = FileToMemoryStream(memoryStream, FileProcModes::Read, 0, &fileError);
+    file = MemoryStreamFile(memoryStream, FileProcModes::Read, 0, &fileError);
     UTest(true, !fileError && file);
     FileAppendRead(file);
 
-    file = FileToMemoryStream(memoryStream, FileProcModes::Read.Combined(FileProcModes::Write), 0, &fileError);
+    file = MemoryStreamFile(memoryStream, FileProcModes::Read.Combined(FileProcModes::Write), 0, &fileError);
     UTest(true, !fileError && file);
     FileWriteRead(file);
 
@@ -968,7 +968,7 @@ template <typename T> static void TestFile(const FilePath &folderForTests)
         Error<> fileError = DefaultError::Ok();
         T file = T(path, FileOpenMode::CreateAlways, FileProcModes::Write, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
         UTest(true, !fileError && file);
-        file.BufferSet(bufferSize, allocBufFunc());
+        file.Buffer(bufferSize, allocBufFunc());
         FileWrite(file);
 		// TODO: fix
 		//if constexpr (std::is_same_v<T, File>)
@@ -981,31 +981,31 @@ template <typename T> static void TestFile(const FilePath &folderForTests)
 
         file = T(path, FileOpenMode::OpenExisting, FileProcModes::Read, 0, FileCacheModes::Default, FileShareModes::Read, &fileError);
         UTest(true, !fileError && file);
-        file.BufferSet(bufferSize, allocBufFunc());
+        file.Buffer(bufferSize, allocBufFunc());
         FileRead(file);
         file.Close();
 
         file = T(path, FileOpenMode::OpenExisting, FileProcModes::Read, 2, FileCacheModes::Default, FileShareModes::Read, &fileError);
         UTest(true, !fileError && file);
-        file.BufferSet(bufferSize, allocBufFunc());
+        file.Buffer(bufferSize, allocBufFunc());
         FileReadOffsetted(file, 2);
         file.Close();
 
         file = T(path, FileOpenMode::OpenExisting, FileProcModes::Write, uiw_max, FileCacheModes::Default, FileShareModes::None, &fileError);
         UTest(true, !fileError && file);
-        file.BufferSet(bufferSize, allocBufFunc());
+        file.Buffer(bufferSize, allocBufFunc());
         FileAppendWrite(file);
         file.Close();
 
         file = T(path, FileOpenMode::OpenExisting, FileProcModes::Read, 0, FileCacheModes::Default, FileShareModes::Read, &fileError);
         UTest(true, !fileError && file);
-        file.BufferSet(bufferSize, allocBufFunc());
+        file.Buffer(bufferSize, allocBufFunc());
         FileAppendRead(file);
         file.Close();
 
         file = T(path, FileOpenMode::CreateAlways, FileProcModes::Read.Combined(FileProcModes::Write), 0, FileCacheModes::Default, FileShareModes::Read.Combined(FileShareModes::Write), &fileError);
         UTest(true, !fileError && file);
-        file.BufferSet(bufferSize, allocBufFunc());
+        file.Buffer(bufferSize, allocBufFunc());
         FileWriteRead(file);
     };
 
@@ -1062,7 +1062,7 @@ static void TestFileSystem(const FilePath &folderForTests)
     Error<> fileError = DefaultError::Ok();
     FilePath tempFilePath = dirTestPath / TSTR("tempFile.txt");
     UTest(Equal, FileSystem::Classify(tempFilePath).GetError(), DefaultError::NotFound());
-    FileToCFile tempFile(tempFilePath, FileOpenMode::CreateAlways, FileProcModes::Write, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
+    StandardFile tempFile(tempFilePath, FileOpenMode::CreateAlways, FileProcModes::Write, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
 	UTest(true, tempFile);
 	tempFile.Close();
     UTest(false, fileError);
@@ -1076,11 +1076,11 @@ static void TestFileSystem(const FilePath &folderForTests)
     UTest(Equal, FileSystem::Classify(tempFileRenamedPath).Unwrap(), FileSystem::ObjectType::File);
     //UTest(false, FileSystem::CopyTo(dirTestPath, dirTestPath / TSTR("foldierCopy"), false));
 
-    UTest(Equal, FileSystem::IsReadOnlyGet(tempFileRenamedPath).Unwrap(), false);
-    UTest(false, FileSystem::IsReadOnlySet(tempFileRenamedPath, true));
-    UTest(Equal, FileSystem::IsReadOnlyGet(tempFileRenamedPath).Unwrap(), true);
-    UTest(false, FileSystem::IsReadOnlySet(tempFileRenamedPath, false));
-    UTest(Equal, FileSystem::IsReadOnlyGet(tempFileRenamedPath).Unwrap(), false);
+    UTest(Equal, FileSystem::IsReadOnly(tempFileRenamedPath).Unwrap(), false);
+    UTest(false, FileSystem::IsReadOnly(tempFileRenamedPath, true));
+    UTest(Equal, FileSystem::IsReadOnly(tempFileRenamedPath).Unwrap(), true);
+    UTest(false, FileSystem::IsReadOnly(tempFileRenamedPath, false));
+    UTest(Equal, FileSystem::IsReadOnly(tempFileRenamedPath).Unwrap(), false);
 
     UnitTestsLogger::Message("finished filesystem tests\n");
 }
@@ -1119,7 +1119,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     std::reverse(crapString.begin(), crapString.end());
     UTest(false, !MemOps::Compare((ui8 *)crapString.data(), mapping.Memory(), crapString.size()));
 
-    UTest(true, file.OffsetSet(FileOffsetMode::FromBegin, 0));
+    UTest(true, file.Offset(FileOffsetMode::FromBegin, 0));
     UTest(true, file.Write(crapString.data(), (ui32)crapString.length()));
     UTest(true, file.Flush());
 
@@ -1129,7 +1129,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
 
     MemOps::Copy(mapping.Memory(), (ui8 *)crapString.data(), crapString.length());
     mapping.Flush();
-    UTest(true, file.OffsetSet(FileOffsetMode::FromBegin, 0));
+    UTest(true, file.Offset(FileOffsetMode::FromBegin, 0));
     UTest(true, file.Read(tempBuf, (ui32)crapString.length()));
     UTest(true, !MemOps::Compare(crapString.data(), tempBuf, crapString.length()));
 
@@ -1147,7 +1147,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     UTest(false, error);
     UTest(true, mapping);
     auto memoryStream = mapping.ToMemoryStream();
-    FileToMemoryStream memoryStreamFile = FileToMemoryStream(memoryStream, FileProcModes::Read);
+    MemoryStreamFile memoryStreamFile = MemoryStreamFile(memoryStream, FileProcModes::Read);
     UTest(true, memoryStreamFile);
     FileRead(memoryStreamFile);
 
@@ -1577,10 +1577,10 @@ static void DoTests(int argc, char **argv)
     AllocatorsTests();
     FilePathTests();
     TestFileToMemoryStream();
-    TestFile<FileToCFile>(folderForTests);
+    TestFile<StandardFile>(folderForTests);
     TestFile<File>(folderForTests);
 #ifndef PLATFORM_POSIX
-    TestFileSharing<FileToCFile>(folderForTests);
+    TestFileSharing<StandardFile>(folderForTests);
     TestFileSharing<File>(folderForTests);
 #endif
     TestFileSystem(folderForTests);

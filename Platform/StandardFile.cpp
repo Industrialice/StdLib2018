@@ -1,5 +1,5 @@
 #include "_PreHeader.hpp"
-#include "FileToCFile.hpp"
+#include "StandardFile.hpp"
 #include "FileSystem.hpp"
 
 #ifdef PLATFORM_WINDOWS
@@ -32,18 +32,18 @@ using namespace StdLib;
 
 extern NOINLINE Error<> StdLib_FileError();
 
-FileToCFile::~FileToCFile()
+StandardFile::~StandardFile()
 {
     this->Close();
 }
 
-FileToCFile::FileToCFile(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode, Error<> *error)
+StandardFile::StandardFile(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode, Error<> *error)
 {
     auto result = this->Open(path, openMode, procMode, offset, cacheMode, shareMode);
     if (error) *error = result;
 }
 
-FileToCFile::FileToCFile(FileToCFile &&source) noexcept
+StandardFile::StandardFile(StandardFile &&source) noexcept
 {
     this->_file = source._file;
     source._file = nullptr;
@@ -52,7 +52,7 @@ FileToCFile::FileToCFile(FileToCFile &&source) noexcept
     this->_procMode = source._procMode;
 }
 
-FileToCFile &FileToCFile::operator = (FileToCFile &&source) noexcept
+StandardFile &StandardFile::operator = (StandardFile &&source) noexcept
 {
     ASSUME(this != &source);
     Close();
@@ -64,7 +64,7 @@ FileToCFile &FileToCFile::operator = (FileToCFile &&source) noexcept
     return *this;
 }
 
-Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode)
+Error<> StandardFile::Open(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode)
 {
     offset = std::min<ui64>(i64_max, offset);
 
@@ -242,18 +242,18 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
     return DefaultError::Ok();
 }
 
-FileOpenMode FileToCFile::OpenModeGet() const
+FileOpenMode StandardFile::OpenMode() const
 {
 	ASSUME(IsOpen());
 	return _openMode;
 }
 
-TypeId FileToCFile::Type() const
+TypeId StandardFile::Type() const
 {
 	return GetTypeId();
 }
 
-void FileToCFile::Close()
+void StandardFile::Close()
 {
     if (_file)
     {
@@ -262,12 +262,12 @@ void FileToCFile::Close()
     _file = 0;
 }
 
-bool FileToCFile::IsOpen() const
+bool StandardFile::IsOpen() const
 {
     return _file != 0;
 }
 
-bool FileToCFile::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
+bool StandardFile::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
 {
     ASSUME(IsOpen());
     ui32 actuallyRead = (ui32)fread(target, 1, len, _file);
@@ -275,7 +275,7 @@ bool FileToCFile::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
     return true;
 }
 
-bool FileToCFile::Write(const void *source, ui32 len, ui32 *RSTR written)
+bool StandardFile::Write(const void *source, ui32 len, ui32 *RSTR written)
 {
     ASSUME(IsOpen());
     ui32 actuallyWritten = (ui32)fwrite(source, 1, len, _file);
@@ -283,13 +283,13 @@ bool FileToCFile::Write(const void *source, ui32 len, ui32 *RSTR written)
     return true;
 }
 
-bool FileToCFile::Flush()
+bool StandardFile::Flush()
 {
     ASSUME(IsOpen());
     return fflush(_file) == 0;
 }
 
-bool FileToCFile::IsBufferingSupported() const
+bool StandardFile::IsBufferingSupported() const
 {
     ASSUME(IsOpen());
 
@@ -298,7 +298,7 @@ bool FileToCFile::IsBufferingSupported() const
     return !isCachingDisabled;
 }
 
-bool FileToCFile::BufferSet(ui32 size, bufferType &&buffer)
+bool StandardFile::Buffer(ui32 size, bufferType &&buffer)
 {
     ASSUME(IsOpen());
 
@@ -323,18 +323,18 @@ bool FileToCFile::BufferSet(ui32 size, bufferType &&buffer)
     return true;
 }
 
-std::pair<ui32, const void *> FileToCFile::BufferGet() const
+std::pair<ui32, const void *> StandardFile::Buffer() const
 {
 	ASSUME(IsOpen());
     return {_bufferSize, _customBufferPtr.get()};
 }
 
-bool FileToCFile::IsSeekSupported() const
+bool StandardFile::IsSeekSupported() const
 {
     return true;
 }
 
-Result<i64> FileToCFile::OffsetGet(FileOffsetMode offsetMode)
+Result<i64> StandardFile::Offset(FileOffsetMode offsetMode)
 {
     ASSUME(IsOpen());
 
@@ -377,7 +377,7 @@ Result<i64> FileToCFile::OffsetGet(FileOffsetMode offsetMode)
     return offsetDiff;
 }
 
-Result<i64> FileToCFile::OffsetSet(FileOffsetMode offsetMode, i64 offset)
+Result<i64> StandardFile::Offset(FileOffsetMode offsetMode, i64 offset)
 {
     ASSUME(IsOpen());
 
@@ -429,7 +429,7 @@ Result<i64> FileToCFile::OffsetSet(FileOffsetMode offsetMode, i64 offset)
     return curPos - _offsetToStart;
 }
 
-Result<ui64> FileToCFile::SizeGet()
+Result<ui64> StandardFile::Size()
 {
     ASSUME(IsOpen());
 
@@ -480,7 +480,7 @@ Result<ui64> FileToCFile::SizeGet()
     return (ui64)(endOfFile - _offsetToStart);
 }
 
-Error<> FileToCFile::SizeSet(ui64 newSize)
+Error<> StandardFile::Size(ui64 newSize)
 {
     ASSUME(IsOpen());
 
@@ -503,13 +503,13 @@ Error<> FileToCFile::SizeSet(ui64 newSize)
     return DefaultError::Ok();
 }
 
-FileProcModes::FileProcMode FileToCFile::ProcMode() const
+FileProcModes::FileProcMode StandardFile::ProcMode() const
 {
     ASSUME(IsOpen());
     return _procMode;
 }
 
-FileCacheModes::FileCacheMode FileToCFile::CacheMode() const
+FileCacheModes::FileCacheMode StandardFile::CacheMode() const
 {
     ASSUME(IsOpen());
     return FileCacheModes::Default;

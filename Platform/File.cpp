@@ -236,7 +236,7 @@ bool File::IsBufferingSupported() const
     return true;
 }
 
-NOINLINE bool File::BufferSet(ui32 size, bufferType &&buffer)
+NOINLINE bool File::Buffer(ui32 size, bufferType &&buffer)
 {
 	ASSUME(IsOpen());
     ASSUME(size || buffer.get() == nullptr);
@@ -270,7 +270,7 @@ NOINLINE bool File::BufferSet(ui32 size, bufferType &&buffer)
     return true;
 }
 
-std::pair<ui32, const void *> File::BufferGet() const
+std::pair<ui32, const void *> File::Buffer() const
 {
 	ASSUME(IsOpen());
     return {_bufferSize, _internalBuffer.get()};
@@ -281,7 +281,7 @@ bool File::IsSeekSupported() const
     return true;
 }
 
-Result<i64> File::OffsetGet(FileOffsetMode offsetMode)
+Result<i64> File::Offset(FileOffsetMode offsetMode)
 {
     ASSUME(IsOpen());
 
@@ -324,7 +324,7 @@ Result<i64> File::OffsetGet(FileOffsetMode offsetMode)
     {
         ASSUME(offsetMode == FileOffsetMode::FromEnd);
 
-        auto fileSize = File::SizeGet();
+        auto fileSize = File::Size();
         if (!fileSize)
         {
             return fileSize.GetError();

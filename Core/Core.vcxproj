@@ -196,7 +196,7 @@
     <ClInclude Include="DIWRSpinLock.hpp" />
     <ClInclude Include="EnumCombinable.hpp" />
     <ClInclude Include="Error.hpp" />
-    <ClInclude Include="FileToMemoryStream.hpp" />
+    <ClInclude Include="MemoryStreamFile.hpp" />
     <ClInclude Include="FunctionInfo.hpp" />
     <ClInclude Include="HashFuncs.hpp" />
     <ClInclude Include="IFile.hpp" />
@@ -220,7 +220,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DIWRSpinLock.cpp" />
-    <ClCompile Include="FileToMemoryStream.cpp" />
+    <ClCompile Include="MemoryStreamFile.cpp" />
     <ClCompile Include="HashFuncs.cpp" />
     <ClCompile Include="MatrixMathTypes.cpp" />
     <ClCompile Include="StdCoreLib.cpp" />

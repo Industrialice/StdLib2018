@@ -19,68 +19,68 @@ namespace StdLib
 		}
 	};
 
-    struct MinutesFP64 : _TimeBase<MinutesFP64, f64>
+    struct TimeMinutesFP64 : _TimeBase<TimeMinutesFP64, f64>
     {
-        using _TimeBase<MinutesFP64, f64>::_TimeBase;
+        using _TimeBase<TimeMinutesFP64, f64>::_TimeBase;
     };
-    struct MinutesI64 : _TimeBase<MinutesI64, i64>
+    struct TimeMinutesI64 : _TimeBase<TimeMinutesI64, i64>
     {
-        using _TimeBase<MinutesI64, i64>::_TimeBase;
+        using _TimeBase<TimeMinutesI64, i64>::_TimeBase;
     };
-	struct SecondsFP64 : _TimeBase<SecondsFP64, f64> 
+	struct TimeSecondsFP64 : _TimeBase<TimeSecondsFP64, f64> 
 	{
-		using _TimeBase<SecondsFP64, f64>::_TimeBase;
+		using _TimeBase<TimeSecondsFP64, f64>::_TimeBase;
 	};
-	struct SecondsI64 : _TimeBase<SecondsI64, i64> 
+	struct TimeSecondsI64 : _TimeBase<TimeSecondsI64, i64> 
 	{
-		using _TimeBase<SecondsI64, i64>::_TimeBase;
+		using _TimeBase<TimeSecondsI64, i64>::_TimeBase;
 	};
-	struct MilliSecondsFP64 : _TimeBase<MilliSecondsFP64, f64>
+	struct TimeMilliSecondsFP64 : _TimeBase<TimeMilliSecondsFP64, f64>
 	{
-		using _TimeBase<MilliSecondsFP64, f64>::_TimeBase;
+		using _TimeBase<TimeMilliSecondsFP64, f64>::_TimeBase;
 	};
-	struct MilliSecondsI64 : _TimeBase<MilliSecondsI64, i64>
+	struct TimeMilliSecondsI64 : _TimeBase<TimeMilliSecondsI64, i64>
 	{
-		using _TimeBase<MilliSecondsI64, i64>::_TimeBase;
+		using _TimeBase<TimeMilliSecondsI64, i64>::_TimeBase;
 	};
-	struct MicroSecondsFP64 : _TimeBase<MicroSecondsFP64, f64>
+	struct TimeMicroSecondsFP64 : _TimeBase<TimeMicroSecondsFP64, f64>
 	{
-		using _TimeBase<MicroSecondsFP64, f64>::_TimeBase;
+		using _TimeBase<TimeMicroSecondsFP64, f64>::_TimeBase;
 	};
-	struct MicroSecondsI64 : _TimeBase<MicroSecondsI64, i64>
+	struct TimeMicroSecondsI64 : _TimeBase<TimeMicroSecondsI64, i64>
 	{
-		using _TimeBase<MicroSecondsI64, i64>::_TimeBase;
+		using _TimeBase<TimeMicroSecondsI64, i64>::_TimeBase;
 	};
 
-    constexpr inline MinutesFP64 operator "" _m(long double value)
+    constexpr inline TimeMinutesFP64 operator "" _m(long double value)
     {
         return {(f64)value};
     }
-    constexpr inline MinutesI64 operator "" _m(unsigned long long value)
+    constexpr inline TimeMinutesI64 operator "" _m(unsigned long long value)
     {
         return {(i64)value};
     }
-    constexpr inline SecondsFP64 operator "" _s(long double value)
+    constexpr inline TimeSecondsFP64 operator "" _s(long double value)
 	{
 		return {(f64)value};
 	}
-    constexpr inline SecondsI64 operator "" _s(unsigned long long value)
+    constexpr inline TimeSecondsI64 operator "" _s(unsigned long long value)
 	{
 		return {(i64)value};
 	}
-    constexpr inline MilliSecondsFP64 operator "" _ms(long double value)
+    constexpr inline TimeMilliSecondsFP64 operator "" _ms(long double value)
 	{
 		return {(f64)value};
 	}
-    constexpr inline MilliSecondsI64 operator "" _ms(unsigned long long value)
+    constexpr inline TimeMilliSecondsI64 operator "" _ms(unsigned long long value)
 	{
 		return {(i64)value};
 	}
-    constexpr inline MicroSecondsFP64 operator "" _us(long double value)
+    constexpr inline TimeMicroSecondsFP64 operator "" _us(long double value)
 	{
 		return {(f64)value};
 	}
-    constexpr inline MicroSecondsI64 operator "" _us(unsigned long long value)
+    constexpr inline TimeMicroSecondsI64 operator "" _us(unsigned long long value)
 	{
 		return {(i64)value};
 	}
@@ -95,14 +95,14 @@ namespace StdLib
 
     public:
         TimeDifference() = default;
-        TimeDifference(MinutesFP64 time);
-        TimeDifference(MinutesI64 time);
-		TimeDifference(SecondsFP64 time);
-		TimeDifference(SecondsI64 time);
-		TimeDifference(MilliSecondsFP64 time);
-		TimeDifference(MilliSecondsI64 time);
-		TimeDifference(MicroSecondsFP64 time);
-		TimeDifference(MicroSecondsI64 time);
+        TimeDifference(TimeMinutesFP64 time);
+        TimeDifference(TimeMinutesI64 time);
+		TimeDifference(TimeSecondsFP64 time);
+		TimeDifference(TimeSecondsI64 time);
+		TimeDifference(TimeMilliSecondsFP64 time);
+		TimeDifference(TimeMilliSecondsI64 time);
+		TimeDifference(TimeMicroSecondsFP64 time);
+		TimeDifference(TimeMicroSecondsI64 time);
 
         [[nodiscard]] f32 ToSec() const;
 		[[nodiscard]] f64 ToSec_f64() const;
