@@ -15,6 +15,10 @@ namespace StdLib
     };
 
     // these constraints aren't strictly enforced, so you should not rely on them only
+	// None: the file is exclusive and cannot be open for either read, or write
+	// Read: the file can be open for read
+	// Write: the file can be open for write
+	// Delete: the file is allowed to be deleted
     struct FileShareModes
     {
         static constexpr struct FileShareMode : EnumCombinable<FileShareMode, ui8, true>

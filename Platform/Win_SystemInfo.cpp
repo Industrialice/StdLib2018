@@ -1,8 +1,6 @@
 #include "_PreHeader.hpp"
 #include "SystemInfo.hpp"
 
-#include <thread>
-
 using namespace StdLib;
 
 namespace
@@ -10,6 +8,7 @@ namespace
 	ui32 LogicalCPUCoresValue;
 	ui32 PhysicalCPUCoresValue;
     uiw PageSizeValue;
+	std::vector<SystemInfo::CacheInfo> CacheInfos;
 }
 
 auto SystemInfo::CPUArchitecture() -> Arch
@@ -43,6 +42,11 @@ ui32 SystemInfo::PhysicalCPUCores()
 	return PhysicalCPUCoresValue;
 }
 
+auto SystemInfo::AcquireCacheInfo() -> std::pair<const CacheInfo *, uiw>
+{
+	return {CacheInfos.data(), CacheInfos.size()};
+}
+
 uiw SystemInfo::AllocationAlignment()
 {
 	return MEMORY_ALLOCATION_ALIGNMENT;
@@ -54,6 +58,11 @@ uiw SystemInfo::MemoryPageSize()
     return PageSizeValue;
 }
 
+bool SystemInfo::IsDebuggerAttached()
+{
+	return IsDebuggerPresent();
+}
+
 namespace StdLib::SystemInfo
 {
 	void Initialize()
@@ -62,7 +71,79 @@ namespace StdLib::SystemInfo
 		GetSystemInfo(&sysinfo);
 
 		LogicalCPUCoresValue = sysinfo.dwNumberOfProcessors;
-		PhysicalCPUCoresValue = LogicalCPUCoresValue; // TODO: determine this value
         PageSizeValue = sysinfo.dwPageSize;
+
+		DWORD bufferSize = 0;
+
+		GetLogicalProcessorInformation(0, &bufferSize);
+		ASSUME(bufferSize > 0);
+		ASSUME((bufferSize % sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION)) == 0);
+		uiw informationCount = bufferSize / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION);
+		auto buffer = std::make_unique<SYSTEM_LOGICAL_PROCESSOR_INFORMATION[]>(informationCount);
+		BOOL result = GetLogicalProcessorInformation(buffer.get(), &bufferSize);
+		ASSUME(result);
+
+		ULONG_PTR processorMask = 0;
+
+		for (uiw index = 0; index < informationCount; ++index)
+		{
+			processorMask |= buffer[index].ProcessorMask;
+
+			if (buffer[index].Relationship == RelationCache)
+			{
+				auto source = buffer[index].Cache;
+				CacheInfo info;
+
+				switch (source.Type)
+				{
+				case CacheData:
+					info.type = CacheInfo::Type::Data;
+					break;
+				case CacheInstruction:
+					info.type = CacheInfo::Type::Instruction;
+					break;
+				case CacheTrace:
+					info.type = CacheInfo::Type::Trace;
+					break;
+				case CacheUnified:
+					info.type = CacheInfo::Type::Unified;
+					break;
+				}
+
+				info.associativity = source.Associativity;
+				info.level = source.Level;
+				info.lineSize = source.LineSize;
+				info.size = source.Size;
+				info.isPerCore = false;
+
+				bool isFound = false;
+				for (auto &stored : CacheInfos)
+				{
+					if (stored.associativity == info.associativity &&
+						stored.level == info.level &&
+						stored.lineSize == info.lineSize &&
+						stored.size == info.size &&
+						stored.type == info.type)
+					{
+						isFound = true;
+						stored.isPerCore = true;
+					}
+				}
+				if (!isFound)
+				{
+					CacheInfos.push_back(info);
+				}
+			}
+		}
+
+		CacheInfos.shrink_to_fit();
+
+		for (ui32 bitNumber = 0; bitNumber < sizeof(ULONG_PTR) * 8; ++bitNumber)
+		{
+			if (Funcs::IsBitSet(processorMask, bitNumber))
+			{
+				++PhysicalCPUCoresValue;
+			}
+		}
 	}
 }

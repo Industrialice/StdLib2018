@@ -91,7 +91,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::Fi
     }
 
     mode_t processMask = umask(0);
-    int hfile = open(pnn.PlatformPath().data(), flags, S_IRWXU | S_IRWXG | S_IRWXO);
+    int hfile = open(pnn.PlatformPath().data(), flags, S_IRWXU | S_IRWXG | S_IRWXO); // TODO: file locks
     umask(processMask);
     if (hfile == -1)
     {

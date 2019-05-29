@@ -1,5 +1,7 @@
 #pragma once
 
+// TODO: add SAL annotations
+
 extern "C" {
 
 #ifndef PLATFORM_WINDOWS

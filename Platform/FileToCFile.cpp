@@ -30,6 +30,8 @@
 
 using namespace StdLib;
 
+extern NOINLINE Error<> StdLib_FileError();
+
 FileToCFile::~FileToCFile()
 {
     this->Close();
@@ -98,31 +100,29 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
         }
     }
 
-    bool isDisableCache = false;
+	bool isDisableReadCache = cacheMode.Contains(FileCacheModes::DisableSystemReadCache);
+	bool isDisableWriteCache = cacheMode.Contains(FileCacheModes::DisableSystemWriteCache);
+	bool isOptimizeForSequentialRead = cacheMode.Contains(FileCacheModes::LinearRead);
+	bool isOptimizeForSequentialWrite = cacheMode.Contains(FileCacheModes::LinearWrite);
+	bool isOptimizeForRandomRead = cacheMode.Contains(FileCacheModes::RandomRead);
+	bool isOptimizeForRandomWrite = cacheMode.Contains(FileCacheModes::RandomWrite);
 
-    if (cacheMode.Contains(FileCacheModes::DisableSystemWriteCache))
-    {
-        if (procMode.Contains(FileProcModes::Write))
-        {
-            isDisableCache = true;
-        }
-        else
-        {
-            return DefaultError::InvalidArgument("FileCacheModes::DisableSystemWriteCache is used without FileProcModes::Write");
-        }
-    }
+	ui32 cacheReadCount = isDisableReadCache + isOptimizeForSequentialRead + isOptimizeForRandomRead;
+	ui32 cacheWriteCount = isDisableWriteCache + isOptimizeForSequentialWrite + isOptimizeForRandomWrite;
 
-    if (cacheMode.Contains(FileCacheModes::DisableSystemReadCache))
-    {
-        if (procMode.Contains(FileProcModes::Read))
-        {
-            isDisableCache = true;
-        }
-        else
-        {
-            return DefaultError::InvalidArgument("FileCacheModes::DisableSystemReadCache is used without FileProcModes::Read");
-        }
-    }
+	if (cacheReadCount > 1 || cacheWriteCount > 1)
+	{
+		return DefaultError::InvalidArgument("Conflicting settings for cache have been requested");
+	}
+
+	if (cacheReadCount && !procMode.Contains(FileProcModes::Read))
+	{
+		return DefaultError::InvalidArgument("Cache mode contains settings for read, but FileProcModes::Read is not requested");
+	}
+	if (cacheWriteCount && !procMode.Contains(FileProcModes::Write))
+	{
+		return DefaultError::InvalidArgument("Cache mode contains settings for write, but FileProcModes::Write is not requested");
+	}
 
     const pathChar *procModeStr;
 
@@ -171,22 +171,31 @@ Error<> FileToCFile::Open(const FilePath &path, FileOpenMode openMode, FileProcM
         _SH_DENYNO  // FileShareModes::Read + FileShareModes::Write
     };
     int sharingOption = sharingArray[shareMode.AsInteger() & 0b11];
-    wchar_t binaryProcModeStr[4];
+    wchar_t binaryProcModeStr[8];
     wcscpy(binaryProcModeStr, procModeStr);
     wcscat(binaryProcModeStr, L"b");
+	if (isOptimizeForSequentialRead || isOptimizeForSequentialWrite)
+	{
+		wcscat(binaryProcModeStr, L"S");
+	}
+	else if (isOptimizeForRandomRead || isOptimizeForRandomWrite)
+	{
+		wcscat(binaryProcModeStr, L"R");
+	}
     _file = _wfsopen(path.PlatformPath().data(), binaryProcModeStr, sharingOption);
+	// FileShareModes::Delete setting is ignored
 #else
     char binaryProcModeStr[4];
     strcpy(binaryProcModeStr, procModeStr);
     strcat(binaryProcModeStr, "b");
-    _file = fopen(path.PlatformPath().data(), procModeStr); // TODO: process shareMode
+    _file = fopen(path.PlatformPath().data(), procModeStr);
 #endif
     if (!_file)
     {
         return DefaultError::UnknownError("fopen failed");
     }
 
-    if (isDisableCache)
+    if (isDisableReadCache || isDisableWriteCache)
     {
         if (setvbuf(_file, 0, _IONBF, 0) != 0)
         {

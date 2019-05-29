@@ -599,6 +599,14 @@ static void ResultTests()
 
 static void VirtualMemoryTests()
 {
+#ifdef PLATFORM_WINDOWS
+	if (SystemInfo::IsDebuggerAttached())
+	{
+		UnitTestsLogger::Message("debugger is present, skipping virtual memory tests\n");
+		return;
+	}
+#endif
+
     ui8 *memory = (ui8 *)VirtualMemory::Reserve(999);
     UTest(true, memory);
     EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), true);
@@ -923,29 +931,29 @@ static void TestFileToMemoryStream()
     
     Error<> fileError = DefaultError::Ok();
     FileToMemoryStream file = FileToMemoryStream(memoryStream, FileProcModes::Write, 0, &fileError);
-    UTest(true, !fileError && file.IsOpen());
+    UTest(true, !fileError && file);
     FileWrite(file);
 
 	FileTypeTest<FileToMemoryStream>(file);
 
     file = FileToMemoryStream(memoryStream, FileProcModes::Read, 0, &fileError);
-    UTest(true, !fileError && file.IsOpen());
+    UTest(true, !fileError && file);
     FileRead(file);
 
     file = FileToMemoryStream(memoryStream, FileProcModes::Read, 2, &fileError);
-    UTest(true, !fileError && file.IsOpen());
+    UTest(true, !fileError && file);
     FileReadOffsetted(file, 2);
 
     file = FileToMemoryStream(memoryStream, FileProcModes::Write, uiw_max, &fileError);
-    UTest(true, !fileError && file.IsOpen());
+    UTest(true, !fileError && file);
     FileAppendWrite(file);
 
     file = FileToMemoryStream(memoryStream, FileProcModes::Read, 0, &fileError);
-    UTest(true, !fileError && file.IsOpen());
+    UTest(true, !fileError && file);
     FileAppendRead(file);
 
     file = FileToMemoryStream(memoryStream, FileProcModes::Read.Combined(FileProcModes::Write), 0, &fileError);
-    UTest(true, !fileError && file.IsOpen());
+    UTest(true, !fileError && file);
     FileWriteRead(file);
 
     UnitTestsLogger::Message("finished file memory stream tests\n");
@@ -959,7 +967,7 @@ template <typename T> static void TestFile(const FilePath &folderForTests)
 
         Error<> fileError = DefaultError::Ok();
         T file = T(path, FileOpenMode::CreateAlways, FileProcModes::Write, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
-        UTest(true, !fileError && file.IsOpen());
+        UTest(true, !fileError && file);
         file.BufferSet(bufferSize, allocBufFunc());
         FileWrite(file);
 		// TODO: fix
@@ -972,31 +980,31 @@ template <typename T> static void TestFile(const FilePath &folderForTests)
 		FileTypeTest<T>(file);
 
         file = T(path, FileOpenMode::OpenExisting, FileProcModes::Read, 0, FileCacheModes::Default, FileShareModes::Read, &fileError);
-        UTest(true, !fileError && file.IsOpen());
+        UTest(true, !fileError && file);
         file.BufferSet(bufferSize, allocBufFunc());
         FileRead(file);
         file.Close();
 
         file = T(path, FileOpenMode::OpenExisting, FileProcModes::Read, 2, FileCacheModes::Default, FileShareModes::Read, &fileError);
-        UTest(true, !fileError && file.IsOpen());
+        UTest(true, !fileError && file);
         file.BufferSet(bufferSize, allocBufFunc());
         FileReadOffsetted(file, 2);
         file.Close();
 
         file = T(path, FileOpenMode::OpenExisting, FileProcModes::Write, uiw_max, FileCacheModes::Default, FileShareModes::None, &fileError);
-        UTest(true, !fileError && file.IsOpen());
+        UTest(true, !fileError && file);
         file.BufferSet(bufferSize, allocBufFunc());
         FileAppendWrite(file);
         file.Close();
 
         file = T(path, FileOpenMode::OpenExisting, FileProcModes::Read, 0, FileCacheModes::Default, FileShareModes::Read, &fileError);
-        UTest(true, !fileError && file.IsOpen());
+        UTest(true, !fileError && file);
         file.BufferSet(bufferSize, allocBufFunc());
         FileAppendRead(file);
         file.Close();
 
         file = T(path, FileOpenMode::CreateAlways, FileProcModes::Read.Combined(FileProcModes::Write), 0, FileCacheModes::Default, FileShareModes::Read.Combined(FileShareModes::Write), &fileError);
-        UTest(true, !fileError && file.IsOpen());
+        UTest(true, !fileError && file);
         file.BufferSet(bufferSize, allocBufFunc());
         FileWriteRead(file);
     };
@@ -1016,27 +1024,27 @@ template <typename T> static void TestFile(const FilePath &folderForTests)
     internalTest(2, allocNullBuff);
     internalTest(10, std::bind(allocSizedBuff, 10));
 
-    UnitTestsLogger::Message("finished template file tests\n");
+    UnitTestsLogger::Message("finished template file tests for %s\n", T::GetTypeName().data());
 }
 
 template <typename T> static void TestFileSharing(const FilePath &folderForTests)
 {
     Error<> fileError = DefaultError::Ok();
     T file = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::CreateAlways, FileProcModes::Write, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
-    UTest(true, !fileError && file.IsOpen());
+    UTest(true, !fileError && file);
 
     T file2 = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::OpenExisting, FileProcModes::Read, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
-    UTest(true, fileError && !file2.IsOpen());
+    UTest(true, fileError && !file2);
 
     file.Close();
     file2 = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::OpenExisting, FileProcModes::Read, 0, FileCacheModes::Default, FileShareModes::Read, &fileError);
-    UTest(true, !fileError && file2.IsOpen());
+    UTest(true, !fileError && file2);
 
     file2.Close();
     file = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::OpenExisting, FileProcModes::Read, 0, FileCacheModes::Default, FileShareModes::Write, &fileError);
-    UTest(true, !fileError && file.IsOpen());
+    UTest(true, !fileError && file);
 
-    UnitTestsLogger::Message("finished template file sharing tests\n");
+    UnitTestsLogger::Message("finished template file sharing tests for %s\n", T::GetTypeName().data());
 }
 
 static void TestFileSystem(const FilePath &folderForTests)
@@ -1055,7 +1063,7 @@ static void TestFileSystem(const FilePath &folderForTests)
     FilePath tempFilePath = dirTestPath / TSTR("tempFile.txt");
     UTest(Equal, FileSystem::Classify(tempFilePath).GetError(), DefaultError::NotFound());
     FileToCFile tempFile(tempFilePath, FileOpenMode::CreateAlways, FileProcModes::Write, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
-	UTest(true, tempFile.IsOpen());
+	UTest(true, tempFile);
 	tempFile.Close();
     UTest(false, fileError);
     UTest(Equal, FileSystem::IsFolderEmpty(dirTestPath).Unwrap(), false);
@@ -1088,25 +1096,25 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     char tempBuf[256];
 
     File file = File(folderForTests / TSTR("memMapped.txt"), FileOpenMode::CreateAlways, FileProcModes::Read.Combined(FileProcModes::Write));
-    UTest(true, file.IsOpen());
+    UTest(true, file);
     UTest(true, file.Write(crapString.data(), (ui32)crapString.length()));
 
     Error<> error = DefaultError::Ok();
     MemoryMappedFile mapping = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
     UTest(false, error);
-    UTest(true, mapping.IsOpen());
+    UTest(true, mapping);
     UTest(Equal, mapping.Size(), crapString.length());
     UTest(Equal, mapping.IsWritable(), true);
     UTest(true, !MemOps::Compare((ui8 *)crapString.data(), mapping.Memory(), crapString.size()));
 
     MemoryMappedFile mappingDuplicate = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
     UTest(false, error);
-    UTest(true, mappingDuplicate.IsOpen());
+    UTest(true, mappingDuplicate);
     UTest(NotEqual, mapping.Memory(), mappingDuplicate.Memory());
 
     MemoryMappedFile mappingOffsetted = MemoryMappedFile(file, 2, uiw_max, false, false, &error);
     UTest(false, error);
-    UTest(true, mappingOffsetted.IsOpen());
+    UTest(true, mappingOffsetted);
 
     std::reverse(crapString.begin(), crapString.end());
     UTest(false, !MemOps::Compare((ui8 *)crapString.data(), mapping.Memory(), crapString.size()));
@@ -1133,18 +1141,18 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     UTest(true, !MemOps::Compare(mapping.Memory() + 2, mappingOffsetted.Memory(), crapString.size() - 2));
 
     file = File(folderForTests / TSTR("memMapped2.txt"), FileOpenMode::CreateAlways, FileProcModes::Read.Combined(FileProcModes::Write));
-    UTest(true, file.IsOpen());
+    UTest(true, file);
     FileWrite(file);
     mapping = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
     UTest(false, error);
-    UTest(true, mapping.IsOpen());
+    UTest(true, mapping);
     auto memoryStream = mapping.ToMemoryStream();
     FileToMemoryStream memoryStreamFile = FileToMemoryStream(memoryStream, FileProcModes::Read);
-    UTest(true, memoryStreamFile.IsOpen());
+    UTest(true, memoryStreamFile);
     FileRead(memoryStreamFile);
 
     file = File(folderForTests / TSTR("appendTest.txt"), FileOpenMode::CreateAlways, FileProcModes::Write);
-    UTest(true, file.IsOpen());
+    UTest(true, file);
     std::string_view invisiblePartStr = "invisible part";
     UTest(true, file.Write(invisiblePartStr.data(), (ui32)invisiblePartStr.length()));
     file.Close();
@@ -1154,7 +1162,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
 
     MemoryMappedFile appendedFileMapping = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
     UTest(false, error);
-    UTest(true, appendedFileMapping.IsOpen());
+    UTest(true, appendedFileMapping);
     UTest(true, !MemOps::Compare(appendedFileMapping.Memory(), (ui8 *)currentPartStr.data(), currentPartStr.size()));
 
     UnitTestsLogger::Message("finished memory mapped file tests\n");
@@ -1420,11 +1428,58 @@ static void VirtualKeysTests()
 
 static void PrintSystemInfo()
 {
+	auto cacheInfo = SystemInfo::AcquireCacheInfo();
+
 	UnitTestsLogger::Message("System info:\n");
-	UnitTestsLogger::Message("  Logical CPU cores: %u\n", SystemInfo::LogicalCPUCores());
-	UnitTestsLogger::Message("  Physical CPU cores: %u\n", SystemInfo::PhysicalCPUCores());
-	UnitTestsLogger::Message("  Memory allocation alignment: %u\n", (ui32)SystemInfo::AllocationAlignment());
-    UnitTestsLogger::Message("  Memory page size: %u\n", (ui32)SystemInfo::MemoryPageSize());
+	UnitTestsLogger::Message("  Logical CPU cores %u\n", SystemInfo::LogicalCPUCores());
+	UnitTestsLogger::Message("  Physical CPU cores %u\n", SystemInfo::PhysicalCPUCores());
+	for (uiw index = 0; index < cacheInfo.second; ++index)
+	{
+		auto info = cacheInfo.first[index];
+		auto typeToString = [&info]
+		{
+			switch (info.type)
+			{
+			case SystemInfo::CacheInfo::Type::Data:
+				return "Data";
+			case SystemInfo::CacheInfo::Type::Instruction:
+				return "Instruction";
+			case SystemInfo::CacheInfo::Type::Trace:
+				return "Trace";
+			case SystemInfo::CacheInfo::Type::Unified:
+				return "Unified";
+			}
+			UNREACHABLE;
+			return "";
+		};
+		auto sizeToString = [&info]
+		{
+			ui32 size = info.size;
+			const char *label = " B";
+			if (size / 1024)
+			{
+				size /= 1024;
+				label = " KB";
+				if (size / 1024)
+				{
+					size /= 1024;
+					label = " MB";
+				}
+			}
+			return std::to_string(size) + label;
+		};
+		UnitTestsLogger::Message("    %s\n", typeToString());
+		UnitTestsLogger::Message("      Level %u\n", info.level);
+		UnitTestsLogger::Message("      Line size %u\n", info.lineSize);
+		UnitTestsLogger::Message("      Associativity %u\n", info.associativity);
+		UnitTestsLogger::Message("      Size %s\n", sizeToString().c_str());
+		if (info.isPerCore.has_value())
+		{
+			UnitTestsLogger::Message("      Per core %s\n", *info.isPerCore ? "true" : "false");
+		}
+	}
+	UnitTestsLogger::Message("  Memory allocation alignment %u\n", (ui32)SystemInfo::AllocationAlignment());
+    UnitTestsLogger::Message("  Memory page size %u\n", (ui32)SystemInfo::MemoryPageSize());
 	const char *arch = nullptr;
 	switch (SystemInfo::CPUArchitecture())
 	{
@@ -1450,7 +1505,7 @@ static void PrintSystemInfo()
 		arch = "Emscripten";
 		break;
 	}
-	UnitTestsLogger::Message("  CPU architecture: %s\n", arch);
+	UnitTestsLogger::Message("  CPU architecture %s\n", arch);
     const char *platform = nullptr;
     switch (SystemInfo::CurrentPlatform())
     {
@@ -1476,7 +1531,7 @@ static void PrintSystemInfo()
         platform = "Windows";
         break;
     }
-    UnitTestsLogger::Message("  Platform: %s\n", platform);
+    UnitTestsLogger::Message("  Platform %s\n", platform);
     UnitTestsLogger::Message("Finished printing system info\n");
 }
 
@@ -1518,14 +1573,16 @@ static void DoTests(int argc, char **argv)
     RotateBitsTests();
     ErrorTests();
     ResultTests();
-    //VirtualMemoryTests();
+    VirtualMemoryTests();
     AllocatorsTests();
     FilePathTests();
     TestFileToMemoryStream();
     TestFile<FileToCFile>(folderForTests);
     TestFile<File>(folderForTests);
-    //TestFileSharing<FileToCFile>(folderForTests);
-    //TestFileSharing<File>(folderForTests);
+#ifndef PLATFORM_POSIX
+    TestFileSharing<FileToCFile>(folderForTests);
+    TestFileSharing<File>(folderForTests);
+#endif
     TestFileSystem(folderForTests);
     TestMemoryMappedFile(folderForTests);
     TimeMomentTests();

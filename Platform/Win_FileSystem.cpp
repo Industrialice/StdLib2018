@@ -3,10 +3,6 @@
 
 using namespace StdLib;
 
-#if defined(_MSC_VER) && !defined(DEBUG)
-    #pragma optimize( "s", on ) // TODO: global solution
-#endif
-
 extern NOINLINE Error<> StdLib_FileError()
 {
     DWORD code = GetLastError();
