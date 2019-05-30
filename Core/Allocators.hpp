@@ -8,16 +8,6 @@
 
 namespace StdLib::Allocator
 {
-	#ifdef PLATFORM_WINDOWS
-		#ifdef _WIN64
-			static constexpr uiw MinimalGuaranteedAlignment = 16;
-		#else
-			static constexpr uiw MinimalGuaranteedAlignment = 8;
-		#endif
-	#else
-		static constexpr uiw MinimalGuaranteedAlignment = 8;
-	#endif
-
     struct Malloc
     {
         template <typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count)
@@ -101,16 +91,23 @@ namespace StdLib::Allocator
 			#ifdef PLATFORM_WINDOWS
 				return (T *)_aligned_malloc(count, alignment);
 			#else
-				if (alignment & (sizeof(void *) - 1)) // posix_memalign requires alignment to be divisible by sizeof(void *)
+				if (alignment > MinimalGuaranteedAlignment)
 				{
-					alignment += sizeof(void *);
-					alignment &= ~(sizeof(void *) - 1);
+					if (alignment & (sizeof(void *) - 1)) // posix_memalign requires alignment to be divisible by sizeof(void *)
+					{
+						alignment += sizeof(void *);
+						alignment &= ~(sizeof(void *) - 1);
+					}
+					void *memory;
+					int code = posix_memalign(&memory, alignment, count);
+					ASSUME(code == 0);
+					ASSUME(Funcs::IsAligned(memory, alignment));
+					return (T *)memory;
 				}
-				void *memory;
-				int code = posix_memalign(&memory, alignment, count);
-				ASSUME(code == 0);
-				ASSUME(Funcs::IsAligned(memory, alignment));
-				return (T *)memory;
+				else
+				{
+					return (T *)malloc(count);
+				}
 			#endif
 		}
 

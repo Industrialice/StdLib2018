@@ -35,5 +35,15 @@ namespace StdLib
     constexpr ui32 MaxFileNameLength = 256;
 #else
     #error unknown platform
+#endif	
+
+#ifdef PLATFORM_WINDOWS
+	#ifdef _WIN64
+		static constexpr uiw MinimalGuaranteedAlignment = 16;
+	#else
+		static constexpr uiw MinimalGuaranteedAlignment = 8;
+	#endif
+#else
+	static constexpr uiw MinimalGuaranteedAlignment = 8;
 #endif
 }
