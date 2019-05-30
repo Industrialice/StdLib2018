@@ -67,6 +67,8 @@ namespace StdLib::SystemInfo
 {
 	void Initialize()
 	{
+		CacheInfos.clear();
+
 		SYSTEM_INFO sysinfo;
 		GetSystemInfo(&sysinfo);
 

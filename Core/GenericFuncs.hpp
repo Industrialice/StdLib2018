@@ -275,6 +275,12 @@ namespace StdLib::Funcs
 		return (value & (value - 1)) == 0;
 	}
 
+	[[nodiscard]] constexpr bool IsAligned(const void *memory, uiw alignment)
+	{
+		ASSUME(IsPowerOf2(alignment));
+		return (((uiw)memory) & (alignment - 1)) == 0;
+	}
+
     template <typename T> void Reinitialize(T &target)
     {
         target.~T();

@@ -32,6 +32,7 @@
 	#define WARNING_DISABLE_INTEGRAL_CONSTANT_OVERFLOW __pragma(warning(disable : 4307))
 	#define WARNING_DISABLE_ATTRIBUTE_IS_NOT_RECOGNIZED __pragma(warning(disable : 5030))
 	#define WARNING_DISABLE_LARGE_BY_VALUE_COPY
+	#define WARNING_DISABLE_INCREASES_REQUIRED_ALIGNMENT
 
     #define _UNREACHABLE __assume(0)
 
@@ -97,6 +98,7 @@
 		#define WARNING_DISABLE_INTEGRAL_CONSTANT_OVERFLOW _Pragma("clang diagnostic ignored \"-Winteger-overflow\"")
 		#define WARNING_DISABLE_ATTRIBUTE_IS_NOT_RECOGNIZED _Pragma("clang diagnostic ignored \"-Wunknown-attributes\"")
 		#define WARNING_DISABLE_LARGE_BY_VALUE_COPY _Pragma("clang diagnostic ignored \"-Wlarge-by-value-copy\"")
+		#define WARNING_DISABLE_INCREASES_REQUIRED_ALIGNMENT _Pragma("clang diagnostic ignored \"-Wcast-align\"")
 	#else
 		/* TODO: implement */
 		#define WARNING_PUSH
@@ -104,6 +106,7 @@
 		#define WARNING_DISABLE_INTEGRAL_CONSTANT_OVERFLOW
 		#define WARNING_DISABLE_ATTRIBUTE_IS_NOT_RECOGNIZED
 		#define WARNING_DISABLE_LARGE_BY_VALUE_COPY
+		#define WARNING_DISABLE_INCREASES_REQUIRED_ALIGNMENT
 	#endif
 
     #define _UNREACHABLE __builtin_unreachable()

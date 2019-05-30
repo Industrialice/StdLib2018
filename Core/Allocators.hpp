@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GenericFuncs.hpp"
+
 #if defined(PLATFORM_ANDROID) && __ANDROID_API__ < 17
 	extern StdLib::uiw (*MallocUsableSize)(const void *ptr); // from StdCoreLib.cpp
 #endif
@@ -18,7 +20,7 @@ namespace StdLib::Allocator
 
     struct Malloc
     {
-        template <typename T = ui8> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count)
+        template <typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count)
         {
             if constexpr (!std::is_same_v<T, void>)
             {
@@ -87,18 +89,27 @@ namespace StdLib::Allocator
 	// TODO: optimize the non-Windows version
 	struct MallocAlignedRuntime
 	{
-		template <typename T = ui8> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count, uiw alignment)
+		template <typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count, uiw alignment)
 		{
 			if constexpr (!std::is_same_v<T, void>)
 			{
 				count *= sizeof(T);
 			}
 
+			ASSUME(Funcs::IsPowerOf2(alignment));
+
 			#ifdef PLATFORM_WINDOWS
 				return (T *)_aligned_malloc(count, alignment);
 			#else
+				if (alignment & (sizeof(void *) - 1)) // posix_memalign requires alignment to be divisible by sizeof(void *)
+				{
+					alignment += sizeof(void *);
+					alignment &= ~(sizeof(void *) - 1);
+				}
 				void *memory;
-				posix_memalign(&memory, alignment, count);
+				int code = posix_memalign(&memory, alignment, count);
+				ASSUME(code == 0);
+				ASSUME(Funcs::IsAligned(memory, alignment));
 				return (T *)memory;
 			#endif
 		}
@@ -110,17 +121,26 @@ namespace StdLib::Allocator
 				count *= sizeof(T);
 			}
 
+			ASSUME(Funcs::IsPowerOf2(alignment));
+
 			#ifdef PLATFORM_WINDOWS
 				return (T *)_aligned_realloc(memory, count, alignment);
 			#else
 				memory = (T *)realloc(memory, count);
-				if ((uiw)memory & (alignment - 1))
+				if (!Funcs::IsAligned(memory, alignment))
 				{
+					if (alignment & (sizeof(void *) - 1)) // posix_memalign requires alignment to be divisible by sizeof(void *)
+					{
+						alignment += sizeof(void *);
+						alignment &= ~(sizeof(void *) - 1);
+					}
 					void *temp;
-					posix_memalign(&temp, alignment, count);
-					MemOps::Copy((ui8 *)temp, (ui8 *)memory, count);
+					int code = posix_memalign(&temp, alignment, count);
+					ASSUME(code == 0);
+					MemOps::Copy((std::byte *)temp, (std::byte *)memory, count);
 					free(memory);
 					memory = (T *)temp;
+					ASSUME(Funcs::IsAligned(memory, alignment));
 				}
 				return memory;
 			#endif
@@ -143,6 +163,8 @@ namespace StdLib::Allocator
 
         template <typename T> [[nodiscard]] static uiw MemorySize(const T *memory, uiw alignment)
         {
+			ASSUME(Funcs::IsPowerOf2(alignment));
+
 			#ifdef PLATFORM_WINDOWS
 				return memory ? _aligned_msize((void *)memory, alignment, 0) : 0;
 			#else
@@ -153,7 +175,7 @@ namespace StdLib::Allocator
 
 	template <uiw Alignment> struct MallocAlignedPredefined
 	{
-		template <typename T = ui8> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count)
+		template <typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count)
 		{
 			if constexpr (Alignment > MinimalGuaranteedAlignment)
 			{
@@ -216,7 +238,7 @@ namespace StdLib::Allocator
 	
     struct MallocAligned
     {
-        template <uiw Alignment, typename T = ui8> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count)
+        template <uiw Alignment, typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count)
         {
 			return MallocAlignedPredefined<Alignment>::template Allocate<T>(count);
         }

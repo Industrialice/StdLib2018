@@ -64,6 +64,9 @@ static void MiscTests()
     MovableAtomic<ui32> atomicTest2 = std::move(atomicTest);
     UTest(Equal, atomicTest2.load(), 15);
 
+	UTest(true, Funcs::IsAligned((void *)16, 4));
+	UTest(false, Funcs::IsAligned((void *)13, 4));
+
     UnitTestsLogger::Message("finished misc tests\n");
 }
 
@@ -637,7 +640,7 @@ static void AllocatorsTests()
 {
     uiw blockSize = 0;
 
-    ui8 *memory = Allocator::Malloc::Allocate(100);
+	ui8 *memory = Allocator::Malloc::Allocate<ui8>(100);
     UTest(true, memory);
 
     blockSize = Allocator::Malloc::MemorySize(memory);
@@ -657,14 +660,14 @@ static void AllocatorsTests()
 
     Allocator::Malloc::Free(memory);
 
-    memory = Allocator::Malloc::Allocate(0);
+    memory = Allocator::Malloc::Allocate<ui8>(0);
     memory = Allocator::Malloc::Reallocate(memory, 0);
 #ifdef PLATFORM_WINDOWS
     UTest(true, Allocator::Malloc::ReallocateInplace(memory, 0));
 #endif
     Allocator::Malloc::Free(memory);
 
-	memory = Allocator::MallocAligned::Allocate<4>(111);
+	memory = Allocator::MallocAligned::Allocate<4, ui8>(111);
 	MemOps::Set(memory, 0x66, 111);
 	UTest(Equal, (uiw)memory & 3, 0u);
 	memory = Allocator::MallocAligned::Reallocate<4>(memory, 222);
@@ -677,7 +680,7 @@ static void AllocatorsTests()
 	UTest(LeftGreaterEqual, blockSize, 222u);
 	Allocator::MallocAligned::Free<4>(memory);
 
-	memory = Allocator::MallocAligned::Allocate<64>(31);
+	memory = Allocator::MallocAligned::Allocate<64, ui8>(31);
 	UTest(Equal, (uiw)memory & 63, 0u);
 	MemOps::Set(memory, 0x77, 31);
 	memory = Allocator::MallocAligned::Reallocate<64>(memory, 11);
@@ -690,16 +693,21 @@ static void AllocatorsTests()
 	UTest(LeftGreaterEqual, blockSize, 11u);
 	Allocator::MallocAligned::Free<64>(memory);
 
+	memory = Allocator::MallocAligned::Allocate<1, ui8>(10);
+	blockSize = Allocator::MallocAligned::MemorySize<1>(memory);
+	UTest(LeftGreaterEqual, blockSize, 10u);
+	Allocator::MallocAligned::Free<1>(memory);
+
 	// testing MemorySize specifically, on Android targets prior 17 there's an unreliable hack solution to get it
-    ui8 *mem = Allocator::Malloc::Allocate(0);
+	memory = Allocator::Malloc::Allocate<ui8>(0);
     for (uiw index = 0; index < 1000; ++index)
     {
         uiw size = rand() % 256;
-        mem = Allocator::Malloc::Reallocate(mem, size);
-        uiw newSize = Allocator::Malloc::MemorySize(mem);
+		memory = Allocator::Malloc::Reallocate(memory, size);
+        uiw newSize = Allocator::Malloc::MemorySize(memory);
         ASSUME(newSize >= size);
     }
-    Allocator::Malloc::Free(mem);
+    Allocator::Malloc::Free(memory);
 
     UnitTestsLogger::Message("finished allocators tests\n");
 }
