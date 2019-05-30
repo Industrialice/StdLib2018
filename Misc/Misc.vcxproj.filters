@@ -32,6 +32,9 @@
     <ClInclude Include="_MiscInitialization.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UnitTestsLogger.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="UniqueIdManager.cpp">
@@ -41,6 +44,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="StdMiscLib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTestsLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

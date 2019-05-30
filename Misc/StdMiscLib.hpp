@@ -13,6 +13,7 @@
 #include "MiscTypes.hpp"
 #include "UniqueIdManager.hpp"
 #include "Logger.hpp"
+#include "UnitTestsLogger.hpp"
 #include "_MiscInitialization.hpp"
 
 #define _STD_MISC_LIB_INCLUDED

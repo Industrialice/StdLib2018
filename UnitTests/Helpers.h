@@ -51,8 +51,6 @@
 #include <unordered_set>
 #include <StdMiscLib.hpp>
 
-#include "UnitTestsLogger.hpp"
-
 enum UnitTestType
 {
     LeftLesser,

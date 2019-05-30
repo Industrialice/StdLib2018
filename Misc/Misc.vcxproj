@@ -191,10 +191,12 @@
     <ClInclude Include="MiscTypes.hpp" />
     <ClInclude Include="StdMiscLib.hpp" />
     <ClInclude Include="UniqueIdManager.hpp" />
+    <ClInclude Include="UnitTestsLogger.hpp" />
     <ClInclude Include="_MiscInitialization.hpp" />
     <ClInclude Include="_PreHeader.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="UnitTestsLogger.cpp" />
     <ClCompile Include="_PreHeader.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
