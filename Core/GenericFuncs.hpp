@@ -7,131 +7,179 @@ namespace StdLib::Funcs
         return left.owner_before(right) == false && right.owner_before(left) == false;
     }
 
-    template <ui32 size> struct _NearestInt;
-    template <> struct _NearestInt<1> { using type = ui8; };
-    template <> struct _NearestInt<2> { using type = ui16; };
-    template <> struct _NearestInt<4> { using type = ui32; };
-    template <> struct _NearestInt<8> { using type = ui64; };
+	// TODO: constexpr
+
+	// use it to store an opaque object as one of the fundamental types without breaking the strict aliasing rules
+	template <uiw FundamentalSize, typename T> [[nodiscard]] FORCEINLINE auto ToFundamental(T value)
+	{
+		static_assert(sizeof(T) <= 8, "there're no fundamental types with sizes above 8");
+		static_assert(sizeof(T) <= FundamentalSize);
+		auto reinterpreted = []()
+		{
+			if constexpr (FundamentalSize == 1)
+			{
+				return ui8();
+			}
+			else if constexpr (FundamentalSize == 2)
+			{
+				return ui16();
+			}
+			else if constexpr (FundamentalSize == 4)
+			{
+				return ui32();
+			}
+			else
+			{
+				return ui64();
+			}
+		} ();
+		static_assert(alignof(decltype(reinterpreted)) >= alignof(decltype(value)));
+		MemOps::Copy(reinterpret_cast<std::byte *>(&reinterpreted), reinterpret_cast<std::byte *>(&value), sizeof(T));
+		return reinterpreted;
+	}
+
+	template <typename T> [[nodiscard]] FORCEINLINE auto ToFundamental(T value)
+	{
+		return ToFundamental<sizeof(T)>(value);
+	}
+
+	// use it to reinterpret bits as a different type without breaking the strict aliasing rules
+	template <typename T, typename R> [[nodiscard]] FORCEINLINE T Reinterpret(R value)
+	{
+		static_assert(sizeof(T) == sizeof(R));
+		T reinterpreted;
+		MemOps::Copy(reinterpret_cast<std::byte *>(&reinterpreted), reinterpret_cast<std::byte *>(&value), sizeof(T));
+		return reinterpreted;
+	}
 
     template <typename T> [[nodiscard]] FORCEINLINE T SetBit(T value, ui32 bitNum, bool bitValue)
     {
+		static_assert(sizeof(T) <= 8, "cannot operate on types larger than 8 bytes");
         ASSUME(sizeof(T) * 8 > bitNum);
-        using intType = typename _NearestInt<sizeof(T)>::type;
-        intType reinterpreted = *(intType *)&value;
+		auto fundamental = ToFundamental(value);
         if constexpr (sizeof(T) > 4)
         {
+			auto input = static_cast<BitTestInput64Type>(fundamental);
+			auto bitNumInput = static_cast<BitTestInput64Type>(bitNum);
             if (bitValue)
             {
-                _BITTESTANDSET64(&reinterpreted, bitNum);
+                _BITTESTANDSET64(&input, bitNumInput);
             }
             else
             {
-                _BITTESTANDRESET64(&reinterpreted, bitNum);
+                _BITTESTANDRESET64(&input, bitNumInput);
             }
+			fundamental = static_cast<decltype(fundamental)>(input);
         }
         else
         {
-            ui32 widened = reinterpreted;
+			auto input = static_cast<BitTestInputType>(fundamental);
+			auto bitNumInput = static_cast<BitTestInputType>(bitNum);
             if (bitValue)
             {
-                _BITTESTANDSET32(&widened, bitNum);
+                _BITTESTANDSET32(&input, bitNumInput);
             }
             else
             {
-                _BITTESTANDRESET32(&widened, bitNum);
+                _BITTESTANDRESET32(&input, bitNumInput);
             }
-            reinterpreted = (intType)widened;
+			fundamental = static_cast<decltype(fundamental)>(input);
         }
-        return *(T *)&reinterpreted;
+		return Reinterpret<T>(fundamental);
     }
 
     template <typename T> [[nodiscard]] FORCEINLINE bool IsBitSet(T value, ui32 bitNum)
     {
+		static_assert(sizeof(T) <= 8, "cannot operate on types larger than 8 bytes");
         ASSUME(sizeof(T) * 8 > bitNum);
-        using intType = typename _NearestInt<sizeof(T)>::type;
-        intType reinterpreted = *(intType *)&value;
+		auto fundamental = ToFundamental(value);
         if constexpr (sizeof(T) > 4)
         {
-            return _BITTEST64(&reinterpreted, bitNum);
+			auto input = static_cast<BitTestInput64Type>(fundamental);
+			auto bitNumInput = static_cast<BitTestInput64Type>(bitNum);
+            return _BITTEST64(input, bitNumInput);
         }
         else
         {
-            ui32 widened = reinterpreted;
-            return _BITTEST32(&widened, bitNum);
+			auto input = static_cast<BitTestInputType>(fundamental);
+			auto bitNumInput = static_cast<BitTestInputType>(bitNum);
+            return _BITTEST32(input, bitNumInput);
         }
     }
 
-    template <typename T, typename R = T> [[nodiscard]] constexpr R BitPos(T pos)
+    template <typename T, typename R = T> [[nodiscard]] FORCEINLINE constexpr R BitPos(T pos)
     {
-        return (R)1 << pos;
+        return static_cast<R>(1) << pos;
     }
 
     template <typename T> [[nodiscard]] FORCEINLINE ui32 IndexOfMostSignificantNonZeroBit(T value)
     {
+		static_assert(sizeof(T) <= 8, "cannot operate on types larger than 8 bytes");
         ASSUME(value != 0);
-        static_assert(std::is_integral_v<T> || std::is_enum_v<T>, "Cannot operate on non-integral types");
-        ui32 result;
+		auto fundamental = ToFundamental(value);
+        _IndexOfSignificantBitResultType result;
         if constexpr (sizeof(T) > 4)
         {
-            _MSNZB64(value, &result);
+			auto input = static_cast<_IndexOfSignificantBitInput64Type>(fundamental);
+            _MSNZB64(input, &result);
         }
         else
         {
-            using tempValType = typename _NearestInt<sizeof(T)>::type;
-            tempValType temp = *(tempValType *)&value;
-            ui32 temp32Bit = temp;
-            _MSNZB32(temp32Bit, &result);
+			auto input = static_cast<_IndexOfSignificantBitInputType>(fundamental);
+            _MSNZB32(input, &result);
         }
-        return result;
+        return static_cast<ui32>(result);
     }
 
     template <typename T> [[nodiscard]] FORCEINLINE ui32 IndexOfLeastSignificantNonZeroBit(T value)
     {
+		static_assert(sizeof(T) <= 8, "cannot operate on types larger than 8 bytes");
         ASSUME(value != 0);
-        static_assert(std::is_integral_v<T> || std::is_enum_v<T>, "Cannot operate on non-integral types");
-        ui32 result;
-        if constexpr (sizeof(T) > 4)
-        {
-            _LSNZB64(value, &result);
-        }
-        else
-        {
-            std::conditional_t<std::is_signed_v<T>, i32, ui32> temp = value;
-            _LSNZB32(temp, &result);
-        }
-        return result;
+		auto fundamental = ToFundamental(value);
+		_IndexOfSignificantBitResultType result;
+		if constexpr (sizeof(T) > 4)
+		{
+			auto input = static_cast<_IndexOfSignificantBitInput64Type>(fundamental);
+			_LSNZB64(input, &result);
+		}
+		else
+		{
+			auto input = static_cast<_IndexOfSignificantBitInputType>(fundamental);
+			_LSNZB32(input, &result);
+		}
+		return static_cast<ui32>(result);
     }
 
     template <typename T> [[nodiscard]] FORCEINLINE ui32 IndexOfMostSignificantZeroBit(T value)
     {
-        return IndexOfMostSignificantNonZeroBit(T(~value));
+        return IndexOfMostSignificantNonZeroBit(static_cast<T>(~value));
     }
 
     template <typename T> [[nodiscard]] FORCEINLINE ui32 IndexOfLeastSignificantZeroBit(T value)
     {
-        return IndexOfLeastSignificantNonZeroBit(T(~value));
+        return IndexOfLeastSignificantNonZeroBit(static_cast<T>(~value));
     }
 
     template <typename T> [[nodiscard]] T ChangeEndianness(T value)
     {
-        static_assert(std::is_fundamental_v<T>, "input value is not a fundamental type in ChangeEndianness");
+		auto fundamental = ToFundamental(value);
         if constexpr (sizeof(value) == 8)
         {
-            ui64 temp = *(ui64 *)&value;
-            temp = _BYTESWAP64(temp);
-            return *(T *)&temp;
+			auto input = static_cast<_ByteSwapInput64>(fundamental);
+			input = _BYTESWAP64(input);
+            return Reinterpret<T>(input);
         }
         else if constexpr (sizeof(value) == 4)
         {
-            ui32 temp = *(ui32 *)&value;
-            temp = _BYTESWAP32(temp);
-            return *(T *)&temp;
+			auto input = static_cast<_ByteSwapInput32>(fundamental);
+			input = _BYTESWAP32(input);
+			return Reinterpret<T>(input);
         }
         else if constexpr (sizeof(value) == 2)
         {
-            ui16 temp = *(ui16 *)&value;
-            temp = _BYTESWAP16(temp);
-            return *(T *)&temp;
+			auto input = static_cast<_ByteSwapInput16>(fundamental);
+			input = _BYTESWAP16(input);
+			return Reinterpret<T>(input);
         }
 		else if constexpr (sizeof(value) == 1)
 		{
@@ -177,31 +225,31 @@ namespace StdLib::Funcs
 
     template <typename T> [[nodiscard]] T RotateBitsLeft(T value, ui32 shift)
     {
-        static_assert(std::is_fundamental_v<T>, "input value is not a fundamental type in RotateBitsLeft");
         ASSUME(shift < sizeof(T) * 8);
+		auto fundamental = ToFundamental(value);
         if constexpr (sizeof(value) == 8)
         {
-            alignas(T) ui64 temp = *(ui64 *)&value;
-            temp = _ROTATE64L(temp, shift);
-            return *(T *)&temp;
+			auto input = static_cast<_RotateBitsInput64>(fundamental);
+			input = _ROTATE64L(input, shift);
+			return Reinterpret<T>(input);
         }
         else if constexpr (sizeof(value) == 4)
         {
-            alignas(T) ui32 temp = *(ui32 *)&value;
-            temp = _ROTATE32L(temp, shift);
-            return *(T *)&temp;
+			auto input = static_cast<_RotateBitsInput32>(fundamental);
+			input = _ROTATE32L(input, shift);
+			return Reinterpret<T>(input);
         }
         else if constexpr (sizeof(value) == 2)
         {
-            alignas(T) ui16 temp = *(ui16 *)&value;
-            temp = _ROTATE16L(temp, shift);
-            return *(T *)&temp;
+			auto input = static_cast<_RotateBitsInput16>(fundamental);
+			input = _ROTATE16L(input, shift);
+			return Reinterpret<T>(input);
         }
 		else if constexpr (sizeof(value) == 1)
 		{
-			alignas(T) ui8 temp = *(ui8 *)&value;
-			temp = _ROTATE8L(temp, shift);
-			return *(T *)&temp;
+			auto input = static_cast<_RotateBitsInput8>(fundamental);
+			input = _ROTATE8L(input, shift);
+			return Reinterpret<T>(input);
 		}
 		else
 		{
@@ -211,31 +259,31 @@ namespace StdLib::Funcs
 
     template <typename T> [[nodiscard]] T RotateBitsRight(T value, ui32 shift)
     {
-        static_assert(std::is_fundamental_v<T>, "val is not a fundamental type in RotateBitsRight");
         ASSUME(shift < sizeof(T) * 8);
-        if constexpr (sizeof(value) == 8)
+		auto fundamental = ToFundamental(value);
+		if constexpr (sizeof(value) == 8)
         {
-            alignas(T) ui64 temp = *(ui64 *)&value;
-            temp = _ROTATE64R(temp, shift);
-            return *(T *)&temp;
+			auto input = static_cast<_RotateBitsInput64>(fundamental);
+			input = _ROTATE64R(input, shift);
+			return Reinterpret<T>(input);
         }
         else if constexpr (sizeof(value) == 4)
         {
-            alignas(T) ui32 temp = *(ui32 *)&value;
-            temp = _ROTATE32R(temp, shift);
-            return *(T *)&temp;
+			auto input = static_cast<_RotateBitsInput32>(fundamental);
+			input = _ROTATE32R(input, shift);
+			return Reinterpret<T>(input);
         }
         else if constexpr (sizeof(value) == 2)
         {
-            alignas(T) ui16 temp = *(ui16 *)&value;
-            temp = _ROTATE16R(temp, shift);
-            return *(T *)&temp;
+			auto input = static_cast<_RotateBitsInput16>(fundamental);
+			input = _ROTATE16R(input, shift);
+			return Reinterpret<T>(input);
         }
 		else if constexpr (sizeof(value) == 1)
 		{
-			alignas(T) ui8 temp = *(ui8 *)&value;
-			temp = _ROTATE8R(temp, shift);
-			return *(T *)&temp;
+			auto input = static_cast<_RotateBitsInput8>(fundamental);
+			input = _ROTATE8R(input, shift);
+			return Reinterpret<T>(input);
 		}
 		else
 		{
@@ -278,7 +326,7 @@ namespace StdLib::Funcs
 	[[nodiscard]] constexpr bool IsAligned(const void *memory, uiw alignment)
 	{
 		ASSUME(IsPowerOf2(alignment));
-		return (((uiw)memory) & (alignment - 1)) == 0;
+		return ((uiw)memory & (alignment - 1)) == 0;
 	}
 
     template <typename T> void Reinitialize(T &target)

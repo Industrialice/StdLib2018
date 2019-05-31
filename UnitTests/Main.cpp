@@ -328,9 +328,9 @@ template <typename T> static void TestIntegerHashes()
 
     UTest(NotEqual, Hash::FNVHash<Hash::Precision::P32>(number0) + Hash::FNVHash<Hash::Precision::P32>(number1), Hash::FNVHash<Hash::Precision::P32>(number2));
 
-    T hash0 = Hash::Integer(number0);
-    T hash1 = Hash::Integer(number1);
-    T hash2 = Hash::Integer(number2);
+    auto hash0 = Hash::Integer(number0);
+	auto hash1 = Hash::Integer(number1);
+	auto hash2 = Hash::Integer(number2);
 
     UTest(NotEqual, hash0, hash1);
     UTest(NotEqual, hash1, hash2);
@@ -373,6 +373,10 @@ static void HashFuncsTest()
     TestIntegerHashes<ui16>();
     TestIntegerHashes<ui32>();
     TestIntegerHashes<ui64>();
+	TestIntegerHashes<i8>();
+	TestIntegerHashes<i16>();
+	TestIntegerHashes<i32>();
+	TestIntegerHashes<i64>();
 
 	UnitTestsLogger::Message("finished hash tests\n");
 }
@@ -392,15 +396,96 @@ static void IntegerPropertiesTest()
 
 static void SetBitTests()
 {
-    ui32 value = 0;
-    value = SetBit(value, 14u, true);
-    UTest(Equal, value, 16384u);
-    UTest(true, IsBitSet(value, 14u));
-    UTest(false, IsBitSet(value, 13u));
-    value = SetBit(value, 14u, false);
-    UTest(Equal, value, 0u);
-    ui64 value64 = SetBit<ui64>(0, 63, 1);
-    UTest(Equal, value64, 0x8000'0000'0000'0000ULL);
+	ui32 value = 0;
+	value = SetBit(value, 14u, true);
+	UTest(Equal, value, 16384u);
+	UTest(true, IsBitSet(value, 14u));
+	UTest(false, IsBitSet(value, 13u));
+	value = SetBit(value, 14u, false);
+	UTest(Equal, value, 0u);
+	ui64 value64 = SetBit<ui64>(0, 63, 1);
+	UTest(Equal, value64, 0x8000'0000'0000'0000ULL);
+
+	auto test = [](auto typedefining)
+	{
+		using type = decltype(typedefining);
+		constexpr ui32 bitsCount = sizeof(type) * 8;
+		std::unordered_set<ui32> setBits;
+
+		auto testSet = [&setBits](type value)
+		{
+			for (ui32 index = 0; index < bitsCount; ++index)
+			{
+				if (setBits.find(index) != setBits.end())
+				{
+					UTest(true, IsBitSet(value, index));
+				}
+				else
+				{
+					UTest(false, IsBitSet(value, index));
+				}
+			}
+		};
+
+		type value = {};
+		testSet(value);
+
+		auto modify = [&value, &setBits, &testSet](ui32 bitNum, bool isSet)
+		{
+			value = SetBit(value, bitNum, isSet);
+			if (isSet)
+			{
+				setBits.insert(bitNum);
+			}
+			else
+			{
+				setBits.erase(bitNum);
+			}
+			testSet(value);
+		};
+
+		modify(7u, true);
+		modify(0u, true);
+		modify(bitsCount - 1, true);
+		modify(7u, false);
+		modify(bitsCount - 2, true);
+		modify(1u, true);
+		modify(bitsCount - 1, false);
+		modify(bitsCount - 1, false);
+		if constexpr (sizeof(type) >= 2)
+		{
+			modify(14u, true);
+			modify(14u, false);
+			if constexpr (sizeof(type) >= 4)
+			{
+				modify(30u, true);
+				modify(30u, false);
+			}
+			if constexpr (sizeof(type) == 8)
+			{
+				modify(60u, true);
+				modify(60u, false);
+			}
+		}
+	};
+
+	struct Opaque
+	{
+		f32 fp = 0;
+		i32 i = 0;
+	};
+
+	test(ui8());
+	test(ui16());
+	test(ui32());
+	test(ui64());
+	test(i8());
+	test(i16());
+	test(i32());
+	test(i64());
+	test(f32());
+	test(f64());
+	test(Opaque());
 
     UnitTestsLogger::Message("finished set bit tests\n");
 }
@@ -1458,7 +1543,7 @@ static void PrintSystemInfo()
 		};
 		auto sizeToString = [&info]
 		{
-			ui32 size = info.size;
+			uiw size = info.size;
 			const char *label = " B";
 			if (size / 1024)
 			{

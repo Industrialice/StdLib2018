@@ -40,39 +40,54 @@
 
     #include <intrin.h>
 
-    #define _MSNZB32(tosearch, result) do { ASSUME(*(unsigned long *)&tosearch != 0); unsigned long r; _BitScanReverse(&r, *(unsigned long *)&tosearch); *result = r; } while(0)
-    #define _LSNZB32(tosearch, result) do { ASSUME(*(unsigned long *)&tosearch != 0); unsigned long r; _BitScanForward(&r, *(unsigned long *)&tosearch); *result = r; } while(0)
+	using _IndexOfSignificantBitResultType = unsigned long;
+	using _IndexOfSignificantBitInputType = unsigned long;
+    #define _MSNZB32(tosearch, result) _BitScanReverse(result, tosearch)
+    #define _LSNZB32(tosearch, result) _BitScanForward(result, tosearch)
 
 #ifdef _WIN64
-    #define _MSNZB64(tosearch, result) do { ASSUME(*(unsigned long long *)&tosearch != 0); unsigned long r; _BitScanReverse64(&r, *(unsigned long long *)&tosearch); *result = r; } while(0)
-    #define _LSNZB64(tosearch, result) do { ASSUME(*(unsigned long long *)&tosearch != 0); unsigned long r; _BitScanForward64(&r, *(unsigned long long *)&tosearch); *result = r; } while(0)
+	using _IndexOfSignificantBitInput64Type = unsigned __int64;
+    #define _MSNZB64(tosearch, result) _BitScanReverse64(result, tosearch)
+    #define _LSNZB64(tosearch, result) _BitScanForward64(result, tosearch)
 #endif
+
+	using _ByteSwapInput16 = unsigned short;
+	using _ByteSwapInput32 = unsigned long;
+	using _ByteSwapInput64 = unsigned __int64;
 
     #define _BYTESWAP16(value) _byteswap_ushort(value)
     #define _BYTESWAP32(value) _byteswap_ulong(value)
     #define _BYTESWAP64(value) _byteswap_uint64(value)
 
-    #define _ROTATE32R(val, shift) _rotr(val, shift)
-    #define _ROTATE32L(val, shift) _rotl(val, shift)
-    #define _ROTATE64R(val, shift) _rotr64(val, shift)
-    #define _ROTATE64L(val, shift) _rotl64(val, shift)
-    #define _ROTATE16R(val, shift) _rotr16(val, shift)
-    #define _ROTATE16L(val, shift) _rotl16(val, shift)
-    #define _ROTATE8R(val, shift) _rotr8(val, shift)
-    #define _ROTATE8L(val, shift) _rotl8(val, shift)
+	using _RotateBitsInput64 = unsigned __int64;
+	using _RotateBitsInput32 = unsigned int;
+	using _RotateBitsInput16 = unsigned short;
+	using _RotateBitsInput8 = unsigned char;
+
+    #define _ROTATE32R(val, shift) _rotr(val, static_cast<int>(shift))
+    #define _ROTATE32L(val, shift) _rotl(val, static_cast<int>(shift))
+    #define _ROTATE64R(val, shift) _rotr64(val, static_cast<int>(shift))
+    #define _ROTATE64L(val, shift) _rotl64(val, static_cast<int>(shift))
+    #define _ROTATE16R(val, shift) _rotr16(val, static_cast<unsigned char>(shift))
+    #define _ROTATE16L(val, shift) _rotl16(val, static_cast<unsigned char>(shift))
+    #define _ROTATE8R(val, shift) _rotr8(val, static_cast<unsigned char>(shift))
+    #define _ROTATE8L(val, shift) _rotl8(val, static_cast<unsigned char>(shift))
 
     // works, but shows worse performance
-    /*#define _BITTEST32(value, position) _bittest((long *)value, (long)position)
-    #if defined(_WIN64) || defined(_M_ARM)
-        #define _BITTEST64(value, position) _bittest64((__int64 *)value, (__int64)position)
-    #endif*/
+	//using BitTestInputType = long;
+	//#define _BITTEST32(value, position) (_bittest(&value, position) != 0)
+	//#if defined(_WIN64) || defined(_M_ARM)
+	//	using BitTestInput64Type = long long;
+	//	#define _BITTEST64(value, position) (_bittest64(&value, position) != 0)
+	//#endif
 
-    /*#define _BITTESTANDRESET32(value, position) _bittestandreset((long *)value, (long)position)
-    #define _BITTESTANDSET32(value, position) _bittestandset((long *)value, (long)position)
-    #if defined(_M_AMD64)
-        #define _BITTESTANDRESET64(value, position) _bittestandreset64((__int64 *)value, (__int64)position)
-        #define _BITTESTANDSET64(value, position) _bittestandset64((__int64 *)value, (__int64)position)
-    #endif*/
+	//#define _BITTESTANDRESET32(value, position) (_bittestandreset(value, position) != 0)
+	//#define _BITTESTANDSET32(value, position) (_bittestandset(value, position) != 0)
+	//#if defined(_M_AMD64)
+	//	using BitTestInput64Type = long long;
+	//	#define _BITTESTANDRESET64(value, position) (_bittestandreset64(value, position) != 0)
+	//	#define _BITTESTANDSET64(value, position) (_bittestandset64(value, position) != 0)
+	//#endif
 
 #elif defined(__GNUC__) || defined(__clang__) || defined(__EMSCRIPTEN__) || defined(__MINGW32__) || defined(__MINGW32__) || defined(__MINGW64__)
 
@@ -123,6 +138,12 @@
 			#pragma clang diagnostic warning "-Wcast-align"
 			#pragma clang diagnostic warning "-Wstrict-prototypes"
 			#pragma clang diagnostic error "-Wwrite-strings"
+			#pragma clang diagnostic warning "-Wold-style-cast"
+			#pragma clang diagnostic error "-Wformat"
+			#pragma clang diagnostic warning "-Wself-assign"
+			#pragma clang diagnostic error "-Winstantiation-after-specialization"
+			#pragma clang diagnostic warning "-Wlarge-by-value-copy"
+			#pragma clang diagnostic warning "-Wpessimizing-move"
 		#else
 			#pragma GCC diagnostic error "-Wswitch"
 			#pragma GCC diagnostic error "-Wswitch-enum"
@@ -132,14 +153,28 @@
 			#pragma GCC diagnostic warning "-Wcast-align"
 			#pragma GCC diagnostic warning "-Wstrict-prototypes"
 			#pragma GCC diagnostic error "-Wwrite-strings"
+			#pragma GCC diagnostic warning "-Wold-style-cast"
+			#pragma GCC diagnostic error "-Wformat"
+			#pragma GCC diagnostic warning "-Wself-assign"
+			#pragma GCC diagnostic error "-Winstantiation-after-specialization"
+			#pragma GCC diagnostic warning "-Wlarge-by-value-copy"
+			#pragma GCC diagnostic warning "-Wpessimizing-move"
 		#endif
 	#endif
 
-    #define _MSNZB32(tosearch, result) do { ASSUME(*(unsigned int *)&tosearch != 0); *result = (31 - __builtin_clz(*(unsigned int *)&tosearch)); } while(0)
-    #define _LSNZB32(tosearch, result) do { ASSUME(*(unsigned int *)&tosearch != 0); *result = __builtin_ctz(*(unsigned int *)&tosearch); } while(0)
+	using _IndexOfSignificantBitResultType = int;
+	using _IndexOfSignificantBitInputType = unsigned long;
+	using _IndexOfSignificantBitInput64Type = unsigned long long;
 
-    #define _MSNZB64(tosearch, result) do { ASSUME(*(unsigned long long *)&tosearch != 0); *result = (63 - __builtin_clzll(*(unsigned long long *)&tosearch)); } while(0)
-    #define _LSNZB64(tosearch, result) do { ASSUME(*(unsigned long long *)&tosearch != 0); *result = __builtin_ctzll(*(unsigned long long *)&tosearch); } while(0)
+    #define _MSNZB32(tosearch, result) (*result = (31 - __builtin_clz(tosearch)))
+    #define _LSNZB32(tosearch, result) (*result = __builtin_ctz(tosearch))
+
+    #define _MSNZB64(tosearch, result) (*result = (63 - __builtin_clzll(tosearch)))
+    #define _LSNZB64(tosearch, result) (*result = __builtin_ctzll(tosearch))
+
+	using _ByteSwapInput16 = uint16_t;
+	using _ByteSwapInput32 = uint32_t;
+	using _ByteSwapInput64 = uint64_t;
 
     #define _BYTESWAP16(value) __builtin_bswap16(value)
     #define _BYTESWAP32(value) __builtin_bswap32(value)
@@ -165,84 +200,122 @@
 
 inline bool __BitTestAndReset32(int *value, int position)
 {
-    bool isSet = (*value & ((int)1 << position)) != 0;
-    *value &= ~((int)1 << position);
+    bool isSet = (*value & (1 << position)) != 0;
+    *value &= ~(1 << position);
     return isSet;
 }
 
 inline bool __BitTestAndSet32(int *value, int position)
 {
-    bool isSet = (*value & ((int)1 << position)) != 0;
-    *value |= (int)1 << position;
+    bool isSet = (*value & (1 << position)) != 0;
+    *value |= 1 << position;
     return isSet;
 }
 
 inline bool __BitTestAndReset64(long long *value, long long position)
 {
-    bool isSet = (*value & ((long long)1 << position)) != 0;
-    *value &= ~((long long)1 << position);
+    bool isSet = (*value & (1LL << position)) != 0;
+    *value &= ~(1LL << position);
     return isSet;
 }
 
 inline bool __BitTestAndSet64(long long *value, long long position)
 {
-    bool isSet = (*value & ((long long)1 << position)) != 0;
-    *value |= (long long)1 << position;
+    bool isSet = (*value & (1LL << position)) != 0;
+    *value |= 1LL << position;
     return isSet;
 }
 
-#ifndef _ROTATE64R
-    #define _ROTATE64R(val, shift) ((ui64)((ui64)(val) >> (shift)) | (ui64)((ui64)(val) << (64 - (shift))))
+#if !defined(_ROTATE64R) || !defined(_ROTATE64L)
+	using _RotateBitsInput64 = unsigned long long;
+    #define _ROTATE64R(val, shift) ((val >> shift) | (val << (64 - shift)))
+    #define _ROTATE64L(val, shift) ((val << shift) | (val >> (64 - shift)))
 #endif
-#ifndef _ROTATE64L
-    #define _ROTATE64L(val, shift) ((ui64)((ui64)(val) << (shift)) | (ui64)((ui64)(val) >> (64 - (shift))))
+#if !defined(_ROTATE32R) || !defined(_ROTATE32L)
+	using _RotateBitsInput32 = unsigned int;
+    #define _ROTATE32R(val, shift) ((val >> shift) | (val << (32 - shift)))
+    #define _ROTATE32L(val, shift) ((val << shift) | (val >> (32 - shift)))
 #endif
-#ifndef _ROTATE32R
-    #define _ROTATE32R(val, shift) ((ui32)((ui32)(val) >> (shift)) | (ui32)((ui32)(val) << (32 - (shift))))
+#if !defined(_ROTATE16R) || !defined(_ROTATE16L)
+	using _RotateBitsInput16 = unsigned short;
+    #define _ROTATE16R(val, shift) (((val >> shift) | (val << (16 - shift))) & 0xFFFF)
+    #define _ROTATE16L(val, shift) (((val << shift) | (val >> (16 - shift))) & 0xFFFF)
 #endif
-#ifndef _ROTATE32L
-    #define _ROTATE32L(val, shift) ((ui32)((ui32)(val) << (shift)) | (ui32)((ui32)(val) >> (32 - (shift))))
-#endif
-#ifndef _ROTATE16R
-    #define _ROTATE16R(val, shift) ((ui16)((ui16)(val) >> (shift)) | (ui16)((ui16)(val) << (16 - (shift))))
-#endif
-#ifndef _ROTATE16L
-    #define _ROTATE16L(val, shift) ((ui16)((ui16)(val) << (shift)) | (ui16)((ui16)(val) >> (16 - (shift))))
-#endif
-#ifndef _ROTATE8R
-    #define _ROTATE8R(val, shift) ((ui8)((ui8)(val) >> (shift)) | (ui8)((ui8)(val) << (8 - (shift))))
-#endif
-#ifndef _ROTATE8L
-    #define _ROTATE8L(val, shift) ((ui8)((ui8)(val) << (shift)) | (ui8)((ui8)(val) >> (8 - (shift))))
+#if !defined(_ROTATE8R) || !defined(_ROTATE8L)
+	using _RotateBitsInput8 = unsigned char;
+    #define _ROTATE8R(val, shift) (((val >> shift) | (val << (8 - shift))) & 0xFF)
+    #define _ROTATE8L(val, shift) (((val << shift) | (val >> (8 - shift))) & 0xFF)
 #endif
 
-#ifndef _MSNZB32
-    #define _MSNZB32(tosearch, result) do { ASSUME(tosearch != 0); for (ui32 index = 31; ; --index) { if (tosearch & 1 << index) { *result = index; break; } } } while(0)
+#if !defined(_MSNZB32) || !defined(_LSNZB32)
+	using _IndexOfSignificantBitResultType = unsigned int;
+	using _IndexOfSignificantBitInputType = unsigned int;
+
+    #define _MSNZB32(tosearch, result) do { \
+		ASSUME(tosearch != 0); \
+		for (ui32 index = 31; ; --index) { \
+			if (tosearch & 1u << index) { \
+				*result = index; \
+				break; } } } while(0)
+    
+	#define _LSNZB32(tosearch, result) do { \
+		ASSUME(tosearch != 0); \
+		for (ui32 index = 0; ; ++index) { \
+			if (tosearch & 1u << index) { \
+				*result = index; \
+				break; } } } while(0)
 #endif
-#ifndef _LSNZB32
-    #define _LSNZB32(tosearch, result) do { ASSUME(tosearch != 0); for (ui32 index = 0; ; ++index) { if (tosearch & 1 << index) { *result = index; break; } } } while(0)
+#if !defined(_MSNZB64) || !defined(_LSNZB64)
+	using _IndexOfSignificantBitInput64Type = unsigned long long; // assuming that _IndexOfSignificantBitResultType is already defined
+
+    #define _MSNZB64(tosearch, result) do { \
+		ASSUME(tosearch != 0); \
+		unsigned highPart = static_cast<unsigned>(tosearch >> 32); \
+		unsigned lowPart = static_cast<unsigned>(tosearch & 0xFFFFFFFF); \
+		_IndexOfSignificantBitResultType tempResult; \
+		if (highPart) { \
+			_MSNZB32(highPart, &tempResult); \
+			tempResult += 32; } \
+		else \
+			_MSNZB32(lowPart, &tempResult); \
+		*result = tempResult; } while(0)
+    
+	#define _LSNZB64(tosearch, result) do { \
+		ASSUME(tosearch != 0); \
+		unsigned highPart = static_cast<unsigned>(tosearch >> 32); \
+		unsigned lowPart = static_cast<unsigned>(tosearch & 0xFFFFFFFF); \
+		_IndexOfSignificantBitResultType tempResult; \
+		if (lowPart) \
+			_LSNZB32(lowPart, &tempResult); \
+		else { \
+			_LSNZB32(highPart, &tempResult); \
+			tempResult += 32; } \
+		*result = tempResult; } while(0)
 #endif
-#ifndef _MSNZB64
-    #define _MSNZB64(tosearch, result) do { ASSUME(tosearch != 0); auto casted = *(unsigned long long *)&tosearch; unsigned highPart = unsigned(casted >> 32); unsigned lowPart = unsigned(casted & 0xFFFFFFFF); unsigned int tempResult; if (highPart) { _MSNZB32(highPart, &tempResult); tempResult += 32; } else _MSNZB32(lowPart, &tempResult); *result = tempResult; } while(0)
+
+#if !defined(_BITTEST32) && !defined(_BITTESTANDRESET32) && !defined(_BITTESTANDSET32)
+	using BitTestInputType = int;
 #endif
-#ifndef _LSNZB64
-    #define _LSNZB64(tosearch, result) do { ASSUME(tosearch != 0); auto casted = *(unsigned long long *)&tosearch; unsigned highPart = unsigned(casted >> 32); unsigned lowPart = (unsigned)(casted & 0xFFFFFFFF); unsigned int tempResult; if (lowPart) _LSNZB32(lowPart, &tempResult); else { _LSNZB32(highPart, &tempResult); tempResult += 32; } *result = tempResult; } while(0)
+
+#if !defined(_BITTEST64) && !defined(_BITTESTANDRESET64) && !defined(_BITTESTANDSET64)
+	using BitTestInput64Type = long long;
 #endif
+
 #ifndef _BITTEST32
-    #define _BITTEST32(value, position) (*value & ((long)1 << position)) != 0
+    #define _BITTEST32(value, position) ((value & (1 << position)) != 0)
 #endif
 #ifndef _BITTEST64
-    #define _BITTEST64(value, position) (*value & ((long long)1 << position)) != 0
+    #define _BITTEST64(value, position) ((value & (1LL << position)) != 0)
 #endif
 #ifndef _BITTESTANDRESET32
-    #define _BITTESTANDRESET32(value, position) __BitTestAndReset32((int *)value, (int)position)
+    #define _BITTESTANDRESET32(value, position) __BitTestAndReset32(value, position)
 #endif
 #ifndef _BITTESTANDSET32
-    #define _BITTESTANDSET32(value, position) __BitTestAndSet32((int *)value, (int)position)
+    #define _BITTESTANDSET32(value, position) __BitTestAndSet32(value, position)
 #endif
 #ifndef _BITTESTANDRESET64
-    #define _BITTESTANDRESET64(value, position) __BitTestAndReset64((long long *)value, (long)position)
+    #define _BITTESTANDRESET64(value, position) __BitTestAndReset64(value, position)
 #endif
 #ifndef _BITTESTANDSET64
-    #define _BITTESTANDSET64(value, position) __BitTestAndSet64((long long *)value, (long)position)
+    #define _BITTESTANDSET64(value, position) __BitTestAndSet64(value, position)
 #endif

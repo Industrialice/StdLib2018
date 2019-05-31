@@ -91,60 +91,46 @@ namespace StdLib::Hash
     // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key
     // doesn't work well for 8 and 16 bits inputs
     // TODO: add precision specifier
-    template <typename T> [[nodiscard]] T Integer(T x)
+    template <typename T> [[nodiscard]] auto Integer(T y)
     {
         static_assert(std::is_integral_v<T>);
         if constexpr (sizeof(T) == 8)
         {
+			auto x = static_cast<ui64>(y);
             x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
             x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
             x = x ^ (x >> 31);
+			return x;
         }
-        else if constexpr (sizeof(T) == 4)
-        {
-            x = ((x >> 16) ^ x) * 0x45d9f3b;
-            x = ((x >> 16) ^ x) * 0x45d9f3b;
-            x = (x >> 16) ^ x;
-        }
-		else if constexpr (sizeof(T) == 2)
-		{
-			x = (((x >> 8) ^ x) * 0x45d9f3b) & 0xFFFF;
-			x = (((x >> 8) ^ x) * 0x45d9f3b) & 0xFFFF;
-			x = ((x >> 8) ^ x) & 0xFFFF;
-		}
 		else
 		{
-			x = (x * 0x45d9f3b) & 0xFF;
+			auto x = static_cast<ui32>(y);
+			x = ((x >> 16) ^ x) * 0x45d9f3b;
+			x = ((x >> 16) ^ x) * 0x45d9f3b;
+			x = (x >> 16) ^ x;
+			return x;
 		}
-        return x;
     }
 
     // returns the original value passed into Hash::Integer
-    template <typename T> [[nodiscard]] T IntegerInverse(T x)
+    template <typename T> [[nodiscard]] auto IntegerInverse(T y)
     {
         static_assert(std::is_integral_v<T>);
         if constexpr (sizeof(T) == 8)
         {
-            x = (x ^ (x >> 31) ^ (x >> 62)) * 0x319642b2d24d8ec3ULL;
+			auto x = static_cast<ui64>(y);
+			x = (x ^ (x >> 31) ^ (x >> 62)) * 0x319642b2d24d8ec3ULL;
             x = (x ^ (x >> 27) ^ (x >> 54)) * 0x96de1b173f119089ULL;
             x = x ^ (x >> 30) ^ (x >> 60);
-        }
-		else if constexpr (sizeof(T) == 4)
+			return x;
+		}
+		else
 		{
+			auto x = static_cast<ui32>(y);
 			x = ((x >> 16) ^ x) * 0x119de1f3;
 			x = ((x >> 16) ^ x) * 0x119de1f3;
 			x = (x >> 16) ^ x;
+			return x;
 		}
-		else if constexpr (sizeof(T) == 2)
-		{
-			x = (((x >> 8) ^ x) * 0x119de1f3) & 0xFFFF;
-			x = (((x >> 8) ^ x) * 0x119de1f3) & 0xFFFF;
-			x = ((x >> 8) ^ x) & 0xFFFF;
-		}
-        else
-        {
-            x = (x * 0x119de1f3) & 0xFF;
-        }
-        return x;
     }
 }

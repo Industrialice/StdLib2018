@@ -34,7 +34,7 @@ namespace StdLib::_Private
 #define CONCAT_EXPANDED(first, second) CONCAT(first, second)
 #define CONCAT(first, second) first##second
 #define TOSTR(code) #code
-#define ALLOCA_TYPED(count, type) (std::remove_const_t<type> *)ALLOCA(count, sizeof(type))
+#define ALLOCA_TYPED(count, type) static_cast<std::remove_const_t<type> *>(ALLOCA(count, sizeof(type)))
 
 #define static_warning(condition, message) \
 	struct CONCAT_EXPANDED(_Warning, __LINE__) \
