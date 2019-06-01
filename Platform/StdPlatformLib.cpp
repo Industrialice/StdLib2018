@@ -28,7 +28,7 @@ namespace StdLib::Initialization
 
 void StdLib::Initialization::Initialize(const PlatformParameters &parameters)
 {
-    Initialize((const CoreParameters &)parameters);
+    Initialize(static_cast<const CoreParameters &>(parameters));
 
     VirtualMemory::Initialize();
     FileInitialization::Initialize();

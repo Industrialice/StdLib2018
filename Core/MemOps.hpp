@@ -169,40 +169,64 @@ inline errno_t memset_s(void *target, size_t destinationCapacity, int value, siz
 
 } // finish extern "C"
 
+namespace StdLib
+{
+	template <typename T, typename E> [[nodiscard]] constexpr bool _AreTypesCompatible()
+	{
+		using PT = std::remove_cvref_t<T>;
+		using PE = std::remove_cvref_t<E>;
+		if constexpr (std::is_same_v<PT, PE>)
+		{
+			return true;
+		}
+		else
+		{
+			constexpr bool isTBin = std::is_same_v<PT, std::byte> || std::is_same_v<PT, ui8> || std::is_same_v<PT, char> || std::is_same_v<PT, unsigned char>;
+			constexpr bool isEBin = std::is_same_v<PE, std::byte> || std::is_same_v<PE, ui8> || std::is_same_v<PE, char> || std::is_same_v<PT, unsigned char>;
+			return isTBin && isEBin;
+		}
+	}
+}
+
 // void * types are not allowed
 // According to the docs target must always be a non-null pointer even when the size is 0, but
 // ignore that rule as being detached from the real world
 // TODO: check overlapping
 namespace StdLib::MemOps
 {
-	template <typename T> T *Copy(T *RSTR destination, const T *RSTR source, uiw count)
+	template <typename T, typename E = T> T *Copy(T *RSTR destination, const E *RSTR source, uiw count)
 	{
+		static_assert(_AreTypesCompatible<T, E>(), "passed types are not compatible, consider using casts");
 		static_assert(!std::is_same_v<T, void>, "void types are not allowed");
 		ASSUME((destination && source) || count == 0);
 		return static_cast<T *>(_CallOriginalMemCpy(destination, source, count * sizeof(T)));
 	}
 
-	template <typename T> bool CopyChecked(T *RSTR destination, uiw destinationCapacity, const T *RSTR source, uiw count)
+	template <typename T, typename E = T> bool CopyChecked(T *RSTR destination, uiw destinationCapacity, const E *RSTR source, uiw count)
 	{
+		static_assert(_AreTypesCompatible<T, E>(), "passed types are not compatible, consider using casts");
 		static_assert(!std::is_same_v<T, void>, "void types are not allowed");
 		return 0 == _CallOriginalMemCpyS(destination, destinationCapacity * sizeof(T), source, count * sizeof(T));
 	}
 
-	template <typename T> T *Move(T *destination, const T *source, uiw count)
+	template <typename T, typename E> T *Move(T *destination, const E *source, uiw count)
 	{
+		static_assert(_AreTypesCompatible<T, E>(), "passed types are not compatible, consider using casts");
 		static_assert(!std::is_same_v<T, void>, "void types are not allowed");
 		ASSUME((destination && source) || count == 0);
 		return static_cast<T *>(_CallOriginalMemMove(destination, source, count * sizeof(T)));
 	}
 
-	template <typename T> bool MoveChecked(T *destination, uiw destinationCapacity, const T *source, uiw count)
+	template <typename T, typename E> bool MoveChecked(T *destination, uiw destinationCapacity, const E *source, uiw count)
 	{
+		static_assert(_AreTypesCompatible<T, E>(), "passed types are not compatible, consider using casts");
 		static_assert(!std::is_same_v<T, void>, "void types are not allowed");
 		return 0 == _CallOriginalMemMoveS(destination, destinationCapacity * sizeof(T), source, count * sizeof(T));
 	}
 
-	template <typename T> [[nodiscard]] i32 Compare(const T *target, const T *source, uiw count)
+	template <typename T, typename E = T> [[nodiscard]] i32 Compare(const T *target, const E *source, uiw count)
 	{
+		static_assert(_AreTypesCompatible<T, E>(), "passed types are not compatible, consider using casts");
 		static_assert(!std::is_same_v<T, void>, "void types are not allowed");
 		ASSUME(target && source);
 		return _CallOriginalMemCmp(target, source, count * sizeof(T));
@@ -212,13 +236,13 @@ namespace StdLib::MemOps
 	{
 		static_assert(!std::is_same_v<T, void>, "void types are not allowed");
 		ASSUME(destination || count == 0);
-		return static_cast<T *>(_CallOriginalMemSet(destination, (i32)value, count * sizeof(T)));
+		return static_cast<T *>(_CallOriginalMemSet(destination, value, count * sizeof(T)));
 	}
 
 	template <typename T> bool SetChecked(T *destination, uiw destinationCapacity, ui8 value, uiw count)
 	{
 		static_assert(!std::is_same_v<T, void>, "void types are not allowed");
-		return 0 == _CallOriginalMemSetS(destination, destinationCapacity * sizeof(T), (i32)value, count * sizeof(T));
+		return 0 == _CallOriginalMemSetS(destination, destinationCapacity * sizeof(T), value, count * sizeof(T));
 	}
 
 	template <typename T> [[nodiscard]] const T *Chr(const T *source, ui8 value, uiw count)

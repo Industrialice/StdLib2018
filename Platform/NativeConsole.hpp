@@ -21,8 +21,8 @@ namespace StdLib
 		{
 			static constexpr struct ModeValue : EnumCombinable<ModeValue, ui8, true>
 			{} Default = ModeValue::Create(0),
-				EnableMouseSelection = ModeValue::Create(Funcs::BitPos(0)),
-				ProcessInput = ModeValue::Create(Funcs::BitPos(1)); /* processing key combinations like Control + C */
+				EnableMouseSelection = ModeValue::Create(1 << 0),
+				ProcessInput = ModeValue::Create(1 << 1); /* processing key combinations like Control + C */
 		};
 
 	private:

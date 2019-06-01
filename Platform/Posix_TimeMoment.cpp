@@ -24,7 +24,7 @@ namespace
 
 TimeDifference::TimeDifference(TimeMinutesFP64 time)
 {
-    _counter = (i64)(time * FreqMFP64);
+    _counter = static_cast<i64>(time * FreqMFP64);
 }
 
 TimeDifference::TimeDifference(TimeMinutesI64 time)
@@ -34,7 +34,7 @@ TimeDifference::TimeDifference(TimeMinutesI64 time)
 
 TimeDifference::TimeDifference(TimeSecondsFP64 time)
 {
-    _counter = (i64)(time * FreqFP64);
+    _counter = static_cast<i64>(time * FreqFP64);
 }
 
 TimeDifference::TimeDifference(TimeSecondsI64 time)
@@ -44,7 +44,7 @@ TimeDifference::TimeDifference(TimeSecondsI64 time)
 
 TimeDifference::TimeDifference(TimeMilliSecondsFP64 time)
 {
-    _counter = (i64)(time * FreqMSFP64);
+    _counter = static_cast<i64>(time * FreqMSFP64);
 }
 
 TimeDifference::TimeDifference(TimeMilliSecondsI64 time)
@@ -54,7 +54,7 @@ TimeDifference::TimeDifference(TimeMilliSecondsI64 time)
 
 TimeDifference::TimeDifference(TimeMicroSecondsFP64 time)
 {
-    _counter = (i64)(time * FreqUSFP64);
+    _counter = static_cast<i64>(time * FreqUSFP64);
 }
 
 TimeDifference::TimeDifference(TimeMicroSecondsI64 time)
@@ -76,7 +76,7 @@ i32 TimeDifference::ToSec_i32() const
 {
     i64 result = ToSec_i64();
     ASSUME(result <= std::numeric_limits<i32>::max() && result >= std::numeric_limits<i32>::min());
-    return (i32)result;
+    return static_cast<i32>(result);
 }
 
 i64 TimeDifference::ToSec_i64() const
@@ -98,7 +98,7 @@ i32 TimeDifference::ToMSec_i32() const
 {
     i64 result = ToMSec_i64();
     ASSUME(result <= std::numeric_limits<i32>::max() && result >= std::numeric_limits<i32>::min());
-    return (i32)result;
+    return static_cast<i32>(result);
 }
 
 i64 TimeDifference::ToMSec_i64() const
@@ -120,7 +120,7 @@ i32 TimeDifference::ToUSec_i32() const
 {
     i64 result = ToUSec_i64();
     ASSUME(result <= std::numeric_limits<i32>::max() && result >= std::numeric_limits<i32>::min());
-    return (i32)result;
+    return static_cast<i32>(result);
 }
 
 i64 TimeDifference::ToUSec_i64() const

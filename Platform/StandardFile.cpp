@@ -270,7 +270,7 @@ bool StandardFile::IsOpen() const
 bool StandardFile::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
 {
     ASSUME(IsOpen());
-    ui32 actuallyRead = (ui32)fread(target, 1, len, _file);
+    ui32 actuallyRead = static_cast<ui32>(fread(target, 1, len, _file));
     if (read) *read = actuallyRead;
     return true;
 }
@@ -278,7 +278,7 @@ bool StandardFile::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
 bool StandardFile::Write(const void *RSTR source, ui32 len, ui32 *RSTR written)
 {
     ASSUME(IsOpen());
-    ui32 actuallyWritten = (ui32)fwrite(source, 1, len, _file);
+    ui32 actuallyWritten = static_cast<ui32>(fwrite(source, 1, len, _file));
     if (written) *written = actuallyWritten;
     return true;
 }
@@ -312,7 +312,7 @@ bool StandardFile::Buffer(ui32 size, bufferType &&buffer)
         return false;
     }
     int mode = size > 0 ? _IOFBF : _IONBF;
-    if (setvbuf(_file, (char *)buffer.get(), mode, size) != 0)
+    if (setvbuf(_file, reinterpret_cast<char *>(buffer.get()), mode, size) != 0)
     {
         return false;
     }
@@ -520,7 +520,7 @@ FileCacheModes::FileCacheMode StandardFile::CacheMode() const
     {
         fflush(stream);
         off_t result = lseek64(fileno(stream), offset, whence);
-        return result == (off_t)-1 ? -1 : 0;
+        return result == static_cast<off_t>(-1) ? -1 : 0;
     }
 #endif
 

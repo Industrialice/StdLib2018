@@ -77,19 +77,19 @@ std::optional<ui32> VirtualKeys::KeyNumber(KeyCode key)
 {
     if (IsDigit(key))
     {
-        return (ui32)key - (ui32)KeyCode::Digit0;
+        return static_cast<ui32>(key) - static_cast<ui32>(KeyCode::Digit0);
     }
     if (IsMouseButton(key))
     {
-        return (ui32)key - (ui32)KeyCode::MButton0;
+        return static_cast<ui32>(key) - static_cast<ui32>(KeyCode::MButton0);
     }
     if (IsNPadDigit(key))
     {
-        return (ui32)key - (ui32)KeyCode::NPad0;
+        return static_cast<ui32>(key) - static_cast<ui32>(KeyCode::NPad0);
     }
     if (IsFKey(key))
     {
-        return (ui32)key - (ui32)KeyCode::F1 + 1;
+        return static_cast<ui32>(key) - static_cast<ui32>(KeyCode::F1) + 1;
     }
     return std::nullopt;
 }
@@ -98,7 +98,7 @@ char VirtualKeys::ToAlpha(KeyCode key, bool isUpperCase)
 {
     if (IsLetter(key))
     {
-        return ((ui32)key - (ui32)KeyCode::A) + (isUpperCase ? 'A' : 'a');
+        return (static_cast<ui32>(key) - static_cast<ui32>(KeyCode::A)) + (isUpperCase ? 'A' : 'a');
     }
     return '\0';
 }

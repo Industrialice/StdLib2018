@@ -32,7 +32,7 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
         {
             return DefaultError::OutOfMemory("File is too big");
         }
-        fileSize = (uiw)fileSizeUnwrapped;
+        fileSize = static_cast<uiw>(fileSizeUnwrapped);
     }
     else
     {
@@ -61,10 +61,10 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
         return DefaultError::UnknownError("mmap failed");
     }
 
-    _offset = offset + (uiw)file._offsetToStart;
+    _offset = offset + static_cast<uiw>(file._offsetToStart);
     _size = size;
 
-    uiw accessibleFileSize = fileSize - (uiw)file._offsetToStart;
+    uiw accessibleFileSize = fileSize - static_cast<uiw>(file._offsetToStart);
     if (_size > accessibleFileSize)
     {
         _size = accessibleFileSize;

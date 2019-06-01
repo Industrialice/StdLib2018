@@ -295,7 +295,7 @@ Result<ui64> File::Size()
     }
     if (!_readBufferCurrentSize)
     {
-        size.QuadPart += (i64)_bufferPos;
+        size.QuadPart += static_cast<i64>(_bufferPos);
     }
     ASSUME(size.QuadPart >= _offsetToStart);
     return size.QuadPart - _offsetToStart;
@@ -310,8 +310,8 @@ Error<> File::Size(ui64 newSize)
         return DefaultError::UnknownError("Flushing buffers failed");
     }
 
-    newSize += (ui64)_offsetToStart;
-    if (newSize < (ui64)_offsetToStart) // overflow
+    newSize += static_cast<ui64>(_offsetToStart);
+    if (newSize < static_cast<ui64>(_offsetToStart)) // overflow
     {
         newSize = ui64_max;
     }
@@ -400,7 +400,7 @@ bool File::CancelCachedRead()
         ASSUME(_readBufferCurrentSize == 0 || _bufferPos == _readBufferCurrentSize);
         return true;
     }
-    LONGLONG move = (LONGLONG)_bufferPos - (LONGLONG)_readBufferCurrentSize;
+    LONGLONG move = static_cast<LONGLONG>(_bufferPos) - static_cast<LONGLONG>(_readBufferCurrentSize);
     ASSUME(move <= 0);
     LARGE_INTEGER quadMove;
     quadMove.QuadPart = move;
@@ -432,7 +432,7 @@ namespace StdLib::FileInitialization
 				return;
 			}
 			using type = decltype(StdLib_GetFinalPathNameByHandleW);
-			StdLib_GetFinalPathNameByHandleW = (type)GetProcAddress(k32, "GetFinalPathNameByHandleW"); // exists since Vista
+			StdLib_GetFinalPathNameByHandleW = static_cast<type>(GetProcAddress(k32, "GetFinalPathNameByHandleW")); // exists since Vista
 		#else
 			StdLib_GetFinalPathNameByHandleW = GetFinalPathNameByHandleW;
 		#endif

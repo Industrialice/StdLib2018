@@ -84,7 +84,26 @@ namespace StdLib::SystemInfo
             free(addresses[i]);
         }
 
-        LogicalCPUCoresValue = (ui32)sysconf(_SC_NPROCESSORS_CONF);
-        PageSizeValue = (uiw)sysconf(_SC_PAGESIZE);
+		int logicalCPUCores = sysconf(_SC_NPROCESSORS_CONF);
+		if (logicalCPUCores == -1)
+		{
+			SOFTBREAK;
+			LogicalCPUCoresValue = 1;
+		}
+		else
+		{
+			LogicalCPUCoresValue = static_cast<ui32>(logicalCPUCores);
+		}
+
+		int pageSize = sysconf(_SC_PAGESIZE);
+		if (pageSize == -1)
+		{
+			SOFTBREAK;
+			PageSizeValue = 4096;
+		}
+		else
+		{
+			PageSizeValue = static_cast<uiw>(pageSize);
+		}
     }
 }

@@ -52,22 +52,22 @@ bool MemoryMappedFile::IsWritable() const
     return _isWritable;
 }
 
-ui8 *MemoryMappedFile::Memory()
+std::byte *MemoryMappedFile::Memory()
 {
     ASSUME(IsOpen());
-    return (ui8 *)_memory + _offset;
+    return _memory + _offset;
 }
 
-const ui8 *MemoryMappedFile::Memory() const
+const std::byte *MemoryMappedFile::Memory() const
 {
     ASSUME(IsOpen());
-    return (ui8 *)_memory + _offset;
+    return _memory + _offset;
 }
 
-const ui8 *MemoryMappedFile::CMemory() const
+const std::byte *MemoryMappedFile::CMemory() const
 {
     ASSUME(IsOpen());
-    return (ui8 *)_memory + _offset;
+    return _memory + _offset;
 }
 
 uiw MemoryMappedFile::Size()

@@ -276,8 +276,8 @@ Error<> File::Size(ui64 newSize)
         return DefaultError::UnknownError("Flushing buffers failed");
     }
 
-    newSize += (ui64)_offsetToStart;
-    if (newSize < (ui64)_offsetToStart) // overflow
+    newSize += static_cast<ui64>(_offsetToStart);
+    if (newSize < static_cast<ui64>(_offsetToStart)) // overflow
     {
         newSize = ui64_max;
     }
@@ -307,7 +307,7 @@ bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
 #endif
 
     ssize_t sswritten = write(_handle, source, len);
-    if (sswritten == (ssize_t)-1)
+    if (sswritten == static_cast<ssize_t>(-1))
     {
         if (written) *written = 0;
         return false;
@@ -317,7 +317,7 @@ bool File::WriteToFile(const void *source, ui32 len, ui32 *written)
     _stats.bytesToFileWritten += sswritten;
 #endif
 
-    if (written) *written = (ui32)sswritten;
+    if (written) *written = static_cast<ui32>(sswritten);
     return true;
 }
 
@@ -331,7 +331,7 @@ bool File::ReadFromFile(void *target, ui32 len, ui32 *readRet)
 #endif
 
     ssize_t actuallyRead = read(_handle, target, len);
-    if (actuallyRead == (ssize_t)-1)
+    if (actuallyRead == static_cast<ssize_t>(-1))
     {
         if (readRet) *readRet = 0;
         return false;
@@ -341,7 +341,7 @@ bool File::ReadFromFile(void *target, ui32 len, ui32 *readRet)
     _stats.bytesFromFileRead += actuallyRead;
 #endif
 
-    if (readRet) *readRet = (ui32)actuallyRead;
+    if (readRet) *readRet = static_cast<ui32>(actuallyRead);
     return true;
 }
 
@@ -353,7 +353,7 @@ bool File::CancelCachedRead()
         ASSUME(_readBufferCurrentSize == 0 || _bufferPos == _readBufferCurrentSize);
         return true;
     }
-    i32 move = (i32)_bufferPos - (i32)_readBufferCurrentSize;
+    i32 move = static_cast<i32>(_bufferPos) - static_cast<i32>(_readBufferCurrentSize);
     off64_t result = lseek64(_handle, move, SEEK_CUR);
     _bufferPos = _readBufferCurrentSize = 0;
     return result != -1;

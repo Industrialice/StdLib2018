@@ -136,16 +136,16 @@ NativeConsole &NativeConsole::CursorPosition(std::optional<ui32> x, std::optiona
 		auto info = GetInfo(_outputHandle);
 		if (x == std::nullopt)
 		{
-			x = (ui32)info.dwCursorPosition.X;
+			x = static_cast<ui32>(info.dwCursorPosition.X);
 		}
 		if (y == std::nullopt)
 		{
-			y = (ui32)info.dwCursorPosition.Y;
+			y = static_cast<ui32>(info.dwCursorPosition.Y);
 		}
 	}
 	COORD coord;
-	coord.X = (SHORT)*x;
-	coord.Y = (SHORT)*y;
+	coord.X = static_cast<SHORT>(*x);
+	coord.Y = static_cast<SHORT>(*y);
 	BOOL result = SetConsoleCursorPosition(_outputHandle, coord);
 	ASSUME(result);
 	return *this;
@@ -155,7 +155,7 @@ std::pair<ui32, ui32> NativeConsole::CursorPosition() const
 {
 	ASSUME(IsOpen());
 	auto info = GetInfo(_outputHandle);
-	return {(ui32)info.dwCursorPosition.X, (ui32)info.dwCursorPosition.Y};
+	return {static_cast<ui32>(info.dwCursorPosition.X), static_cast<ui32>(info.dwCursorPosition.Y)};
 }
 
 NativeConsole &NativeConsole::Write(pathStringView text, ui32 *printed)
@@ -163,7 +163,7 @@ NativeConsole &NativeConsole::Write(pathStringView text, ui32 *printed)
 	ASSUME(IsOpen());
 
 	DWORD written;
-	BOOL result = WriteConsoleW(_outputHandle, text.data(), (DWORD)text.size(), &written, nullptr);
+	BOOL result = WriteConsoleW(_outputHandle, text.data(), static_cast<DWORD>(text.size()), &written, nullptr);
 	ASSUME(result);
 	if (printed)
 	{
@@ -178,7 +178,7 @@ NativeConsole &NativeConsole::WriteASCII(std::string_view text, ui32 *printed)
 	ASSUME(IsOpen());
 
 	DWORD written;
-	BOOL result = WriteConsoleA(_outputHandle, text.data(), (DWORD)text.size(), &written, nullptr);
+	BOOL result = WriteConsoleA(_outputHandle, text.data(), static_cast<DWORD>(text.size()), &written, nullptr);
 	ASSUME(result);
 	if (printed)
 	{
@@ -256,7 +256,7 @@ auto NativeConsole::Colors() const -> std::pair<Color, Color>
 		ASSUME(index < CountOf(TextColorMap));
 		if (TextColorMap[index] == textColor)
 		{
-			left = (Color)index;
+			left = static_cast<Color>(index);
 			break;
 		}
 	}
@@ -265,7 +265,7 @@ auto NativeConsole::Colors() const -> std::pair<Color, Color>
 		ASSUME(index < CountOf(BackgroundColorMap));
 		if (BackgroundColorMap[index] == backgroundColor)
 		{
-			right = (Color)index;
+			right = static_cast<Color>(index);
 			break;
 		}
 	}
@@ -283,11 +283,11 @@ NativeConsole &NativeConsole::Position(std::optional<i32> x, std::optional<i32> 
 	ASSUME(result);
 	if (x == std::nullopt)
 	{
-		x = (i32)rect.left;
+		x = static_cast<i32>(rect.left);
 	}
 	if (y == std::nullopt)
 	{
-		y = (i32)rect.top;
+		y = static_cast<i32>(rect.top);
 	}
 	result = MoveWindow(window, *x, *y, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 	ASSUME(result);
@@ -302,7 +302,7 @@ std::pair<i32, i32> NativeConsole::Position() const
 	RECT rect;
 	BOOL result = GetWindowRect(window, &rect);
 	ASSUME(result);
-	return {(i32)rect.left, (i32)rect.top};
+	return { static_cast<i32>(rect.left), static_cast<i32>(rect.top)};
 }
 
 NativeConsole &NativeConsole::Size(std::optional<ui32> width, std::optional<ui32> height)
@@ -317,11 +317,11 @@ NativeConsole &NativeConsole::Size(std::optional<ui32> width, std::optional<ui32
 	ASSUME(result);
 	if (width == std::nullopt)
 	{
-		width = (ui32)(rect.right - rect.left);
+		width = static_cast<ui32>(rect.right - rect.left);
 	}
 	if (height == std::nullopt)
 	{
-		height = (ui32)(rect.bottom - rect.top);
+		height = static_cast<ui32>(rect.bottom - rect.top);
 	}
 
 	// increase screen buffer size if it isn't big enough for the new window size
@@ -330,8 +330,8 @@ NativeConsole &NativeConsole::Size(std::optional<ui32> width, std::optional<ui32
 	ASSUME(result);
 	i32 xDelta = (rect.right - rect.left) - (client.right - client.left);
 	i32 yDelta = (rect.bottom - rect.top) - (client.bottom - client.top);
-	i32 newClientWidth = (i32)*width - xDelta;
-	i32 newClientHeight = (i32)*height - yDelta;
+	i32 newClientWidth = static_cast<i32>(*width) - xDelta;
+	i32 newClientHeight = static_cast<i32>(*height) - yDelta;
 	CONSOLE_FONT_INFO fontInfo;
 	result = GetCurrentConsoleFont(_outputHandle, FALSE, &fontInfo);
 	ASSUME(result);
@@ -345,12 +345,12 @@ NativeConsole &NativeConsole::Size(std::optional<ui32> width, std::optional<ui32
 		i32 currentBufferWidth = currentBufferWidthPixels / fontInfo.dwFontSize.X;
 		i32 currentBufferHeight = currentBufferHeightPixels / fontInfo.dwFontSize.Y;
 
-		COORD bufSize = {(SHORT)currentBufferWidth, (SHORT)currentBufferHeight};
+		COORD bufSize = {static_cast<SHORT>(currentBufferWidth), static_cast<SHORT>(currentBufferHeight)};
 		result = SetConsoleScreenBufferSize(_outputHandle, bufSize);
 		ASSUME(result);
 	}
 
-	result = MoveWindow(window, rect.left, rect.top, (i32)*width, (i32)*height, TRUE);
+	result = MoveWindow(window, rect.left, rect.top, static_cast<i32>(*width), static_cast<i32>(*height), TRUE);
 	ASSUME(result);
 
 	return *this;
@@ -364,7 +364,7 @@ std::pair<ui32, ui32> NativeConsole::Size() const
 	RECT rect;
 	BOOL result = GetWindowRect(window, &rect);
 	ASSUME(result);
-	return {(ui32)(rect.right - rect.left), (ui32)(rect.bottom - rect.top)};
+	return {static_cast<ui32>(rect.right - rect.left), static_cast<ui32>(rect.bottom - rect.top)};
 }
 
 NativeConsole &NativeConsole::BufferSize(std::optional<ui32> charactersPerLine, std::optional<ui32> lines)
@@ -375,14 +375,14 @@ NativeConsole &NativeConsole::BufferSize(std::optional<ui32> charactersPerLine, 
 		auto info = GetInfo(_outputHandle);
 		if (charactersPerLine == std::nullopt)
 		{
-			charactersPerLine = (ui32)info.dwSize.X;
+			charactersPerLine = static_cast<ui32>(info.dwSize.X);
 		}
 		if (lines == std::nullopt)
 		{
-			lines = (ui32)info.dwSize.Y;
+			lines = static_cast<ui32>(info.dwSize.Y);
 		}
 	}
-	COORD bufSize = {(SHORT)*charactersPerLine, (SHORT)*lines};
+	COORD bufSize = {static_cast<SHORT>(*charactersPerLine), static_cast<SHORT>(*lines)};
 	BOOL result = SetConsoleScreenBufferSize(_outputHandle, bufSize);
 	ASSUME(result);
 	return *this;
@@ -442,7 +442,7 @@ NativeConsole &NativeConsole::SnapToWindowSize(bool isSnapByX, bool isSnapByY)
 	i32 newBufferWidth = newBufferWidthPixels / fontInfo.dwFontSize.X;
 	i32 newBufferHeight = newBufferHeightPixels / fontInfo.dwFontSize.Y;
 
-	COORD bufSize = {(SHORT)newBufferWidth, (SHORT)newBufferHeight};
+	COORD bufSize = {static_cast<SHORT>(newBufferWidth), static_cast<SHORT>(newBufferHeight)};
 	result = SetConsoleScreenBufferSize(_outputHandle, bufSize);
 	ASSUME(result);
 
@@ -453,7 +453,7 @@ std::pair<ui32, ui32> NativeConsole::BufferSize() const
 {
 	ASSUME(IsOpen());
 	auto info = GetInfo(_outputHandle);
-	return {(ui32)info.dwSize.X, (ui32)info.dwSize.Y};
+	return {static_cast<ui32>(info.dwSize.X), static_cast<ui32>(info.dwSize.Y)};
 }
 
 NativeConsole &NativeConsole::Modes(ModeValues::ModeValue modes)
@@ -524,12 +524,12 @@ void SetColors(HANDLE handle, std::optional<NativeConsole::Color> textColor, std
 	if (textColor)
 	{
 		mask &= 0xFFF0;
-		mask |= TextColorMap[(uiw)*textColor];
+		mask |= TextColorMap[static_cast<uiw>(*textColor)];
 	}
 	if (backgroundColor)
 	{
 		mask &= 0xFF0F;
-		mask |= BackgroundColorMap[(uiw)*backgroundColor];
+		mask |= BackgroundColorMap[static_cast<uiw>(*backgroundColor)];
 	}
 
 	DWORD result = SetConsoleTextAttribute(handle, mask);

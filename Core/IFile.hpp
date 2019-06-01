@@ -69,7 +69,7 @@ namespace StdLib
 
     struct NOVTABLE IFile
     {
-        using bufferType = std::unique_ptr<ui8, void(*)(ui8 *)>;
+        using bufferType = std::unique_ptr<std::byte, void(*)(std::byte *)>;
 
         virtual ~IFile() = default;
 

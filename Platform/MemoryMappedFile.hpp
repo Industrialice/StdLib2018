@@ -11,7 +11,7 @@ namespace StdLib
     //  If the MemoryMappedFile is const, you can't change the mapped memory
     class MemoryMappedFile
     {
-        void *_memory = nullptr;
+        std::byte *_memory = nullptr;
         uiw _size;
         uiw _offset;
         bool _isWritable;
@@ -32,9 +32,9 @@ namespace StdLib
         [[nodiscard]] bool IsOpen() const;
         void Flush() const;
         [[nodiscard]] bool IsWritable() const;
-        [[nodiscard]] ui8 *Memory();
-        [[nodiscard]] const ui8 *Memory() const;
-        [[nodiscard]] const ui8 *CMemory() const;
+        [[nodiscard]] std::byte *Memory();
+        [[nodiscard]] const std::byte *Memory() const;
+        [[nodiscard]] const std::byte *CMemory() const;
         [[nodiscard]] uiw Size();
         [[nodiscard]] MemoryStreamFixedExternal ToMemoryStream();
         [[nodiscard]] MemoryStreamFixedExternal ToMemoryStream() const;

@@ -124,7 +124,7 @@ NOINLINE bool File::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
 
     auto readFromBuffer = [this](void *target, ui32 len)
     {
-        MemOps::Copy((ui8 *)target, _internalBuffer.get() + _bufferPos, len);
+        MemOps::Copy(static_cast<std::byte *>(target), _internalBuffer.get() + _bufferPos, len);
         _bufferPos += len;
     #ifdef STDLIB_ENABLE_FILE_STATS
         ++_stats.readsFromBufferCount;
@@ -146,7 +146,7 @@ NOINLINE bool File::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
         ui32 cpyLen = _readBufferCurrentSize - _bufferPos;
         readFromBuffer(target, cpyLen);
         len -= cpyLen;
-        target = (ui8 *)target + cpyLen;
+        target = static_cast<std::byte *>(target) + cpyLen;
 
         if (len >= _bufferSize)
         {
@@ -206,7 +206,7 @@ NOINLINE bool File::Write(const void *RSTR source, ui32 len, ui32 *RSTR written)
 		++_stats.bufferedWrites;
 	#endif
 
-    MemOps::Copy(_internalBuffer.get() + _bufferPos, (ui8 *)source, len);
+    MemOps::Copy(_internalBuffer.get() + _bufferPos, static_cast<const std::byte *>(source), len);
     _bufferPos += len;
 	#ifdef STDLIB_ENABLE_FILE_STATS
 		++_stats.writesToBufferCount;
@@ -252,7 +252,7 @@ NOINLINE bool File::Buffer(ui32 size, bufferType &&buffer)
         }
         else
         {
-            _internalBuffer = bufferType((ui8 *)malloc(size), [](ui8 *ptr) { free(ptr); });
+            _internalBuffer = bufferType(Allocator::Malloc::Allocate(size), [](std::byte *ptr) { free(ptr); });
         }
     }
     ASSUME(_bufferPos == 0);
@@ -302,11 +302,11 @@ Result<i64> File::Offset(FileOffsetMode offsetMode)
         ASSUME(_bufferPos == 0 || _internalBuffer.get());
         if (_readBufferCurrentSize)
         {
-            offsetFromBegin -= (i64)(_readBufferCurrentSize - _bufferPos);
+            offsetFromBegin -= static_cast<i64>(_readBufferCurrentSize - _bufferPos);
         }
         else
         {
-            offsetFromBegin += (i64)_bufferPos;
+            offsetFromBegin += static_cast<i64>(_bufferPos);
         }
 
         return offsetFromBegin;

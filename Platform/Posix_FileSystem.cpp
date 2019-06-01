@@ -444,13 +444,13 @@ Error<> CopyFileInternal(const char *sourcePnn, const char *targetPnn)
         {
             break;
         }
-        if (actuallyRead == (ssize_t)-1)
+        if (actuallyRead == static_cast<ssize_t>(-1))
         {
             copyFileResult = -1;
             break;
         }
         auto actuallyWritten = write(targetFile, localBuffer, actuallyRead);
-        if (actuallyWritten == (ssize_t)-1 || actuallyWritten < actuallyRead)
+        if (actuallyWritten == static_cast<ssize_t>(-1) || actuallyWritten < actuallyRead)
         {
             copyFileResult = -1;
             break;

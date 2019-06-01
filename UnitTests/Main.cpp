@@ -1105,7 +1105,7 @@ template <typename T> static void TestFile(const FilePath &folderForTests)
 
 	auto allocSizedBuff = [](uiw size) -> File::bufferType
 	{
-		return {new ui8[10], [](ui8 *ptr) { delete[] ptr; }};
+		return {new std::byte[10], [](std::byte *ptr) { delete[] ptr; }};
 	};
 
     internalTest(0, allocNullBuff);
@@ -1194,7 +1194,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     UTest(true, mapping);
     UTest(Equal, mapping.Size(), crapString.length());
     UTest(Equal, mapping.IsWritable(), true);
-    UTest(true, !MemOps::Compare((ui8 *)crapString.data(), mapping.Memory(), crapString.size()));
+    UTest(true, !MemOps::Compare(crapString.data(), mapping.Memory(), crapString.size()));
 
     MemoryMappedFile mappingDuplicate = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
     UTest(false, error);
@@ -1206,24 +1206,24 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     UTest(true, mappingOffsetted);
 
     std::reverse(crapString.begin(), crapString.end());
-    UTest(false, !MemOps::Compare((ui8 *)crapString.data(), mapping.Memory(), crapString.size()));
+    UTest(false, !MemOps::Compare(crapString.data(), mapping.Memory(), crapString.size()));
 
     UTest(true, file.Offset(FileOffsetMode::FromBegin, 0));
     UTest(true, file.Write(crapString.data(), (ui32)crapString.length()));
     UTest(true, file.Flush());
 
-    UTest(true, !MemOps::Compare((ui8 *)crapString.data(), mapping.Memory(), crapString.size()));
+    UTest(true, !MemOps::Compare(crapString.data(), mapping.Memory(), crapString.size()));
     std::reverse(crapString.begin(), crapString.end());
-    UTest(false, !MemOps::Compare((ui8 *)crapString.data(), mapping.Memory(), crapString.size()));
+    UTest(false, !MemOps::Compare(crapString.data(), mapping.Memory(), crapString.size()));
 
-    MemOps::Copy(mapping.Memory(), (ui8 *)crapString.data(), crapString.length());
+    MemOps::Copy(mapping.Memory(), crapString.data(), crapString.length());
     mapping.Flush();
     UTest(true, file.Offset(FileOffsetMode::FromBegin, 0));
     UTest(true, file.Read(tempBuf, (ui32)crapString.length()));
     UTest(true, !MemOps::Compare(crapString.data(), tempBuf, crapString.length()));
 
     file.Close();
-    UTest(true, !MemOps::Compare((ui8 *)crapString.data(), mapping.Memory(), crapString.size()));
+    UTest(true, !MemOps::Compare(crapString.data(), mapping.Memory(), crapString.size()));
 
     UTest(true, !MemOps::Compare(mapping.Memory(), mappingDuplicate.Memory(), crapString.size())); // different mapping should be coherent
 
@@ -1252,7 +1252,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     MemoryMappedFile appendedFileMapping = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
     UTest(false, error);
     UTest(true, appendedFileMapping);
-    UTest(true, !MemOps::Compare(appendedFileMapping.Memory(), (ui8 *)currentPartStr.data(), currentPartStr.size()));
+    UTest(true, !MemOps::Compare(appendedFileMapping.Memory(), currentPartStr.data(), currentPartStr.size()));
 
     UnitTestsLogger::Message("finished memory mapped file tests\n");
 }
@@ -1373,17 +1373,17 @@ static void MemoryStreamTests()
     {
         UTest(true, ms.IsReadable());
         UTest(Equal, ms.Size(), test0.length() + test1.length());
-        UTest(true, !MemOps::Compare(ms.CMemory(), (std::byte *)test0.data(), test0.length()));
-        UTest(true, !MemOps::Compare(ms.CMemory() + test0.length(), (std::byte *)test1.data(), test1.length()));
+        UTest(true, !MemOps::Compare(ms.CMemory(), test0.data(), test0.length()));
+        UTest(true, !MemOps::Compare(ms.CMemory() + test0.length(), test1.data(), test1.length()));
     };
 
     auto writeAndCheck = [test0, test1, checkContent](IMemoryStream &ms)
     {
         UTest(true, ms.IsReadable());
         UTest(Equal, ms.Resize(test0.length()), test0.length());
-        MemOps::Copy(ms.Memory(), (std::byte *)test0.data(), test0.length());
+        MemOps::Copy(ms.Memory(), test0.data(), test0.length());
         UTest(Equal, ms.Resize(ms.Size() + test1.size()), test0.length() + test1.length());
-		MemOps::Copy(ms.Memory() + test0.length(), (std::byte *)test1.data(), test1.size());
+		MemOps::Copy(ms.Memory() + test0.length(), test1.data(), test1.size());
         checkContent(ms);
     };
 

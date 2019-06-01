@@ -31,7 +31,7 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
         {
             return DefaultError::OutOfMemory("File is too big");
         }
-        fileSize = (uiw)fileSizeUnwrapped;
+        fileSize = static_cast<uiw>(fileSizeUnwrapped);
     }
     else
     {
@@ -43,7 +43,7 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
     DWORD protection = (isCopyOnWrite || !file._procMode.Contains(FileProcModes::Write)) ? PAGE_WRITECOPY : PAGE_READWRITE; // for memory mapped files PAGE_WRITECOPY is equivalent to PAGE_READONLY
     DWORD commitMode = isPrecommitSpace ? SEC_COMMIT : SEC_RESERVE;
     LARGE_INTEGER sizeToMap;
-    sizeToMap.QuadPart = (LONGLONG)systemMappingSize;
+    sizeToMap.QuadPart = static_cast<LONGLONG>(systemMappingSize);
     _mappingHandle = CreateFileMappingW(file._handle, nullptr, protection | commitMode, sizeToMap.HighPart, sizeToMap.LowPart, nullptr);
     if (_mappingHandle == NULL)
     {
@@ -70,7 +70,7 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
         }
     }
 
-    _memory = MapViewOfFile(_mappingHandle, desiredAccess, 0, 0, systemMappingSize);
+    _memory = static_cast<std::byte *>(MapViewOfFile(_mappingHandle, desiredAccess, 0, 0, systemMappingSize));
     if (_memory == nullptr)
     {
         BOOL result = CloseHandle(_mappingHandle);
@@ -78,10 +78,10 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
         return DefaultError::UnknownError("MapViewOfFile failed");
     }
 
-    _offset = offset + (uiw)file._offsetToStart;
+    _offset = offset + static_cast<uiw>(file._offsetToStart);
     _size = size;
 
-    uiw accessibleFileSize = fileSize - (uiw)file._offsetToStart;
+    uiw accessibleFileSize = fileSize - static_cast<uiw>(file._offsetToStart);
     if (_size > accessibleFileSize)
     {
         _size = accessibleFileSize;
