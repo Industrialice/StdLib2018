@@ -20,7 +20,7 @@ namespace StdLib
                         break;
                     }
                     ASSUME((sym & 0x80) == 0);
-                    encoded |= ((ui64)sym) << offset;
+                    encoded |= static_cast<ui64>(sym) << offset;
                 }
             }
             return encoded;
@@ -33,7 +33,7 @@ namespace StdLib
                 uiw offset = 56;
                 for (uiw index = 0; index < 9; ++index, offset -= 7)
                 {
-                    char sym = (char)((number >> offset) & 0x7F);
+                    char sym = static_cast<char>((number >> offset) & 0x7F);
                     if (start < length)
                     {
                         target[start] = sym;
@@ -60,7 +60,7 @@ namespace StdLib
                 uiw offset = 56;
                 for (uiw index = 0; index < 9; ++index, offset -= 7)
                 {
-                    char sym = (char)((number >> offset) & 0x7F);
+                    char sym = static_cast<char>((number >> offset) & 0x7F);
                     if (sym == 0)
                     {
                         break;

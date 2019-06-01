@@ -17,7 +17,7 @@ namespace StdLib
         union
         {
             void *_address;
-            alignas(Alignment) ui8 _local[size];
+            alignas(Alignment) std::byte _local[size];
         };
         void (*_onMoving)(DataHolder &target, DataHolder &source);
     #ifdef DEBUG
@@ -49,7 +49,7 @@ namespace StdLib
 					ASSUME_DEBUG_ONLY(!sourceHolder._isDestroyed);
 					ASSUME_DEBUG_ONLY(!sourceHolder._isMovedFrom);
                     new (target._local) clearT(std::move(sourceHolder.Get<clearT>()));
-                    ((clearT *)sourceHolder._local)->~clearT();
+                    reinterpret_cast<clearT *>(sourceHolder._local)->~clearT();
                     target._onMoving = sourceHolder._onMoving;
                 #ifdef DEBUG
                     target._isDestroyed = false;
@@ -88,7 +88,7 @@ namespace StdLib
             return *this;
         }
 
-        template <typename T> void Destroy() // do not call it on hold
+        template <typename T> void Destroy() // do not call it from the constructor
         {
         #ifdef DEBUG
             ASSUME(!_isDestroyed && !_isMovedFrom);
@@ -96,12 +96,11 @@ namespace StdLib
         #endif
             if constexpr (sizeof(T) <= size)
             {
-                ((T *)_local)->~T();
+				reinterpret_cast<T *>(_local)->~T();
             }
             else
             {
-                T *casted = (T *)_address;
-                delete casted;
+                delete static_cast<T *>(_address);
             }
         }
 
@@ -110,25 +109,25 @@ namespace StdLib
             ASSUME_DEBUG_ONLY(!_isDestroyed && !_isMovedFrom);
             if constexpr (sizeof(T) <= size)
             {
-                return *(T *)_local;
+                return *reinterpret_cast<T *>(_local);
             }
             else
             {
-                return *(T *)_address;
+                return *static_cast<T *>(_address);
             }
         }
 
         template <typename T> [[nodiscard]] const T &Get() const
         {
             ASSUME_DEBUG_ONLY(!_isDestroyed && !_isMovedFrom);
-            if constexpr (sizeof(T) <= size)
-            {
-                return *(T *)_local;
-            }
-            else
-            {
-                return *(T *)_address;
-            }
+			if constexpr (sizeof(T) <= size)
+			{
+				return *reinterpret_cast<const T *>(_local);
+			}
+			else
+			{
+				return *static_cast<const T *>(_address);
+			}
         }
 
         template <typename T> [[nodiscard]] constexpr bool IsPlacedLocally() const

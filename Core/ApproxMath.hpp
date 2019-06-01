@@ -5,6 +5,7 @@ namespace StdLib::ApproxMath
     enum class Precision { Low, Medium, High };
 
 	// based on https://www.hackersdelight.org/hdcodetxt/rsqrt.c.txt
+	// TODO: type punning using unions is UB in C++
     template <Precision precision> [[nodiscard]] inline f32 RSqrt(f32 input)
     {
 		ASSUME(input >= 0);

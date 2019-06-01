@@ -34,7 +34,7 @@ namespace StdLib
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) += VECDATA(other, index);
 		_ValidateValues(*this, other);
-		return *(VectorType *)this;
+		return *static_cast<VectorType *>(this);
     }
 
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator += (ScalarType scalar) -> VectorType &
@@ -42,7 +42,7 @@ namespace StdLib
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) += scalar;
         _ValidateValues(*this, scalar);
-        return *(VectorType *)this;
+		return *static_cast<VectorType *>(this);
     }
 
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator - (const _VectorBase &other) const -> VectorType
@@ -68,7 +68,7 @@ namespace StdLib
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) -= VECDATA(other, index);
 		_ValidateValues(*this, other);
-        return *(VectorType *)this;
+		return *static_cast<VectorType *>(this);
     }
 
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator -= (ScalarType scalar) -> VectorType &
@@ -76,7 +76,7 @@ namespace StdLib
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) -= scalar;
 		_ValidateValues(*this, scalar);
-        return *(VectorType *)this;
+		return *static_cast<VectorType *>(this);
     }
 
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator * (const _VectorBase &other) const -> VectorType
@@ -102,7 +102,7 @@ namespace StdLib
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) *= VECDATA(other, index);
 		_ValidateValues(*this, other);
-        return *(VectorType *)this;
+		return *static_cast<VectorType *>(this);
     }
 
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator *= (ScalarType scalar) -> VectorType &
@@ -110,7 +110,7 @@ namespace StdLib
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) *= scalar;
 		_ValidateValues(*this, scalar);
-        return *(VectorType *)this;
+		return *static_cast<VectorType *>(this);
     }
 
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator / (const _VectorBase &other) const -> VectorType
@@ -136,7 +136,7 @@ namespace StdLib
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) /= VECDATA(other, index);
 		_ValidateValues(*this, other);
-        return *(VectorType *)this;
+		return *static_cast<VectorType *>(this);
     }
 
     template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator /= (ScalarType scalar) -> VectorType &
@@ -144,7 +144,7 @@ namespace StdLib
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) /= scalar;
 		_ValidateValues(*this, scalar);
-        return *(VectorType *)this;
+        return *static_cast<VectorType *>(this);
     }
 
     template <typename _ScalarType, uiw Dim> inline auto _VectorBase<_ScalarType, Dim>::operator - () const -> VectorType
@@ -158,7 +158,7 @@ namespace StdLib
         else
         {
             HARDBREAK; // trying to negate an unsigned type
-            result = *(VectorType *)this;
+            result = *static_cast<const VectorType *>(this);
         }
         _ValidateValues(*this, result);
         return result;
@@ -181,13 +181,13 @@ namespace StdLib
     template <typename ScalarType, uiw Dim> inline std::array<ScalarType, Dim> &_VectorBase<ScalarType, Dim>::Data()
     {
 		_ValidateValues(*this);
-        return *(std::array<ScalarType, Dim> *)&x;
+        return *reinterpret_cast<std::array<ScalarType, Dim> *>(&x);
     }
 
     template <typename ScalarType, uiw Dim> inline const std::array<ScalarType, Dim> &_VectorBase<ScalarType, Dim>::Data() const
     {
 		_ValidateValues(*this);
-        return *(std::array<ScalarType, Dim> *)&x;
+        return *reinterpret_cast<const std::array<ScalarType, Dim> *>(&x);
     }
 
     template <typename ScalarType, uiw Dim> inline ScalarType &_VectorBase<ScalarType, Dim>::operator[](uiw index)
@@ -307,7 +307,7 @@ namespace StdLib
         for (uiw index = 0; index < dim; ++index)
             VECDATA(*this, index) *= revLength;
 		_ValidateValues(*this);
-        return *(VectorType *)this;
+        return *static_cast<VectorType *>(this);
     }
 
     template <typename Basis> inline auto _VectorFP<Basis>::GetNormalized() const -> VectorType
@@ -340,7 +340,7 @@ namespace StdLib
 		_ValidateValues(*this, other, interpolant);
 		ASSUME(interpolant >= 0.0f && interpolant <= 1.0f);
         *this += (other - *this) * interpolant;
-        return *(VectorType *)this;
+        return *static_cast<VectorType *>(this);
     }
 
     template <typename Basis> inline auto _VectorFP<Basis>::GetLerped(const _VectorFP &other, f32 interpolant) const -> VectorType
@@ -372,7 +372,7 @@ namespace StdLib
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
                 elements[rowIndex][columnIndex] += other[rowIndex][columnIndex];
         _ValidateValues(*this, other);
-        return *(MatrixType *)this;
+        return *static_cast<MatrixType *>(this);
     }
 
     template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator - (const _Matrix &other) const -> MatrixType
@@ -391,7 +391,7 @@ namespace StdLib
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
                 elements[rowIndex][columnIndex] -= other[rowIndex][columnIndex];
         _ValidateValues(*this, other);
-        return *(MatrixType *)this;
+        return *static_cast<MatrixType *>(this);
     }
 
     template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator * (const _Matrix &other) const -> MatrixType
@@ -431,14 +431,14 @@ namespace StdLib
             for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
                 elements[rowIndex][columnIndex] *= scalar;
         _ValidateValues(*this, scalar);
-        return *(MatrixType *)this;
+        return *static_cast<MatrixType *>(this);
     }
 
     template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator *= (const _Matrix &other) -> MatrixType &
     {
         *this = *this * other;
         _ValidateValues(*this, other);
-        return *(MatrixType *)this;
+        return *static_cast<MatrixType *>(this);
     }
 
     template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::operator[](uiw index) -> std::array<f32, Columns> &
@@ -456,13 +456,13 @@ namespace StdLib
     template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::Data() -> std::array<f32, Rows * Columns> &
     {
         _ValidateValues(*this);
-        return *(std::array<f32, Rows * Columns> *)elements.data()->data();
+        return *reinterpret_cast<std::array<f32, Rows * Columns> *>(elements.data()->data());
     }
 
     template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::Data() const -> const std::array<f32, Rows * Columns> &
     {
         _ValidateValues(*this);
-        return *(std::array<f32, Rows * Columns> *)elements.data()->data();
+        return *reinterpret_cast<const std::array<f32, Rows * Columns> *>(elements.data()->data());
     }
 
     template <uiw Rows, uiw Columns> inline MatrixTypeByDimensions<Columns, Rows> _Matrix<Rows, Columns>::GetTransposed() const
@@ -489,7 +489,7 @@ namespace StdLib
         for (uiw columnIndex = 0; columnIndex < Columns; ++columnIndex)
             elements[rowIndex][columnIndex] = row[columnIndex];
         _ValidateValues(*this);
-        return *(MatrixType *)this;
+        return *static_cast<MatrixType *>(this);
     }
 
     template <uiw Rows, uiw Columns> inline VectorTypeByDimension<f32, Rows> _Matrix<Rows, Columns>::GetColumn(uiw columnIndex) const
@@ -506,7 +506,7 @@ namespace StdLib
         for (uiw rowIndex = 0; rowIndex < Rows; ++rowIndex)
             elements[rowIndex][columnIndex] = column[rowIndex];
         _ValidateValues(*this);
-        return *(MatrixType *)this;
+        return *static_cast<MatrixType *>(this);
     }
 
     template <uiw Rows, uiw Columns> inline f32 _Matrix<Rows, Columns>::FetchValueBoundless(uiw rowIndex, uiw columnIndex) const
@@ -523,9 +523,9 @@ namespace StdLib
     {
         _ValidateValues(*this, value);
         if (rowIndex >= Rows || columnIndex >= Columns)
-            return *(MatrixType *)this;
+            return *static_cast<MatrixType *>(this);
         elements[rowIndex][columnIndex] = value;
-        return *(MatrixType *)this;
+        return *static_cast<MatrixType *>(this);
     }
 
     template <uiw Rows, uiw Columns> inline bool _Matrix<Rows, Columns>::EqualsWithEpsilon(const _Matrix &other, f32 epsilon) const
@@ -541,16 +541,16 @@ namespace StdLib
 
     template <uiw Rows, uiw Columns> inline auto _Matrix<Rows, Columns>::Inverse() -> MatrixType &
     {
-        auto inversed = ((MatrixType *)this)->GetInversed();
+        auto inversed = static_cast<MatrixType *>(this)->GetInversed();
         if (inversed)
         {
-            *(MatrixType *)this = *inversed;
+            *static_cast<MatrixType *>(this) = *inversed;
         }
         else
         {
             SOFTBREAK;
         }
-        return *(MatrixType *)this;
+        return *static_cast<MatrixType *>(this);
     }
 
     ///////////////

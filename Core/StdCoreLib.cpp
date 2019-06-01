@@ -81,7 +81,10 @@ void DefaultSoftBreakCallback(const char *file, i32 line, i32 counter)
         }
     };
 
+	static std::mutex mutex;
     static std::set<BreakInfo> breaksToIgnore;
+
+	std::scoped_lock lock{mutex};
 
     BreakInfo newBreak{file, line, counter};
     auto it = breaksToIgnore.find(newBreak);

@@ -16,7 +16,7 @@ namespace StdLib::Allocator
             {
                 count *= sizeof(T);
             }
-            return (T *)malloc(count);
+            return static_cast<T *>(malloc(count));
         }
 
         template <typename T> [[nodiscard]] static T *Reallocate(T *memory, uiw count)
@@ -25,7 +25,7 @@ namespace StdLib::Allocator
             {
                 count *= sizeof(T);
             }
-            return (T *)realloc(memory, count);
+            return static_cast<T *>(realloc(memory, count));
         }
 
         template <typename T> [[nodiscard]] static bool ReallocateInplace(T *memory, uiw count)
@@ -56,7 +56,7 @@ namespace StdLib::Allocator
         template <typename T> [[nodiscard]] static uiw MemorySize(const T *memory)
         {
         #ifdef PLATFORM_WINDOWS
-            return memory ? _msize((void *)memory) : 0;
+            return memory ? _msize(const_cast<T *>(memory)) : 0;
         #elif defined(PLATFORM_ANDROID)
 			#if __ANDROID_API__ >= 17
 				return malloc_usable_size(memory);
@@ -64,9 +64,9 @@ namespace StdLib::Allocator
 				return MallocUsableSize(memory);
 			#endif
         #elif defined(PLATFORM_LINUX) || defined(PLATFORM_EMSCRIPTEN)
-            return malloc_usable_size((void *)memory);
+            return malloc_usable_size(const_cast<T *>(memory));
         #else
-            return malloc_size((void *)memory);
+            return malloc_size(memory);
         #endif
         }
 
@@ -89,7 +89,7 @@ namespace StdLib::Allocator
 			ASSUME(Funcs::IsPowerOf2(alignment));
 
 			#ifdef PLATFORM_WINDOWS
-				return (T *)_aligned_malloc(count, alignment);
+				return static_cast<T *>(_aligned_malloc(count, alignment));
 			#else
 				if (alignment > MinimalGuaranteedAlignment)
 				{
@@ -102,11 +102,11 @@ namespace StdLib::Allocator
 					int code = posix_memalign(&memory, alignment, count);
 					ASSUME(code == 0);
 					ASSUME(Funcs::IsAligned(memory, alignment));
-					return (T *)memory;
+					return static_cast<T *>(memory);
 				}
 				else
 				{
-					return (T *)malloc(count);
+					return static_cast<T *>(malloc(count));
 				}
 			#endif
 		}
@@ -121,9 +121,9 @@ namespace StdLib::Allocator
 			ASSUME(Funcs::IsPowerOf2(alignment));
 
 			#ifdef PLATFORM_WINDOWS
-				return (T *)_aligned_realloc(memory, count, alignment);
+				return static_cast<T *>(_aligned_realloc(memory, count, alignment));
 			#else
-				memory = (T *)realloc(memory, count);
+				memory = static_cast<T *>(realloc(memory, count));
 				if (!Funcs::IsAligned(memory, alignment))
 				{
 					if (alignment & (sizeof(void *) - 1)) // posix_memalign requires alignment to be divisible by sizeof(void *)
@@ -134,9 +134,9 @@ namespace StdLib::Allocator
 					void *temp;
 					int code = posix_memalign(&temp, alignment, count);
 					ASSUME(code == 0);
-					MemOps::Copy((std::byte *)temp, (std::byte *)memory, count);
+					MemOps::Copy(static_cast<std::byte *>(temp), static_cast<std::byte *>(memory), count);
 					free(memory);
-					memory = (T *)temp;
+					memory = static_cast<T *>(temp);
 					ASSUME(Funcs::IsAligned(memory, alignment));
 				}
 				return memory;
@@ -163,7 +163,7 @@ namespace StdLib::Allocator
 			ASSUME(Funcs::IsPowerOf2(alignment));
 
 			#ifdef PLATFORM_WINDOWS
-				return memory ? _aligned_msize((void *)memory, alignment, 0) : 0;
+				return memory ? _aligned_msize(const_cast<T *>(memory), alignment, 0) : 0;
 			#else
 				return Malloc::MemorySize(memory);
 			#endif
