@@ -1373,17 +1373,17 @@ static void MemoryStreamTests()
     {
         UTest(true, ms.IsReadable());
         UTest(Equal, ms.Size(), test0.length() + test1.length());
-        UTest(true, !MemOps::Compare(ms.CMemory(), (ui8 *)test0.data(), test0.length()));
-        UTest(true, !MemOps::Compare(ms.CMemory() + test0.length(), (ui8 *)test1.data(), test1.length()));
+        UTest(true, !MemOps::Compare(ms.CMemory(), (std::byte *)test0.data(), test0.length()));
+        UTest(true, !MemOps::Compare(ms.CMemory() + test0.length(), (std::byte *)test1.data(), test1.length()));
     };
 
     auto writeAndCheck = [test0, test1, checkContent](IMemoryStream &ms)
     {
         UTest(true, ms.IsReadable());
         UTest(Equal, ms.Resize(test0.length()), test0.length());
-        MemOps::Copy(ms.Memory(), (ui8 *)test0.data(), test0.length());
+        MemOps::Copy(ms.Memory(), (std::byte *)test0.data(), test0.length());
         UTest(Equal, ms.Resize(ms.Size() + test1.size()), test0.length() + test1.length());
-		MemOps::Copy(ms.Memory() + test0.length(), (ui8 *)test1.data(), test1.size());
+		MemOps::Copy(ms.Memory() + test0.length(), (std::byte *)test1.data(), test1.size());
         checkContent(ms);
     };
 
@@ -1407,9 +1407,9 @@ static void MemoryStreamTests()
     using holderType = DataHolder<memoryStreamType::localSize, memoryStreamType::localAlignment>;
     holderType data = holderType(holderTestData);
 
-    auto holderTestDataProvide = [](const holderType &data) -> const ui8 *
+    auto holderTestDataProvide = [](const holderType &data) -> const std::byte *
     {
-        return (ui8 *)&data.Get<HolderTestData>().str;
+        return (std::byte *)&data.Get<HolderTestData>().str;
     };
 
     auto dataHolderMS = memoryStreamType::New<HolderTestData>(std::move(data), test0.length() + test1.length(), holderTestDataProvide);

@@ -50,7 +50,7 @@ void Initialization::Initialize(const CoreParameters &parameters)
 			        return 0;
 			    }
 				uiw size;
-				MemOps::Copy(&size, (uiw *)ptr - 1, sizeof(uiw));
+				MemOps::Copy(&size, static_cast<uiw *>(ptr) - 1, sizeof(uiw));
 				return size - 6;
 			};
 			__android_log_print(ANDROID_LOG_WARN, "StdLib info", "Didn't find malloc_usable_size, using a hack");

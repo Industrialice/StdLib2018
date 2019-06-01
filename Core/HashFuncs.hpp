@@ -89,7 +89,6 @@ namespace StdLib::Hash
 
     // based on Thomas Mueller's answer from 
     // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key
-    // doesn't work well for 8 and 16 bits inputs
     // TODO: add precision specifier
     template <typename T> [[nodiscard]] auto Integer(T y)
     {

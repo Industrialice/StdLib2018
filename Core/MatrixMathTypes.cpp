@@ -1008,7 +1008,7 @@ Quaternion Quaternion::FromMatrix(const Matrix3x3 &matrix)
 {
 #ifdef DEBUG
 	Vector3 debugScale;
-	matrix.Decompose((Vector3 *)nullptr, &debugScale);
+	matrix.Decompose(static_cast<Vector3 *>(nullptr), &debugScale);
 	ASSUME(debugScale.EqualsWithEpsilon({1, 1, 1}));
 #endif
 
@@ -1190,13 +1190,13 @@ const f32 &Quaternion::operator[](uiw index) const
 std::array<f32, 4> &Quaternion::Data()
 {
 	_ValidateValues(*this);
-    return *(std::array<f32, 4> *)&x;
+    return *reinterpret_cast<std::array<f32, 4> *>(&x);
 }
 
 const std::array<f32, 4> &Quaternion::Data() const
 {
 	_ValidateValues(*this);
-    return *(std::array<f32, 4> *)&x;
+    return *reinterpret_cast<const std::array<f32, 4> *>(&x);
 }
 
 Vector3 Quaternion::RotateVector(const Vector3 &source) const

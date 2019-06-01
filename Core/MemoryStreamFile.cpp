@@ -85,9 +85,9 @@ bool MemoryStreamFile::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
     len = std::min(len, (ui32)diff);
     if (_offset + len < _offset)  //  overflow
     {
-        len = (ui32)(uiw_max - _offset);
+        len = static_cast<ui32>(uiw_max - _offset);
     }
-    MemOps::Copy((ui8 *)target, _stream->Memory() + _offset, len);
+    MemOps::Copy(static_cast<std::byte *>(target), _stream->Memory() + _offset, len);
     _offset += len;
     if (read) *read = len;
     return true;
@@ -101,7 +101,7 @@ bool MemoryStreamFile::Write(const void *RSTR source, ui32 len, ui32 *RSTR writt
     if (writeEnd < _offset)  //  overflow
     {
         writeEnd = uiw_max;
-        len = (ui32)(uiw_max - _offset);
+        len = static_cast<ui32>(uiw_max - _offset);
     }
     if (writeEnd > _stream->Size())
     {
@@ -112,10 +112,10 @@ bool MemoryStreamFile::Write(const void *RSTR source, ui32 len, ui32 *RSTR writt
         }
         else
         {
-            len = (ui32)(newSize - _offset);
+            len = static_cast<ui32>(newSize - _offset);
         }
     }
-    MemOps::Copy(_stream->Memory() + _offset, (ui8 *)source, len);
+    MemOps::Copy(_stream->Memory() + _offset, static_cast<const std::byte *>(source), len);
     _offset += len;
     if (written) *written = len;
     return true;
@@ -153,7 +153,7 @@ Result<i64> MemoryStreamFile::Offset(FileOffsetMode offsetMode)
     ASSUME(_stream);
     if (offsetMode == FileOffsetMode::FromBegin)
     {
-        return (i64)_offset - (i64)_startOffset;
+        return static_cast<i64>(_offset) - static_cast<i64>(_startOffset);
     }
     else if (offsetMode == FileOffsetMode::FromCurrent)
     {
@@ -162,7 +162,7 @@ Result<i64> MemoryStreamFile::Offset(FileOffsetMode offsetMode)
     else
     {
         ASSUME(offsetMode == FileOffsetMode::FromEnd);
-        return (i64)_offset - (i64)_stream->Size();
+        return static_cast<i64>(_offset) - static_cast<i64>(_stream->Size());
     }
 }
 
@@ -209,7 +209,7 @@ Result<i64> MemoryStreamFile::Offset(FileOffsetMode offsetMode, i64 offset)
     {
         if (offsetMode == FileOffsetMode::FromBegin)
         {
-            if (offset > (i64)(_stream->Size() - _startOffset)) // overflow
+            if (offset > static_cast<i64>(_stream->Size() - _startOffset)) // overflow
             {
                 SOFTBREAK;
                 return DefaultError::InvalidArgument("Specified offset is out of range for the file");
@@ -221,7 +221,7 @@ Result<i64> MemoryStreamFile::Offset(FileOffsetMode offsetMode, i64 offset)
         }
         else if (offsetMode == FileOffsetMode::FromCurrent)
         {
-            if (offset > (i64)(_stream->Size() > _startOffset)) // overflow
+            if (offset > static_cast<i64>(_stream->Size() > _startOffset)) // overflow
             {
                 SOFTBREAK;
                 return DefaultError::InvalidArgument("Specified offset is out of range for the file");

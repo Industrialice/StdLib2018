@@ -86,19 +86,19 @@ namespace StdLib
 
 		[[nodiscard]] constexpr WrapperType Combined(const EnumCombinable &other) const
         {
-            return {(ValueType)(_value | other._value)};
+            return {static_cast<ValueType>(_value | other._value)};
         }
 
 		constexpr WrapperType &Add(const EnumCombinable &other)
         {
             _value |= other._value;
-            return (WrapperType &)*this;
+            return static_cast<WrapperType &>(*this);
         }
 
 		constexpr WrapperType &Remove(const EnumCombinable &other)
         {
             _value &= ~other._value;
-            return (WrapperType &)*this;
+			return static_cast<WrapperType&>(*this);
         }
 
 		[[nodiscard]] constexpr bool Contains(const EnumCombinable &other) const

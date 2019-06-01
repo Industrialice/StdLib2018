@@ -24,7 +24,7 @@ ui32 Hash::CRC32(const ui8 *message)
 		byte = reverse(byte);
 		for (uiw j = 0; j <= 7; j++) 
 		{
-			if ((i32)(crc ^ byte) < 0)
+			if (static_cast<i32>(crc ^ byte) < 0)
 			{
 				crc = (crc << 1) ^ 0x04C11DB7;
 			}
@@ -47,7 +47,7 @@ ui32 Hash::CRC32(const ui8 *message, uiw length)
 		byte = reverse(byte);
 		for (uiw j = 0; j <= 7; j++)
 		{
-			if ((i32)(crc ^ byte) < 0)
+			if (static_cast<i32>(crc ^ byte) < 0)
 			{
 				crc = (crc << 1) ^ 0x04C11DB7;
 			}
@@ -58,5 +58,5 @@ ui32 Hash::CRC32(const ui8 *message, uiw length)
 			byte = byte << 1;
 		}
 	}
-	return reverse((ui32)~crc);
+	return reverse(static_cast<ui32>(~crc));
 }

@@ -29,15 +29,15 @@ namespace StdLib
 			if constexpr (isArray)
 				return arg;
 			else
-				return (T &)arg;
+				return static_cast<T &>(arg);
         }
 
 		[[nodiscard]] static decltype(auto) ToStored(T &arg)
         {
 			if constexpr (isArray)
-				return (stored)arg;
+				return static_cast<stored>(arg);
 			else
-				return (stored &)arg;
+				return static_cast<stored &>(arg);
         }
     };
 
@@ -51,15 +51,15 @@ namespace StdLib
 			if constexpr (isArray)
 				return arg;
 			else
-				return (const T &)arg;
+				return static_cast<const T &>(arg);
 		}
 
 		[[nodiscard]] static decltype(auto) ToStored(const T &arg)
 		{
 			if constexpr (isArray)
-				return (stored)arg;
+				return static_cast<stored>(arg);
 			else
-				return (stored &)arg;
+				return static_cast<stored &>(arg);
 		}
 	};
 
@@ -129,7 +129,7 @@ namespace StdLib
 
 		template <uiw... S> static void callFunc(i32 action, MessageBase<Base> *object, std::index_sequence<S...>)
 		{
-			MessageDelegate *helper = (MessageDelegate *)object;
+			auto helper = static_cast<MessageDelegate *>(object);
 			if (action & 1)
 			{
 				std::invoke(MethodToCall, helper->caller, ArgConverter<MessageArgs>::FromStored(std::get<S>(helper->args))...);
@@ -159,7 +159,7 @@ namespace StdLib
 
         template <uiw... S> static void callFunc(i32 action, MessageBase<Base> *object, std::index_sequence<S...>)
         {
-            MessageFuncInline *helper = (MessageFuncInline *)object;
+            auto helper = static_cast<MessageFuncInline *>(object);
 			if (action & 1)
 			{
 				funcToCall(ArgConverter<MessageArgs>::FromStored(std::get<S>(helper->args))...);
@@ -189,7 +189,7 @@ namespace StdLib
 
         template <uiw... S> static void callFunc(i32 action, MessageBase<Base> *object, std::index_sequence<S...>)
         {
-            MessageFuncPointer *helper = (MessageFuncPointer *)object;
+            auto helper = static_cast<MessageFuncPointer *>(object);
 			if (action & 1)
 			{
 				helper->func(ArgConverter<MessageArgs>::FromStored(std::get<S>(helper->args))...);

@@ -598,7 +598,7 @@ namespace StdLib
     {
         *this = *this * matrix;
         _ValidateValues(*this, matrix);
-        return (VectorType &)*this;
+		return *static_cast<VectorType*>(this);
     }
 
     // constepxr is implicitly inline, so these definitions must be in the header
@@ -616,7 +616,7 @@ namespace StdLib
             e = func(e);
         }
         _ValidateValues(*this);
-        return *(VectorType *)this;
+        return *static_cast<VectorType *>(this);
     }
 
     template <typename _ScalarType, uiw Dim>
@@ -636,7 +636,7 @@ namespace StdLib
             }
         }
         _ValidateValues(*this);
-        return *(VectorType *)this;
+		return *static_cast<VectorType*>(this);
     }
 
     template <typename _ScalarType, uiw Dim>
@@ -656,7 +656,7 @@ namespace StdLib
             }
         }
         _ValidateValues(*this);
-        return *(VectorType *)this;
+		return *static_cast<VectorType*>(this);
     }
 
     template <typename _ScalarType, uiw Dim>
@@ -676,7 +676,7 @@ namespace StdLib
             }
         }
         _ValidateValues(*this);
-        return *(VectorType *)this;
+		return *static_cast<VectorType*>(this);
     }
 
     template <typename _ScalarType, uiw Dim>
@@ -696,7 +696,7 @@ namespace StdLib
             }
         }
         _ValidateValues(*this);
-        return *(VectorType *)this;
+		return *static_cast<VectorType*>(this);
     }
 
     template <typename _ScalarType, uiw Dim> 

@@ -106,7 +106,7 @@ namespace StdLib::FunctionInfo
         using parentClass = Class;
     };
 
-    template <typename Result, typename... Args> struct Info<std::function< Result(Args...) >>
+    template <typename Result, typename... Args> struct Info<std::function<Result(Args...)>>
     {
         using args = std::tuple<Args...>;
         using result = Result;

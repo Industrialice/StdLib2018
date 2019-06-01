@@ -179,7 +179,7 @@ namespace StdLib::MemOps
 	{
 		static_assert(!std::is_same_v<T, void>, "void types are not allowed");
 		ASSUME((destination && source) || count == 0);
-		return (T *)_CallOriginalMemCpy(destination, source, count * sizeof(T));
+		return static_cast<T *>(_CallOriginalMemCpy(destination, source, count * sizeof(T)));
 	}
 
 	template <typename T> bool CopyChecked(T *RSTR destination, uiw destinationCapacity, const T *RSTR source, uiw count)
@@ -192,7 +192,7 @@ namespace StdLib::MemOps
 	{
 		static_assert(!std::is_same_v<T, void>, "void types are not allowed");
 		ASSUME((destination && source) || count == 0);
-		return (T *)_CallOriginalMemMove(destination, source, count * sizeof(T));
+		return static_cast<T *>(_CallOriginalMemMove(destination, source, count * sizeof(T)));
 	}
 
 	template <typename T> bool MoveChecked(T *destination, uiw destinationCapacity, const T *source, uiw count)
@@ -212,7 +212,7 @@ namespace StdLib::MemOps
 	{
 		static_assert(!std::is_same_v<T, void>, "void types are not allowed");
 		ASSUME(destination || count == 0);
-		return (T *)_CallOriginalMemSet(destination, (i32)value, count * sizeof(T));
+		return static_cast<T *>(_CallOriginalMemSet(destination, (i32)value, count * sizeof(T)));
 	}
 
 	template <typename T> bool SetChecked(T *destination, uiw destinationCapacity, ui8 value, uiw count)
@@ -225,7 +225,14 @@ namespace StdLib::MemOps
 	{
 		static_assert(!std::is_same_v<T, void>, "void types are not allowed");
 		ASSUME(source || count == 0);
-		return (T *)_CallOriginalMemChr(source, value, count * sizeof(T));
+		return static_cast<const T *>(_CallOriginalMemChr(source, value, count * sizeof(T)));
+	}
+
+	template <typename T> [[nodiscard]] T *Chr(T *source, ui8 value, uiw count)
+	{
+		static_assert(!std::is_same_v<T, void>, "void types are not allowed");
+		ASSUME(source || count == 0);
+		return const_cast<T *>(static_cast<const T *>(_CallOriginalMemChr(source, value, count * sizeof(T))));
 	}
 }
 

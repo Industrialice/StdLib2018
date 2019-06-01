@@ -16,9 +16,9 @@ namespace StdLib
         [[nodiscard]] virtual ui64 Size() const = 0;
         [[nodiscard]] virtual ui64 Resize(ui64 newSize) = 0; // returns final size, it can be lower than newSize if the stream had failed to allocate enough memory; memory address and size might change after this call
         virtual void Flush() = 0; // memory address and size might change after this call
-        [[nodiscard]] virtual ui8 *Memory() = 0;
-        [[nodiscard]] virtual const ui8 *Memory() const = 0;
-        [[nodiscard]] virtual const ui8 *CMemory() const = 0;
+        [[nodiscard]] virtual std::byte *Memory() = 0;
+        [[nodiscard]] virtual const std::byte *Memory() const = 0;
+        [[nodiscard]] virtual const std::byte *CMemory() const = 0;
         [[nodiscard]] virtual bool IsReadable() const = 0;
         [[nodiscard]] virtual bool IsWritable() const = 0;
 		[[nodiscard]] virtual TypeId Type() const = 0;
@@ -27,10 +27,13 @@ namespace StdLib
     // uses a fixed sized buffer
     template <uiw FixedSize> class MemoryStreamFixed final : public IMemoryStream, public TypeIdentifiable<MemoryStreamFixed<FixedSize>>
     {
-        ui8 _buffer[FixedSize];
+		std::byte _buffer[FixedSize];
         uiw _currentSize = 0;
 
     public:
+		using TypeIdentifiable<MemoryStreamFixed<FixedSize>>::GetTypeId;
+		using TypeIdentifiable<MemoryStreamFixed<FixedSize>>::GetTypeName;
+
         MemoryStreamFixed() = default;
 
         [[nodiscard]] virtual ui64 Size() const override
@@ -51,17 +54,17 @@ namespace StdLib
         virtual void Flush() override
         {}
 
-        [[nodiscard]] virtual ui8 *Memory() override
+        [[nodiscard]] virtual std::byte *Memory() override
         {
             return _buffer;
         }
 
-        [[nodiscard]] virtual const ui8 *Memory() const override
+        [[nodiscard]] virtual const std::byte *Memory() const override
         {
             return _buffer;
         }
 
-        [[nodiscard]] virtual const ui8 *CMemory() const override
+        [[nodiscard]] virtual const std::byte *CMemory() const override
         {
             return _buffer;
         }
@@ -78,39 +81,41 @@ namespace StdLib
 
 		[[nodiscard]] virtual TypeId Type() const override
 		{
-			//return GetTypeId();
-			return {};
+			return GetTypeId();
 		}
     };
 
     // uses an externally provided buffer
     class MemoryStreamFixedExternal final : public IMemoryStream, public TypeIdentifiable<MemoryStreamFixedExternal>
     {
-        ui8 *_writeBuffer = nullptr;
-        const ui8 *_readBuffer = nullptr;
+		std::byte *_writeBuffer = nullptr;
+        const std::byte *_readBuffer = nullptr;
         uiw _maxSize = 0;
         uiw _currentSize = 0;
 
     public:
+		using TypeIdentifiable<MemoryStreamFixedExternal>::GetTypeId;
+		using TypeIdentifiable<MemoryStreamFixedExternal>::GetTypeName;
+
         MemoryStreamFixedExternal() = default;
 
-        MemoryStreamFixedExternal(void *buffer, uiw maxSize, uiw currentSize = 0) : _writeBuffer((ui8 *)buffer), _readBuffer((ui8 *)buffer), _maxSize(maxSize), _currentSize(currentSize)
+        MemoryStreamFixedExternal(void *buffer, uiw maxSize, uiw currentSize = 0) : _writeBuffer(static_cast<std::byte *>(buffer)), _readBuffer(static_cast<const std::byte *>(buffer)), _maxSize(maxSize), _currentSize(currentSize)
         {}
 
-        MemoryStreamFixedExternal(const void *buffer, uiw maxSize, uiw currentSize = 0) : _writeBuffer(nullptr), _readBuffer((ui8 *)buffer), _maxSize(maxSize), _currentSize(currentSize)
+        MemoryStreamFixedExternal(const void *buffer, uiw maxSize, uiw currentSize = 0) : _writeBuffer(nullptr), _readBuffer(static_cast<const std::byte *>(buffer)), _maxSize(maxSize), _currentSize(currentSize)
         {}
 
         void SetBuffer(void *buffer, uiw maxSize, uiw currentSize = 0)
         {
-            this->_readBuffer = (const ui8 *)buffer;
-            this->_writeBuffer = (ui8 *)buffer;
+            this->_readBuffer = static_cast<const std::byte *>(buffer);
+            this->_writeBuffer = static_cast<std::byte *>(buffer);
             this->_maxSize = maxSize;
             this->_currentSize = currentSize;
         }
 
         void SetBuffer(const void *buffer, uiw maxSize, uiw currentSize = 0)
         {
-            this->_readBuffer = (const ui8 *)buffer;
+            this->_readBuffer = static_cast<const std::byte *>(buffer);
             this->_writeBuffer = nullptr;
             this->_maxSize = maxSize;
             this->_currentSize = currentSize;
@@ -128,24 +133,24 @@ namespace StdLib
             {
                 newSize = _maxSize;
             }
-            _currentSize = (uiw)newSize;
+            _currentSize = static_cast<uiw>(newSize);
             return _currentSize;
         }
 
         virtual void Flush() override
         {}
 
-        [[nodiscard]] virtual ui8 *Memory() override
+        [[nodiscard]] virtual std::byte *Memory() override
         {
             return _writeBuffer;
         }
 
-        [[nodiscard]] virtual const ui8 *Memory() const override
+        [[nodiscard]] virtual const std::byte *Memory() const override
         {
             return _readBuffer;
         }
 
-        [[nodiscard]] virtual const ui8 *CMemory() const override
+        [[nodiscard]] virtual const std::byte *CMemory() const override
         {
             return _readBuffer;
         }
@@ -170,10 +175,13 @@ namespace StdLib
     template <typename AllocatorType = Allocator::Malloc> class MemoryStreamAllocator final : public IMemoryStream, public TypeIdentifiable<MemoryStreamAllocator<AllocatorType>>
     {
         AllocatorType _allocator{};
-        ui8 *_buffer = nullptr;
+		std::byte *_buffer = nullptr;
         uiw _currentSize = 0;
 
     public:
+		using TypeIdentifiable<MemoryStreamAllocator<AllocatorType>>::GetTypeId;
+		using TypeIdentifiable<MemoryStreamAllocator<AllocatorType>>::GetTypeName;
+
         ~MemoryStreamAllocator()
         {
             _allocator.Free(_buffer);
@@ -191,9 +199,9 @@ namespace StdLib
             ASSUME(newSize <= uiw_max);
             if (newSize != _currentSize)
             {
-                _currentSize = (uiw)newSize;
+                _currentSize = static_cast<uiw>(newSize);
                 newSize += newSize == 0;
-                _buffer = _allocator.Reallocate(_buffer, (uiw)newSize);
+                _buffer = _allocator.Reallocate(_buffer, _currentSize);
             }
             return _currentSize;
         }
@@ -201,17 +209,17 @@ namespace StdLib
         virtual void Flush() override
         {}
 
-        [[nodiscard]] virtual ui8 *Memory() override
+        [[nodiscard]] virtual std::byte *Memory() override
         {
             return _buffer;
         }
 
-        [[nodiscard]] virtual const ui8 *Memory() const override
+        [[nodiscard]] virtual const std::byte *Memory() const override
         {
             return _buffer;
         }
 
-        [[nodiscard]] virtual const ui8 *CMemory() const override
+        [[nodiscard]] virtual const std::byte *CMemory() const override
         {
             return _buffer;
         }
@@ -228,8 +236,7 @@ namespace StdLib
 
 		[[nodiscard]] virtual TypeId Type() const override
 		{
-			//return GetTypeId();
-			return {};
+			return GetTypeId();
 		}
     };
 
@@ -238,7 +245,7 @@ namespace StdLib
         using holderType = DataHolder<LocalSize, LocalAlignment>;
 
         holderType _data;
-        const ui8 *(*_provide)(const holderType &data);
+        const std::byte *(*_provide)(const holderType &data);
         void(*_flush)(holderType &data);
         void(*_destroy)(holderType &data);
         uiw _size;
@@ -248,6 +255,9 @@ namespace StdLib
         MemoryStreamFromDataHolder(holderType &&data, uiw size, decltype(_provide) provide, decltype(_flush) flush, decltype(_destroy) destroy) : _data(std::move(data)), _size(size), _provide(provide), _flush(flush), _destroy(destroy) {}
 
     public:
+		using TypeIdentifiable<MemoryStreamFromDataHolder<LocalSize, LocalAlignment>>::GetTypeId;
+		using TypeIdentifiable<MemoryStreamFromDataHolder<LocalSize, LocalAlignment>>::GetTypeName;
+
         static constexpr uiw localSize = LocalSize;
 		static constexpr uiw localAlignment = LocalAlignment;
 
@@ -289,18 +299,18 @@ namespace StdLib
             _flush(_data);
         }
 
-        [[nodiscard]] virtual ui8 *Memory() override
+        [[nodiscard]] virtual std::byte *Memory() override
         {
             SOFTBREAK;
             return nullptr;
         }
 
-        [[nodiscard]] virtual const ui8 *Memory() const override
+        [[nodiscard]] virtual const std::byte *Memory() const override
         {
             return _provide(_data);
         }
 
-        [[nodiscard]] virtual const ui8 *CMemory() const override
+        [[nodiscard]] virtual const std::byte *CMemory() const override
         {
             return _provide(_data);
         }
@@ -317,8 +327,7 @@ namespace StdLib
 
 		[[nodiscard]] virtual TypeId Type() const override
 		{
-			//return GetTypeId();
-			return {};
+			return GetTypeId();
 		}
 
         template <typename T> [[nodiscard]] static MemoryStreamFromDataHolder New(holderType &&data, uiw size, decltype(_provide) provide, decltype(_flush) flush = nullptr)

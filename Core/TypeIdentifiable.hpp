@@ -109,7 +109,12 @@ namespace std
 	{
 		[[nodiscard]] size_t operator()(const StdLib::TypeId &value) const
 		{
-			return (size_t)value.Hash();
+			StdLib::TypeId::idType hash = value.Hash();
+			if (sizeof(hash) > sizeof(size_t))
+			{
+				hash &= 0xFFFF'FFFF;
+			}
+			return static_cast<size_t>(hash);
 		}
 	};
 }
