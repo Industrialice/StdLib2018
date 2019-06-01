@@ -94,9 +94,6 @@ namespace StdLib
         uiw _currentSize = 0;
 
     public:
-		using TypeIdentifiable<MemoryStreamFixedExternal>::GetTypeId;
-		using TypeIdentifiable<MemoryStreamFixedExternal>::GetTypeName;
-
         MemoryStreamFixedExternal() = default;
 
         MemoryStreamFixedExternal(void *buffer, uiw maxSize, uiw currentSize = 0) : _writeBuffer(static_cast<std::byte *>(buffer)), _readBuffer(static_cast<const std::byte *>(buffer)), _maxSize(maxSize), _currentSize(currentSize)
@@ -330,12 +327,19 @@ namespace StdLib
 			return GetTypeId();
 		}
 
-        template <typename T> [[nodiscard]] static MemoryStreamFromDataHolder New(holderType &&data, uiw size, decltype(_provide) provide, decltype(_flush) flush = nullptr)
+        template <typename T> [[nodiscard]] static MemoryStreamFromDataHolder New(holderType &&data, uiw size, decltype(_provide) provide = nullptr, decltype(_flush) flush = nullptr)
         {
             auto destroy = [](holderType &data)
             {
                 data.template Destroy<T>();
             };
+			if (!provide)
+			{
+				provide = [](const holderType &holder)
+				{
+					return &holder.Get<std::byte>();
+				};
+			}
             if (!flush)
             {
                 flush = [](holderType &) {};

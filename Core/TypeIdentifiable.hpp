@@ -60,6 +60,16 @@ namespace StdLib
 			return _id;
 		}
 
+		[[nodiscard]] constexpr bool IsValid() const
+		{
+			return _id != 0;
+		}
+
+		[[nodiscard]] explicit constexpr operator bool() const
+		{
+			return IsValid();
+		}
+
 		constexpr const char *Name() const
 		{
 #ifdef USE_ID_NAMES
@@ -72,7 +82,7 @@ namespace StdLib
 	private:
 		idType _id{};
 #ifdef USE_ID_NAMES
-		const char *_name{};
+		const char *_name = "";
 #endif
 	};
 

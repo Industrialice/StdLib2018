@@ -1497,7 +1497,6 @@ template <KeyCode... Codes> void TestKeys(bool(*func)(KeyCode key))
 
 static void VirtualKeysTests()
 {
-
     TestKeys<KeyCode::LAlt, KeyCode::RAlt>(VirtualKeys::IsAlt);
     TestKeys<KeyCode::LeftArrow, KeyCode::RightArrow, KeyCode::UpArrow, KeyCode::DownArrow>(VirtualKeys::IsArrowKey);
     TestKeys<KeyCode::A, KeyCode::B, KeyCode::C, KeyCode::D, KeyCode::E, KeyCode::F, KeyCode::G, KeyCode::H, KeyCode::I, KeyCode::J, KeyCode::K, KeyCode::L, KeyCode::M, KeyCode::N, KeyCode::O, KeyCode::P, KeyCode::Q, KeyCode::R, KeyCode::S, KeyCode::T, KeyCode::U, KeyCode::V, KeyCode::W, KeyCode::X, KeyCode::Y, KeyCode::Z>(VirtualKeys::IsLetter);
@@ -1513,6 +1512,34 @@ static void VirtualKeysTests()
     TestKeys<KeyCode::MButton0, KeyCode::MButton1, KeyCode::MButton2, KeyCode::MButton3, KeyCode::MButton4, KeyCode::MButton5, KeyCode::MButton6>(VirtualKeys::IsMouseButton);
 
     UnitTestsLogger::Message("finished virtual keys tests\n");
+}
+
+static void TypeTests()
+{
+	auto checkType = [](const auto &value)
+	{
+		using T = std::remove_reference_t<decltype(value)>;
+		UTest(true, value.Type());
+		UTest(Equal, value.Type(), T::GetTypeId());
+		UTest(NotEqual, value.GetTypeName(), std::string_view{});
+		UTest(Equal, value.GetTypeName(), T::GetTypeName());
+	}; 
+	
+	using memoryStreamType = MemoryStreamFromDataHolder<32>;
+	using holderType = DataHolder<32>;
+	holderType data = holderType(int());
+
+	auto dataHolderMS = memoryStreamType::New<int>(std::move(data), sizeof(int));
+
+	checkType(File());
+	checkType(StandardFile());
+	checkType(MemoryStreamFile());
+	checkType(MemoryStreamAllocator<>());
+	checkType(MemoryStreamFixed<100>());
+	checkType(MemoryStreamFixedExternal());
+	checkType(dataHolderMS);
+
+	UnitTestsLogger::Message("finished type matching tests\n");
 }
 
 static void PrintSystemInfo()
@@ -1679,6 +1706,7 @@ static void DoTests(int argc, char **argv)
     MemoryStreamTests();
     FunctionInfoTests();
     VirtualKeysTests();
+	TypeTests();
     MathLibTests();
     UniqueIdManagerTests();
 	LoggerTests();
