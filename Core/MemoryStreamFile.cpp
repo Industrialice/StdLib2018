@@ -82,7 +82,7 @@ bool MemoryStreamFile::Read(void *RSTR target, ui32 len, ui32 *RSTR read)
     ASSUME(_stream && _procMode.Contains(FileProcModes::Read));
     ASSUME(len == 0 || target);
     ui64 diff = _offset <= _stream->Size() ? _stream->Size() - _offset : 0;
-    len = std::min(len, (ui32)diff);
+    len = std::min(len, static_cast<ui32>(diff));
     if (_offset + len < _offset)  //  overflow
     {
         len = static_cast<ui32>(uiw_max - _offset);

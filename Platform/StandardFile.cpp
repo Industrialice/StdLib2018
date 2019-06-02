@@ -477,7 +477,7 @@ Result<ui64> StandardFile::Size()
 
 #endif
 
-    return (ui64)(endOfFile - _offsetToStart);
+    return static_cast<ui64>(endOfFile - _offsetToStart);
 }
 
 Error<> StandardFile::Size(ui64 newSize)

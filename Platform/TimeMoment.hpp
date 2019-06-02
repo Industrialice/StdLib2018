@@ -54,35 +54,35 @@ namespace StdLib
 
     constexpr inline TimeMinutesFP64 operator "" _m(long double value)
     {
-        return {(f64)value};
+        return {static_cast<f64>(value)};
     }
     constexpr inline TimeMinutesI64 operator "" _m(unsigned long long value)
     {
-        return {(i64)value};
+        return {static_cast<i64>(value)};
     }
     constexpr inline TimeSecondsFP64 operator "" _s(long double value)
 	{
-		return {(f64)value};
+		return {static_cast<f64>(value)};
 	}
     constexpr inline TimeSecondsI64 operator "" _s(unsigned long long value)
 	{
-		return {(i64)value};
+		return {static_cast<i64>(value)};
 	}
     constexpr inline TimeMilliSecondsFP64 operator "" _ms(long double value)
 	{
-		return {(f64)value};
+		return {static_cast<f64>(value)};
 	}
     constexpr inline TimeMilliSecondsI64 operator "" _ms(unsigned long long value)
 	{
-		return {(i64)value};
+		return {static_cast<i64>(value)};
 	}
     constexpr inline TimeMicroSecondsFP64 operator "" _us(long double value)
 	{
-		return {(f64)value};
+		return {static_cast<f64>(value)};
 	}
     constexpr inline TimeMicroSecondsI64 operator "" _us(unsigned long long value)
 	{
-		return {(i64)value};
+		return {static_cast<i64>(value)};
 	}
 
     class TimeDifference

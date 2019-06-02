@@ -55,7 +55,7 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
     int flags = isCopyOnWrite ? MAP_PRIVATE : MAP_SHARED;
     flags |= isPrecommitSpace ? MAP_POPULATE : MAP_NORESERVE;
 
-    _memory = mmap(nullptr, _systemMappingSize, prot, flags, file._handle, 0);
+    _memory = static_cast<std::byte *>(mmap(nullptr, _systemMappingSize, prot, flags, file._handle, 0));
     if (!_memory)
     {
         return DefaultError::UnknownError("mmap failed");

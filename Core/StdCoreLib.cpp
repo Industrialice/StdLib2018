@@ -40,7 +40,7 @@ void Initialization::Initialize(const CoreParameters &parameters)
 	#if defined(PLATFORM_ANDROID) && __ANDROID_API__ < 17
 		void *libc = dlopen("libc.so", RTLD_NOW);
 		ASSUME(libc);
-		MallocUsableSize = (decltype(MallocUsableSize))dlsym(libc, "malloc_usable_size");
+		MallocUsableSize = reinterpret_cast<decltype(MallocUsableSize)>(dlsym(libc, "malloc_usable_size"));
 		if (MallocUsableSize == nullptr)
 		{
 			MallocUsableSize = [](const void *ptr) -> uiw
@@ -49,8 +49,7 @@ void Initialization::Initialize(const CoreParameters &parameters)
 			    {
 			        return 0;
 			    }
-				uiw size;
-				MemOps::Copy(&size, static_cast<uiw *>(ptr) - 1, sizeof(uiw));
+				ui32 size = static_cast<const ui32 *>(ptr)[-1];
 				return size - 6;
 			};
 			__android_log_print(ANDROID_LOG_WARN, "StdLib info", "Didn't find malloc_usable_size, using a hack");

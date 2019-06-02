@@ -47,7 +47,7 @@ namespace StdLib
             {
                 newSize = FixedSize;
             }
-            _currentSize = (uiw)newSize;
+            _currentSize = static_cast<uiw>(newSize);
             return _currentSize;
         }
 
@@ -337,7 +337,7 @@ namespace StdLib
 			{
 				provide = [](const holderType &holder)
 				{
-					return &holder.Get<std::byte>();
+					return &holder.template Get<std::byte>();
 				};
 			}
             if (!flush)

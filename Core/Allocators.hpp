@@ -134,7 +134,7 @@ namespace StdLib::Allocator
 					void *temp;
 					int code = posix_memalign(&temp, alignment, count);
 					ASSUME(code == 0);
-					MemOps::Copy(static_cast<std::byte *>(temp), static_cast<std::byte *>(memory), count);
+					MemOps::Copy(static_cast<std::byte *>(temp), reinterpret_cast<std::byte *>(memory), count);
 					free(memory);
 					memory = static_cast<T *>(temp);
 					ASSUME(Funcs::IsAligned(memory, alignment));

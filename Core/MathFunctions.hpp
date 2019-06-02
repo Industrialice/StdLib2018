@@ -76,7 +76,7 @@ namespace StdLib
 			return rot - fullRot;
 		}
 
-		rot = (T)std::fmod(rot, fullRot);
+		rot = static_cast<T>(std::fmod(rot, fullRot));
 		if (rot < 0)
 		{
 			rot += fullRot;
@@ -279,7 +279,7 @@ namespace StdLib
         return abs(left - right) <= epsilon;
     }
 
-	[[nodiscard]] inline bool EqualsWithEpsilon(f64 left, f64 right, f64 epsilon = (f64)DefaultF32Epsilon)
+	[[nodiscard]] inline bool EqualsWithEpsilon(f64 left, f64 right, f64 epsilon = static_cast<f64>(DefaultF32Epsilon))
 	{
 		ASSUME(epsilon >= 0);
 		_ValidateValues(left, right, epsilon);

@@ -346,7 +346,7 @@ static void Vector4Tests()
 
 template <typename T> static void MathFuncsTests()
 {
-	T epsilon = (T)DefaultF32Epsilon;
+	T epsilon = static_cast<T>(DefaultF32Epsilon);
 	static constexpr T zero = T(0);
 
 	UTest(true, EqualsWithEpsilon(zero, zero, zero));

@@ -142,7 +142,7 @@ namespace StdLib
 
         static void CallFunc(typename MessageBase<Base>::Action action, MessageBase<Base> *object)
         {
-            callFunc((i32)action, object, std::make_index_sequence<sizeof...(MessageArgs)>());
+            callFunc(static_cast<i32>(action), object, std::make_index_sequence<sizeof...(MessageArgs)>());
         }
 
         template <typename TCaller, typename... TMessageArgs> MessageDelegate(TCaller &&caller, TMessageArgs &&... args) :
@@ -172,7 +172,7 @@ namespace StdLib
 
         static void CallFunc(typename MessageBase<Base>::Action action, MessageBase<Base> *object)
         {
-            callFunc((i32)action, object, std::make_index_sequence<sizeof...(MessageArgs)>());
+            callFunc(static_cast<i32>(action), object, std::make_index_sequence<sizeof...(MessageArgs)>());
         }
 
         template <typename... TMessageArgs> MessageFuncInline(TMessageArgs &&... args) :
@@ -202,7 +202,7 @@ namespace StdLib
 
         static void CallFunc(typename MessageBase<Base>::Action action, MessageBase<Base> *object)
         {
-            callFunc((i32)action, object, std::make_index_sequence<sizeof...(MessageArgs)>());
+            callFunc(static_cast<i32>(action), object, std::make_index_sequence<sizeof...(MessageArgs)>());
         }
 
         template <typename... TMessageArgs> MessageFuncPointer(FuncType func, TMessageArgs &&... args) :

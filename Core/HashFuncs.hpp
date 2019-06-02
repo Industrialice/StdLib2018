@@ -68,7 +68,7 @@ namespace StdLib::Hash
 	// will generate different hashes compared to FNVHash if sizeof(T) is not 1
 	template <Precision precision, typename T, uiw length, bool useReference = true> [[nodiscard]] constexpr auto FNVHashCT(const T (&source)[length])
 	{
-		return FNVHashCT<precision, T, length>((T *)source);
+		return FNVHashCT<precision, T, length>(static_cast<const T *>(source));
 	}
 
 	template <Precision precision, typename T> [[nodiscard]] constexpr auto FNVHash(const T &value)

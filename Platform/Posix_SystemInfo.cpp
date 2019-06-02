@@ -77,7 +77,7 @@ namespace StdLib::SystemInfo
 	    for (int i = 0; i < 16; ++i)
         {
             addresses[i] = malloc(1);
-            AllocationAlignmentValue = std::min<uiw>(AllocationAlignmentValue, 1u << Funcs::IndexOfLeastSignificantNonZeroBit((uiw)addresses[i]));
+            AllocationAlignmentValue = std::min<uiw>(AllocationAlignmentValue, 1u << Funcs::IndexOfLeastSignificantNonZeroBit(reinterpret_cast<uiw>(addresses[i])));
         }
         for (int i = 0; i < 16; ++i)
         {

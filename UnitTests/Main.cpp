@@ -980,7 +980,7 @@ static void FileWriteRead(IFile &file)
 
     UTest(Equal, file.Offset().Unwrap(), 0);
     UTest(true, file.Write(crapString0.data(), static_cast<ui32>(crapString0.length()), &written));
-    UTest(Equal, written, (ui32)crapString0.length());
+    UTest(Equal, written, static_cast<ui32>(crapString0.length()));
     UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), static_cast<i64>(crapString0.length()));
     UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), 0LL);
     UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), 0LL);
@@ -1475,9 +1475,9 @@ template <KeyCode... Codes> void TestKeys(bool(*func)(KeyCode key))
     auto test = [](bool(*func)(KeyCode key)) -> ui32
     {
         ui32 count = 0;
-        for (ui32 index = 0; index < (ui32)KeyCode::_size; ++index)
+        for (ui32 index = 0; index < static_cast<ui32>(KeyCode::_size); ++index)
         {
-            if (func((KeyCode)index))
+            if (func(static_cast<KeyCode>(index)))
             {
                 ++count;
             }
@@ -1594,8 +1594,8 @@ static void PrintSystemInfo()
 			UnitTestsLogger::Message("      Per core %s\n", *info.isPerCore ? "true" : "false");
 		}
 	}
-	UnitTestsLogger::Message("  Memory allocation alignment %u\n", (ui32)SystemInfo::AllocationAlignment());
-    UnitTestsLogger::Message("  Memory page size %u\n", (ui32)SystemInfo::MemoryPageSize());
+	UnitTestsLogger::Message("  Memory allocation alignment %u\n", static_cast<ui32>(SystemInfo::AllocationAlignment()));
+    UnitTestsLogger::Message("  Memory page size %u\n", static_cast<ui32>(SystemInfo::MemoryPageSize()));
 	const char *arch = nullptr;
 	switch (SystemInfo::CPUArchitecture())
 	{
