@@ -766,7 +766,7 @@ static void Matrix4x4Tests()
 	MatrixDecomposeTest<Matrix4x4>();
 }
 
-template <typename T> void RectangleTestsHelper()
+template <typename T> static void RectangleTestsHelper()
 {
 	using type = typename T::type;
 	T rect = T::FromPoint(0, 0);
@@ -780,8 +780,43 @@ template <typename T> void RectangleTestsHelper()
 	UTest(Equal, rect.Width(), type(15));
 }
 
+static void ApproxMathTestsHelper(f32 func(f32), f32 ref(f32), f32 rangeFrom, f32 rangeTo, f32 errorLower, f32 errorUpper)
+{
+	auto compare = [&func, &ref, &errorLower, &errorUpper](f32 value)
+	{
+		f32 referenceResult = ref(value);
+		f32 approxValue = func(value);
+		f32 diff = referenceResult - approxValue;
+		UTest(LeftLesserEqual, diff, errorUpper);
+		UTest(LeftGreaterEqual, diff, errorLower);
+	};
+
+	compare(rangeFrom);
+	compare(rangeTo);
+	if (rangeFrom < 0)
+	{
+		compare(0);
+	}
+
+	constexpr uiw steps = 100;
+
+	f64 step = (static_cast<f64>(rangeTo) - static_cast<f64>(rangeFrom)) / static_cast<f64>(steps + 1);
+	for (uiw index = 0; index < steps; ++index)
+	{
+		f32 value = static_cast<f32>(rangeFrom + step * static_cast<f64>(index));
+		compare(value);
+	}
+}
+
 static void ApproxMathTests()
 {
+	ApproxMathTestsHelper(&ApproxMath::RSqrt<ApproxMath::Precision::Low>, [](f32 value) { return 1.0f / sqrt(value); }, 0.05f, 10000.0f, -0.1417f, 0.10329);
+	ApproxMathTestsHelper(&ApproxMath::RSqrt<ApproxMath::Precision::Medium>, [](f32 value) { return 1.0f / sqrt(value); }, 0.05f, 10000.0f, -0.0037, 0.00389);
+	ApproxMathTestsHelper(&ApproxMath::RSqrt<ApproxMath::Precision::High>, [](f32 value) { return 1.0f / sqrt(value); }, 0.05f, 10000.0f, -0.000021, 0.0000011);
+	//ApproxMathTestsHelper(&ApproxMath::Sqrt<ApproxMath::Precision::Low>, &sqrt, 0.00001f, MathPiDouble(), -0.072f, 0.04915f);
+	//ApproxMathTestsHelper(&ApproxMath::Sqrt<ApproxMath::Precision::Medium>, &sqrt, 0.00001f, MathPiDouble(), -0.00000015f, 0.001245f);
+	//ApproxMathTestsHelper(&ApproxMath::Sqrt<ApproxMath::Precision::High>, &sqrt, 0.00001f, MathPiDouble(), -0.00000025f, 0.00000050f);
+
 	UnitTestsLogger::Message("  finished approx math tests\n");
 }
 
@@ -850,104 +885,85 @@ static void RectangleTests()
 	UnitTestsLogger::Message("  finished rectangle tests\n");
 }
 
-template <ApproxMath::Precision Precision> static void CosTests()
+static void MeasurePrecision(f32 func(f32), f32 ref(f32), f32 start, f32 end)
 {
-	f32 c0Min = 0, c0Max = 0;
-	f32 c0MinValue = 0, c0MaxValue = 0;
+	f32 funcMaxNegativeDiff = 0;
+	f32 funcMaxPositiveDiff = 0;
+	f32 funcMaxNegativeDiffAtValue = 0;
+	f32 funcMaxPositiveDiffAtValue = 0;
 	ui32 counter = 0;
 
 	union { f32 value; ui32 intRep; };
-	value = -MathPiHalf() - DefaultF32Epsilon;
+	value = start;
 
-	auto repeat = [&counter, &c0Min, &c0Max, &c0MinValue, &c0MaxValue](f32 value) mutable
+	auto repeat = [&func, &ref, &counter, &funcMaxNegativeDiff, &funcMaxPositiveDiff, &funcMaxNegativeDiffAtValue, &funcMaxPositiveDiffAtValue](f32 value) mutable
 	{
-		f32 ref = std::cos(value);
-		f32 c0 = ApproxMath::Cos<Precision>(value);
-		if (c0Min > c0 - ref)
+		f32 referenceValue = ref(value);
+		f32 approxValue = func(value);
+		if (funcMaxNegativeDiff > approxValue - referenceValue)
 		{
-			c0Min = c0 - ref;
-			c0MinValue = value;
+			funcMaxNegativeDiff = approxValue - referenceValue;
+			funcMaxNegativeDiffAtValue = value;
 		}
-		if (c0Max < c0 - ref)
+		if (funcMaxPositiveDiff < approxValue - referenceValue)
 		{
-			c0Max = c0 - ref;
-			c0MaxValue = value;
+			funcMaxPositiveDiff = approxValue - referenceValue;
+			funcMaxPositiveDiffAtValue = value;
 		}
 
-        if (UnitTestsLogger::IsMessagePoppingSupported())
-        {
-            ++counter;
-            if (counter >= 1'000'000)
-            {
-                UnitTestsLogger::PopLastMessage();
-                UnitTestsLogger::Message("%.14f", value);
-                counter = 0;
-            }
-        }
+		if (UnitTestsLogger::IsMessagePoppingSupported())
+		{
+			++counter;
+			if (counter >= 1'000'000)
+			{
+				UnitTestsLogger::PopLastMessage();
+				UnitTestsLogger::Message("%.39f", value);
+				counter = 0;
+			}
+		}
 	};
 
-	for (; value < 0; --intRep)
+	if (start < 0)
 	{
-		repeat(value);
+		for (; value < 0; --intRep)
+		{
+			repeat(value);
+		}
+		value = 0;
 	}
-	value = 0;
-	for (; value < MathPiDouble() + MathPiHalf() + DefaultF32Epsilon; ++intRep)
+	for (; value < end; ++intRep)
 	{
 		repeat(value);
 	}
 
-	UnitTestsLogger::Message("\napprox cos 0 min %f at %f max %f at %f\n", c0Min, c0MinValue, c0Max, c0MaxValue);
+	if (UnitTestsLogger::IsMessagePoppingSupported())
+	{
+		UnitTestsLogger::PopLastMessage();
+	}
+
+	UnitTestsLogger::Message("\nmin %.8f at %.8f max %.8f at %.8f\n", funcMaxNegativeDiff, funcMaxNegativeDiffAtValue, funcMaxPositiveDiff, funcMaxPositiveDiffAtValue);
 }
 
-template <ApproxMath::Precision Precision> static void SinTests()
+static void MeasuringApproxPrecision()
 {
-	f32 c0Min = 0, c0Max = 0;
-	f32 c0MinValue = 0, c0MaxValue = 0;
-	ui32 counter = 0;
-
-	union { f32 value; ui32 intRep; };
-	value = -DefaultF32Epsilon;
-
-	constexpr ui32 step = 1;
-
-	auto repeat = [&counter, &c0Min, &c0Max, &c0MinValue, &c0MaxValue](f32 value) mutable
-	{
-		f32 ref = std::sin(value);
-		f32 c0 = ApproxMath::Sin<Precision>(value);
-		if (c0Min > c0 - ref)
-		{
-			c0Min = c0 - ref;
-			c0MinValue = value;
-		}
-		if (c0Max < c0 - ref)
-		{
-			c0Max = c0 - ref;
-			c0MaxValue = value;
-		}
-
-        if (UnitTestsLogger::IsMessagePoppingSupported())
-        {
-            ++counter;
-            if (counter >= 1'000'000)
-            {
-                UnitTestsLogger::PopLastMessage();
-                UnitTestsLogger::Message("%.14f", value);
-                counter = 0;
-            }
-        }
-	};
-
-	for (; value < 0; intRep -= step)
-	{
-		repeat(value);
-	}
-	value = 0;
-	for (; value < MathPiDouble() + MathPi() + DefaultF32Epsilon; intRep += step)
-	{
-		repeat(value);
-	}
-
-	UnitTestsLogger::Message("\napprox sin 0 min %f at %f max %f at %f\n", c0Min, c0MinValue, c0Max, c0MaxValue);
+	//printf("cos precision: \n");
+	//MeasurePrecision(&ApproxMath::Cos<ApproxMath::Precision::High>, &std::cos, -MathPiHalf() - DefaultF32Epsilon, MathPiDouble() + MathPiHalf() + DefaultF32Epsilon);
+	//printf("sin precision: \n");
+	//MeasurePrecision(&ApproxMath::Sin<ApproxMath::Precision::High>, &std::sin, -DefaultF32Epsilon, MathPiDouble() + MathPi() + DefaultF32Epsilon);
+	//printf("low rsqrt precision: \n");
+	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::Low>, [](f32 value) { return 1.0f / sqrt(value); }, 0.05f, 10'000.0f);
+	//printf("medium rsqrt precision: \n");
+	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::Medium>, [](f32 value) { return 1.0f / sqrt(value); }, 0.05f, 10'000.0f);
+	//printf("high rsqrt precision: \n");
+	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::High>, [](f32 value) { return 1.0f / sqrt(value); }, 0.05f, 10'000.0f);
+	//printf("low sqrt precision: \n");
+	//MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::Low>, &sqrt, 0.00001f, MathPiDouble());
+	//printf("medium sqrt precision: \n");
+	//MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::Medium>, &sqrt, 0.00001f, MathPiDouble());
+	//printf("high sqrt precision: \n");
+	//MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::High>, &sqrt, 0.00001f, MathPiDouble());
+	//printf("low qurt precision: \n");
+	//MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::Low>, [](f32 value) { return pow(value, 1.0f / 3.0f); }, 0.00001f, MathPiDouble());
 }
 
 template <typename TrigFuncType, TrigFuncType TrigFunc> static inline f64 TrigBenchmarksHelper(const char *name, f64 ref = 0)
@@ -1078,7 +1094,7 @@ void MathLibTests()
 #endif
 		auto start = TimeMoment::Now();
 
-		ApproxMathTests();
+		//ApproxMathTests();
 		MathFuncsTests<f32>();
 		MathFuncsTests<f64>();
 		BaseVectorTests();
@@ -1104,8 +1120,7 @@ void MathLibTests()
     XNARef();
 #endif
 
-	//CosTests<ApproxMath::Precision::High>();
-	//SinTests<ApproxMath::Precision::High>();
+	MeasuringApproxPrecision();
 
 	//volatile ui32 counter = 0;
 	//for (ui32 index = 1; index < 1000000; ++index)

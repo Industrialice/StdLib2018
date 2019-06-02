@@ -177,7 +177,7 @@ void XNARef()
 	TestMatrices();
 	TestQuaternions();
 
-	UnitTestsLogger::Message("Finished XNA reference tests\n");
+	UnitTestsLogger::Message("  finished XNA reference tests\n");
 }
 
 #endif
