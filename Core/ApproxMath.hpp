@@ -18,7 +18,7 @@ namespace StdLib::ApproxMath
             The constant 0x5f400000 makes the relative error range from 0 to
             +0.088662.
 			Measured error relative to 1.0f / sqrt on range 
-			[0.05;10000] is [-0.141699; 0.103287]
+			[0.05; 10000] is [-0.141699; 0.103287]
 			MSVC 15.9.12 2500k x64: 389.12kk 2.39x
 			Clang 8.0.2 MT6589: 57.60kk 2.46x 
 			Clang 8.0.2 MT8735M ARM64: 47.45kk 2.06x */
@@ -46,7 +46,7 @@ namespace StdLib::ApproxMath
             larger relative error, according to Chris.
             The routine can be adapted to IEEE double precision.
 			Measured error relative to 1.0f / sqrt on range 
-			[0.05;10000] is [-0.003691; 0.003884]
+			[0.05; 10000] is [-0.003691; 0.003884]
 			MSVC 15.9.12 2500k x64: 342.06kk 2.09x
 			Clang 8.0.2 MT6589: 31.39kk 1.34x 
 			Clang 8.0.2 MT8735M ARM64: 24.38kk 1.06x */
@@ -66,7 +66,7 @@ namespace StdLib::ApproxMath
 			0x5f37599e makes the relative error range from 0 to -0.00000463.
             You can't balance the error by adjusting the constant.
 			Measured error relative to 1.0f / sqrt on range 
-			[0.05;10000] is [-0.000020; 0.000001]
+			[0.05; 10000] is [-0.000020; 0.000001]
 			MSVC 15.9.12 2500k x64: 251.82kk 1.54x
 			Clang 8.0.2 MT6589: 22.08kk 0.94x 
 			Clang 8.0.2 MT8735M ARM64: 17.36kk 0.75x */
@@ -96,7 +96,7 @@ namespace StdLib::ApproxMath
 			two integer instructions (shift right and add), plus instructions
 			to load the constant.
 			The constant 0x1fbb4f2e balances the relative error at +-0.0347474.
-			Measured error relative to sqrt on range [0.00001;2pi] is [-0.07199645; 0.04914033]
+			Measured error relative to sqrt on range [0.00001; 2pi] is [-0.07199645; 0.04914033]
 			MSVC 15.9.12 2500k x64: 405.29kk 3.88x
 			Clang 8.0.2 MT6589: 56.36kk 4.83x 
 			Clang 8.0.2 MT8735M ARM64: 47.77kk 3.54x */
@@ -119,7 +119,7 @@ namespace StdLib::ApproxMath
 			For denorms it is either within tolerance or gives a result < 1.0e-19.
 			Gives the correct result (inf) for x = inf.
 			Gives the correct result (NaN) for x = NaN.
-			Measured error relative to sqrt on range [0.00001;2pi] is [-0.00000012; 0.00124454]
+			Measured error relative to sqrt on range [0.00001; 2pi] is [-0.00000012; 0.00124454]
 			MSVC 15.9.12 2500k x64: 320.82kk 3.08x
 			Clang 8.0.2 MT6589: 24.18kk 2.07x 
 			Clang 8.0.2 MT8735M ARM64: 23.06kk 1.71x */
@@ -136,7 +136,7 @@ namespace StdLib::ApproxMath
 			/* This is the same as Precision::Medium, but with an additional step
 			of the Newton iteration, for increased accuracy.
 			The relative error ranges from 0 to +0.00000023.
-			Measured error relative to sqrt on range [0.00001;2pi] is [-0.00000024; 0.00000048]
+			Measured error relative to sqrt on range [0.00001; 2pi] is [-0.00000024; 0.00000048]
 			MSVC 15.9.12 2500k x64: 165.93kk 1.58x
 			Clang 8.0.2 MT6589: 15.86kk 1.36x 
 			Clang 8.0.2 MT8735M ARM64: 15.20kk 1.13x */
@@ -167,6 +167,8 @@ namespace StdLib::ApproxMath
 			two integer instructions (shift right and divide), plus instructions
 			to load the constant.
 			The constant 0x2a51067f balances the relative error at +-0.0316.
+			Measured error relative to pow(value, 1.0f / 3.0f) on range
+			[0.00001; pi] is [-0.03258288; 0.04560971]
 			MSVC 15.9.12 2500k x64: 356.08kk 5.29x
 			Clang 8.0.2 MT6589: 48.03kk 19.31x 
 			Clang 8.0.2 MT8735M ARM64: 37.74kk 15.60x */
@@ -189,6 +191,8 @@ namespace StdLib::ApproxMath
 			For denorms it is either within tolerance or gives a result < 2.1e-13.
 			Gives the correct result (inf) for x = inf.
 			Gives the correct result (NaN) for x = NaN.
+			Measured error relative to pow(value, 1.0f / 3.0f) on range
+			[0.00001; pi] is [-0.00000012; 0.00130832]
 			MSVC 15.9.12 2500k x64: 187.49kk 2.81x
 			Clang 8.0.2 MT6589: 16.91kk 6.80x 
 			Clang 8.0.2 MT8735M ARM64: 15.79kk 6.53x */
@@ -208,6 +212,8 @@ namespace StdLib::ApproxMath
 			/* This is the same as Precision::Medium, but with an additional step
 			of the Newton iteration, for increased accuracy.
 			The relative error ranges from 0 to +0.00000116.
+			Measured error relative to pow(value, 1.0f / 3.0f) on range
+			[0.00001; pi] is [-0.00000024; 0.00000143]
 			MSVC 15.9.12 2500k x64: 127.52kk 1.89x
 			Clang 8.0.2 MT6589: 11.47kk 4.61x 
 			Clang 8.0.2 MT8735M ARM64: 11.01kk 4.55x */

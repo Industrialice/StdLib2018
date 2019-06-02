@@ -786,7 +786,7 @@ static void ApproxMathTestsHelper(f32 func(f32), f32 ref(f32), f32 rangeFrom, f3
 	{
 		f32 referenceResult = ref(value);
 		f32 approxValue = func(value);
-		f32 diff = referenceResult - approxValue;
+		f32 diff = approxValue - referenceResult;
 		UTest(LeftLesserEqual, diff, errorUpper);
 		UTest(LeftGreaterEqual, diff, errorLower);
 	};
@@ -810,12 +810,18 @@ static void ApproxMathTestsHelper(f32 func(f32), f32 ref(f32), f32 rangeFrom, f3
 
 static void ApproxMathTests()
 {
-	ApproxMathTestsHelper(&ApproxMath::RSqrt<ApproxMath::Precision::Low>, [](f32 value) { return 1.0f / sqrt(value); }, 0.05f, 10000.0f, -0.1417f, 0.10329);
-	ApproxMathTestsHelper(&ApproxMath::RSqrt<ApproxMath::Precision::Medium>, [](f32 value) { return 1.0f / sqrt(value); }, 0.05f, 10000.0f, -0.0037, 0.00389);
-	ApproxMathTestsHelper(&ApproxMath::RSqrt<ApproxMath::Precision::High>, [](f32 value) { return 1.0f / sqrt(value); }, 0.05f, 10000.0f, -0.000021, 0.0000011);
-	//ApproxMathTestsHelper(&ApproxMath::Sqrt<ApproxMath::Precision::Low>, &sqrt, 0.00001f, MathPiDouble(), -0.072f, 0.04915f);
-	//ApproxMathTestsHelper(&ApproxMath::Sqrt<ApproxMath::Precision::Medium>, &sqrt, 0.00001f, MathPiDouble(), -0.00000015f, 0.001245f);
-	//ApproxMathTestsHelper(&ApproxMath::Sqrt<ApproxMath::Precision::High>, &sqrt, 0.00001f, MathPiDouble(), -0.00000025f, 0.00000050f);
+	auto rsqrt = [](f32 value) { return 1.0f / sqrt(value); };
+	auto qurt = [](f32 value) { return pow(value, 1.0f / 3.0f); };
+
+	ApproxMathTestsHelper(ApproxMath::RSqrt<ApproxMath::Precision::Low>, rsqrt, 0.05f, 10000.0f, -0.1417f, 0.10329);
+	ApproxMathTestsHelper(ApproxMath::RSqrt<ApproxMath::Precision::Medium>, rsqrt, 0.05f, 10000.0f, -0.0037, 0.00389);
+	ApproxMathTestsHelper(ApproxMath::RSqrt<ApproxMath::Precision::High>, rsqrt, 0.05f, 10000.0f, -0.000021, 0.0000011);
+	ApproxMathTestsHelper(ApproxMath::Sqrt<ApproxMath::Precision::Low>, sqrt, 0.00001f, MathPiDouble(), -0.072f, 0.04915f);
+	ApproxMathTestsHelper(ApproxMath::Sqrt<ApproxMath::Precision::Medium>, sqrt, 0.00001f, MathPiDouble(), -0.00000015f, 0.001245f);
+	ApproxMathTestsHelper(ApproxMath::Sqrt<ApproxMath::Precision::High>, sqrt, 0.00001f, MathPiDouble(), -0.00000025f, 0.00000050f);
+	ApproxMathTestsHelper(ApproxMath::Qurt<ApproxMath::Precision::Low>, qurt, 0.00001f, MathPiDouble(), -0.032583f, 0.04561f);
+	ApproxMathTestsHelper(ApproxMath::Qurt<ApproxMath::Precision::Medium>, qurt, 0.00001f, MathPiDouble(), -0.00000015f, 0.0013084f);
+	ApproxMathTestsHelper(ApproxMath::Qurt<ApproxMath::Precision::High>, qurt, 0.00001f, MathPiDouble(), -0.00000025f, 0.0000015f);
 
 	UnitTestsLogger::Message("  finished approx math tests\n");
 }
@@ -887,19 +893,18 @@ static void RectangleTests()
 
 static void MeasurePrecision(f32 func(f32), f32 ref(f32), f32 start, f32 end)
 {
-	f32 funcMaxNegativeDiff = 0;
-	f32 funcMaxPositiveDiff = 0;
-	f32 funcMaxNegativeDiffAtValue = 0;
-	f32 funcMaxPositiveDiffAtValue = 0;
-	ui32 counter = 0;
+	f64 funcMaxNegativeDiff = 0;
+	f64 funcMaxPositiveDiff = 0;
+	f64 funcMaxNegativeDiffAtValue = 0;
+	f64 funcMaxPositiveDiffAtValue = 0;
 
 	union { f32 value; ui32 intRep; };
 	value = start;
 
-	auto repeat = [&func, &ref, &counter, &funcMaxNegativeDiff, &funcMaxPositiveDiff, &funcMaxNegativeDiffAtValue, &funcMaxPositiveDiffAtValue](f32 value) mutable
+	auto repeat = [&func, &ref, &funcMaxNegativeDiff, &funcMaxPositiveDiff, &funcMaxNegativeDiffAtValue, &funcMaxPositiveDiffAtValue](f32 value, ui32 intRep)
 	{
-		f32 referenceValue = ref(value);
-		f32 approxValue = func(value);
+		f64 referenceValue = ref(value);
+		f64 approxValue = func(value);
 		if (funcMaxNegativeDiff > approxValue - referenceValue)
 		{
 			funcMaxNegativeDiff = approxValue - referenceValue;
@@ -913,12 +918,10 @@ static void MeasurePrecision(f32 func(f32), f32 ref(f32), f32 start, f32 end)
 
 		if (UnitTestsLogger::IsMessagePoppingSupported())
 		{
-			++counter;
-			if (counter >= 1'000'000)
+			if ((intRep & (1'000'000 - 1)) == 0) // every 1'048'576 iterations
 			{
 				UnitTestsLogger::PopLastMessage();
 				UnitTestsLogger::Message("%.39f", value);
-				counter = 0;
 			}
 		}
 	};
@@ -927,13 +930,13 @@ static void MeasurePrecision(f32 func(f32), f32 ref(f32), f32 start, f32 end)
 	{
 		for (; value < 0; --intRep)
 		{
-			repeat(value);
+			repeat(value, intRep);
 		}
 		value = 0;
 	}
 	for (; value < end; ++intRep)
 	{
-		repeat(value);
+		repeat(value, intRep);
 	}
 
 	if (UnitTestsLogger::IsMessagePoppingSupported())
@@ -946,16 +949,19 @@ static void MeasurePrecision(f32 func(f32), f32 ref(f32), f32 start, f32 end)
 
 static void MeasuringApproxPrecision()
 {
+	auto rsqrt = [](f32 value) { return 1.0f / sqrt(value); };
+	auto qurt = [](f32 value) { return pow(value, 1.0f / 3.0f); };
+
 	//printf("cos precision: \n");
 	//MeasurePrecision(&ApproxMath::Cos<ApproxMath::Precision::High>, &std::cos, -MathPiHalf() - DefaultF32Epsilon, MathPiDouble() + MathPiHalf() + DefaultF32Epsilon);
 	//printf("sin precision: \n");
 	//MeasurePrecision(&ApproxMath::Sin<ApproxMath::Precision::High>, &std::sin, -DefaultF32Epsilon, MathPiDouble() + MathPi() + DefaultF32Epsilon);
 	//printf("low rsqrt precision: \n");
-	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::Low>, [](f32 value) { return 1.0f / sqrt(value); }, 0.05f, 10'000.0f);
+	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::Low>, rsqrt, 0.05f, 10'000.0f);
 	//printf("medium rsqrt precision: \n");
-	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::Medium>, [](f32 value) { return 1.0f / sqrt(value); }, 0.05f, 10'000.0f);
+	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::Medium>, rsqrt, 0.05f, 10'000.0f);
 	//printf("high rsqrt precision: \n");
-	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::High>, [](f32 value) { return 1.0f / sqrt(value); }, 0.05f, 10'000.0f);
+	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::High>, rsqrt, 0.05f, 10'000.0f);
 	//printf("low sqrt precision: \n");
 	//MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::Low>, &sqrt, 0.00001f, MathPiDouble());
 	//printf("medium sqrt precision: \n");
@@ -963,7 +969,11 @@ static void MeasuringApproxPrecision()
 	//printf("high sqrt precision: \n");
 	//MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::High>, &sqrt, 0.00001f, MathPiDouble());
 	//printf("low qurt precision: \n");
-	//MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::Low>, [](f32 value) { return pow(value, 1.0f / 3.0f); }, 0.00001f, MathPiDouble());
+	//MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::Low>, qurt, 0.00001f, MathPiDouble());
+	//printf("medium qurt precision: \n");
+	//MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::Medium>, qurt, 0.00001f, MathPiDouble());
+	//printf("high qurt precision: \n");
+	//MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::High>, qurt, 0.00001f, MathPiDouble());
 }
 
 template <typename TrigFuncType, TrigFuncType TrigFunc> static inline f64 TrigBenchmarksHelper(const char *name, f64 ref = 0)
@@ -1094,7 +1104,7 @@ void MathLibTests()
 #endif
 		auto start = TimeMoment::Now();
 
-		//ApproxMathTests();
+		ApproxMathTests();
 		MathFuncsTests<f32>();
 		MathFuncsTests<f64>();
 		BaseVectorTests();
