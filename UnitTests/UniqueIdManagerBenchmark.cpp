@@ -13,7 +13,7 @@ static void Shuffle(const std::vector<std::pair<ui32, ui32>> &shuffleIndexes, st
 
 static std::pair<f32, f32> Benchmark(const std::vector<std::pair<ui32, ui32>> &shuffleIndexes, std::vector<ui32> &ids)
 {
-    ui32 requestSize = (ui32)ids.size();
+    ui32 requestSize = static_cast<ui32>(ids.size());
 
 	UniqueIdManager manager;
 
@@ -51,7 +51,7 @@ static void PrepareShuffler(uiw requestSize, std::vector<std::pair<ui32, ui32>> 
 
     std::random_device rd;
     std::mt19937 rng(rd());
-    std::uniform_int_distribution<ui32> uni(0, (ui32)requestSize - 1);
+    std::uniform_int_distribution<ui32> uni(0, static_cast<ui32>(requestSize) - 1);
 
     shuffleIndexes.reserve(requestSize);
     for (uiw index = 0; index < requestSize; ++index)

@@ -780,6 +780,11 @@ template <typename T> void RectangleTestsHelper()
 	UTest(Equal, rect.Width(), type(15));
 }
 
+static void ApproxMathTests()
+{
+	UnitTestsLogger::Message("  finished approx math tests\n");
+}
+
 static void BaseVectorTests()
 {
 	BaseVectorTestsHelper<i32Vector2>();
@@ -798,6 +803,8 @@ static void BaseVectorTests()
 	IntegerVectorTestsHelper<ui32Vector2>();
 	IntegerVectorTestsHelper<ui32Vector3>();
 	IntegerVectorTestsHelper<ui32Vector4>();
+
+	UnitTestsLogger::Message("  finished base vector tests\n");
 }
 
 static void FP32VectorTests()
@@ -809,6 +816,8 @@ static void FP32VectorTests()
 	Vector2Tests();
 	Vector3Tests();
 	Vector4Tests();
+
+	UnitTestsLogger::Message("  finished fp32 vector tests\n");
 }
 
 static void MatrixTests()
@@ -828,6 +837,8 @@ static void MatrixTests()
     Matrix3x4Tests();
     Matrix4x3Tests();
     Matrix4x4Tests();
+
+	UnitTestsLogger::Message("  finished matrix tests\n");
 }
 
 static void RectangleTests()
@@ -835,6 +846,8 @@ static void RectangleTests()
 	RectangleTestsHelper<RectangleF32>();
 	RectangleTestsHelper<RectangleI32>();
 	RectangleTestsHelper<RectangleUI32>();
+
+	UnitTestsLogger::Message("  finished rectangle tests\n");
 }
 
 template <ApproxMath::Precision Precision> static void CosTests()
@@ -1065,6 +1078,7 @@ void MathLibTests()
 #endif
 		auto start = TimeMoment::Now();
 
+		ApproxMathTests();
 		MathFuncsTests<f32>();
 		MathFuncsTests<f64>();
 		BaseVectorTests();

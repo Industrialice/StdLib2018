@@ -35,7 +35,7 @@ void UnitTestsLogger::PopLastMessage()
     {
         std::fill(message, message + CountOf(message), ' ');
     }
-	console.WriteASCII({message, std::min<ui32>((ui32)CountOf(message), _lastMessageLength)});
+	console.WriteASCII({message, std::min<ui32>(static_cast<ui32>(CountOf(message)), _lastMessageLength)});
 	console.CursorPosition(0, std::nullopt);
 #elif defined(PLATFORM_ANDROID)
     ::PopLastMessage(_lastMessageLength);
@@ -49,7 +49,7 @@ void UnitTestsLogger::Message(PRINTF_VERIFY_FRONT const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
 #if defined(PLATFORM_WINDOWS)
-    _lastMessageLength = (ui32)vprintf(fmt, args);
+    _lastMessageLength = static_cast<ui32>(vprintf(fmt, args));
 #elif defined(PLATFORM_ANDROID)
     char buf[4096];
     _lastMessageLength = vsnprintf(buf, CountOf(buf), fmt, args);

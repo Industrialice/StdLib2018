@@ -144,7 +144,7 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(level, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(level, &meta, format, args);
 		va_end(args);
 	}
 
@@ -152,7 +152,7 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Info, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Info, &meta, format, args);
 		va_end(args);
 	}
 
@@ -160,7 +160,7 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Error, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Error, &meta, format, args);
 		va_end(args);
 	}
 
@@ -168,7 +168,7 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Warning, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Warning, &meta, format, args);
 		va_end(args);
 	}
 
@@ -176,7 +176,7 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Critical, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Critical, &meta, format, args);
 		va_end(args);
 	}
 
@@ -184,7 +184,7 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Debug, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Debug, &meta, format, args);
 		va_end(args);
 	}
 
@@ -192,7 +192,7 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Attention, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Attention, &meta, format, args);
 		va_end(args);
 	}
 
@@ -200,55 +200,55 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Other, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Other, &meta, format, args);
 		va_end(args);
 	}
 
 	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Message(LogLevels::LogLevel level, const MetaType &meta, const char *format, va_list args)
 	{
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(level, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(level, &meta, format, args);
 	}
 
 	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Info(const MetaType &meta, const char *format, va_list args)
 	{
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Info, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Info, &meta, format, args);
 	}
 
 	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Error(const MetaType &meta, const char *format, va_list args)
 	{
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Error, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Error, &meta, format, args);
 	}
 
 	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Warning(const MetaType &meta, const char *format, va_list args)
 	{
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Warning, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Warning, &meta, format, args);
 	}
 
 	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Critical(const MetaType &meta, const char *format, va_list args)
 	{
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Critical, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Critical, &meta, format, args);
 	}
 
 	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Debug(const MetaType &meta, const char *format, va_list args)
 	{
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Debug, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Debug, &meta, format, args);
 	}
 
 	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Attention(const MetaType &meta, const char *format, va_list args)
 	{
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Attention, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Attention, &meta, format, args);
 	}
 
 	template <typename MetaType, bool IsThreadSafe> inline void _LoggerMessageMethod<MetaType, IsThreadSafe>::Other(const MetaType &meta, const char *format, va_list args)
 	{
-		((Logger<MetaType, IsThreadSafe> *)this)->MessageImpl(LogLevels::Other, &meta, format, args);
+		static_cast<Logger<MetaType, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Other, &meta, format, args);
 	}
 
 	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Message(LogLevels::LogLevel level, PRINTF_VERIFY_FRONT const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(level, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(level, nullptr, format, args);
 		va_end(args);
 	}
 
@@ -256,7 +256,7 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(LogLevels::Info, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Info, nullptr, format, args);
 		va_end(args);
 	}
 
@@ -264,7 +264,7 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(LogLevels::Error, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Error, nullptr, format, args);
 		va_end(args);
 	}
 
@@ -272,7 +272,7 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(LogLevels::Warning, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Warning, nullptr, format, args);
 		va_end(args);
 	}
 
@@ -280,7 +280,7 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(LogLevels::Critical, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Critical, nullptr, format, args);
 		va_end(args);
 	}
 
@@ -288,7 +288,7 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(LogLevels::Debug, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Debug, nullptr, format, args);
 		va_end(args);
 	}
 
@@ -296,7 +296,7 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(LogLevels::Attention, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Attention, nullptr, format, args);
 		va_end(args);
 	}
 
@@ -304,53 +304,53 @@ namespace StdLib
 	{
 		va_list args;
 		va_start(args, format);
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(LogLevels::Other, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Other, nullptr, format, args);
 		va_end(args);
 	}
 
 	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Message(LogLevels::LogLevel level, const char *format, va_list args)
 	{
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(level, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(level, nullptr, format, args);
 	}
 
 	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Info(const char *format, va_list args)
 	{
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(LogLevels::Info, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Info, nullptr, format, args);
 	}
 
 	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Error(const char *format, va_list args)
 	{
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(LogLevels::Error, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Error, nullptr, format, args);
 	}
 
 	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Warning(const char *format, va_list args)
 	{
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(LogLevels::Warning, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Warning, nullptr, format, args);
 	}
 
 	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Critical(const char *format, va_list args)
 	{
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(LogLevels::Critical, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Critical, nullptr, format, args);
 	}
 
 	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Debug(const char *format, va_list args)
 	{
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(LogLevels::Debug, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Debug, nullptr, format, args);
 	}
 
 	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Attention(const char *format, va_list args)
 	{
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(LogLevels::Attention, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Attention, nullptr, format, args);
 	}
 
 	template <bool IsThreadSafe> inline void _LoggerMessageMethod<void, IsThreadSafe>::Other(const char *format, va_list args)
 	{
-		((Logger<void, IsThreadSafe> *)this)->MessageImpl(LogLevels::Other, nullptr, format, args);
+		static_cast<Logger<void, IsThreadSafe> *>(this)->MessageImpl(LogLevels::Other, nullptr, format, args);
 	}
 
 	template <typename MetaType, bool IsThreadSafe> void Logger<MetaType, IsThreadSafe>::RemoveListener(LoggerLocation *instance, void *handle)
 	{
-		instance->logger->RemoveListener(*(ListenerHandle *)handle);
+		instance->logger->RemoveListener(*static_cast<ListenerHandle *>(handle));
 	}
 
 	template <typename MetaType, bool IsThreadSafe> Logger<MetaType, IsThreadSafe>::Logger()
@@ -408,7 +408,7 @@ namespace StdLib
 		{
 			tempBuffer = std::make_unique<char[]>(printed + 1);
 			targetBuffer = tempBuffer.get();
-			printed = vsnprintf(targetBuffer, (uiw)printed + 1, format, args);
+			printed = vsnprintf(targetBuffer, static_cast<uiw>(printed) + 1, format, args);
 		}
 
 		for (auto it = _listeners.rbegin(); it != _listeners.rend(); ++it)
@@ -422,7 +422,7 @@ namespace StdLib
 				}
 				else
 				{
-					listener.callback(level, std::string_view(targetBuffer, printed), *(MetaType *)meta);
+					listener.callback(level, std::string_view(targetBuffer, printed), *static_cast<const MetaType *>(meta));
 				}
 			}
 		}

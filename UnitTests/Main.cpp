@@ -11,7 +11,7 @@ void MTTests();
 
 static void MiscTests()
 {
-    ui32 *arr = (ui32 *)ALLOCA(5, sizeof(ui32));
+    ui32 *arr = static_cast<ui32 *>(ALLOCA(5, sizeof(ui32)));
     std::fill(arr, arr + 5, 1);
     for (uiw index = 0; index < 5; ++index)
     {
@@ -64,8 +64,8 @@ static void MiscTests()
     MovableAtomic<ui32> atomicTest2 = std::move(atomicTest);
     UTest(Equal, atomicTest2.load(), 15);
 
-	UTest(true, Funcs::IsAligned((void *)16, 4));
-	UTest(false, Funcs::IsAligned((void *)13, 4));
+	UTest(true, Funcs::IsAligned(reinterpret_cast<void *>(16), 4));
+	UTest(false, Funcs::IsAligned(reinterpret_cast<void *>(13), 4));
 
     UnitTestsLogger::Message("finished misc tests\n");
 }
@@ -99,7 +99,7 @@ static void MemOpsTests()
 	UTest(Equal, MemOps::Set(arr0.data(), 1, arr0.size()), arr0.data());
 	checkMem(arr0, 1);
 
-	UTest(Equal, MemOps::SetChecked((ui8 *)nullptr, 23, 1, 10), false);
+	UTest(Equal, MemOps::SetChecked(static_cast<ui8 *>(nullptr), 23, 1, 10), false);
 	UTest(Equal, MemOps::SetChecked(arr0.data(), 5, 1, 10), false);
 	UTest(Equal, MemOps::SetChecked(arr0.data(), arr0.size(), 2, arr0.size()), true);
 	checkMem(arr0, 2);
@@ -117,13 +117,13 @@ static void MemOpsTests()
 	UTest(Equal, MemOps::Compare(arr0.data(), arr1.data(), arr0.size()), 0);
 	checkMem(arr0, 3);
 
-	UTest(Equal, MemOps::CopyChecked((ui8 *)nullptr, 42, arr0.data(), arr0.size()), false);
+	UTest(Equal, MemOps::CopyChecked(static_cast<ui8 *>(nullptr), 42, arr0.data(), arr0.size()), false);
 	UTest(Equal, MemOps::CopyChecked(arr0.data(), 5, arr0.data(), arr0.size()), false);
 	UTest(Equal, MemOps::CopyChecked(arr0.data(), arr0.size(), arr1.data(), arr0.size()), true);
 	UTest(Equal, MemOps::Compare(arr0.data(), arr1.data(), arr0.size()), 0);
 	checkMem(arr0, 3);
 
-	UTest(Equal, MemOps::SetChecked((ui8 *)nullptr, 42, 1, 20), false);
+	UTest(Equal, MemOps::SetChecked(static_cast<ui8 *>(nullptr), 42, 1, 20), false);
 	UTest(Equal, MemOps::SetChecked(arr0.data(), 5, 1, 20), false);
 	UTest(Equal, MemOps::SetChecked(arr0.data(), arr0.size(), 4, arr0.size()), true);
 	checkMem(arr0, 4);
@@ -134,7 +134,7 @@ static void MemOpsTests()
 	UTest(Equal, MemOps::Set(arr0.data(), 6, arr0.size()), arr0.data());
 	checkMem(arr0, 6);
 
-	UTest(Equal, MemOps::MoveChecked((ui8 *)nullptr, 20, arr0.data(), 10), false);
+	UTest(Equal, MemOps::MoveChecked(static_cast<ui8 *>(nullptr), 20, arr0.data(), 10), false);
 	UTest(Equal, MemOps::MoveChecked(arr0.data(), 5, arr0.data(), 10), false);
 	UTest(Equal, MemOps::MoveChecked(arr0.data(), arr0.size(), arr1.data(), arr0.size()), true);
 	checkMem(arr0, 3);
@@ -364,9 +364,9 @@ static void HashFuncsTest()
 	UTest(Equal, nameHashedCT, nameHashed);
 
 	const char *crc32str = "Skellig Peaceful Theme.mp3";
-	ui32 crc32 = Hash::CRC32((ui8 *)crc32str);
+	ui32 crc32 = Hash::CRC32(reinterpret_cast<const ui8 *>(crc32str));
 	UTest(Equal, crc32, 0xD85554CE);
-	crc32 = Hash::CRC32((ui8 *)crc32str, strlen(crc32str));
+	crc32 = Hash::CRC32(reinterpret_cast<const ui8 *>(crc32str), strlen(crc32str));
 	UTest(Equal, crc32, 0xD85554CE);
 
     TestIntegerHashes<ui8>();
@@ -691,7 +691,7 @@ static void VirtualMemoryTests()
 	}
 #endif
 
-    ui8 *memory = (ui8 *)VirtualMemory::Reserve(999);
+    std::byte *memory = static_cast<std::byte *>(VirtualMemory::Reserve(999));
     UTest(true, memory);
     EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), true);
 
@@ -712,7 +712,7 @@ static void VirtualMemoryTests()
 
     UTest(true, VirtualMemory::Free(memory, 999));
 
-    memory = (ui8 *)VirtualMemory::Alloc(999, VirtualMemory::PageModes::Read.Combined(VirtualMemory::PageModes::Write));
+    memory = static_cast<std::byte *>(VirtualMemory::Alloc(999, VirtualMemory::PageModes::Read.Combined(VirtualMemory::PageModes::Write)));
     UTest(true, memory);
     EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), false);
 
@@ -754,22 +754,22 @@ static void AllocatorsTests()
 
 	memory = Allocator::MallocAligned::Allocate<4, ui8>(111);
 	MemOps::Set(memory, 0x66, 111);
-	UTest(Equal, (uiw)memory & 3, 0u);
+	UTest(true, Funcs::IsAligned(memory, 4));
 	memory = Allocator::MallocAligned::Reallocate<4>(memory, 222);
 	for (uiw index = 0; index < 111; ++index)
 	{
 		UTest(Equal, memory[index], 0x66);
 	}
-	UTest(Equal, (uiw)memory & 3, 0u);
+	UTest(true, Funcs::IsAligned(memory, 4));
 	blockSize = Allocator::MallocAligned::MemorySize<4>(memory);
 	UTest(LeftGreaterEqual, blockSize, 222u);
 	Allocator::MallocAligned::Free<4>(memory);
 
 	memory = Allocator::MallocAligned::Allocate<64, ui8>(31);
-	UTest(Equal, (uiw)memory & 63, 0u);
+	UTest(true, Funcs::IsAligned(memory, 64));
 	MemOps::Set(memory, 0x77, 31);
 	memory = Allocator::MallocAligned::Reallocate<64>(memory, 11);
-	UTest(Equal, (uiw)memory & 63, 0u);
+	UTest(true, Funcs::IsAligned(memory, 64));
 	for (uiw index = 0; index < 11; ++index)
 	{
 		UTest(Equal, memory[index], 0x77);
@@ -846,7 +846,7 @@ static void FileWrite(IFile &file)
     
     std::string_view str = "test0123456789 start";
     ui32 written = 0;
-    UTest(true, file.Write(str.data(), (ui32)str.length(), &written));
+    UTest(true, file.Write(str.data(), static_cast<ui32>(str.length()), &written));
     UTest(Equal, written, str.length());
     UTest(true, file.Write(nullptr, 0, &written));
     UTest(Equal, written, 0);
@@ -862,7 +862,7 @@ static void FileWrite(IFile &file)
         UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), 0);
         UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), -5);
         str = "trats";
-        UTest(true, file.Write(str.data(), (ui32)str.length(), &written));
+        UTest(true, file.Write(str.data(), static_cast<ui32>(str.length()), &written));
         UTest(Equal, written, str.length());
         UTest(Equal, file.Offset().Unwrap(), oldOffset);
     }
@@ -886,7 +886,7 @@ static void FileRead(IFile &file)
     UTest(LeftGreaterEqual, file.Size().Unwrap(), str.length());
     ui32 read = 0;
     std::string target(str.length(), '\0');
-    UTest(true, file.Read(target.data(), (ui32)target.length(), &read));
+    UTest(true, file.Read(target.data(), static_cast<ui32>(target.length()), &read));
     UTest(Equal, read, str.length());
     UTest(Equal, str, target);
     UTest(Equal, file.Offset().Unwrap(), str.length());
@@ -899,7 +899,7 @@ static void FileRead(IFile &file)
         UTest(true, file.Offset(FileOffsetMode::FromCurrent, -4));
         str = file.IsSeekSupported() ? "trat" : "star";
         target.resize(str.length());
-        UTest(true, file.Read(target.data(), (ui32)target.length(), &read));
+        UTest(true, file.Read(target.data(), static_cast<ui32>(target.length()), &read));
         UTest(Equal, read, str.length());
         UTest(Equal, target, str);
     }
@@ -914,7 +914,7 @@ static void FileReadOffsetted(IFile &file, uiw offset)
     UTest(LeftGreaterEqual, file.Size().Unwrap(), str.length());
     ui32 read = 0;
     std::string target(str.length(), '\0');
-    UTest(true, file.Read(target.data(), (ui32)target.length(), &read));
+    UTest(true, file.Read(target.data(), static_cast<ui32>(target.length()), &read));
     UTest(Equal, read, str.length());
     UTest(Equal, str, target);
     UTest(Equal, file.Offset().Unwrap(), str.length());
@@ -927,7 +927,7 @@ static void FileReadOffsetted(IFile &file, uiw offset)
         UTest(true, file.Offset(FileOffsetMode::FromCurrent, -4));
         str = file.IsSeekSupported() ? "trat" : "star";
         target.resize(str.length());
-        UTest(true, file.Read(target.data(), (ui32)target.length(), &read));
+        UTest(true, file.Read(target.data(), static_cast<ui32>(target.length()), &read));
         UTest(Equal, read, str.length());
         UTest(Equal, target, str);
     }
@@ -939,7 +939,7 @@ static void FileAppendWrite(IFile &file)
     UTest(Equal, file.Offset().Unwrap(), 0);
     std::string_view str = "9184";
     ui32 written = 0;
-    UTest(true, file.Write(str.data(), (ui32)str.length(), &written));
+    UTest(true, file.Write(str.data(), static_cast<ui32>(str.length()), &written));
     UTest(Equal, written, str.length());
     UTest(Equal, file.Offset().Unwrap(), str.length());
     UTest(Equal, file.Size().Unwrap(), str.length());
@@ -953,7 +953,7 @@ static void FileAppendRead(IFile &file)
     UTest(Equal, file.Size().Unwrap(), str.length());
     std::string target(str.length(), '\0');
     ui32 read = 0;
-    UTest(true, file.Read(target.data(), (ui32)target.length(), &read));
+    UTest(true, file.Read(target.data(), static_cast<ui32>(target.length()), &read));
     UTest(Equal, read, str.length());
     UTest(Equal, target, str);
 }
@@ -979,38 +979,38 @@ static void FileWriteRead(IFile &file)
     UTest(Equal, file.ProcMode().Combined(FileProcModes::Write).Combined(FileProcModes::Read), file.ProcMode());
 
     UTest(Equal, file.Offset().Unwrap(), 0);
-    UTest(true, file.Write(crapString0.data(), (ui32)crapString0.length(), &written));
+    UTest(true, file.Write(crapString0.data(), static_cast<ui32>(crapString0.length()), &written));
     UTest(Equal, written, (ui32)crapString0.length());
-    UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), (i64)crapString0.length());
-    UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
-    UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), (i64)0);
+    UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), static_cast<i64>(crapString0.length()));
+    UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), 0LL);
+    UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), 0LL);
     UTest(Equal, file.Size().Unwrap(), crapString0.length());
 
-    UTest(true, file.Offset(FileOffsetMode::FromBegin, (i64)32));
-    UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), (i64)32);
-    UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
-    UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), -((i64)crapString0.length() - 32));
-    UTest(true, file.Read(readBuf, (ui32)crapString0.length() - 32, &read));
-    UTest(Equal, read, (ui32)crapString0.length() - 32);
+    UTest(true, file.Offset(FileOffsetMode::FromBegin, 32LL));
+    UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), 32LL);
+    UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), 0LL);
+    UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), -(static_cast<i64>(crapString0.length()) - 32));
+    UTest(true, file.Read(readBuf, static_cast<ui32>(crapString0.length()) - 32, &read));
+    UTest(Equal, read, static_cast<ui32>(crapString0.length()) - 32);
     UTest(true, !MemOps::Compare(readBuf, crapString0.data() + 32, crapString0.length() - 32));
     UTest(Equal, file.Size().Unwrap(), crapString0.length());
-    UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), (i64)crapString0.length());
-    UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
-    UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), (i64)0);
+    UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), static_cast<i64>(crapString0.length()));
+    UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), 0LL);
+    UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), 0LL);
 
     UTest(true, file.Offset(FileOffsetMode::FromBegin, 64));
-    UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), (i64)64);
-    UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), (i64)0);
-    UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), -(i64)(crapString0.length() - 64));
+    UTest(Equal, file.Offset(FileOffsetMode::FromBegin).Unwrap(), 64LL);
+    UTest(Equal, file.Offset(FileOffsetMode::FromCurrent).Unwrap(), 0LL);
+    UTest(Equal, file.Offset(FileOffsetMode::FromEnd).Unwrap(), -(static_cast<i64>(crapString0.length()) - 64));
     UTest(Equal, file.Size().Unwrap(), crapString0.length());
-    UTest(true, file.Write(crapString1.data(), (ui32)crapString1.length(), &written));
-    UTest(Equal, written, (ui32)crapString1.length());
+    UTest(true, file.Write(crapString1.data(), static_cast<ui32>(crapString1.length()), &written));
+    UTest(Equal, written, static_cast<ui32>(crapString1.length()));
 
     UTest(true, file.Offset(FileOffsetMode::FromBegin, 0));
     UTest(Equal, file.Size().Unwrap(), crapString0.length());
     crapString0.replace(crapString0.begin() + 64, crapString0.begin() + 64 + crapString1.length(), crapString1.data(), crapString1.length());
-    UTest(true, file.Read(readBuf, (ui32)crapString0.length() + 999, &read)); // read outside the file, must truncate the requested size
-    UTest(Equal, read, (ui32)crapString0.length());
+    UTest(true, file.Read(readBuf, static_cast<ui32>(crapString0.length()) + 999, &read)); // read outside the file, must truncate the requested size
+    UTest(Equal, read, static_cast<ui32>(crapString0.length()));
     UTest(true, !MemOps::Compare(readBuf, crapString0.data(), crapString0.length()));
 }
 
@@ -1186,7 +1186,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
 
     File file = File(folderForTests / TSTR("memMapped.txt"), FileOpenMode::CreateAlways, FileProcModes::Read.Combined(FileProcModes::Write));
     UTest(true, file);
-    UTest(true, file.Write(crapString.data(), (ui32)crapString.length()));
+    UTest(true, file.Write(crapString.data(), static_cast<ui32>(crapString.length())));
 
     Error<> error = DefaultError::Ok();
     MemoryMappedFile mapping = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
@@ -1209,7 +1209,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     UTest(false, !MemOps::Compare(crapString.data(), mapping.Memory(), crapString.size()));
 
     UTest(true, file.Offset(FileOffsetMode::FromBegin, 0));
-    UTest(true, file.Write(crapString.data(), (ui32)crapString.length()));
+    UTest(true, file.Write(crapString.data(), static_cast<ui32>(crapString.length())));
     UTest(true, file.Flush());
 
     UTest(true, !MemOps::Compare(crapString.data(), mapping.Memory(), crapString.size()));
@@ -1219,7 +1219,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     MemOps::Copy(mapping.Memory(), crapString.data(), crapString.length());
     mapping.Flush();
     UTest(true, file.Offset(FileOffsetMode::FromBegin, 0));
-    UTest(true, file.Read(tempBuf, (ui32)crapString.length()));
+    UTest(true, file.Read(tempBuf, static_cast<ui32>(crapString.length())));
     UTest(true, !MemOps::Compare(crapString.data(), tempBuf, crapString.length()));
 
     file.Close();
@@ -1243,11 +1243,11 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     file = File(folderForTests / TSTR("appendTest.txt"), FileOpenMode::CreateAlways, FileProcModes::Write);
     UTest(true, file);
     std::string_view invisiblePartStr = "invisible part";
-    UTest(true, file.Write(invisiblePartStr.data(), (ui32)invisiblePartStr.length()));
+    UTest(true, file.Write(invisiblePartStr.data(), static_cast<ui32>(invisiblePartStr.length())));
     file.Close();
     file = File(folderForTests / TSTR("appendTest.txt"), FileOpenMode::OpenExisting, FileProcModes::Write.Combined(FileProcModes::Read), uiw_max);
     std::string_view currentPartStr = "current part";
-    UTest(true, file.Write(currentPartStr.data(), (ui32)currentPartStr.length()));
+    UTest(true, file.Write(currentPartStr.data(), static_cast<ui32>(currentPartStr.length())));
 
     MemoryMappedFile appendedFileMapping = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
     UTest(false, error);
@@ -1282,13 +1282,13 @@ static void TimeMomentTests()
     {
         UTest(true, EqualsWithEpsilon(refDiff.ToSec(), timeUSec / (1'000'000.0f), 0.00001f));
         UTest(true, EqualsWithEpsilon(refDiff.ToMSec(), timeUSec / (1'000.0f), 0.01f));
-        UTest(true, EqualsWithEpsilon(refDiff.ToUSec(), (f32)timeUSec, 10.0f));
+        UTest(true, EqualsWithEpsilon(refDiff.ToUSec(), static_cast<f32>(timeUSec), 10.0f));
         UTest(true, EqualsWithEpsilon(refDiff.ToSec_f64(), timeUSec / (1'000'000.0), 0.00001));
         UTest(true, EqualsWithEpsilon(refDiff.ToMSec_f64(), timeUSec / (1'000.0), 0.01));
-        UTest(true, EqualsWithEpsilon(refDiff.ToUSec_f64(), (f64)timeUSec, 10.0));
-        UTest(true, refDiff.ToSec_i32() == (i32)timeUSec / 1'000'000);
-        UTest(true, abs(refDiff.ToMSec_i32() - (i32)timeUSec / 1'000) <= 1);
-        UTest(true, abs(refDiff.ToUSec_i32() - (i32)timeUSec) <= 10);
+        UTest(true, EqualsWithEpsilon(refDiff.ToUSec_f64(), static_cast<f64>(timeUSec), 10.0));
+        UTest(true, refDiff.ToSec_i32() == timeUSec / 1'000'000);
+        UTest(true, abs(refDiff.ToMSec_i32() - timeUSec / 1'000) <= 1);
+        UTest(true, abs(refDiff.ToUSec_i32() - timeUSec) <= 10);
         UTest(true, refDiff.ToSec_i64() == timeUSec / 1'000'000);
         UTest(true, abs(refDiff.ToMSec_i64() - timeUSec / 1'000) <= 1);
         UTest(true, abs(refDiff.ToUSec_i64() - timeUSec) <= 10);
@@ -1409,7 +1409,7 @@ static void MemoryStreamTests()
 
     auto holderTestDataProvide = [](const holderType &data) -> const std::byte *
     {
-        return (std::byte *)&data.Get<HolderTestData>().str;
+        return reinterpret_cast<const std::byte *>(&data.Get<HolderTestData>().str);
     };
 
     auto dataHolderMS = memoryStreamType::New<HolderTestData>(std::move(data), test0.length() + test1.length(), holderTestDataProvide);
@@ -1736,7 +1736,7 @@ int main(int argc, char **argv)
 		console.
 			BufferSize(std::nullopt, 150).
 			Size(width, height).
-			Position((screenWidth - (i32)width) / 2, (screenHeight - (i32)height) / 2).
+			Position((static_cast<i32>(screenWidth) - static_cast<i32>(width)) / 2, (static_cast<i32>(screenHeight) - static_cast<i32>(height)) / 2).
 			SnapToWindowSize(true).
 			Modes(NativeConsole::ModeValues::EnableMouseSelection);
 	}

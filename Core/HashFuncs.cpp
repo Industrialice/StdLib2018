@@ -35,7 +35,7 @@ ui32 Hash::CRC32(const ui8 *message)
 			byte = byte << 1;
 		}
 	}
-	return reverse((ui32)~crc);
+	return reverse(static_cast<ui32>(~crc));
 }
 
 ui32 Hash::CRC32(const ui8 *message, uiw length)

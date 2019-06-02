@@ -10,5 +10,5 @@ namespace StdLib::Initialization
 
 void Initialization::Initialize(const MiscParameters &parameters)
 {
-    Initialize((const PlatformParameters &)parameters);
+    Initialize(static_cast<const PlatformParameters &>(parameters));
 }

@@ -63,13 +63,14 @@ namespace StdLib::ApproxMath
 			Clang 8.0.2 MT6589: 22.08kk 0.94x 
 			Clang 8.0.2 MT8735M ARM64: 17.36kk 0.75x */
 
+			union { i32 i; f32 x; };
+
             f32 xhalf = 0.5f * input;
-            i32 i = *(i32 *)&input;
+            x = input;
             i = 0x5f37599e - (i >> 1); // Initial guess.
-            input = *(f32 *)&i;
-            input = input * (1.5f - xhalf * input * input); // Newton step.
-            input = input * (1.5f - xhalf * input * input); // Newton step again.
-            return input;
+            x = x * (1.5f - xhalf * x * x); // Newton step.
+            x = x * (1.5f - xhalf * x * x); // Newton step again.
+            return x;
         }
     }
 
