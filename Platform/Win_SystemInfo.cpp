@@ -7,7 +7,6 @@ namespace
 {
 	ui32 LogicalCPUCoresValue;
 	ui32 PhysicalCPUCoresValue;
-    uiw PageSizeValue;
 	std::vector<SystemInfo::CacheInfo> CacheInfos;
 }
 
@@ -52,12 +51,6 @@ uiw SystemInfo::AllocationAlignment()
 	return MEMORY_ALLOCATION_ALIGNMENT;
 }
 
-uiw SystemInfo::MemoryPageSize()
-{
-    ASSUME(PageSizeValue > 0);
-    return PageSizeValue;
-}
-
 bool SystemInfo::IsDebuggerAttached()
 {
 	return IsDebuggerPresent();
@@ -73,7 +66,6 @@ namespace StdLib::SystemInfo
 		GetSystemInfo(&sysinfo);
 
 		LogicalCPUCoresValue = sysinfo.dwNumberOfProcessors;
-        PageSizeValue = sysinfo.dwPageSize;
 
 		DWORD bufferSize = 0;
 

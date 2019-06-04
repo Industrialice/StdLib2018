@@ -32,7 +32,6 @@ namespace StdLib::SystemInfo
 	[[nodiscard]] ui32 PhysicalCPUCores();
 	[[nodiscard]] std::pair<const CacheInfo *, uiw> AcquireCacheInfo();
 	[[nodiscard]] uiw AllocationAlignment();
-	[[nodiscard]] uiw MemoryPageSize(); // size in bytes
 	[[nodiscard]] Platform CurrentPlatform();
 	[[nodiscard]] bool IsDebuggerAttached();
 }

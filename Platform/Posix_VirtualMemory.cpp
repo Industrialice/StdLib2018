@@ -17,6 +17,8 @@ namespace
         PROT_EXEC | PROT_READ, // 6 - Execute + Read
         PROT_EXEC | PROT_WRITE | PROT_READ // 7 - Execute + Write + Read
     };
+
+	uiw PageSizeValue;
 }
 
 static constexpr int PageModeToPosix(VirtualMemory::PageModes::PageMode pageMode);
@@ -84,7 +86,8 @@ Error<> VirtualMemory::PageMode(void *memory, uiw size, PageModes::PageMode page
 
 uiw VirtualMemory::PageSize()
 {
-    return 4096;
+	ASSUME(PageSizeValue > 0);
+	return PageSizeValue;
 }
 
 constexpr int PageModeToPosix(VirtualMemory::PageModes::PageMode pageMode)
@@ -95,5 +98,16 @@ constexpr int PageModeToPosix(VirtualMemory::PageModes::PageMode pageMode)
 namespace StdLib::VirtualMemory
 {
     void Initialize()
-    {}
+    {
+		int pageSize = sysconf(_SC_PAGESIZE);
+		if (pageSize == -1)
+		{
+			SOFTBREAK;
+			PageSizeValue = 4096;
+		}
+		else
+		{
+			PageSizeValue = static_cast<uiw>(pageSize);
+		}
+	}
 }

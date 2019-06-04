@@ -320,26 +320,26 @@ static void TypeIdentifiableTests()
 	UnitTestsLogger::Message("finished type identifiable tests\n");
 }
 
-template <typename T> static void TestIntegerHashes()
+template <Hash::Precision precision, typename T> static void TestIntegerHashes()
 {
     T number0 = 3;
     T number1 = 2;
     T number2 = 5;
 
-    UTest(NotEqual, Hash::FNVHash<Hash::Precision::P32>(number0) + Hash::FNVHash<Hash::Precision::P32>(number1), Hash::FNVHash<Hash::Precision::P32>(number2));
+    UTest(NotEqual, Hash::FNVHash<precision>(number0) + Hash::FNVHash<precision>(number1), Hash::FNVHash<precision>(number2));
 
-    auto hash0 = Hash::Integer(number0);
-	auto hash1 = Hash::Integer(number1);
-	auto hash2 = Hash::Integer(number2);
+    auto hash0 = Hash::Integer<precision>(number0);
+	auto hash1 = Hash::Integer<precision>(number1);
+	auto hash2 = Hash::Integer<precision>(number2);
 
     UTest(NotEqual, hash0, hash1);
     UTest(NotEqual, hash1, hash2);
 
     UTest(NotEqual, hash0 + hash1, hash2);
 
-    UTest(Equal, Hash::IntegerInverse(hash0), 3);
-    UTest(Equal, Hash::IntegerInverse(hash1), 2);
-    UTest(Equal, Hash::IntegerInverse(hash2), 5);
+    UTest(Equal, Hash::IntegerInverse<precision>(hash0), 3);
+    UTest(Equal, Hash::IntegerInverse<precision>(hash1), 2);
+    UTest(Equal, Hash::IntegerInverse<precision>(hash2), 5);
 }
 
 static void HashFuncsTest()
@@ -369,14 +369,22 @@ static void HashFuncsTest()
 	crc32 = Hash::CRC32(reinterpret_cast<const ui8 *>(crc32str), strlen(crc32str));
 	UTest(Equal, crc32, 0xD85554CE);
 
-    TestIntegerHashes<ui8>();
-    TestIntegerHashes<ui16>();
-    TestIntegerHashes<ui32>();
-    TestIntegerHashes<ui64>();
-	TestIntegerHashes<i8>();
-	TestIntegerHashes<i16>();
-	TestIntegerHashes<i32>();
-	TestIntegerHashes<i64>();
+    TestIntegerHashes<Hash::Precision::P64, ui8>();
+	TestIntegerHashes<Hash::Precision::P32, ui8>();
+	TestIntegerHashes<Hash::Precision::P32, ui16>();
+	TestIntegerHashes<Hash::Precision::P64, ui16>();
+	TestIntegerHashes<Hash::Precision::P32, ui32>();
+	TestIntegerHashes<Hash::Precision::P64, ui32>();
+	TestIntegerHashes<Hash::Precision::P32, ui64>();
+	TestIntegerHashes<Hash::Precision::P64, ui64>();
+	TestIntegerHashes<Hash::Precision::P32, i8>();
+	TestIntegerHashes<Hash::Precision::P64, i8>();
+	TestIntegerHashes<Hash::Precision::P32, i16>();
+	TestIntegerHashes<Hash::Precision::P64, i16>();
+	TestIntegerHashes<Hash::Precision::P32, i32>();
+	TestIntegerHashes<Hash::Precision::P64, i32>();
+	TestIntegerHashes<Hash::Precision::P32, i64>();
+	TestIntegerHashes<Hash::Precision::P64, i64>();
 
 	UnitTestsLogger::Message("finished hash tests\n");
 }
@@ -1595,7 +1603,7 @@ static void PrintSystemInfo()
 		}
 	}
 	UnitTestsLogger::Message("  Memory allocation alignment %u\n", static_cast<ui32>(SystemInfo::AllocationAlignment()));
-    UnitTestsLogger::Message("  Memory page size %u\n", static_cast<ui32>(SystemInfo::MemoryPageSize()));
+    UnitTestsLogger::Message("  Memory page size %u\n", static_cast<ui32>(VirtualMemory::PageSize()));
 	const char *arch = nullptr;
 	switch (SystemInfo::CPUArchitecture())
 	{
@@ -1721,6 +1729,10 @@ static void DoTests(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
+#if defined(_MSC_VER) && defined(DEBUG)
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_DELAY_FREE_MEM_DF | _CRTDBG_LEAK_CHECK_DF/* | _CRTDBG_CHECK_EVERY_1024_DF*/);
+#endif
+
     StdLib::Initialization::Initialize({});
 
 #ifdef PLATFORM_WINDOWS
@@ -1749,6 +1761,8 @@ int main(int argc, char **argv)
     UnitTestsLogger::Message("---Finished Everything---\n");
 
 #ifdef PLATFORM_WINDOWS
+
+
     system("pause");
 #endif
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GenericFuncs.hpp"
+
 namespace StdLib::Hash
 {
 	enum class Precision { P32, P64 };
@@ -89,13 +91,13 @@ namespace StdLib::Hash
 
     // based on Thomas Mueller's answer from 
     // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key
-    // TODO: add precision specifier
-    template <typename T> [[nodiscard]] auto Integer(T y)
+    template <Precision precision, typename T> [[nodiscard]] auto Integer(T y)
     {
-        static_assert(std::is_integral_v<T>);
-        if constexpr (sizeof(T) == 8)
+        static_assert(std::is_trivial_v<T>);
+		auto fundamental = Funcs::ToFundamental(y);
+        if constexpr (precision == Precision::P64)
         {
-			auto x = static_cast<ui64>(y);
+			auto x = static_cast<ui64>(fundamental);
             x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
             x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
             x = x ^ (x >> 31);
@@ -103,7 +105,7 @@ namespace StdLib::Hash
         }
 		else
 		{
-			auto x = static_cast<ui32>(y);
+			auto x = static_cast<ui32>(fundamental);
 			x = ((x >> 16) ^ x) * 0x45d9f3b;
 			x = ((x >> 16) ^ x) * 0x45d9f3b;
 			x = (x >> 16) ^ x;
@@ -112,12 +114,13 @@ namespace StdLib::Hash
     }
 
     // returns the original value passed into Hash::Integer
-    template <typename T> [[nodiscard]] auto IntegerInverse(T y)
+    template <Precision precision, typename T> [[nodiscard]] auto IntegerInverse(T y)
     {
-        static_assert(std::is_integral_v<T>);
-        if constexpr (sizeof(T) == 8)
+        static_assert(std::is_trivial_v<T>);
+		auto fundamental = Funcs::ToFundamental(y);
+		if constexpr (precision == Precision::P64)
         {
-			auto x = static_cast<ui64>(y);
+			auto x = static_cast<ui64>(fundamental);
 			x = (x ^ (x >> 31) ^ (x >> 62)) * 0x319642b2d24d8ec3ULL;
             x = (x ^ (x >> 27) ^ (x >> 54)) * 0x96de1b173f119089ULL;
             x = x ^ (x >> 30) ^ (x >> 60);
@@ -125,7 +128,7 @@ namespace StdLib::Hash
 		}
 		else
 		{
-			auto x = static_cast<ui32>(y);
+			auto x = static_cast<ui32>(fundamental);
 			x = ((x >> 16) ^ x) * 0x119de1f3;
 			x = ((x >> 16) ^ x) * 0x119de1f3;
 			x = (x >> 16) ^ x;

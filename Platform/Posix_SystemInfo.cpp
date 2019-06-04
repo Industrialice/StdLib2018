@@ -55,12 +55,6 @@ uiw SystemInfo::AllocationAlignment()
     return AllocationAlignmentValue;
 }
 
-uiw SystemInfo::MemoryPageSize()
-{
-    ASSUME(PageSizeValue > 0);
-    return PageSizeValue;
-}
-
 // TODO: implementation
 bool SystemInfo::IsDebuggerAttached()
 {
@@ -93,17 +87,6 @@ namespace StdLib::SystemInfo
 		else
 		{
 			LogicalCPUCoresValue = static_cast<ui32>(logicalCPUCores);
-		}
-
-		int pageSize = sysconf(_SC_PAGESIZE);
-		if (pageSize == -1)
-		{
-			SOFTBREAK;
-			PageSizeValue = 4096;
-		}
-		else
-		{
-			PageSizeValue = static_cast<uiw>(pageSize);
 		}
     }
 }
