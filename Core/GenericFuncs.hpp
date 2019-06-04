@@ -329,6 +329,18 @@ namespace StdLib::Funcs
 		return (reinterpret_cast<uiw>(memory) & (alignment - 1)) == 0;
 	}
 
+	[[nodiscard]] constexpr uiw AlignAs(uiw value, uiw alignment)
+	{
+		ASSUME(value && alignment);
+		ASSUME(IsPowerOf2(alignment));
+		if (value % alignment)
+		{
+			value += alignment;
+			value &= ~(alignment - 1);
+		}
+		return value;
+	}
+
     template <typename T> void Reinitialize(T &target)
     {
         target.~T();

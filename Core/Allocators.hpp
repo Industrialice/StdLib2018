@@ -93,11 +93,7 @@ namespace StdLib::Allocator
 			#else
 				if (alignment > MinimalGuaranteedAlignment)
 				{
-					if (alignment & (sizeof(void *) - 1)) // posix_memalign requires alignment to be divisible by sizeof(void *)
-					{
-						alignment += sizeof(void *);
-						alignment &= ~(sizeof(void *) - 1);
-					}
+					alignment = Funcs::AlignAs(alignment, sizeof(void *)); // posix_memalign requires alignment to be divisible by sizeof(void *)
 					void *memory;
 					int code = posix_memalign(&memory, alignment, count);
 					ASSUME(code == 0);
@@ -126,11 +122,7 @@ namespace StdLib::Allocator
 				memory = static_cast<T *>(realloc(memory, count));
 				if (!Funcs::IsAligned(memory, alignment))
 				{
-					if (alignment & (sizeof(void *) - 1)) // posix_memalign requires alignment to be divisible by sizeof(void *)
-					{
-						alignment += sizeof(void *);
-						alignment &= ~(sizeof(void *) - 1);
-					}
+					alignment = Funcs::AlignAs(alignment, sizeof(void *)); // posix_memalign requires alignment to be divisible by sizeof(void *)
 					void *temp;
 					int code = posix_memalign(&temp, alignment, count);
 					ASSUME(code == 0);

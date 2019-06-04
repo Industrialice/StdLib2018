@@ -67,6 +67,11 @@ static void MiscTests()
 	UTest(true, Funcs::IsAligned(reinterpret_cast<void *>(16), 4));
 	UTest(false, Funcs::IsAligned(reinterpret_cast<void *>(13), 4));
 
+	UTest(Equal, Funcs::AlignAs(1, 16), 16u);
+	UTest(Equal, Funcs::AlignAs(3, 16), 16u);
+	UTest(Equal, Funcs::AlignAs(16, 16), 16u);
+	UTest(Equal, Funcs::AlignAs(17, 16), 32u);
+
     UnitTestsLogger::Message("finished misc tests\n");
 }
 
