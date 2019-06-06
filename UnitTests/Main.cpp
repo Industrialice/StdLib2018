@@ -72,6 +72,13 @@ static void MiscTests()
 	UTest(Equal, Funcs::AlignAs(16, 16), 16u);
 	UTest(Equal, Funcs::AlignAs(17, 16), 32u);
 
+	void *volatileVoidMemory = reinterpret_cast<void *>(3);
+	UTest(Equal, reinterpret_cast<uiw>(Funcs::AlignAs(volatileVoidMemory, 16)), 16u);
+	const void *constVoidMemory = reinterpret_cast<const void *>(3);
+	UTest(Equal, reinterpret_cast<uiw>(Funcs::AlignAs(constVoidMemory, 16)), 16u);
+	const uiw *constUIWMemory = reinterpret_cast<const uiw *>(3);
+	UTest(Equal, reinterpret_cast<uiw>(Funcs::AlignAs(constUIWMemory, 16)), 16u);
+
     UnitTestsLogger::Message("finished misc tests\n");
 }
 
@@ -712,20 +719,20 @@ static void VirtualMemoryTests()
     UTest(true, commitError.IsOk());
     EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), false);
 
-    auto protection = VirtualMemory::PageMode(memory, VirtualMemory::PageSize());
+    auto protection = VirtualMemory::PageModeRequest(memory, VirtualMemory::PageSize());
 #ifdef PLATFORM_WINDOWS
     UTest(Equal, protection.Unwrap(), VirtualMemory::PageModes::Read.Combined(VirtualMemory::PageModes::Write));
 #else
     UTest(Equal, protection.GetError(), DefaultError::Unsupported());
 #endif
 
-    auto protectionSetResult = VirtualMemory::PageMode(memory, VirtualMemory::PageSize(), VirtualMemory::PageModes::Read);
+    auto protectionSetResult = VirtualMemory::PageModeChange(memory, VirtualMemory::PageSize(), VirtualMemory::PageModes::Read);
     UTest(true, protectionSetResult.IsOk());
     EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), true);
 
     UTest(true, VirtualMemory::Free(memory, 999));
 
-    memory = static_cast<std::byte *>(VirtualMemory::Alloc(999, VirtualMemory::PageModes::Read.Combined(VirtualMemory::PageModes::Write)));
+    memory = static_cast<std::byte *>(VirtualMemory::Alloc(999, false, VirtualMemory::PageModes::Read.Combined(VirtualMemory::PageModes::Write)));
     UTest(true, memory);
     EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), false);
 

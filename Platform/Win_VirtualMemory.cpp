@@ -17,14 +17,21 @@ namespace
         PAGE_EXECUTE_READWRITE // 7 - Execute + Write + Read
     };
 
+#ifdef STDLIB_DONT_ASSUME_PAGE_SIZE
     uiw Static_PageSize{};
+#endif
 }
 
 static constexpr DWORD PageModeToWinAPI(VirtualMemory::PageModes::PageMode pageMode);
 
-void *VirtualMemory::Reserve(uiw size)
+void *VirtualMemory::Reserve(uiw size, bool isTopDown)
 {
-    return VirtualAlloc(0, size, MEM_RESERVE, PAGE_NOACCESS);
+	DWORD flags = MEM_RESERVE;
+	if (isTopDown)
+	{
+		flags |= MEM_TOP_DOWN;
+	}
+    return VirtualAlloc(0, size, flags, PAGE_NOACCESS);
 }
 
 Error<> VirtualMemory::Commit(void *memory, uiw size, PageModes::PageMode pageMode)
@@ -43,7 +50,7 @@ Error<> VirtualMemory::Commit(void *memory, uiw size, PageModes::PageMode pageMo
     return DefaultError::UnknownError("VirtualAlloc failed");
 }
 
-void *VirtualMemory::Alloc(uiw size, PageModes::PageMode pageMode)
+void *VirtualMemory::Alloc(uiw size, bool isTopDown, PageModes::PageMode pageMode)
 {
     ASSUME(size);
     DWORD protection = PageModeToWinAPI(pageMode);
@@ -52,7 +59,12 @@ void *VirtualMemory::Alloc(uiw size, PageModes::PageMode pageMode)
         SOFTBREAK;
         return nullptr;
     }
-    return VirtualAlloc(0, size, MEM_RESERVE | MEM_COMMIT, protection);
+	DWORD flags = MEM_RESERVE | MEM_COMMIT;
+	if (isTopDown)
+	{
+		flags |= MEM_TOP_DOWN;
+	}
+    return VirtualAlloc(0, size, flags, protection);
 }
 
 bool VirtualMemory::Free(void *memory, uiw memorySize)
@@ -61,7 +73,7 @@ bool VirtualMemory::Free(void *memory, uiw memorySize)
     return VirtualFree(memory, 0, MEM_RELEASE) != 0;
 }
 
-auto VirtualMemory::PageMode(const void *memory, uiw size) -> Result<PageModes::PageMode>
+auto VirtualMemory::PageModeRequest(const void *memory, uiw size) -> Result<PageModes::PageMode>
 {
     if ((size % PageSize()) != 0)
     {
@@ -89,7 +101,7 @@ auto VirtualMemory::PageMode(const void *memory, uiw size) -> Result<PageModes::
     return DefaultError::UnknownError("Encountered unknown WinAPI protection mode");
 }
 
-Error<> VirtualMemory::PageMode(void *memory, uiw size, PageModes::PageMode pageMode)
+Error<> VirtualMemory::PageModeChange(void *memory, uiw size, PageModes::PageMode pageMode)
 {
     ASSUME(memory && size);
     DWORD oldProtect;
@@ -106,11 +118,13 @@ Error<> VirtualMemory::PageMode(void *memory, uiw size, PageModes::PageMode page
     return DefaultError::UnknownError("VirtualProtect failed");
 }
 
+#ifdef STDLIB_DONT_ASSUME_PAGE_SIZE
 uiw VirtualMemory::PageSize()
 {
     ASSUME(Static_PageSize);
     return Static_PageSize;
 }
+#endif
 
 constexpr DWORD PageModeToWinAPI(VirtualMemory::PageModes::PageMode pageMode)
 {
@@ -121,8 +135,10 @@ namespace StdLib::VirtualMemory
 {
     void Initialize()
     {
-        SYSTEM_INFO sysinfo;
-        GetSystemInfo(&sysinfo);
-        Static_PageSize = sysinfo.dwPageSize;
+		#ifdef STDLIB_DONT_ASSUME_PAGE_SIZE
+			SYSTEM_INFO sysinfo;
+			GetSystemInfo(&sysinfo);
+			Static_PageSize = sysinfo.dwPageSize;
+		#endif
     }
 }

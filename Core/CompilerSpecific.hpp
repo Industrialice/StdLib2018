@@ -33,6 +33,7 @@
 	#define WARNING_DISABLE_ATTRIBUTE_IS_NOT_RECOGNIZED __pragma(warning(disable : 5030))
 	#define WARNING_DISABLE_LARGE_BY_VALUE_COPY
 	#define WARNING_DISABLE_INCREASES_REQUIRED_ALIGNMENT
+	#define WARNING_DISABLE_NONSTANDARD_EXTENSION_USED __pragma(warning(disable : 4200))
 
     #define _UNREACHABLE __assume(0)
 
@@ -114,6 +115,7 @@
 		#define WARNING_DISABLE_ATTRIBUTE_IS_NOT_RECOGNIZED _Pragma("clang diagnostic ignored \"-Wunknown-attributes\"")
 		#define WARNING_DISABLE_LARGE_BY_VALUE_COPY _Pragma("clang diagnostic ignored \"-Wlarge-by-value-copy\"")
 		#define WARNING_DISABLE_INCREASES_REQUIRED_ALIGNMENT _Pragma("clang diagnostic ignored \"-Wcast-align\"")
+		#define WARNING_DISABLE_NONSTANDARD_EXTENSION_USED
 	#else
 		/* TODO: implement */
 		#define WARNING_PUSH
@@ -122,6 +124,7 @@
 		#define WARNING_DISABLE_ATTRIBUTE_IS_NOT_RECOGNIZED
 		#define WARNING_DISABLE_LARGE_BY_VALUE_COPY
 		#define WARNING_DISABLE_INCREASES_REQUIRED_ALIGNMENT
+		#define WARNING_DISABLE_NONSTANDARD_EXTENSION_USED
 	#endif
 
     #define _UNREACHABLE __builtin_unreachable()

@@ -341,16 +341,29 @@ namespace StdLib::Funcs
 		return value;
 	}
 
+	template <typename T> [[nodiscard]] T *AlignAs(T *memory, uiw alignment)
+	{
+		if constexpr (!std::is_same_v<std::remove_cv_t<T>, void>)
+		{
+			ASSUME(alignment >= alignof(T));
+		}
+		ASSUME(memory && alignment);
+		ASSUME(IsPowerOf2(alignment));
+		uiw value = reinterpret_cast<uiw>(memory);
+		value = AlignAs(value, alignment);
+		return reinterpret_cast<T *>(value);
+	}
+
     template <typename T> void Reinitialize(T &target)
     {
         target.~T();
         new (&target) T();
     }
 
-    template <typename T, typename U> void Reinitialize(T &target, U &&newValue)
+    template <typename T, typename... Args> void Reinitialize(T &target, Args &&... arguments)
     {
         target.~T();
-        new (&target) T(std::forward<U>(newValue));
+        new (&target) T(std::forward<Args>(arguments)...);
     }
 
     template <typename T> void Drop(T &&target)

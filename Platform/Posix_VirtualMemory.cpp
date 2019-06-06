@@ -18,12 +18,14 @@ namespace
         PROT_EXEC | PROT_WRITE | PROT_READ // 7 - Execute + Write + Read
     };
 
+#ifdef STDLIB_DONT_ASSUME_PAGE_SIZE
 	uiw PageSizeValue;
+#endif
 }
 
 static constexpr int PageModeToPosix(VirtualMemory::PageModes::PageMode pageMode);
 
-void *VirtualMemory::Reserve(uiw size)
+void *VirtualMemory::Reserve(uiw size, bool isTopDown)
 {
     ASSUME(size);
     return mmap(0, size, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -45,7 +47,7 @@ Error<> VirtualMemory::Commit(void *memory, uiw size, PageModes::PageMode pageMo
     return DefaultError::UnknownError("mprotect failed");
 }
 
-void *VirtualMemory::Alloc(uiw size, PageModes::PageMode pageMode)
+void *VirtualMemory::Alloc(uiw size, bool isTopDown, PageModes::PageMode pageMode)
 {
     ASSUME(size);
     int protection = PageModeToPosix(pageMode);
@@ -63,12 +65,12 @@ bool VirtualMemory::Free(void *memory, uiw memorySize)
     return munmap(memory, memorySize) == 0;
 }
 
-auto VirtualMemory::PageMode(const void *memory, uiw size) -> Result<PageModes::PageMode>
+auto VirtualMemory::PageModeRequest(const void *memory, uiw size) -> Result<PageModes::PageMode>
 {
     return DefaultError::Unsupported();
 }
 
-Error<> VirtualMemory::PageMode(void *memory, uiw size, PageModes::PageMode pageMode)
+Error<> VirtualMemory::PageModeChange(void *memory, uiw size, PageModes::PageMode pageMode)
 {
     ASSUME(memory && size);
     int protection = PageModeToPosix(pageMode);
@@ -84,11 +86,13 @@ Error<> VirtualMemory::PageMode(void *memory, uiw size, PageModes::PageMode page
     return DefaultError::UnknownError("mprotect failed");
 }
 
+#ifdef STDLIB_DONT_ASSUME_PAGE_SIZE
 uiw VirtualMemory::PageSize()
 {
 	ASSUME(PageSizeValue > 0);
 	return PageSizeValue;
 }
+#endif
 
 constexpr int PageModeToPosix(VirtualMemory::PageModes::PageMode pageMode)
 {
@@ -99,15 +103,17 @@ namespace StdLib::VirtualMemory
 {
     void Initialize()
     {
-		int pageSize = sysconf(_SC_PAGESIZE);
-		if (pageSize == -1)
-		{
-			SOFTBREAK;
-			PageSizeValue = 4096;
-		}
-		else
-		{
-			PageSizeValue = static_cast<uiw>(pageSize);
-		}
+		#ifdef STDLIB_DONT_ASSUME_PAGE_SIZE
+			int pageSize = sysconf(_SC_PAGESIZE);
+			if (pageSize == -1)
+			{
+				SOFTBREAK;
+				PageSizeValue = 4096;
+			}
+			else
+			{
+				PageSizeValue = static_cast<uiw>(pageSize);
+			}
+		#endif
 	}
 }

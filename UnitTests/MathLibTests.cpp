@@ -813,6 +813,10 @@ static void ApproxMathTests()
 	auto rsqrt = [](f32 value) { return 1.0f / sqrt(value); };
 	auto qurt = [](f32 value) { return pow(value, 1.0f / 3.0f); };
 
+	ApproxMathTestsHelper(ApproxMath::Cos<ApproxMath::Precision::High>, cos, -DefaultF32Epsilon, MathPiDouble() + DefaultF32Epsilon, -0.000008f, 0.000008f);
+	ApproxMathTestsHelper(ApproxMath::Cos<ApproxMath::Precision::Medium>, cos, -DefaultF32Epsilon, MathPiDouble() + DefaultF32Epsilon, -0.00059701f, 0.00059722f);
+	ApproxMathTestsHelper(ApproxMath::Sin<ApproxMath::Precision::High>, sin, -DefaultF32Epsilon, MathPiDouble() + DefaultF32Epsilon, -0.000008f, 0.000008f);
+	ApproxMathTestsHelper(ApproxMath::Sin<ApproxMath::Precision::Medium>, sin, -DefaultF32Epsilon, MathPiDouble() + DefaultF32Epsilon, -0.0005975f, 0.0005977f);
 	ApproxMathTestsHelper(ApproxMath::RSqrt<ApproxMath::Precision::Low>, rsqrt, 0.05f, 10000.0f, -0.1417f, 0.10329);
 	ApproxMathTestsHelper(ApproxMath::RSqrt<ApproxMath::Precision::Medium>, rsqrt, 0.05f, 10000.0f, -0.0037, 0.00389);
 	ApproxMathTestsHelper(ApproxMath::RSqrt<ApproxMath::Precision::High>, rsqrt, 0.05f, 10000.0f, -0.000021, 0.0000011);
@@ -891,30 +895,92 @@ static void RectangleTests()
 	UnitTestsLogger::Message("  finished rectangle tests\n");
 }
 
-static void MeasurePrecision(f32 func(f32), f32 ref(f32), f32 start, f32 end)
+// TODO: average relative is broken
+FORCEINLINE static void MeasurePrecision(f32 func(f32), f32 ref(f32), f32 start, f32 end)
 {
-	f64 funcMaxNegativeDiff = 0;
-	f64 funcMaxPositiveDiff = 0;
-	f64 funcMaxNegativeDiffAtValue = 0;
-	f64 funcMaxPositiveDiffAtValue = 0;
+	f64 funcMaxAbsoluteNegativeDiff = 0;
+	f64 funcMaxAbsolutePositiveDiff = 0;
+	f64 funcMaxAbsoluteNegativeDiffAtValue = start;
+	f64 funcMaxAbsolutePositiveDiffAtValue = start;
+	f64 funcMaxRelativeNegativeDiff = 0;
+	f64 funcMaxRelativePositiveDiff = 0;
+	f64 funcMaxRelativeNegativeDiffAtValue = start;
+	f64 funcMaxRelativePositiveDiffAtValue = start;
+	f64 currentAverageAbsolutePositive = 0;
+	f64 currentAverageAbsoluteNegative = 0;
+	f64 currentAverageRelativePositive = 0;
+	f64 currentAverageRelativeNegative = 0;
+	ui32 counter = 1;
+	std::vector<f64> averageAbsolutePositiveValues, averageAbsoluteNegativeValues;
+	std::vector<f64> averageRelativePositiveValues, averageRelativeNegativeValues;
 
 	union { f32 value; ui32 intRep; };
 	value = start;
 
-	auto repeat = [&func, &ref, &funcMaxNegativeDiff, &funcMaxPositiveDiff, &funcMaxNegativeDiffAtValue, &funcMaxPositiveDiffAtValue](f32 value, ui32 intRep)
+	auto repeat = [&](f32 value, ui32 intRep)
 	{
 		f64 referenceValue = ref(value);
 		f64 approxValue = func(value);
-		if (funcMaxNegativeDiff > approxValue - referenceValue)
+
+		f64 abosoluteDiff = approxValue - referenceValue;
+		if (funcMaxAbsoluteNegativeDiff > abosoluteDiff)
 		{
-			funcMaxNegativeDiff = approxValue - referenceValue;
-			funcMaxNegativeDiffAtValue = value;
+			funcMaxAbsoluteNegativeDiff = abosoluteDiff;
+			funcMaxAbsoluteNegativeDiffAtValue = value;
 		}
-		if (funcMaxPositiveDiff < approxValue - referenceValue)
+		if (funcMaxAbsolutePositiveDiff < abosoluteDiff)
 		{
-			funcMaxPositiveDiff = approxValue - referenceValue;
-			funcMaxPositiveDiffAtValue = value;
+			funcMaxAbsolutePositiveDiff = abosoluteDiff;
+			funcMaxAbsolutePositiveDiffAtValue = value;
 		}
+
+		if (abosoluteDiff > 0)
+		{
+			currentAverageAbsolutePositive += (abosoluteDiff - currentAverageAbsolutePositive) / counter;
+		}
+		else
+		{
+			currentAverageAbsoluteNegative += (abosoluteDiff - currentAverageAbsoluteNegative) / counter;
+		}
+
+		if (abs(value) > 0.0001f && abs(referenceValue) > 0.0001f)
+		{
+			f64 relativeDiff = abosoluteDiff / value;
+
+			if (relativeDiff > 0)
+			{
+				currentAverageRelativePositive += (relativeDiff - currentAverageRelativePositive) / counter;
+			}
+			else
+			{
+				currentAverageRelativeNegative += (-relativeDiff - currentAverageRelativeNegative) / counter;
+			}
+
+			if (funcMaxRelativeNegativeDiff > relativeDiff)
+			{
+				funcMaxRelativeNegativeDiff = relativeDiff;
+				funcMaxRelativeNegativeDiffAtValue = value;
+			}
+			if (funcMaxRelativePositiveDiff < relativeDiff)
+			{
+				funcMaxRelativePositiveDiff = relativeDiff;
+				funcMaxRelativePositiveDiffAtValue = value;
+			}
+		}
+
+		if (counter == 10000)
+		{
+			averageAbsolutePositiveValues.push_back(currentAverageAbsolutePositive);
+			averageAbsoluteNegativeValues.push_back(currentAverageAbsoluteNegative);
+			currentAverageAbsolutePositive = 0;
+			currentAverageAbsoluteNegative = 0;
+			averageRelativePositiveValues.push_back(currentAverageRelativePositive);
+			averageRelativeNegativeValues.push_back(currentAverageRelativeNegative);
+			currentAverageRelativePositive = 0;
+			currentAverageRelativeNegative = 0;
+			counter = 0;
+		}
+		++counter;
 
 		if (UnitTestsLogger::IsMessagePoppingSupported())
 		{
@@ -944,7 +1010,23 @@ static void MeasurePrecision(f32 func(f32), f32 ref(f32), f32 start, f32 end)
 		UnitTestsLogger::PopLastMessage();
 	}
 
-	UnitTestsLogger::Message("\nmin %.8f at %.8f max %.8f at %.8f\n", funcMaxNegativeDiff, funcMaxNegativeDiffAtValue, funcMaxPositiveDiff, funcMaxPositiveDiffAtValue);
+	//printf("count0 = %zu\n", averageAbsolutePositiveValues.size());
+	//printf("count1 = %zu\n", averageRelativePositiveValues.size());
+
+	averageAbsolutePositiveValues.push_back(currentAverageAbsolutePositive);
+	f64 averageAbsolutePositive = std::accumulate(averageAbsolutePositiveValues.begin(), averageAbsolutePositiveValues.end(), 0.0) / averageAbsolutePositiveValues.size();
+	averageAbsoluteNegativeValues.push_back(currentAverageAbsoluteNegative);
+	f64 averageAbsoluteNegative = std::accumulate(averageAbsoluteNegativeValues.begin(), averageAbsoluteNegativeValues.end(), 0.0) / averageAbsoluteNegativeValues.size();
+
+	averageRelativePositiveValues.push_back(currentAverageRelativePositive);
+	f64 averageRelativePositive = std::accumulate(averageRelativePositiveValues.begin(), averageRelativePositiveValues.end(), 0.0) / averageRelativePositiveValues.size();
+	averageRelativeNegativeValues.push_back(currentAverageRelativeNegative);
+	f64 averageRelativeNegative = std::accumulate(averageRelativeNegativeValues.begin(), averageRelativeNegativeValues.end(), 0.0) / averageRelativeNegativeValues.size();
+
+	UnitTestsLogger::Message(" During [%.4f;%.4f]\n", start, end);
+	UnitTestsLogger::Message(" Absolute [%+.8f;%+.8f] At [%.5f;%.5f] Average absolute [%+.8f;%+.8f]\n", funcMaxAbsoluteNegativeDiff, funcMaxAbsolutePositiveDiff, funcMaxAbsoluteNegativeDiffAtValue, funcMaxAbsolutePositiveDiffAtValue, averageAbsoluteNegative, averageAbsolutePositive);
+	UnitTestsLogger::Message(" Relative [%+.8f;%+.8f] At [%.5f;%.5f]\n" /*Average relative [%+.8f;%+.8f]\n"*/, funcMaxRelativeNegativeDiff, funcMaxRelativePositiveDiff, funcMaxRelativeNegativeDiffAtValue, funcMaxRelativePositiveDiffAtValue/*, averageRelativeNegative, averageRelativePositive*/);
+	UnitTestsLogger::Message("\n");
 }
 
 static void MeasuringApproxPrecision()
@@ -952,28 +1034,32 @@ static void MeasuringApproxPrecision()
 	auto rsqrt = [](f32 value) { return 1.0f / sqrt(value); };
 	auto qurt = [](f32 value) { return pow(value, 1.0f / 3.0f); };
 
-	//printf("cos precision: \n");
-	//MeasurePrecision(&ApproxMath::Cos<ApproxMath::Precision::High>, &std::cos, -MathPiHalf() - DefaultF32Epsilon, MathPiDouble() + MathPiHalf() + DefaultF32Epsilon);
-	//printf("sin precision: \n");
-	//MeasurePrecision(&ApproxMath::Sin<ApproxMath::Precision::High>, &std::sin, -DefaultF32Epsilon, MathPiDouble() + MathPi() + DefaultF32Epsilon);
-	//printf("low rsqrt precision: \n");
-	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::Low>, rsqrt, 0.05f, 10'000.0f);
-	//printf("medium rsqrt precision: \n");
-	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::Medium>, rsqrt, 0.05f, 10'000.0f);
-	//printf("high rsqrt precision: \n");
-	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::High>, rsqrt, 0.05f, 10'000.0f);
-	//printf("low sqrt precision: \n");
-	//MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::Low>, &sqrt, 0.00001f, MathPiDouble());
-	//printf("medium sqrt precision: \n");
-	//MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::Medium>, &sqrt, 0.00001f, MathPiDouble());
-	//printf("high sqrt precision: \n");
-	//MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::High>, &sqrt, 0.00001f, MathPiDouble());
-	//printf("low qurt precision: \n");
-	//MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::Low>, qurt, 0.00001f, MathPiDouble());
-	//printf("medium qurt precision: \n");
-	//MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::Medium>, qurt, 0.00001f, MathPiDouble());
-	//printf("high qurt precision: \n");
-	//MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::High>, qurt, 0.00001f, MathPiDouble());
+	printf("high cos precision: \n");
+	MeasurePrecision(&ApproxMath::Cos<ApproxMath::Precision::High>, &std::cos, -MathPiHalf() - DefaultF32Epsilon, MathPiDouble() + MathPiHalf() + DefaultF32Epsilon);
+	printf("medium cos precision: \n");
+	MeasurePrecision(&ApproxMath::Cos<ApproxMath::Precision::Medium>, &std::cos, -MathPiHalf() - DefaultF32Epsilon, MathPiDouble() + MathPiHalf() + DefaultF32Epsilon);
+	printf("high sin precision: \n");
+	MeasurePrecision(&ApproxMath::Sin<ApproxMath::Precision::High>, &std::sin, -DefaultF32Epsilon, MathPiDouble() + MathPi() + DefaultF32Epsilon);
+	printf("medium sin precision: \n");
+	MeasurePrecision(&ApproxMath::Sin<ApproxMath::Precision::Medium>, &std::sin, -DefaultF32Epsilon, MathPiDouble() + MathPi() + DefaultF32Epsilon);
+	printf("low sqrt precision: \n");
+	MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::Low>, &sqrt, 0.00001f, MathPiDouble());
+	printf("medium sqrt precision: \n");
+	MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::Medium>, &sqrt, 0.00001f, MathPiDouble());
+	printf("high sqrt precision: \n");
+	MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::High>, &sqrt, 0.00001f, MathPiDouble());
+	printf("low rsqrt precision: \n");
+	MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::Low>, rsqrt, 0.05f, 10'000.0f);
+	printf("medium rsqrt precision: \n");
+	MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::Medium>, rsqrt, 0.05f, 10'000.0f);
+	printf("high rsqrt precision: \n");
+	MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::High>, rsqrt, 0.05f, 10'000.0f);
+	printf("low qurt precision: \n");
+	MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::Low>, qurt, 0.00001f, MathPiDouble());
+	printf("medium qurt precision: \n");
+	MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::Medium>, qurt, 0.00001f, MathPiDouble());
+	printf("high qurt precision: \n");
+	MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::High>, qurt, 0.00001f, MathPiDouble());
 }
 
 template <typename TrigFuncType, TrigFuncType TrigFunc> static inline f64 TrigBenchmarksHelper(const char *name, f64 ref = 0)
@@ -1002,7 +1088,7 @@ template <typename TrigFuncType, TrigFuncType TrigFunc> static inline f64 TrigBe
 	TimeDifference diff;
 	for (;;)
 	{
-		if ((l.counted & 0xFFFF) == 0)
+		if ((l.counted & 0xFFFC) == 0)
 		{
 			TimeMoment end = TimeMoment::Now();
 			diff = end - start;
@@ -1037,35 +1123,40 @@ inline f32 StdSinCos(f32 value)
 	return std::sinf(value) + std::cosf(value);
 }
 
-inline f32 ApproxSinCos(f32 value)
+template <ApproxMath::Precision precision> f32 ApproxSinCos(f32 value)
 {
-	return ApproxMath::Sin<ApproxMath::Precision::High>(value) + ApproxMath::Cos<ApproxMath::Precision::High>(value);
+	return ApproxMath::Sin<precision>(value) + ApproxMath::Cos<precision>(value);
 }
+
+using FuncType = f32(*)(f32);
 
 static void SinCosBenchmarks()
 {
-	f64 ref = TrigBenchmarksHelper<decltype(StdSinCos), StdSinCos>(" std::sincos");
-	TrigBenchmarksHelper<decltype(ApproxSinCos), ApproxSinCos>("approxSinCos", ref);
+	f64 ref = TrigBenchmarksHelper<FuncType, StdSinCos>(" std::sincos");
+	TrigBenchmarksHelper<FuncType, ApproxSinCos<ApproxMath::Precision::High>>("sincos app H", ref);
+	TrigBenchmarksHelper<FuncType, ApproxSinCos<ApproxMath::Precision::Medium>>("sincos app M", ref);
 }
 
 static void CosBenchmarks()
 {
-	f64 ref = TrigBenchmarksHelper<decltype(std::cosf), std::cosf>(" std::cos");
-	TrigBenchmarksHelper<f32 (*)(f32), ApproxMath::Cos<ApproxMath::Precision::High>>("approxCos", ref);
+	f64 ref = TrigBenchmarksHelper<FuncType, std::cos>(" std::cos");
+	TrigBenchmarksHelper<FuncType, ApproxMath::Cos<ApproxMath::Precision::High>>("cos app H", ref);
+	TrigBenchmarksHelper<FuncType, ApproxMath::Cos<ApproxMath::Precision::Medium>>("cos app M", ref);
 }
 
 static void SinBenchmarks()
 {
-	f64 ref = TrigBenchmarksHelper<decltype(std::sinf), std::sinf>(" std::sin");
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Sin<ApproxMath::Precision::High>>("approxSin", ref);
+	f64 ref = TrigBenchmarksHelper<FuncType, std::sin>(" std::sin");
+	TrigBenchmarksHelper<FuncType, ApproxMath::Sin<ApproxMath::Precision::High>>("sin app H", ref);
+	TrigBenchmarksHelper<FuncType, ApproxMath::Sin<ApproxMath::Precision::Medium>>("sin app M", ref);
 }
 
 static void SqrtBenchmarks()
 {
-	f64 ref = TrigBenchmarksHelper<decltype(std::sqrtf), std::sinf>("   std::sqrt");
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Sqrt<ApproxMath::Precision::High>>("approxSqrt H", ref);
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Sqrt<ApproxMath::Precision::Medium>>("approxSqrt M", ref);
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Sqrt<ApproxMath::Precision::Low>>("approxSqrt L", ref);
+	f64 ref = TrigBenchmarksHelper<FuncType, std::sqrt>(" std::sqrt");
+	TrigBenchmarksHelper<FuncType, ApproxMath::Sqrt<ApproxMath::Precision::High>>("sqrt app H", ref);
+	TrigBenchmarksHelper<FuncType, ApproxMath::Sqrt<ApproxMath::Precision::Medium>>("sqrt app M", ref);
+	TrigBenchmarksHelper<FuncType, ApproxMath::Sqrt<ApproxMath::Precision::Low>>("sqrt app L", ref);
 }
 
 inline auto StdRSqrt(f32 input) -> f32
@@ -1075,10 +1166,10 @@ inline auto StdRSqrt(f32 input) -> f32
 
 static void RSqrtBenchmarks()
 {
-	f64 ref = TrigBenchmarksHelper<decltype(StdRSqrt), StdRSqrt>("1.0f/std::sqrt");
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::RSqrt<ApproxMath::Precision::High>>(" approxRSqrt H", ref);
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::RSqrt<ApproxMath::Precision::Medium>>(" approxRSqrt M", ref);
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::RSqrt<ApproxMath::Precision::Low>>(" approxRSqrt L", ref);
+	f64 ref = TrigBenchmarksHelper<FuncType, StdRSqrt>("1/std::sqrt");
+	TrigBenchmarksHelper<FuncType, ApproxMath::RSqrt<ApproxMath::Precision::High>>("rsqrt app H", ref);
+	TrigBenchmarksHelper<FuncType, ApproxMath::RSqrt<ApproxMath::Precision::Medium>>("rsqrt app M", ref);
+	TrigBenchmarksHelper<FuncType, ApproxMath::RSqrt<ApproxMath::Precision::Low>>("rsqrt app L", ref);
 }
 
 inline f32 StdQurt(f32 input)
@@ -1088,10 +1179,10 @@ inline f32 StdQurt(f32 input)
 
 static void QurtBenchmarks()
 {
-	f64 ref = TrigBenchmarksHelper<decltype(StdQurt), StdQurt>("pow(v, 1.0f/3)");
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Qurt<ApproxMath::Precision::High>>("  approxQurt H", ref);
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Qurt<ApproxMath::Precision::Medium>>("  approxQurt M", ref);
-	TrigBenchmarksHelper<f32(*)(f32), ApproxMath::Qurt<ApproxMath::Precision::Low>>("  approxQurt L", ref);
+	f64 ref = TrigBenchmarksHelper<FuncType, StdQurt>("pow(v, 1/3)");
+	TrigBenchmarksHelper<FuncType, ApproxMath::Qurt<ApproxMath::Precision::High>>(" qurt app H", ref);
+	TrigBenchmarksHelper<FuncType, ApproxMath::Qurt<ApproxMath::Precision::Medium>>(" qurt app M", ref);
+	TrigBenchmarksHelper<FuncType, ApproxMath::Qurt<ApproxMath::Precision::Low>>(" qurt app L", ref);
 }
 
 void MathLibTests()
@@ -1132,12 +1223,14 @@ void MathLibTests()
 
 	MeasuringApproxPrecision();
 
-	//volatile ui32 counter = 0;
-	//for (ui32 index = 1; index < 1000000; ++index)
-	//{
-	//	counter /= index;
-	//	counter *= index;
-	//}
+#ifndef PLATFORM_WINXP
+	volatile ui32 counter = 0;
+	for (ui32 index = 1; index < 1000000; ++index)
+	{
+		counter /= index;
+		counter *= index;
+	}
+#endif
 	//printf("\n");
 	//SinCosBenchmarks();
 	//printf("\n");

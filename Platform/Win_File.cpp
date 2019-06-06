@@ -432,7 +432,7 @@ namespace StdLib::FileInitialization
 				return;
 			}
 			using type = decltype(StdLib_GetFinalPathNameByHandleW);
-			StdLib_GetFinalPathNameByHandleW = static_cast<type>(GetProcAddress(k32, "GetFinalPathNameByHandleW")); // exists since Vista
+			StdLib_GetFinalPathNameByHandleW = reinterpret_cast<type>(GetProcAddress(k32, "GetFinalPathNameByHandleW")); // exists since Vista
 		#else
 			StdLib_GetFinalPathNameByHandleW = GetFinalPathNameByHandleW;
 		#endif
