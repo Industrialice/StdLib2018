@@ -67,7 +67,7 @@ bool SystemInfo::IsDebuggerAttached()
 	return false;
 }
 
-uiw SystemInfo::CurrentWorkingSet()
+uiw SystemInfo::WorkingSet()
 {
 	#if defined(PLATFORM_MACOS)
 		struct mach_task_basic_info info;

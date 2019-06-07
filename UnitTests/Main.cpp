@@ -1657,7 +1657,7 @@ static void PrintSystemInfo()
 	UnitTestsLogger::Message("  Memory allocation alignment %u\n", static_cast<ui32>(SystemInfo::AllocationAlignment()));
     UnitTestsLogger::Message("  Memory page size %u\n", static_cast<ui32>(VirtualMemory::PageSize()));
 	UnitTestsLogger::Message("  Peak working set %s\n", sizeToString(SystemInfo::PeakWorkingSet()).c_str());
-	UnitTestsLogger::Message("  Current working set %s\n", sizeToString(SystemInfo::CurrentWorkingSet()).c_str());
+	UnitTestsLogger::Message("  Current working set %s\n", sizeToString(SystemInfo::WorkingSet()).c_str());
 	const char *arch = nullptr;
 	switch (SystemInfo::CPUArchitecture())
 	{

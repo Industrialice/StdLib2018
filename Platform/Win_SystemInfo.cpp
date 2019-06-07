@@ -56,7 +56,7 @@ bool SystemInfo::IsDebuggerAttached()
 	return IsDebuggerPresent();
 }
 
-uiw SystemInfo::CurrentWorkingSet()
+uiw SystemInfo::WorkingSet()
 {
 	PROCESS_MEMORY_COUNTERS info;
 	BOOL result = GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info));

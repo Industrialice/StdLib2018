@@ -193,7 +193,7 @@ namespace StdLib::VirtualMemory
 		IsMadvFreeSupported = []
 		{
 			void *memory = mmap(0, PageSize(), PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-			ASSUME(memory);
+			ASSUME(memory && memory != MAP_FAILED);
 			bool IsMadvFreeSupported = madvise(memory, PageSize(), MADV_FREE) == 0;
 			int result = munmap(memory, PageSize());
 			ASSUME(result == 0);
