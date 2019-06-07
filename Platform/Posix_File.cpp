@@ -1,6 +1,7 @@
 #include "_PreHeader.hpp"
 #include "File.hpp"
 #include "FileSystem.hpp"
+#include "PlatformErrorResolve.hpp"
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -8,8 +9,6 @@
 #include <errno.h>
 
 using namespace StdLib;
-
-extern NOINLINE Error<> StdLib_FileError();
 
 Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode)
 {
@@ -19,7 +18,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::Fi
 
     int flags = 0;
 
-    if (procMode.Contains(FileProcModes::Read) && procMode.Contains(FileProcModes::Write))
+    if (procMode.Contains(FileProcModes::ReadWrite))
     {
         flags |= O_RDWR;
     }
@@ -95,7 +94,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::Fi
     umask(processMask);
     if (hfile == -1)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     if (cacheMode.Contains(FileCacheModes::LinearRead) || cacheMode.Contains(FileCacheModes::RandomRead))
@@ -132,13 +131,13 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::Fi
         if (fstat64(hfile, &stats) != 0)
         {
             close(hfile);
-            return StdLib_FileError();
+            return PlatformErrorResolve();
         }
         _offsetToStart = std::min<i64>(stats.st_size, offset);
         if (lseek64(hfile, _offsetToStart, SEEK_SET) == -1)
         {
             close(hfile);
-            return StdLib_FileError();
+            return PlatformErrorResolve();
         }
     }
     else
@@ -234,7 +233,7 @@ Result<i64> File::Offset(FileOffsetMode offsetMode, i64 offset)
     off64_t result = lseek64(_handle, offset, whence);
     if (result == -1)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     if (result < _offsetToStart)
@@ -243,7 +242,7 @@ Result<i64> File::Offset(FileOffsetMode offsetMode, i64 offset)
         result = lseek64(_handle, _offsetToStart, SEEK_SET);
         if (result == -1)
         {
-            return StdLib_FileError();
+            return PlatformErrorResolve();
         }
     }
 
@@ -261,7 +260,7 @@ Result<ui64> File::Size()
     struct stat64 stats;
     if (fstat64(_handle, &stats) != 0)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
     ASSUME(stats.st_size >= _offsetToStart);
     return stats.st_size - _offsetToStart;
@@ -364,7 +363,7 @@ Result<i64> File::CurrentFileOffset() const
     off64_t offset = lseek64(_handle, 0, SEEK_CUR);
     if (offset == -1)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
     ASSUME(offset >= _offsetToStart);
     return offset;

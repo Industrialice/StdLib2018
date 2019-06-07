@@ -56,6 +56,22 @@ bool SystemInfo::IsDebuggerAttached()
 	return IsDebuggerPresent();
 }
 
+uiw SystemInfo::CurrentWorkingSet()
+{
+	PROCESS_MEMORY_COUNTERS info;
+	BOOL result = GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info));
+	ASSUME(result);
+	return info.WorkingSetSize;
+}
+
+uiw SystemInfo::PeakWorkingSet()
+{
+	PROCESS_MEMORY_COUNTERS info;
+	BOOL result = GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info));
+	ASSUME(result);
+	return info.PeakWorkingSetSize;
+}
+
 namespace StdLib::SystemInfo
 {
 	void Initialize()

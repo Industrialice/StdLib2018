@@ -10,7 +10,7 @@ namespace StdLib::Allocator
 {
     struct Malloc
     {
-        template <typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count)
+        template <typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN ALLOCATORFUNC static T *Allocate(uiw count)
         {
             if constexpr (!std::is_same_v<T, void>)
             {
@@ -19,7 +19,7 @@ namespace StdLib::Allocator
             return static_cast<T *>(malloc(count));
         }
 
-        template <typename T> [[nodiscard]] static T *Reallocate(T *memory, uiw count)
+        template <typename T> [[nodiscard]] ALLOCATORFUNC static T *Reallocate(T *memory, uiw count)
         {
             if constexpr (!std::is_same_v<T, void>)
             {
@@ -28,7 +28,7 @@ namespace StdLib::Allocator
             return static_cast<T *>(realloc(memory, count));
         }
 
-        template <typename T> [[nodiscard]] static bool ReallocateInplace(T *memory, uiw count)
+        template <typename T> [[nodiscard]] ALLOCATORFUNC static bool ReallocateInplace(T *memory, uiw count)
         {
             if constexpr (!std::is_same_v<T, void>)
             {
@@ -79,7 +79,7 @@ namespace StdLib::Allocator
 	// TODO: optimize the non-Windows version
 	struct MallocAlignedRuntime
 	{
-		template <typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count, uiw alignment)
+		template <typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN ALLOCATORFUNC static T *Allocate(uiw count, uiw alignment)
 		{
 			if constexpr (!std::is_same_v<T, void>)
 			{
@@ -107,7 +107,7 @@ namespace StdLib::Allocator
 			#endif
 		}
 
-		template <typename T> [[nodiscard]] static T *Reallocate(T *memory, uiw count, uiw alignment)
+		template <typename T> [[nodiscard]] ALLOCATORFUNC static T *Reallocate(T *memory, uiw count, uiw alignment)
 		{
 			if constexpr (!std::is_same_v<T, void>)
 			{
@@ -164,7 +164,7 @@ namespace StdLib::Allocator
 
 	template <uiw Alignment> struct MallocAlignedPredefined
 	{
-		template <typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count)
+		template <typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN ALLOCATORFUNC static T *Allocate(uiw count)
 		{
 			if constexpr (Alignment > MinimalGuaranteedAlignment)
 			{
@@ -176,7 +176,7 @@ namespace StdLib::Allocator
 			}
 		}
 
-		template <typename T> [[nodiscard]] static T *Reallocate(T *memory, uiw count)
+		template <typename T> [[nodiscard]] ALLOCATORFUNC static T *Reallocate(T *memory, uiw count)
 		{
 			if constexpr (Alignment > MinimalGuaranteedAlignment)
 			{
@@ -227,12 +227,12 @@ namespace StdLib::Allocator
 	
     struct MallocAligned
     {
-        template <uiw Alignment, typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN static T *Allocate(uiw count)
+        template <uiw Alignment, typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN ALLOCATORFUNC static T *Allocate(uiw count)
         {
 			return MallocAlignedPredefined<Alignment>::template Allocate<T>(count);
         }
 
-        template <uiw Alignment, typename T> [[nodiscard]] static T *Reallocate(T *memory, uiw count)
+        template <uiw Alignment, typename T> [[nodiscard]] ALLOCATORFUNC static T *Reallocate(T *memory, uiw count)
         {
 			return MallocAlignedPredefined<Alignment>::template Reallocate(memory, count);
         }

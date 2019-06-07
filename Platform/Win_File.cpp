@@ -1,5 +1,6 @@
 #include "_PreHeader.hpp"
 #include "File.hpp"
+#include "PlatformErrorResolve.hpp"
 
 using namespace StdLib;
 
@@ -7,8 +8,6 @@ namespace
 {
 	DWORD(WINAPI *StdLib_GetFinalPathNameByHandleW)(HANDLE hFile, LPWSTR lpszFilePath, DWORD cchFilePath, DWORD dwFlags);
 }
-
-extern NOINLINE Error<> StdLib_FileError();
 
 Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode)
 {
@@ -138,7 +137,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::Fi
     HANDLE hfile = CreateFileW(pnn.PlatformPath().data(), dwDesiredAccess, dwShareMode, 0, dwCreationDisposition, dwFlagsAndAttributes, 0);
     if (hfile == INVALID_HANDLE_VALUE)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     if (offset > 0)
@@ -148,7 +147,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::Fi
         {
             BOOL result = CloseHandle(hfile);
             ASSUME(result);
-            return StdLib_FileError();
+            return PlatformErrorResolve();
         }
         offset = std::min<ui64>(offset, size.QuadPart);
         size.QuadPart = std::min<i64>(size.QuadPart, offset);
@@ -156,7 +155,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::Fi
         {
             BOOL result = CloseHandle(hfile);
             ASSUME(result);
-            return StdLib_FileError();
+            return PlatformErrorResolve();
         }
         _offsetToStart = size.QuadPart;
     }
@@ -265,7 +264,7 @@ Result<i64> File::Offset(FileOffsetMode offsetMode, i64 offset)
 
     if (!SetFilePointerEx(_handle, move, &move, moveMethod))
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     if (move.QuadPart < _offsetToStart)
@@ -273,7 +272,7 @@ Result<i64> File::Offset(FileOffsetMode offsetMode, i64 offset)
         move.QuadPart = _offsetToStart;
         if (!SetFilePointerEx(_handle, move, &move, FILE_BEGIN))
         {
-            return StdLib_FileError();
+            return PlatformErrorResolve();
         }
     }
 
@@ -291,7 +290,7 @@ Result<ui64> File::Size()
     LARGE_INTEGER size;
     if (!GetFileSizeEx(_handle, &size))
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
     if (!_readBufferCurrentSize)
     {
@@ -319,7 +318,7 @@ Error<> File::Size(ui64 newSize)
     LARGE_INTEGER currentOffset;
     if (!SetFilePointerEx(_handle, {}, &currentOffset, FILE_CURRENT)) // retrieve the current offset
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
     ASSUME(currentOffset.QuadPart >= _offsetToStart);
 
@@ -329,18 +328,18 @@ Error<> File::Size(ui64 newSize)
         newOffset.QuadPart = newSize;
         if (!SetFilePointerEx(_handle, newOffset, nullptr, FILE_BEGIN))
         {
-            return StdLib_FileError();
+            return PlatformErrorResolve();
         }
     }
 
     if (!SetEndOfFile(_handle))
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     if (!SetFilePointerEx(_handle, currentOffset, nullptr, FILE_BEGIN)) // reset the offset
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     return DefaultError::Ok();
@@ -414,7 +413,7 @@ Result<i64> File::CurrentFileOffset() const
     LARGE_INTEGER currentOffset;
     if (!SetFilePointerEx(_handle, {}, &currentOffset, FILE_CURRENT))
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
     ASSUME(currentOffset.QuadPart >= _offsetToStart);
     return currentOffset.QuadPart;

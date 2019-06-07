@@ -10,7 +10,8 @@ namespace StdLib
     {
         static constexpr struct FileProcMode : EnumCombinable<FileProcMode, ui8>
         {} Read = FileProcMode::Create(1 << 0),
-            Write = FileProcMode::Create(1 << 1);
+            Write = FileProcMode::Create(1 << 1),
+			ReadWrite = Read.Combined(Write);
     };
 
     // these constraints aren't strictly enforced, so you should not rely on them only

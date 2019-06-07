@@ -1,9 +1,8 @@
 #include "_PreHeader.hpp"
 #include "MemoryMappedFile.hpp"
+#include "PlatformErrorResolve.hpp"
 
 using namespace StdLib;
-
-extern NOINLINE Error<> StdLib_FileError();
 
 MemoryMappedFile::~MemoryMappedFile()
 {
@@ -47,7 +46,7 @@ Error<> MemoryMappedFile::Open(File &file, uiw offset, uiw size, bool isCopyOnWr
     _mappingHandle = CreateFileMappingW(file._handle, nullptr, protection | commitMode, sizeToMap.HighPart, sizeToMap.LowPart, nullptr);
     if (_mappingHandle == NULL)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     DWORD desiredAccess;

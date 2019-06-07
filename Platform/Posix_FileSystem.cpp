@@ -1,5 +1,6 @@
 #include "_PreHeader.hpp"
 #include "FileSystem.hpp"
+#include "PlatformErrorResolve.hpp"
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -11,43 +12,6 @@
 #include <sys/sendfile.h> /* using 64 bit offsets will pick sendfile64 which isn't available for APIs below 21 */
 
 using namespace StdLib;
-
-extern NOINLINE Error<> StdLib_FileError()
-{
-    int code = errno;
-
-    switch (code)
-    {
-    case EPERM:
-        return DefaultError::Unsupported();
-    case ENOENT:
-        return DefaultError::NotFound();
-    case ENAMETOOLONG:
-    case ENOTDIR:
-    case EINVAL:
-    case EBADF:
-        return DefaultError::InvalidArgument();
-    case EACCES:
-    case EFAULT:
-    case EROFS:
-    case ETXTBSY:
-        return DefaultError::AccessDenied();
-    case EDQUOT:
-    case ELOOP:
-    case EMLINK:
-    case ENOMEM:
-    case ENOSPC:
-    case EOVERFLOW:
-    case EMFILE:
-        return DefaultError::OutOfMemory();
-    case EEXIST:
-        return DefaultError::AlreadyExists();
-    case EINTR:
-        return DefaultError::Interrupted();
-    default:
-        return DefaultError::UnknownError();
-    }
-}
 
 static Error<> RemoveFileInternal(const char *pnn);
 static Error<> RemoveFolderInternal(const char *pnn);
@@ -66,7 +30,7 @@ NOINLINE Error<> FileSystem::MoveTo(const FilePath &sourcePnn, const FilePath &t
 
     if (rename(sourcePnn.PlatformPath().data(), targetPnn.PlatformPath().data()) != 0)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     return DefaultError::Ok();
@@ -94,7 +58,7 @@ auto FileSystem::Classify(const FilePath &sourcePnn) -> Result<ObjectType>
     struct stat st;
     if (stat(sourcePnn.PlatformPath().data(), &st) != 0)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
     auto mode = st.st_mode & S_IFMT;
     if (mode == S_IFREG)
@@ -210,7 +174,7 @@ NOINLINE Result<bool> FileSystem::IsFolderEmpty(const FilePath &pnn)
     DIR *dirHandle = opendir(pnn.PlatformPath().data());
     if (!dirHandle)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     for (; ; )
@@ -239,7 +203,7 @@ Result<bool> FileSystem::IsReadOnly(const FilePath &pnn)
     struct stat fileStats;
     if (stat(pnn.PlatformPath().data(), &fileStats) != 0)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     mode_t mode = fileStats.st_mode & ~S_IFMT;
@@ -251,7 +215,7 @@ Error<> FileSystem::IsReadOnly(const FilePath &pnn, bool isReadOnly)
     mode_t mode = isReadOnly ? (S_IRUSR | S_IRGRP | S_IROTH) : (S_IRWXU | S_IRWXG | S_IRWXO);
     if (chmod(pnn.PlatformPath().data(), mode) != 0)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
     return DefaultError::Ok();
 }
@@ -287,13 +251,13 @@ NOINLINE Error<> FileSystem::CreateNewFolder(const FilePath &where, const FilePa
             if (mkdir(fullPath.PlatformPath().data(), S_IRWXU | S_IRWXG | S_IRWXO) != 0) // and try again
             {
                 umask(processMask);
-                return StdLib_FileError();
+                return PlatformErrorResolve();
             }
         }
         else // some other error, return it
         {
             umask(processMask);
-            return StdLib_FileError();
+            return PlatformErrorResolve();
         }
     }
 
@@ -307,7 +271,7 @@ Result<FilePath> FileSystem::CurrentWorkingPathGet()
     char *result = getcwd(path, MaxFileNameLength);
     if (!result)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
     return FilePath::FromChar(path);
 }
@@ -321,7 +285,7 @@ Error<> FileSystem::CurrentWorkingPathSet(const FilePath &path)
 
     if (chdir(path.PlatformPath().data()) != 0)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     return DefaultError::Ok();
@@ -331,7 +295,7 @@ Error<> RemoveFileInternal(const char *pnn)
 {
     if (unlink(pnn) != 0)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     return DefaultError::Ok();
@@ -353,7 +317,7 @@ Error<> RemoveFolderInternal(const char *pnn)
     DIR *dirHandle = opendir(currentPath);
     if (!dirHandle)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     for (;;)
@@ -375,7 +339,7 @@ Error<> RemoveFolderInternal(const char *pnn)
         if (stat(currentPath, &st) != 0)
         {
             closedir(dirHandle);
-            return StdLib_FileError();
+            return PlatformErrorResolve();
         }
 
         if (S_ISDIR(st.st_mode))
@@ -402,7 +366,7 @@ Error<> RemoveFolderInternal(const char *pnn)
 
     if (rmdir(pnn) != 0)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     return DefaultError::Ok();
@@ -413,14 +377,14 @@ Error<> CopyFileInternal(const char *sourcePnn, const char *targetPnn)
     int sourceFile = open(sourcePnn, O_RDONLY, 0);
     if (sourceFile == -1)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     struct stat64 statSource;
     if (fstat64(sourceFile, &statSource) != 0)
     {
         close(sourceFile);
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     mode_t processMask = umask(0);
@@ -429,7 +393,7 @@ Error<> CopyFileInternal(const char *sourcePnn, const char *targetPnn)
     if (targetFile == -1)
     {
         close(sourceFile);
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     int copyFileResult = 0;
@@ -466,7 +430,7 @@ Error<> CopyFileInternal(const char *sourcePnn, const char *targetPnn)
 
     if (copyFileResult == -1)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     return DefaultError::Ok();

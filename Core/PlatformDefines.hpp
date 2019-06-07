@@ -1,12 +1,19 @@
 #pragma once
 
+// PLATFORM_WINDOWS
+// PLATFORM_ANDROID
+// PLATFORM_IOS
+// PLATFORM_LINUX
+// PLATFORM_MACOS
+// PLATFORM_EMSCRIPTEN
+
 #include "CoreTypes.hpp"    
 
-#if (defined(_MSC_VER) || __has_include(<Windows.h>)) && !defined(PLATFORM_WINDOWS)
+#if !defined(PLATFORM_WINDOWS) && (defined(_WIN32) || __has_include(<Windows.h>))
     #define PLATFORM_WINDOWS
-#endif
-
-#if __has_include(<emscripten.h>) && !defined(PLATFORM_EMSCRIPTEN)
+#elif defined(__MACH__)
+	#define PLATFORM_MACOS
+#elif !defined(PLATFORM_EMSCRIPTEN) && __has_include(<emscripten.h>)
     #define PLATFORM_EMSCRIPTEN
 #endif
 

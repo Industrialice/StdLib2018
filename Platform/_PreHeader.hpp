@@ -43,6 +43,7 @@
     #define WIN32_LEAN_AND_MEAN // Cryptography, DDE, RPC, Shell, and Windows Sockets
     #include <Windows.h>
     #include <io.h> // required by StandardFile
+	#include <Psapi.h> // required by VirtualMemory
 #endif
 
 #define _SUPPRESS_CORE_INITIALIZE

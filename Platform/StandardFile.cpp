@@ -30,8 +30,6 @@
 
 using namespace StdLib;
 
-extern NOINLINE Error<> StdLib_FileError();
-
 StandardFile::~StandardFile()
 {
     this->Close();
@@ -130,7 +128,7 @@ Error<> StandardFile::Open(const FilePath &path, FileOpenMode openMode, FileProc
     {
         procModeStr = TSTR("a+");
     }
-    else if (procMode.Contains(FileProcModes::Read) && procMode.Contains(FileProcModes::Write))
+    else if (procMode.Contains(FileProcModes::ReadWrite))
     {
         if (isFileFound)
         {

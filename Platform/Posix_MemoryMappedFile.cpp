@@ -1,10 +1,9 @@
 #include "_PreHeader.hpp"
 #include "MemoryMappedFile.hpp"
+#include "PlatformErrorResolve.hpp"
 #include <sys/mman.h>
 
 using namespace StdLib;
-
-extern NOINLINE Error<> StdLib_FileError();
 
 MemoryMappedFile::~MemoryMappedFile()
 {

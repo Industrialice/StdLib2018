@@ -1,6 +1,12 @@
 #include "_PreHeader.hpp"
 #include "SystemInfo.hpp"
+#include "VirtualMemory.hpp"
 #include <unistd.h>
+#include <sys/resource.h>
+
+#if defined(PLATFORM_MACOS)
+	#include <mach/mach.h>
+#endif
 
 using namespace StdLib;
 
@@ -59,6 +65,47 @@ uiw SystemInfo::AllocationAlignment()
 bool SystemInfo::IsDebuggerAttached()
 {
 	return false;
+}
+
+uiw SystemInfo::CurrentWorkingSet()
+{
+	#if defined(PLATFORM_MACOS)
+		struct mach_task_basic_info info;
+		mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
+		if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO, reinterpret_cast<task_info_t>(&info), &infoCount) != KERN_SUCCESS)
+		{
+			SOFTBREAK;
+			return 0;
+		}
+		return static_cast<size_t>(info.resident_size);
+	#else
+		long rss = 0L;
+		FILE *fp = fopen("/proc/self/statm", "r");
+		if (!fp)
+		{
+			SOFTBREAK;
+			return 0;
+		}
+		if (fscanf(fp, "%*s%ld", &rss) != 1)
+		{
+			SOFTBREAK;
+			fclose(fp);
+			return 0;
+		}
+		fclose(fp);
+		return static_cast<size_t>(rss) * VirtualMemory::PageSize();
+	#endif
+}
+
+uiw SystemInfo::PeakWorkingSet()
+{
+	struct rusage rusage;
+	getrusage(RUSAGE_SELF, &rusage);
+	#if defined(PLATFORM_MACOS)
+		return static_cast<size_t>(rusage.ru_maxrss);
+	#else
+		return static_cast<uiw>(rusage.ru_maxrss * 1024L);
+	#endif
 }
 
 namespace StdLib::SystemInfo

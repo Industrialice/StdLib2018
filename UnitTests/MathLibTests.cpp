@@ -1034,32 +1034,32 @@ static void MeasuringApproxPrecision()
 	auto rsqrt = [](f32 value) { return 1.0f / sqrt(value); };
 	auto qurt = [](f32 value) { return pow(value, 1.0f / 3.0f); };
 
-	printf("high cos precision: \n");
-	MeasurePrecision(&ApproxMath::Cos<ApproxMath::Precision::High>, &std::cos, -MathPiHalf() - DefaultF32Epsilon, MathPiDouble() + MathPiHalf() + DefaultF32Epsilon);
-	printf("medium cos precision: \n");
-	MeasurePrecision(&ApproxMath::Cos<ApproxMath::Precision::Medium>, &std::cos, -MathPiHalf() - DefaultF32Epsilon, MathPiDouble() + MathPiHalf() + DefaultF32Epsilon);
-	printf("high sin precision: \n");
-	MeasurePrecision(&ApproxMath::Sin<ApproxMath::Precision::High>, &std::sin, -DefaultF32Epsilon, MathPiDouble() + MathPi() + DefaultF32Epsilon);
-	printf("medium sin precision: \n");
-	MeasurePrecision(&ApproxMath::Sin<ApproxMath::Precision::Medium>, &std::sin, -DefaultF32Epsilon, MathPiDouble() + MathPi() + DefaultF32Epsilon);
-	printf("low sqrt precision: \n");
-	MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::Low>, &sqrt, 0.00001f, MathPiDouble());
-	printf("medium sqrt precision: \n");
-	MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::Medium>, &sqrt, 0.00001f, MathPiDouble());
-	printf("high sqrt precision: \n");
-	MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::High>, &sqrt, 0.00001f, MathPiDouble());
-	printf("low rsqrt precision: \n");
-	MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::Low>, rsqrt, 0.05f, 10'000.0f);
-	printf("medium rsqrt precision: \n");
-	MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::Medium>, rsqrt, 0.05f, 10'000.0f);
-	printf("high rsqrt precision: \n");
-	MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::High>, rsqrt, 0.05f, 10'000.0f);
-	printf("low qurt precision: \n");
-	MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::Low>, qurt, 0.00001f, MathPiDouble());
-	printf("medium qurt precision: \n");
-	MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::Medium>, qurt, 0.00001f, MathPiDouble());
-	printf("high qurt precision: \n");
-	MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::High>, qurt, 0.00001f, MathPiDouble());
+	//printf("high cos precision: \n");
+	//MeasurePrecision(&ApproxMath::Cos<ApproxMath::Precision::High>, &std::cos, -MathPiHalf() - DefaultF32Epsilon, MathPiDouble() + MathPiHalf() + DefaultF32Epsilon);
+	//printf("medium cos precision: \n");
+	//MeasurePrecision(&ApproxMath::Cos<ApproxMath::Precision::Medium>, &std::cos, -MathPiHalf() - DefaultF32Epsilon, MathPiDouble() + MathPiHalf() + DefaultF32Epsilon);
+	//printf("high sin precision: \n");
+	//MeasurePrecision(&ApproxMath::Sin<ApproxMath::Precision::High>, &std::sin, -DefaultF32Epsilon, MathPiDouble() + MathPi() + DefaultF32Epsilon);
+	//printf("medium sin precision: \n");
+	//MeasurePrecision(&ApproxMath::Sin<ApproxMath::Precision::Medium>, &std::sin, -DefaultF32Epsilon, MathPiDouble() + MathPi() + DefaultF32Epsilon);
+	//printf("low sqrt precision: \n");
+	//MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::Low>, &sqrt, 0.00001f, MathPiDouble());
+	//printf("medium sqrt precision: \n");
+	//MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::Medium>, &sqrt, 0.00001f, MathPiDouble());
+	//printf("high sqrt precision: \n");
+	//MeasurePrecision(&ApproxMath::Sqrt<ApproxMath::Precision::High>, &sqrt, 0.00001f, MathPiDouble());
+	//printf("low rsqrt precision: \n");
+	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::Low>, rsqrt, 0.05f, 10'000.0f);
+	//printf("medium rsqrt precision: \n");
+	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::Medium>, rsqrt, 0.05f, 10'000.0f);
+	//printf("high rsqrt precision: \n");
+	//MeasurePrecision(&ApproxMath::RSqrt<ApproxMath::Precision::High>, rsqrt, 0.05f, 10'000.0f);
+	//printf("low qurt precision: \n");
+	//MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::Low>, qurt, 0.00001f, MathPiDouble());
+	//printf("medium qurt precision: \n");
+	//MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::Medium>, qurt, 0.00001f, MathPiDouble());
+	//printf("high qurt precision: \n");
+	//MeasurePrecision(&ApproxMath::Qurt<ApproxMath::Precision::High>, qurt, 0.00001f, MathPiDouble());
 }
 
 template <typename TrigFuncType, TrigFuncType TrigFunc> static inline f64 TrigBenchmarksHelper(const char *name, f64 ref = 0)

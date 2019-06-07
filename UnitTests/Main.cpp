@@ -686,16 +686,19 @@ static void ResultTests()
 #ifdef PLATFORM_WINDOWS
     #define EXCEPTION_CHECK(Code, IsExpectingException) \
         { \
-            bool isExcepted = false; \
-            __try \
-            { \
-                Code; \
-            } \
-            __except (EXCEPTION_EXECUTE_HANDLER) \
-            { \
-                isExcepted = true; \
-            } \
-            UTest(Equal, isExcepted, IsExpectingException); \
+			if (!SystemInfo::IsDebuggerAttached()) /* debugger will throw an exception even for intercepted exceptions */ \
+			{ \
+				bool isExcepted = false; \
+				__try \
+				{ \
+					Code; \
+				} \
+				__except (EXCEPTION_EXECUTE_HANDLER) \
+				{ \
+					isExcepted = true; \
+				} \
+				UTest(Equal, isExcepted, IsExpectingException); \
+			} \
         }
 #else
     #define EXCEPTION_CHECK(Code, IsExpectingException)
@@ -703,40 +706,67 @@ static void ResultTests()
 
 static void VirtualMemoryTests()
 {
-#ifdef PLATFORM_WINDOWS
-	if (SystemInfo::IsDebuggerAttached()) // debugger will throw an exception even for intercepted exceptions
-	{
-		UnitTestsLogger::Message("debugger is present, skipping virtual memory tests\n");
-		return;
-	}
-#endif
+	constexpr uiw wholeSize = VirtualMemory::PageSize() * 2;
+	constexpr uiw halfSize = VirtualMemory::PageSize();
 
-    std::byte *memory = static_cast<std::byte *>(VirtualMemory::Reserve(999));
+	auto protectionCheck = [](VirtualMemory::PageModes::PageMode desired, Result<VirtualMemory::PageModes::PageMode> &actual)
+	{
+		#ifdef PLATFORM_WINDOWS
+			UTest(Equal, actual.Unwrap(), desired);
+		#else
+			UTest(Equal, actual.GetError(), DefaultError::Unsupported());
+		#endif
+	};
+
+    std::byte *memory = static_cast<std::byte *>(VirtualMemory::Reserve(wholeSize));
     UTest(true, memory);
     EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), true);
 
-    auto commitError = VirtualMemory::Commit(memory, 500, VirtualMemory::PageModes::Read.Combined(VirtualMemory::PageModes::Write));
-    UTest(true, commitError.IsOk());
+    auto commitError = VirtualMemory::Commit(memory, halfSize, VirtualMemory::PageModes::ReadWrite);
+    UTest(true, commitError.IsOk()); 
+	commitError = VirtualMemory::Commit(memory, halfSize, VirtualMemory::PageModes::ReadWrite);
+	UTest(true, commitError.IsOk());
     EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), false);
 
-    auto protection = VirtualMemory::PageModeRequest(memory, VirtualMemory::PageSize());
-#ifdef PLATFORM_WINDOWS
-    UTest(Equal, protection.Unwrap(), VirtualMemory::PageModes::Read.Combined(VirtualMemory::PageModes::Write));
-#else
-    UTest(Equal, protection.GetError(), DefaultError::Unsupported());
-#endif
+	commitError = VirtualMemory::Commit(memory + VirtualMemory::PageSize(), halfSize, VirtualMemory::PageModes::ReadWrite);
+	UTest(true, commitError.IsOk());
 
-    auto protectionSetResult = VirtualMemory::PageModeChange(memory, VirtualMemory::PageSize(), VirtualMemory::PageModes::Read);
+    auto protection = VirtualMemory::PageModeRequest(memory, halfSize);
+	protectionCheck(VirtualMemory::PageModes::ReadWrite, protection);
+
+    auto protectionSetResult = VirtualMemory::PageModeChange(memory, halfSize, VirtualMemory::PageModes::Read);
     UTest(true, protectionSetResult.IsOk());
     EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), true);
 
-    UTest(true, VirtualMemory::Free(memory, 999));
+	protection = VirtualMemory::PageModeRequest(memory, halfSize);
+	protectionCheck(VirtualMemory::PageModes::Read, protection);
+	protection = VirtualMemory::PageModeRequest(memory + VirtualMemory::PageSize(), halfSize);
+	protectionCheck(VirtualMemory::PageModes::ReadWrite, protection);
 
-    memory = static_cast<std::byte *>(VirtualMemory::Alloc(999, false, VirtualMemory::PageModes::Read.Combined(VirtualMemory::PageModes::Write)));
+	protectionSetResult = VirtualMemory::PageModeChange(memory, VirtualMemory::PageSize(), VirtualMemory::PageModes::ReadWrite);
+	UTest(true, protectionSetResult.IsOk());
+	EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), false);
+
+	auto decommitError = VirtualMemory::Decommit(memory, wholeSize);
+	UTest(true, decommitError.IsOk()); 
+	decommitError = VirtualMemory::Decommit(memory, wholeSize);
+	UTest(true, decommitError.IsOk());
+	EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), true);
+
+	commitError = VirtualMemory::Commit(memory, wholeSize, VirtualMemory::PageModes::ReadWrite);
+	UTest(true, commitError.IsOk());
+
+	auto lazyDecommitError = VirtualMemory::LazyDecommit(memory, halfSize);
+	UTest(true, lazyDecommitError.IsOk());
+	EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), false);
+
+    UTest(true, VirtualMemory::Free(memory, wholeSize));
+
+    memory = static_cast<std::byte *>(VirtualMemory::Alloc(wholeSize, false, VirtualMemory::PageModes::ReadWrite));
     UTest(true, memory);
     EXCEPTION_CHECK(MemOps::Set(memory, 0, 10), false);
 
-    UTest(true, VirtualMemory::Free(memory, 999));
+    UTest(true, VirtualMemory::Free(memory, wholeSize));
 
     UnitTestsLogger::Message("finished virtual memory tests\n");
 }
@@ -996,7 +1026,7 @@ static void FileWriteRead(IFile &file)
 
     char readBuf[256];
 
-    UTest(Equal, file.ProcMode().Combined(FileProcModes::Write).Combined(FileProcModes::Read), file.ProcMode());
+    UTest(Equal, file.ProcMode().Combined(FileProcModes::ReadWrite), file.ProcMode());
 
     UTest(Equal, file.Offset().Unwrap(), 0);
     UTest(true, file.Write(crapString0.data(), static_cast<ui32>(crapString0.length()), &written));
@@ -1061,7 +1091,7 @@ static void TestFileToMemoryStream()
     UTest(true, !fileError && file);
     FileAppendRead(file);
 
-    file = MemoryStreamFile(memoryStream, FileProcModes::Read.Combined(FileProcModes::Write), 0, &fileError);
+    file = MemoryStreamFile(memoryStream, FileProcModes::ReadWrite, 0, &fileError);
     UTest(true, !fileError && file);
     FileWriteRead(file);
 
@@ -1112,7 +1142,7 @@ template <typename T> static void TestFile(const FilePath &folderForTests)
         FileAppendRead(file);
         file.Close();
 
-        file = T(path, FileOpenMode::CreateAlways, FileProcModes::Read.Combined(FileProcModes::Write), 0, FileCacheModes::Default, FileShareModes::Read.Combined(FileShareModes::Write), &fileError);
+        file = T(path, FileOpenMode::CreateAlways, FileProcModes::ReadWrite, 0, FileCacheModes::Default, FileShareModes::Read.Combined(FileShareModes::Write), &fileError);
         UTest(true, !fileError && file);
         file.Buffer(bufferSize, allocBufFunc());
         FileWriteRead(file);
@@ -1204,7 +1234,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
 
     char tempBuf[256];
 
-    File file = File(folderForTests / TSTR("memMapped.txt"), FileOpenMode::CreateAlways, FileProcModes::Read.Combined(FileProcModes::Write));
+    File file = File(folderForTests / TSTR("memMapped.txt"), FileOpenMode::CreateAlways, FileProcModes::ReadWrite);
     UTest(true, file);
     UTest(true, file.Write(crapString.data(), static_cast<ui32>(crapString.length())));
 
@@ -1249,7 +1279,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
 
     UTest(true, !MemOps::Compare(mapping.Memory() + 2, mappingOffsetted.Memory(), crapString.size() - 2));
 
-    file = File(folderForTests / TSTR("memMapped2.txt"), FileOpenMode::CreateAlways, FileProcModes::Read.Combined(FileProcModes::Write));
+    file = File(folderForTests / TSTR("memMapped2.txt"), FileOpenMode::CreateAlways, FileProcModes::ReadWrite);
     UTest(true, file);
     FileWrite(file);
     mapping = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
@@ -1265,7 +1295,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     std::string_view invisiblePartStr = "invisible part";
     UTest(true, file.Write(invisiblePartStr.data(), static_cast<ui32>(invisiblePartStr.length())));
     file.Close();
-    file = File(folderForTests / TSTR("appendTest.txt"), FileOpenMode::OpenExisting, FileProcModes::Write.Combined(FileProcModes::Read), uiw_max);
+    file = File(folderForTests / TSTR("appendTest.txt"), FileOpenMode::OpenExisting, FileProcModes::ReadWrite, uiw_max);
     std::string_view currentPartStr = "current part";
     UTest(true, file.Write(currentPartStr.data(), static_cast<ui32>(currentPartStr.length())));
 
@@ -1564,6 +1594,30 @@ static void TypeTests()
 
 static void PrintSystemInfo()
 {
+	auto sizeToString = [](uiw size)
+	{
+		f64 floatSize = static_cast<f64>(size);
+		const char *label = "B";
+		if (floatSize > 1024)
+		{
+			floatSize /= 1024;
+			label = "KB";
+			if (floatSize > 1024)
+			{
+				floatSize /= 1024;
+				label = "MB";
+				if (floatSize > 1024)
+				{
+					floatSize /= 1024;
+					label = "GB";
+				}
+			}
+		}
+		char formatted[128];
+		snprintf(formatted, sizeof(formatted), "%.2lf", floatSize);
+		return std::string(formatted) + label;
+	};
+
 	auto cacheInfo = SystemInfo::AcquireCacheInfo();
 
 	UnitTestsLogger::Message("System info:\n");
@@ -1588,34 +1642,22 @@ static void PrintSystemInfo()
 			UNREACHABLE;
 			return "";
 		};
-		auto sizeToString = [&info]
-		{
-			uiw size = info.size;
-			const char *label = " B";
-			if (size / 1024)
-			{
-				size /= 1024;
-				label = " KB";
-				if (size / 1024)
-				{
-					size /= 1024;
-					label = " MB";
-				}
-			}
-			return std::to_string(size) + label;
-		};
 		UnitTestsLogger::Message("    %s\n", typeToString());
 		UnitTestsLogger::Message("      Level %u\n", info.level);
 		UnitTestsLogger::Message("      Line size %u\n", info.lineSize);
 		UnitTestsLogger::Message("      Associativity %u\n", info.associativity);
-		UnitTestsLogger::Message("      Size %s\n", sizeToString().c_str());
+		UnitTestsLogger::Message("      Size %s\n", sizeToString(info.size).c_str());
 		if (info.isPerCore.has_value())
 		{
 			UnitTestsLogger::Message("      Per core %s\n", *info.isPerCore ? "true" : "false");
 		}
 	}
+	UnitTestsLogger::Message("  Overcommit OS %s\n", VirtualMemory::IsOvercommitOS() ? "true" : "false");
+	UnitTestsLogger::Message("  Full lazy decommit supported %s\n", VirtualMemory::IsFullLazyDecommitSupported() ? "true" : "false");
 	UnitTestsLogger::Message("  Memory allocation alignment %u\n", static_cast<ui32>(SystemInfo::AllocationAlignment()));
     UnitTestsLogger::Message("  Memory page size %u\n", static_cast<ui32>(VirtualMemory::PageSize()));
+	UnitTestsLogger::Message("  Peak working set %s\n", sizeToString(SystemInfo::PeakWorkingSet()).c_str());
+	UnitTestsLogger::Message("  Current working set %s\n", sizeToString(SystemInfo::CurrentWorkingSet()).c_str());
 	const char *arch = nullptr;
 	switch (SystemInfo::CPUArchitecture())
 	{
@@ -1741,7 +1783,7 @@ static void DoTests(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-#if defined(_MSC_VER) && defined(DEBUG)
+#if defined(_WIN32) && defined(DEBUG)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_DELAY_FREE_MEM_DF | _CRTDBG_LEAK_CHECK_DF/* | _CRTDBG_CHECK_EVERY_1024_DF*/);
 #endif
 
@@ -1773,8 +1815,6 @@ int main(int argc, char **argv)
     UnitTestsLogger::Message("---Finished Everything---\n");
 
 #ifdef PLATFORM_WINDOWS
-
-
     system("pause");
 #endif
 

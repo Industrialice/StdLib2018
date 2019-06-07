@@ -53,6 +53,9 @@
     <ClInclude Include="_PlatformInitialization.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PlatformErrorResolve.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Win_VirtualMemory.cpp">
@@ -122,6 +125,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="StandardFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Win_PlatformErrorResolve.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Posix_PlatformErrorResolve.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -188,6 +188,7 @@
   <ItemGroup>
     <ClInclude Include="File.hpp" />
     <ClInclude Include="FileSystem.hpp" />
+    <ClInclude Include="PlatformErrorResolve.hpp" />
     <ClInclude Include="StandardFile.hpp" />
     <ClInclude Include="MemoryMappedFile.hpp" />
     <ClInclude Include="NativeConsole.hpp" />
@@ -206,6 +207,14 @@
     <ClCompile Include="FilePath.cpp" />
     <ClCompile Include="MemoryMappedFile.cpp" />
     <ClCompile Include="Posix_NativConsole.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Posix_PlatformErrorResolve.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseXP|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -256,6 +265,7 @@
     </ClCompile>
     <ClCompile Include="SystemInfo.cpp" />
     <ClCompile Include="VirtualKeys.cpp" />
+    <ClCompile Include="Win_PlatformErrorResolve.cpp" />
     <ClCompile Include="Win_SystemInfo.cpp" />
     <ClCompile Include="TimeMoment.cpp" />
     <ClCompile Include="Win_File.cpp" />

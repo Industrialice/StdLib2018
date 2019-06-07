@@ -1,22 +1,11 @@
 #include "_PreHeader.hpp"
 #include "VirtualMemory.hpp"
+#include "PlatformErrorResolve.hpp"
 
 using namespace StdLib;
 
 namespace
 {
-    constexpr std::array<DWORD, 8> PageProtectionMapping =
-    {
-        0, // 0 - Unused
-        0, // 1 - Write
-        PAGE_READONLY, // 2 - Read
-        PAGE_READWRITE, // 3 - Write + Read
-        PAGE_EXECUTE, // 4 - Execute
-        0, // 5 - Execute + Write
-        PAGE_EXECUTE_READ, // 6 - Execute + Read
-        PAGE_EXECUTE_READWRITE // 7 - Execute + Write + Read
-    };
-
 #ifdef STDLIB_DONT_ASSUME_PAGE_SIZE
     uiw Static_PageSize{};
 #endif
@@ -26,6 +15,7 @@ static constexpr DWORD PageModeToWinAPI(VirtualMemory::PageModes::PageMode pageM
 
 void *VirtualMemory::Reserve(uiw size, bool isTopDown)
 {
+	ASSUME(size && Funcs::IsAligned(size, PageSize()));
 	DWORD flags = MEM_RESERVE;
 	if (isTopDown)
 	{
@@ -36,7 +26,7 @@ void *VirtualMemory::Reserve(uiw size, bool isTopDown)
 
 Error<> VirtualMemory::Commit(void *memory, uiw size, PageModes::PageMode pageMode)
 {
-    ASSUME(memory && size);
+    ASSUME(memory && Funcs::IsAligned(memory, PageSize()) && size && Funcs::IsAligned(size, PageSize()));
     DWORD protection = PageModeToWinAPI(pageMode);
     if (!protection)
     {
@@ -47,12 +37,34 @@ Error<> VirtualMemory::Commit(void *memory, uiw size, PageModes::PageMode pageMo
     {
         return DefaultError::Ok();
     }
-    return DefaultError::UnknownError("VirtualAlloc failed");
+    return PlatformErrorResolve("VirtualAlloc failed");
+}
+
+Error<> VirtualMemory::Decommit(void *memory, uiw size)
+{
+	ASSUME(memory && Funcs::IsAligned(memory, PageSize()) && size && Funcs::IsAligned(size, PageSize()));
+	
+	if (VirtualFree(memory, size, MEM_DECOMMIT) == TRUE)
+	{
+		return DefaultError::Ok();
+	}
+	return PlatformErrorResolve("VirtualFree failed");
+}
+
+Error<> VirtualMemory::LazyDecommit(void *memory, uiw size)
+{
+	ASSUME(memory && Funcs::IsAligned(memory, PageSize()) && size && Funcs::IsAligned(size, PageSize()));
+	void *result = VirtualAlloc(memory, size, MEM_RESET, PAGE_NOACCESS);
+	if (result != memory)
+	{
+		return PlatformErrorResolve("VirtualAlloc failed");
+	}
+	return DefaultError::Ok();
 }
 
 void *VirtualMemory::Alloc(uiw size, bool isTopDown, PageModes::PageMode pageMode)
 {
-    ASSUME(size);
+    ASSUME(size && Funcs::IsAligned(size, PageSize()));
     DWORD protection = PageModeToWinAPI(pageMode);
     if (!protection)
     {
@@ -67,43 +79,47 @@ void *VirtualMemory::Alloc(uiw size, bool isTopDown, PageModes::PageMode pageMod
     return VirtualAlloc(0, size, flags, protection);
 }
 
-bool VirtualMemory::Free(void *memory, uiw memorySize)
+bool VirtualMemory::Free(void *memory, uiw size)
 {
-    ASSUME(memory && memorySize);
+    ASSUME(memory && Funcs::IsAligned(memory, PageSize()) && size && Funcs::IsAligned(size, PageSize()));
     return VirtualFree(memory, 0, MEM_RELEASE) != 0;
 }
 
 auto VirtualMemory::PageModeRequest(const void *memory, uiw size) -> Result<PageModes::PageMode>
 {
-    if ((size % PageSize()) != 0)
-    {
-        return DefaultError::InvalidArgument("size must be divisible by PageSize()");
-    }
+	ASSUME(memory && Funcs::IsAligned(memory, PageSize()) && size && Funcs::IsAligned(size, PageSize()));
 
-    MEMORY_BASIC_INFORMATION mbi;
+	MEMORY_BASIC_INFORMATION mbi;
     SIZE_T informationSize = VirtualQuery(memory, &mbi, sizeof(mbi));
     if (!informationSize)
     {
-        return DefaultError::UnknownError("VirtualQuery returned 0");
+        return PlatformErrorResolve("VirtualQuery returned 0");
     }
     if (mbi.RegionSize < size)
     {
         return InconsistentProtection();
     }
-    for (uiw index = 0; index < PageProtectionMapping.size(); ++index)
-    {
-        if (PageProtectionMapping[index] == mbi.Protect)
-        {
-            return PageModes::PageMode::Create((PageModes::PageMode::valueType)index);
-        }
-    }
+
+	// mbi.Protect is 0 when the memory is not committed, return NoAccess in that case
+	switch (mbi.Protect)
+	{
+		case PAGE_READWRITE: return PageModes::ReadWrite;
+		case PAGE_READONLY: return PageModes::Read;
+		case 0:
+		case PAGE_NOACCESS: return PageModes::NoAccess;
+		case PAGE_EXECUTE: return PageModes::Execute;
+		case PAGE_EXECUTE_READ: return PageModes::Execute.Combined(PageModes::Read);
+		case PAGE_EXECUTE_READWRITE: return PageModes::Execute.Combined(PageModes::Read).Combined(PageModes::Write);
+	}
+
     SOFTBREAK;
-    return DefaultError::UnknownError("Encountered unknown WinAPI protection mode");
+    return DefaultError::UnknownError("Encountered unexpected WinAPI protection mode");
 }
 
 Error<> VirtualMemory::PageModeChange(void *memory, uiw size, PageModes::PageMode pageMode)
 {
-    ASSUME(memory && size);
+	ASSUME(memory && Funcs::IsAligned(memory, PageSize()) && size && Funcs::IsAligned(size, PageSize()));
+
     DWORD oldProtect;
     DWORD protection = PageModeToWinAPI(pageMode);
     if (!protection)
@@ -115,7 +131,17 @@ Error<> VirtualMemory::PageModeChange(void *memory, uiw size, PageModes::PageMod
     {
         return DefaultError::Ok();
     }
-    return DefaultError::UnknownError("VirtualProtect failed");
+    return PlatformErrorResolve("VirtualProtect failed");
+}
+
+bool VirtualMemory::IsOvercommitOS()
+{
+	return false;
+}
+
+bool VirtualMemory::IsFullLazyDecommitSupported()
+{
+	return false;
 }
 
 #ifdef STDLIB_DONT_ASSUME_PAGE_SIZE
@@ -128,7 +154,34 @@ uiw VirtualMemory::PageSize()
 
 constexpr DWORD PageModeToWinAPI(VirtualMemory::PageModes::PageMode pageMode)
 {
-    return PageProtectionMapping[pageMode.AsInteger()];
+	using VirtualMemory::PageModes;
+
+	if (pageMode == PageModes::ReadWrite)
+	{
+		return PAGE_READWRITE;
+	}
+	if (pageMode == PageModes::Read)
+	{
+		return PAGE_READONLY;
+	}
+	if (pageMode == PageModes::NoAccess)
+	{
+		return PAGE_NOACCESS;
+	}
+	if (pageMode == PageModes::Execute)
+	{
+		return PAGE_EXECUTE;
+	}
+	if (pageMode == PageModes::Execute.Combined(PageModes::Read))
+	{
+		return PAGE_EXECUTE_READ;
+	}
+	if (pageMode == PageModes::Execute.Combined(PageModes::Read).Combined(PageModes::Write))
+	{
+		return PAGE_EXECUTE_READWRITE;
+	}
+
+	return 0;
 }
 
 namespace StdLib::VirtualMemory

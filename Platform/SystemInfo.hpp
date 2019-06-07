@@ -34,4 +34,6 @@ namespace StdLib::SystemInfo
 	[[nodiscard]] uiw AllocationAlignment();
 	[[nodiscard]] Platform CurrentPlatform();
 	[[nodiscard]] bool IsDebuggerAttached();
+	[[nodiscard]] uiw CurrentWorkingSet();
+	[[nodiscard]] uiw PeakWorkingSet();
 }

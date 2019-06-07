@@ -1,35 +1,8 @@
 #include "_PreHeader.hpp"
 #include "FileSystem.hpp"
+#include "PlatformErrorResolve.hpp"
 
 using namespace StdLib;
-
-extern NOINLINE Error<> StdLib_FileError()
-{
-    DWORD code = GetLastError();
-
-    switch (code)
-    {
-    case ERROR_FILE_INVALID:
-        return DefaultError::InvalidArgument();
-    case ERROR_FILE_NOT_FOUND:
-    case ERROR_PATH_NOT_FOUND:
-        return DefaultError::NotFound();
-    case ERROR_ACCESS_DENIED:
-    case ERROR_WRITE_PROTECT:
-    case ERROR_SHARING_VIOLATION:
-    case ERROR_LOCK_VIOLATION:
-    case ERROR_USER_MAPPED_FILE:
-        return DefaultError::AccessDenied();
-    case ERROR_NOT_ENOUGH_MEMORY:
-    case ERROR_OUTOFMEMORY:
-        return DefaultError::OutOfMemory();
-    case ERROR_FILE_EXISTS:
-    case ERROR_ALREADY_EXISTS:
-        return DefaultError::AlreadyExists();
-    default:
-        return DefaultError::UnknownError();
-    }
-}
 
 static Error<> RemoveFileInternal(const wchar_t *pnn);
 static Error<> RemoveFolderInternal(const wchar_t *pnn);
@@ -87,7 +60,7 @@ auto FileSystem::Classify(const FilePath &sourcePnn) -> Result<ObjectType>
     DWORD attribs = GetFileAttributesW(sourcePnn.PlatformPath().data());
     if (attribs == INVALID_FILE_ATTRIBUTES)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     bool isFolder = (attribs & FILE_ATTRIBUTE_DIRECTORY) != 0;
@@ -223,7 +196,7 @@ Result<bool> FileSystem::IsReadOnly(const FilePath &pnn)
     DWORD attribs = GetFileAttributesW(pnn.PlatformPath().data());
     if (attribs == INVALID_FILE_ATTRIBUTES)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     return (attribs & FILE_ATTRIBUTE_READONLY) != 0;
@@ -235,7 +208,7 @@ NOINLINE Error<> FileSystem::IsReadOnly(const FilePath &pnn, bool isReadOnly)
     DWORD old_attribs = GetFileAttributesW(pnn.PlatformPath().data());
     if (old_attribs == INVALID_FILE_ATTRIBUTES)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     if (isReadOnly)
@@ -251,7 +224,7 @@ NOINLINE Error<> FileSystem::IsReadOnly(const FilePath &pnn, bool isReadOnly)
     {
         if (SetFileAttributesW(pnn.PlatformPath().data(), new_attribs) != TRUE)
         {
-            return StdLib_FileError();
+            return PlatformErrorResolve();
         }
     }
 
@@ -282,7 +255,7 @@ NOINLINE Error<> FileSystem::CreateNewFolder(const FilePath &where, const FilePa
 
     if (CreateDirectoryW(fullPath.PlatformPath().data(), 0) != TRUE)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     return DefaultError::Ok();
@@ -323,7 +296,7 @@ Error<> RemoveFileInternal(const wchar_t *pnn)
     BOOL result = DeleteFileW(pnn) != 0;
     if (result == false)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     return DefaultError::Ok();
@@ -391,7 +364,7 @@ Error<> CopyFileInternal(const wchar_t *sourcePnn, const wchar_t *targetPnn)
     BOOL result = CopyFileW(sourcePnn, targetPnn, FALSE);
     if (result == FALSE)
     {
-        return StdLib_FileError();
+        return PlatformErrorResolve();
     }
 
     return DefaultError::Ok();

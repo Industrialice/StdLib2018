@@ -323,6 +323,12 @@ namespace StdLib::Funcs
 		return (value & (value - 1)) == 0;
 	}
 
+	[[nodiscard]] constexpr bool IsAligned(uiw value, uiw alignment)
+	{
+		ASSUME(IsPowerOf2(alignment));
+		return (value & (alignment - 1)) == 0;
+	}
+
 	[[nodiscard]] inline bool IsAligned(const void *memory, uiw alignment)
 	{
 		ASSUME(IsPowerOf2(alignment));

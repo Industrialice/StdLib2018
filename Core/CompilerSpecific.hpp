@@ -147,6 +147,8 @@
 			#pragma clang diagnostic error "-Winstantiation-after-specialization"
 			#pragma clang diagnostic warning "-Wlarge-by-value-copy"
 			#pragma clang diagnostic warning "-Wpessimizing-move"
+			//#pragma clang diagnostic warning "-Wextra-semi-stmt"
+			//#pragma clang diagnostic warning "-Wempty-init-stmt"
 		#else
 			#pragma GCC diagnostic error "-Wswitch"
 			#pragma GCC diagnostic error "-Wswitch-enum"
@@ -162,7 +164,9 @@
 			#pragma GCC diagnostic error "-Winstantiation-after-specialization"
 			#pragma GCC diagnostic warning "-Wlarge-by-value-copy"
 			#pragma GCC diagnostic warning "-Wpessimizing-move"
-		#endif
+			//#pragma GCC diagnostic warning "-Wextra-semi-stmt"
+			//#pragma GCC diagnostic warning "-Wempty-init-stmt"
+#endif
 	#endif
 
 	using _IndexOfSignificantBitResultType = int;
