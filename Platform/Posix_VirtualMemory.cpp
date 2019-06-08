@@ -119,15 +119,6 @@ Error<> VirtualMemory::PageModeChange(void *memory, uiw size, PageModes::PageMod
 	return DefaultError::Ok();
 }
 
-bool VirtualMemory::IsOvercommitOS()
-{
-#ifdef PLATFORM_EMSCRIPTEN
-	return false;
-#else
-	return true;
-#endif
-}
-
 bool VirtualMemory::IsFullLazyDecommitSupported()
 {
 	return IsMadvFreeSupported;

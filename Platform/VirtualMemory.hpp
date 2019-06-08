@@ -39,8 +39,16 @@ namespace StdLib::VirtualMemory
     bool Free(void *memory, uiw size);
     [[nodiscard]] Result<PageModes::PageMode> PageModeRequest(const void *memory, uiw size); // Possible errors are InconsistentProtection on Windows, always returns Unsupported on POSIX
     Error<> PageModeChange(void *memory, uiw size, PageModes::PageMode pageMode); // can commit uncommitted memory
-	[[nodiscard]] bool IsOvercommitOS();
 	[[nodiscard]] bool IsFullLazyDecommitSupported();
+
+	[[nodiscard]] constexpr bool IsOvercommitOS()
+	{
+		#if defined(PLATFORM_EMSCRIPTEN) || defined(PLATFORM_WINDOWS)
+			return false;
+		#else
+			return true;
+		#endif
+	}
 
 #ifndef STDLIB_DONT_ASSUME_PAGE_SIZE
 	[[nodiscard]] constexpr uiw PageSize()

@@ -134,11 +134,6 @@ Error<> VirtualMemory::PageModeChange(void *memory, uiw size, PageModes::PageMod
     return PlatformErrorResolve("VirtualProtect failed");
 }
 
-bool VirtualMemory::IsOvercommitOS()
-{
-	return false;
-}
-
 bool VirtualMemory::IsFullLazyDecommitSupported()
 {
 	return false;
