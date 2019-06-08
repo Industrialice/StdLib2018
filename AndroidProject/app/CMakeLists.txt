@@ -24,6 +24,7 @@ endif()
 #add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
 
 add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++2a> $<$<COMPILE_LANGUAGE:C>:-std=c11>)
+add_compile_options(-fsized-deallocation)
 add_compile_options(-fno-exceptions)
 add_compile_options( -fvisibility=hidden -fvisibility-inlines-hidden)
 add_compile_options(-fstrict-aliasing)

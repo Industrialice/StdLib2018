@@ -23,7 +23,7 @@ COMPILER_OPTIMIZATION = -Os -fno-signed-zeros -freciprocal-math -ffp-contract=fa
 # there's hardly any difference between Os and Oz in terms of size (something like 0.01%), but there might be much more noticeable consequences to the performance, so we avoid Oz
 #COMPILER_OPTIMIZATION = -Oz -fno-signed-zeros -freciprocal-math -ffp-contract=fast -ffast-math -fno-stack-protector -D_FORTIFY_SOURCE=0 -fno-sanitize=memory -fno-rtti
 
-COMPILER_OPTIMIZATION += -fno-exceptions
+COMPILER_OPTIMIZATION += -fno-exceptions -fsized-deallocation -fstrict-aliasing
 
 #COMPILER_WARNING_SETTINGS = -Wno-inconsistent-missing-override
 
