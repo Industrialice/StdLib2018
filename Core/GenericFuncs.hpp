@@ -52,7 +52,7 @@ namespace StdLib::Funcs
 		return reinterpreted;
 	}
 
-    template <typename T> [[nodiscard]] FORCEINLINE T SetBit(T value, ui32 bitNum, bool bitValue)
+    template <typename T> [[nodiscard]] FORCEINLINE T SetBit(T value, uiw bitNum, bool bitValue)
     {
 		static_assert(sizeof(T) <= 8, "cannot operate on types larger than 8 bytes");
         ASSUME(sizeof(T) * 8 > bitNum);
@@ -88,7 +88,7 @@ namespace StdLib::Funcs
 		return Reinterpret<T>(fundamental);
     }
 
-    template <typename T> [[nodiscard]] FORCEINLINE bool IsBitSet(T value, ui32 bitNum)
+    template <typename T> [[nodiscard]] FORCEINLINE bool IsBitSet(T value, uiw bitNum)
     {
 		static_assert(sizeof(T) <= 8, "cannot operate on types larger than 8 bytes");
         ASSUME(sizeof(T) * 8 > bitNum);
@@ -112,7 +112,7 @@ namespace StdLib::Funcs
         return static_cast<R>(1) << pos;
     }
 
-    template <typename T> [[nodiscard]] FORCEINLINE ui32 IndexOfMostSignificantNonZeroBit(T value)
+    template <typename T> [[nodiscard]] FORCEINLINE uiw IndexOfMostSignificantNonZeroBit(T value)
     {
 		static_assert(sizeof(T) <= 8, "cannot operate on types larger than 8 bytes");
         ASSUME(value != 0);
@@ -128,10 +128,10 @@ namespace StdLib::Funcs
 			auto input = static_cast<_IndexOfSignificantBitInputType>(fundamental);
             _MSNZB32(input, &result);
         }
-        return static_cast<ui32>(result);
+        return static_cast<uiw>(result);
     }
 
-    template <typename T> [[nodiscard]] FORCEINLINE ui32 IndexOfLeastSignificantNonZeroBit(T value)
+    template <typename T> [[nodiscard]] FORCEINLINE uiw IndexOfLeastSignificantNonZeroBit(T value)
     {
 		static_assert(sizeof(T) <= 8, "cannot operate on types larger than 8 bytes");
         ASSUME(value != 0);
@@ -147,15 +147,15 @@ namespace StdLib::Funcs
 			auto input = static_cast<_IndexOfSignificantBitInputType>(fundamental);
 			_LSNZB32(input, &result);
 		}
-		return static_cast<ui32>(result);
+		return static_cast<uiw>(result);
     }
 
-    template <typename T> [[nodiscard]] FORCEINLINE ui32 IndexOfMostSignificantZeroBit(T value)
+    template <typename T> [[nodiscard]] FORCEINLINE uiw IndexOfMostSignificantZeroBit(T value)
     {
         return IndexOfMostSignificantNonZeroBit(static_cast<T>(~value));
     }
 
-    template <typename T> [[nodiscard]] FORCEINLINE ui32 IndexOfLeastSignificantZeroBit(T value)
+    template <typename T> [[nodiscard]] FORCEINLINE uiw IndexOfLeastSignificantZeroBit(T value)
     {
         return IndexOfLeastSignificantNonZeroBit(static_cast<T>(~value));
     }
@@ -223,7 +223,7 @@ namespace StdLib::Funcs
         return ChangeEndianness(value);
     }
 
-    template <typename T> [[nodiscard]] T RotateBitsLeft(T value, ui32 shift)
+    template <typename T> [[nodiscard]] T RotateBitsLeft(T value, uiw shift)
     {
         ASSUME(shift < sizeof(T) * 8);
 		auto fundamental = ToFundamental(value);
@@ -257,7 +257,7 @@ namespace StdLib::Funcs
 		}
     }
 
-    template <typename T> [[nodiscard]] T RotateBitsRight(T value, ui32 shift)
+    template <typename T> [[nodiscard]] T RotateBitsRight(T value, uiw shift)
     {
         ASSUME(shift < sizeof(T) * 8);
 		auto fundamental = ToFundamental(value);

@@ -56,7 +56,7 @@ template <typename T> NOINLINE void UniqueIdManager::AllocateLevel(T &level)
 
 ui32 UniqueIdManager::Allocate()
 {
-    for (ui32 level0Index = 0; level0Index < 4; ++level0Index)
+    for (uiw level0Index = 0; level0Index < 4; ++level0Index)
     {
         ui64 &level0Mask = _level0Masks[level0Index];
         if (level0Mask == 0)
@@ -66,9 +66,9 @@ ui32 UniqueIdManager::Allocate()
 
         array<Level1, 64> &level0Levels = _level0Levels[level0Index];
 
-        ui32 id = level0Index * (64 * 64 * 64 * 64 * 64);
+		uiw id = level0Index * (64 * 64 * 64 * 64 * 64);
 
-        ui32 level1Index = Funcs::IndexOfLeastSignificantNonZeroBit(level0Mask);
+        uiw level1Index = Funcs::IndexOfLeastSignificantNonZeroBit(level0Mask);
         Level1 &level1 = level0Levels[level1Index];
         ASSUME(level1.mask != 0);
         id += level1Index * (64 * 64 * 64 * 64);
@@ -77,7 +77,7 @@ ui32 UniqueIdManager::Allocate()
         {
 			AllocateLevel(level1);
         }
-        ui32 level2Index = Funcs::IndexOfLeastSignificantNonZeroBit(level1.mask);
+		uiw level2Index = Funcs::IndexOfLeastSignificantNonZeroBit(level1.mask);
         Level2 &level2 = level1.level->operator[](level2Index);
         ASSUME(level2.mask != 0);
         id += level2Index * (64 * 64 * 64);
@@ -86,7 +86,7 @@ ui32 UniqueIdManager::Allocate()
         {
 			AllocateLevel(level2);
         }
-        ui32 level3Index = Funcs::IndexOfLeastSignificantNonZeroBit(level2.mask);
+		uiw level3Index = Funcs::IndexOfLeastSignificantNonZeroBit(level2.mask);
         Level3 &level3 = level2.level->operator[](level3Index);
         ASSUME(level3.mask != 0);
         id += level3Index * (64 * 64);
@@ -95,12 +95,12 @@ ui32 UniqueIdManager::Allocate()
         {
 			AllocateLevel(level3);
         }
-        ui32 level4Index = Funcs::IndexOfLeastSignificantNonZeroBit(level3.mask);
+		uiw level4Index = Funcs::IndexOfLeastSignificantNonZeroBit(level3.mask);
         ui64 &level4 = level3.level->operator[](level4Index);
         ASSUME(level4 != 0);
         id += level4Index * 64;
 
-        ui32 level5Index = Funcs::IndexOfLeastSignificantNonZeroBit(level4);
+		uiw level5Index = Funcs::IndexOfLeastSignificantNonZeroBit(level4);
         id += level5Index;
 
         level4 = Funcs::SetBit(level4, level5Index, false);
@@ -121,7 +121,7 @@ ui32 UniqueIdManager::Allocate()
             }
         }
 
-        return id;
+        return static_cast<ui32>(id);
     }
 
     return invalidId;
