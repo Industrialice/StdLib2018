@@ -9,6 +9,9 @@ WARNING_DISABLE_INTEGRAL_CONSTANT_OVERFLOW
 
 namespace StdLib
 {
+	// required to be linear and randomly accessible, for more flexibility use IFile interface
+	// it's a lightweight abstraction that can be used to read from a local buffer, memory mapped file
+	// or other naturally linear randomly addressable resource
     struct NOVTABLE IMemoryStream
     {
         virtual ~IMemoryStream() = default;

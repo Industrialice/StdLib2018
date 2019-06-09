@@ -12,6 +12,7 @@
 #include "MathFunctions.hpp" // includes MatrixMathTypes.hpp
 #include "ApproxMath.hpp"
 #include "DIWRSpinLock.hpp"
+#include "SpinLock.hpp"
 #include "MTMessageQueue.hpp" // includes Message.hpp
 #include "ListenerHandle.hpp"
 #include "_CoreInitialization.hpp"

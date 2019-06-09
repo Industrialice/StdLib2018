@@ -1598,15 +1598,15 @@ static void PrintSystemInfo()
 	{
 		f64 floatSize = static_cast<f64>(size);
 		const char *label = "B";
-		if (floatSize > 1024)
+		if (floatSize >= 1024)
 		{
 			floatSize /= 1024;
 			label = "KB";
-			if (floatSize > 1024)
+			if (floatSize >= 1024)
 			{
 				floatSize /= 1024;
 				label = "MB";
-				if (floatSize > 1024)
+				if (floatSize >= 1024)
 				{
 					floatSize /= 1024;
 					label = "GB";

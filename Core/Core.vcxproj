@@ -206,6 +206,7 @@
     <ClInclude Include="Message.hpp" />
     <ClInclude Include="MTMessageQueue.hpp" />
     <ClInclude Include="Result.hpp" />
+    <ClInclude Include="SpinLock.hpp" />
     <ClInclude Include="TypeIdentifiable.hpp" />
     <ClInclude Include="NameOfType.hpp" />
     <ClInclude Include="_ErrorCodes.hpp" />
@@ -224,6 +225,7 @@
     <ClCompile Include="MemoryStreamFile.cpp" />
     <ClCompile Include="HashFuncs.cpp" />
     <ClCompile Include="MatrixMathTypes.cpp" />
+    <ClCompile Include="SpinLock.cpp" />
     <ClCompile Include="StdCoreLib.cpp" />
     <ClCompile Include="_PreHeader.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

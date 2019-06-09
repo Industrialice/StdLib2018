@@ -116,6 +116,9 @@
     <ClInclude Include="_CoreInitialization.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SpinLock.hpp">
+      <Filter>MT Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StdCoreLib.cpp">
@@ -134,6 +137,9 @@
       <Filter>MT Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MemoryStreamFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SpinLock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

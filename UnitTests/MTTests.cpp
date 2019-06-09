@@ -4,7 +4,7 @@ using namespace StdLib;
 using std::nullopt;
 using Funcs::Reinitialize;
 
-static void SpinLockTests()
+static void DIWRSpinLockTests()
 {
 	DIWRSpinLock spin;
 	auto attemptReadLocks = [&spin](uiw count, bool expectToSucceed)
@@ -92,6 +92,19 @@ static void SpinLockTests()
 	testForExclusive();
 
 	lock.Unlock();
+}
+
+static void SpinLockTests()
+{
+	SpinLock spinLock;
+
+	auto unlocker = spinLock.Lock();
+	auto unlocker2 = spinLock.TryLock();
+	UTest(Equal, unlocker2, nullopt);
+	unlocker.Unlock();
+	auto unlocker3 = spinLock.TryLock();
+	UTest(NotEqual, unlocker3, nullopt);
+	unlocker3->Unlock();
 }
 
 struct MessageQueueTestStruct
@@ -182,6 +195,7 @@ static void MessageQueueTests()
 
 void MTTests()
 {
+	DIWRSpinLockTests();
 	SpinLockTests();
 	MessageQueueTests();
 

@@ -68,6 +68,8 @@ namespace StdLib
         FromEnd
     };
 
+	// a very generic abstraction that can be used with any data structure, but it might be less
+	// efficient than less generic abstractions like IMemoryStream
     struct NOVTABLE IFile
     {
         using bufferType = std::unique_ptr<std::byte, void(*)(std::byte *)>;

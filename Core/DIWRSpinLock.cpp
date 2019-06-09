@@ -8,13 +8,13 @@ using namespace StdLib;
 
 DIWRSpinLock::DIWRSpinLock(DIWRSpinLock &&source) noexcept
 {
-    ASSUME(source._users.load() == 0);
+    ASSUME(source._users.load() == 0 && _users.load() == 0); // can't move while locked
 }
 
 DIWRSpinLock &DIWRSpinLock::operator = (DIWRSpinLock &&source) noexcept
 {
     ASSUME(this != &source);
-    ASSUME(source._users.load() == 0);
+    ASSUME(source._users.load() == 0); // can't move while locked
     _users.store(0);
     return *this;
 }

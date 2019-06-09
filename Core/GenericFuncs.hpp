@@ -339,7 +339,7 @@ namespace StdLib::Funcs
 	{
 		ASSUME(value && alignment);
 		ASSUME(IsPowerOf2(alignment));
-		if (value % alignment)
+		if (value & (alignment - 1))
 		{
 			value += alignment;
 			value &= ~(alignment - 1);

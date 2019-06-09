@@ -22,7 +22,7 @@ namespace StdLib
         static constexpr atomicType PendingExclusiveMask = 0x3FFF'0000;
         static constexpr atomicType ReadersMask = 0xFFFF;
 
-        mutable std::atomic<atomicType> _users{0};
+		alignas(64) mutable std::atomic<atomicType> _users{0};
 
     public:
         enum class LockType { Read, Exclusive, Inclusive };
