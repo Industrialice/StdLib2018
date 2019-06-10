@@ -140,7 +140,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SpinLock.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>MT Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
