@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Message.hpp"
+#include "SpinLock.hpp"
 
 namespace StdLib
 {
@@ -15,8 +16,8 @@ namespace StdLib
 		using Message = MessageBase<MessageWithNext>;
 
 		Message *_firstMessage{}, *_lastMessage{};
-        std::mutex _mutex{};
-        std::condition_variable _newWorkNotifier{};
+        SpinLock _mutex{};
+        std::condition_variable_any _newWorkNotifier{};
 
     public:
         template <auto Method, typename Caller, typename = std::enable_if_t<std::is_member_function_pointer_v<decltype(Method)>>, typename... VArgs> void Add(Caller &&caller, VArgs &&... args)
