@@ -26,6 +26,7 @@
     #define PRINTF_VERIFY_BACK(...)
 	#define DEPRECATE(foo, msg) __declspec(deprecated(msg)) foo
 	#define PRETTY_FUNCTION __FUNCTION__
+	#define RETURNS_NONNULL
 
 	#define WARNING_PUSH __pragma(warning(push)) 
 	#define WARNING_POP __pragma(warning(pop)) 
@@ -107,6 +108,7 @@
     #define PRINTF_VERIFY_BACK(stringIndex, argumentIndex) __attribute__((format(printf, stringIndex, argumentIndex))) /* when counting arguments, the first argument has index 1, you should also account for this argument */
 	#define DEPRECATE(foo, msg) foo __attribute__((deprecated(msg)))
 	#define PRETTY_FUNCTION __PRETTY_FUNCTION__
+	#define RETURNS_NONNULL __attribute__((returns_nonnull))
 
 	#ifdef __clang__
 		#define WARNING_PUSH _Pragma("clang diagnostic push")
