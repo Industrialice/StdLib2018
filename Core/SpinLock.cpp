@@ -40,7 +40,7 @@ void SpinLock::lock() const
 	for (;;)
 	{
 		atomicType oldLock = 0;
-		if (_users.compare_exchange_weak(oldLock, 1))
+		if (_users.compare_exchange_weak(oldLock, 1, std::memory_order_acquire))
 		{
 			break;
 		}
@@ -50,13 +50,13 @@ void SpinLock::lock() const
 bool SpinLock::try_lock() const
 {
 	atomicType oldLock = 0;
-	return _users.compare_exchange_strong(oldLock, 1);
+	return _users.compare_exchange_strong(oldLock, 1, std::memory_order_acquire);
 }
 
 void SpinLock::unlock() const
 {
 	ASSUME(_users.load() == 1);
-	_users.store(0);
+	_users.store(0, std::memory_order_release);
 }
 
 SpinLock::Unlocker::Unlocker(const SpinLock &lock) noexcept : _lock(&lock)
