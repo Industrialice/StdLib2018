@@ -53,6 +53,8 @@ namespace StdLib
     {
         using std::atomic<T>::atomic;
 
+		static_assert(std::atomic<T>::is_always_lock_free);
+
         MovableAtomic(MovableAtomic &&source) noexcept
         {
             this->store(source.load());
