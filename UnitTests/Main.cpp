@@ -1647,9 +1647,9 @@ static void PrintSystemInfo()
 		UnitTestsLogger::Message("      Line size %u\n", info.lineSize);
 		UnitTestsLogger::Message("      Associativity %u\n", info.associativity);
 		UnitTestsLogger::Message("      Size %s\n", sizeToString(info.size).c_str());
-		if (info.isPerCore.has_value())
+		if (info.count)
 		{
-			UnitTestsLogger::Message("      Per core %s\n", *info.isPerCore ? "true" : "false");
+			UnitTestsLogger::Message("      Count %u\n", info.count);
 		}
 	}
 	UnitTestsLogger::Message("  Overcommit OS %s\n", VirtualMemory::IsOvercommitOS() ? "true" : "false");

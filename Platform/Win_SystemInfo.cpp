@@ -124,7 +124,7 @@ namespace StdLib::SystemInfo
 				info.level = source.Level;
 				info.lineSize = source.LineSize;
 				info.size = source.Size;
-				info.isPerCore = false;
+				info.count = 1;
 
 				bool isFound = false;
 				for (auto &stored : CacheInfos)
@@ -136,7 +136,8 @@ namespace StdLib::SystemInfo
 						stored.type == info.type)
 					{
 						isFound = true;
-						stored.isPerCore = true;
+						++stored.count;
+						break;
 					}
 				}
 				if (!isFound)

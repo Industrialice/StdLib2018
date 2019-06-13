@@ -24,7 +24,7 @@ namespace StdLib::SystemInfo
 		ui32 associativity{};
 		uiw size{}; // in bytes
 		Type type{};
-		std::optional<bool> isPerCore{}; // not available on POSIX
+		ui32 count{}; // always 0 on POSIX
 	};
 
 	[[nodiscard]] Arch CPUArchitecture();
