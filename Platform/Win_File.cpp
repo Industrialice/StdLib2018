@@ -57,6 +57,11 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::Fi
             return DefaultError::InvalidArgument("'offset' can't be more than 0 when OpenMode::CreateAlways or OpenMode::CreateNew is used");
         }
 
+		if (!procMode.Contains(FileProcModes::Write))
+		{
+			return DefaultError::InvalidArgument("FileProcModes::Write must be specified with OpenMode::CreateAlways and OpenMode::CreateNew modes");
+		}
+
         if (openMode == FileOpenMode::CreateAlways)
         {
             dwCreationDisposition = CREATE_ALWAYS;

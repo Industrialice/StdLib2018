@@ -14,7 +14,8 @@ namespace StdLib::FileSystem
 		static constexpr struct EnumerateOption : EnumCombinable<EnumerateOption, ui8>
 		{} Recursive = EnumerateOption::Create(1 << 0),
 			ReportFiles = EnumerateOption::Create(1 << 1),
-			ReportFolders = EnumerateOption::Create(1 << 2);
+			ReportFolders = EnumerateOption::Create(1 << 2),
+			FollowSymbolicLinks = EnumerateOption::Create(1 << 3);
 	};
 
     // use move functions if you want to rename the file

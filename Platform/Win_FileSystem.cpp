@@ -310,6 +310,12 @@ static Error<> EnumerateInternal(const FilePath &path, const std::function<void(
 			continue;
 		}
 
+		bool isSymLink = (data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) && (data.dwReserved0 == IO_REPARSE_TAG_SYMLINK);
+		if (isSymLink && !options.Contains(EnumerateOptions::FollowSymbolicLinks))
+		{
+			continue;
+		}
+
 		if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 		{
 			if (options.Contains(EnumerateOptions::ReportFolders))

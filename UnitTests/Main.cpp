@@ -1227,15 +1227,15 @@ static void TestFileSystem(const FilePath &folderForTests)
 	FilePath folder0 = rootSearch / TSTR("Folder0");
 	UTest(false, FileSystem::CreateFolder(rootSearch, TSTR("Folder1"), true));
 	FilePath folder1 = rootSearch / TSTR("Folder1");
-	File file = File(rootSearch / TSTR("rootFile.txt"), FileOpenMode::CreateAlways, FileProcModes::Read);
+	File file = File(rootSearch / TSTR("rootFile.txt"), FileOpenMode::CreateAlways, FileProcModes::Write);
 	UTest(true, file.IsOpen());
-	file = File(folder0 / TSTR("folder0File.txt"), FileOpenMode::CreateAlways, FileProcModes::Read);
+	file = File(folder0 / TSTR("folder0File.txt"), FileOpenMode::CreateAlways, FileProcModes::Write);
 	UTest(true, file.IsOpen());
-	file = File(folder0 / TSTR("folder0File.bmp"), FileOpenMode::CreateAlways, FileProcModes::Read);
+	file = File(folder0 / TSTR("folder0File.bmp"), FileOpenMode::CreateAlways, FileProcModes::Write);
 	UTest(true, file.IsOpen());
-	file = File(folder1 / TSTR("folder1File.txt"), FileOpenMode::CreateAlways, FileProcModes::Read);
+	file = File(folder1 / TSTR("folder1File.txt"), FileOpenMode::CreateAlways, FileProcModes::Write);
 	UTest(true, file.IsOpen());
-	file = File(folder1 / TSTR("folder1File.bmp"), FileOpenMode::CreateAlways, FileProcModes::Read);
+	file = File(folder1 / TSTR("folder1File.bmp"), FileOpenMode::CreateAlways, FileProcModes::Write);
 	UTest(true, file.IsOpen());
 	file.Close();
 
@@ -1244,6 +1244,8 @@ static void TestFileSystem(const FilePath &folderForTests)
 	{
 		#ifdef PLATFORM_WINDOWS
 			enumResults.push_back(info.cFileName);
+        #else
+			enumResults.push_back(info.d_name);
 		#endif
 	};
 	auto contains = [&enumResults](pathStringView value)

@@ -291,6 +291,62 @@ Error<> FileSystem::CurrentWorkingPathSet(const FilePath &path)
     return DefaultError::Ok();
 }
 
+// assume that all regular files are also symbolic links
+Error<> FileSystem::Enumerate(const FilePath &path, const std::function<void(const FileEnumInfo &info)> &callback, EnumerateOptions::EnumerateOption options)
+{
+	if (options.Contains(EnumerateOptions::ReportFiles) == false && options.Contains(EnumerateOptions::ReportFolders) == false)
+	{
+		return DefaultError::InvalidArgument("Neither ReportFiles, nor ReportFolders is specified");
+	}
+
+	static_assert(sizeof(struct dirent) == sizeof(FileEnumInfo));
+
+	DIR *dir = opendir(path.PlatformPath().data());
+	if (dir == nullptr)
+	{
+		return PlatformErrorResolve("opendir failed");
+	}
+
+    struct dirent *data = readdir(dir);
+	if (data == nullptr)
+    {
+	    return PlatformErrorResolve("First readdir failed");
+    }
+
+	for (; data != nullptr; data = readdir(dir))
+    {
+        if (!strcmp(data->d_name, ".") || !strcmp(data->d_name, ".."))
+        {
+            continue;
+        }
+
+        if (data->d_type & DT_DIR)
+        {
+            if (options.Contains(EnumerateOptions::ReportFolders))
+            {
+                callback(reinterpret_cast<FileEnumInfo &>(*data));
+            }
+
+            if (options.Contains(EnumerateOptions::Recursive))
+            {
+                auto error = Enumerate(FilePath(path).AddLevel().Append(data->d_name), callback, options);
+                ASSUME(error != DefaultError::NotFound());
+            }
+        }
+        else if (data->d_type & DT_REG)
+        {
+            if (options.Contains(EnumerateOptions::ReportFiles))
+            {
+                callback(reinterpret_cast<FileEnumInfo &>(*data));
+            }
+        }
+    }
+
+    closedir(dir);
+
+	return DefaultError::Ok();
+}
+
 Error<> RemoveFileInternal(const char *pnn)
 {
     if (unlink(pnn) != 0)

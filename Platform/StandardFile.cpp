@@ -81,22 +81,33 @@ Error<> StandardFile::Open(const FilePath &path, FileOpenMode openMode, FileProc
             return DefaultError::NotFound();
         }
     }
+	else if (openMode == FileOpenMode::CreateNew || openMode == FileOpenMode::CreateAlways)
+	{
+		if (offset > 0)
+		{
+			return DefaultError::InvalidArgument("'offset' can't be more than 0 when OpenMode::CreateAlways or OpenMode::CreateNew is used");
+		}
 
-    if (openMode == FileOpenMode::CreateNew)
-    {
-        if (isFileFound)
-        {
-            return DefaultError::AlreadyExists();
-        }
-    }
+		if (!procMode.Contains(FileProcModes::Write))
+		{
+			return DefaultError::InvalidArgument("FileProcModes::Write must be specified with OpenMode::CreateAlways and OpenMode::CreateNew modes");
+		}
 
-    if (openMode == FileOpenMode::CreateAlways)
-    {
-        if (!procMode.Contains(FileProcModes::Write))
-        {
-            return DefaultError::InvalidArgument("FileOpenMode::CreateAlways cannot be used without FileProcModes::Write");
-        }
-    }
+		if (openMode == FileOpenMode::CreateNew)
+		{
+			if (isFileFound)
+			{
+				return DefaultError::AlreadyExists();
+			}
+		}
+		else if (openMode == FileOpenMode::CreateAlways)
+		{
+			if (!procMode.Contains(FileProcModes::Write))
+			{
+				return DefaultError::InvalidArgument("FileOpenMode::CreateAlways cannot be used without FileProcModes::Write");
+			}
+		}
+	}
 
 	bool isDisableReadCache = cacheMode.Contains(FileCacheModes::DisableSystemReadCache);
 	bool isDisableWriteCache = cacheMode.Contains(FileCacheModes::DisableSystemWriteCache);

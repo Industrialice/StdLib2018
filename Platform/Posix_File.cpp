@@ -46,6 +46,11 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::Fi
             return DefaultError::InvalidArgument("'offset' can't be more than 0 when OpenMode::CreateAlways or OpenMode::CreateNew is used");
         }
 
+		if (!procMode.Contains(FileProcModes::Write))
+		{
+			return DefaultError::InvalidArgument("FileProcModes::Write must be specified with OpenMode::CreateAlways and OpenMode::CreateNew modes");
+		}
+
         if (openMode == FileOpenMode::CreateAlways)
         {
             if (!procMode.Contains(FileProcModes::Write)) // we need to truncate file, but we can't do it if we can't write to it, so we just remove it

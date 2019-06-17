@@ -47,7 +47,14 @@ namespace StdLib
 	#define PTHSTR "%ls"
 	#define TSTR(str) L##str
 #else
-	using FileEnumInfo = struct dirent;
+    struct FileEnumInfo
+    {
+        uiw d_ino;
+        i64 d_off;
+        unsigned short d_reclen;
+        unsigned char d_type;
+        char d_name[256];
+    };
 	using ConsoleHandle = int;
 	static constexpr ConsoleHandle ConsoleHandle_undefined = -1;
     using FileHandle = int;
