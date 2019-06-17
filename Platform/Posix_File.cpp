@@ -159,7 +159,7 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::Fi
     return DefaultError::Ok();
 }
 
-Error<> File::Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset)
+Error<> File::Open(FileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset)
 {
     NOIMPL;
     return DefaultError::NotImplemented();

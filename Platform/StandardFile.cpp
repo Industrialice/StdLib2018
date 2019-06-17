@@ -122,7 +122,7 @@ Error<> StandardFile::Open(const FilePath &path, FileOpenMode openMode, FileProc
 		return DefaultError::InvalidArgument("Cache mode contains settings for write, but FileProcModes::Write is not requested");
 	}
 
-    const pathChar *procModeStr;
+    const PathChar *procModeStr;
 
     if (offset)
     {

@@ -16,7 +16,7 @@ namespace StdLib
         uiw _offset;
         bool _isWritable;
     #ifdef PLATFORM_WINDOWS
-        fileHandle _mappingHandle;
+        FileHandle _mappingHandle;
     #else
         uiw _systemMappingSize;
     #endif

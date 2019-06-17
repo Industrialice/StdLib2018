@@ -26,8 +26,8 @@ namespace StdLib
 		};
 
 	private:
-		consoleHandle _outputHandle = consoleHandle_undefined;
-		consoleHandle _inputHandle = consoleHandle_undefined;
+		ConsoleHandle _outputHandle = ConsoleHandle_undefined;
+		ConsoleHandle _inputHandle = ConsoleHandle_undefined;
 		bool _isAttached{};
 
 	public:

@@ -14,7 +14,7 @@ File::File(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMo
     if (error) *error = tempError;
 }
 
-File::File(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset, Error<> *error)
+File::File(FileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset, Error<> *error)
 {
     Error<> tempError = File::Open(osFileDescriptor, isGettingFileDescriptorOwnership, offset);
     if (error) *error = tempError;
@@ -23,7 +23,7 @@ File::File(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, u
 File::File(File &&other) noexcept
 {
     _handle = other._handle;
-    other._handle = fileHandle_undefined;
+    other._handle = FileHandle_undefined;
     _internalBuffer = std::move(other._internalBuffer);
     _bufferSize = other._bufferSize;
     _bufferPos = other._bufferPos;
@@ -46,7 +46,7 @@ File &File::operator = (File &&other) noexcept
     File::Close();
 
     _handle = other._handle;
-    other._handle = fileHandle_undefined;
+    other._handle = FileHandle_undefined;
     _internalBuffer = std::move(other._internalBuffer);
     _bufferSize = other._bufferSize;
     _bufferPos = other._bufferPos;
@@ -86,17 +86,17 @@ FileOpenMode File::OpenMode() const
     return _openMode;
 }
 
-fileHandle File::OsFileDescriptor() const
+FileHandle File::OsFileDescriptor() const
 {
     ASSUME(IsOpen());
     return _handle;
 }
 
-fileHandle File::CloseAndGetOsFileDescriptor()
+FileHandle File::CloseAndGetOsFileDescriptor()
 {
     ASSUME(IsOpen());
     _isOwningFileHandle = false;
-    fileHandle handle = _handle;
+    FileHandle handle = _handle;
     File::Close();
     return handle;
 }
@@ -113,7 +113,7 @@ TypeId File::Type() const
 
 bool File::IsOpen() const
 {
-    return _handle != fileHandle_undefined;
+    return _handle != FileHandle_undefined;
 }
 
 NOINLINE bool File::Read(void *RSTR target, ui32 len, ui32 *RSTR read)

@@ -3,6 +3,7 @@
 #include "PlatformErrorResolve.hpp"
 
 using namespace StdLib;
+using FileSystem::EnumerateOptions;
 
 static Error<> RemoveFileInternal(const wchar_t *pnn);
 static Error<> RemoveFolderInternal(const wchar_t *pnn);
@@ -231,7 +232,7 @@ NOINLINE Error<> FileSystem::IsReadOnly(const FilePath &pnn, bool isReadOnly)
     return DefaultError::Ok();
 }
 
-NOINLINE Error<> FileSystem::CreateNewFolder(const FilePath &where, const FilePath &name, bool isOverrideExisting)
+NOINLINE Error<> FileSystem::CreateFolder(const FilePath &where, const FilePath &name, bool isOverrideExisting)
 {
     FilePath fullPath = where;
     fullPath.AddLevel();
@@ -289,6 +290,64 @@ Error<> FileSystem::CurrentWorkingPathSet(const FilePath &path)
         return DefaultError::UnknownError("SetCurrentDirectoryW failed");
     }
     return DefaultError::Ok();
+}
+
+static Error<> EnumerateInternal(const FilePath &path, const std::function<void(const FileEnumInfo &info)> &callback, const FilePath &mask, EnumerateOptions::EnumerateOption options, WIN32_FIND_DATAW &data)
+{
+	FilePath pathToSearch = path;
+	pathToSearch.AddLevel().Append(mask);
+
+	HANDLE search = FindFirstFileW(pathToSearch.PlatformPath().data(), &data);
+	if (search == INVALID_HANDLE_VALUE)
+	{
+		return PlatformErrorResolve("FindFirstFile failed");
+	}
+
+	do
+	{
+		if (!wcscmp(data.cFileName, L".") || !wcscmp(data.cFileName, L".."))
+		{
+			continue;
+		}
+
+		if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		{
+			if (options.Contains(EnumerateOptions::ReportFolders))
+			{
+				callback(reinterpret_cast<FileEnumInfo &>(data));
+			}
+
+			if (options.Contains(EnumerateOptions::Recursive))
+			{
+				auto error = EnumerateInternal(FilePath(path).AddLevel().Append(data.cFileName), callback, mask, options, data);
+				ASSUME(error != DefaultError::NotFound());
+			}
+		}
+		else
+		{
+			if (options.Contains(EnumerateOptions::ReportFiles))
+			{
+				callback(reinterpret_cast<FileEnumInfo &>(data));
+			}
+		}
+	} while (FindNextFileW(search, &data) == TRUE);
+
+	BOOL result = FindClose(search);
+	ASSUME(result);
+
+	return DefaultError::Ok();
+}
+
+Error<> FileSystem::Enumerate(const FilePath &path, const std::function<void(const FileEnumInfo &info)> &callback, const FilePath &mask, EnumerateOptions::EnumerateOption options)
+{
+	if (options.Contains(EnumerateOptions::ReportFiles.Combined(EnumerateOptions::ReportFolders)) == false)
+	{
+		return DefaultError::InvalidArgument("Neither ReportFiles, nor ReportFolders is specified");
+	}
+
+	static_assert(sizeof(WIN32_FIND_DATAW) == sizeof(FileEnumInfo));
+	WIN32_FIND_DATAW data;
+	return EnumerateInternal(path, callback, mask.IsEmpty() ? FilePath(L'*') : mask, options, data);
 }
 
 Error<> RemoveFileInternal(const wchar_t *pnn)

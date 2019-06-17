@@ -1188,15 +1188,15 @@ template <typename T> static void TestFileSharing(const FilePath &folderForTests
 
 static void TestFileSystem(const FilePath &folderForTests)
 {
-    UTest(false, FileSystem::CreateNewFolder(folderForTests, TSTR("folder"), true));
-    UTest(true, FileSystem::CreateNewFolder(folderForTests, TSTR("folder"), false));
+    UTest(false, FileSystem::CreateFolder(folderForTests, TSTR("folder"), true));
+    UTest(true, FileSystem::CreateFolder(folderForTests, TSTR("folder"), false));
     FilePath dirTestPath = folderForTests / TSTR("folder");
     UTest(Equal, FileSystem::Classify(dirTestPath).Unwrap(), FileSystem::ObjectType::Folder);
     UTest(NotEqual, FileSystem::Classify(dirTestPath).Unwrap(), FileSystem::ObjectType::File);
     UTest(true, FileSystem::IsFolderEmpty(dirTestPath).Unwrap());
     UTest(false, FileSystem::Remove(dirTestPath));
 
-    UTest(false, FileSystem::CreateNewFolder(dirTestPath, {}, false)); // for some reason creating this folder will make folderForTests NotFound
+    UTest(false, FileSystem::CreateFolder(dirTestPath, {}, false)); // for some reason creating this folder will make folderForTests NotFound
     UTest(Equal, FileSystem::IsFolderEmpty(dirTestPath).Unwrap(), true);
     Error<> fileError = DefaultError::Ok();
     FilePath tempFilePath = dirTestPath / TSTR("tempFile.txt");
@@ -1220,6 +1220,47 @@ static void TestFileSystem(const FilePath &folderForTests)
     UTest(Equal, FileSystem::IsReadOnly(tempFileRenamedPath).Unwrap(), true);
     UTest(false, FileSystem::IsReadOnly(tempFileRenamedPath, false));
     UTest(Equal, FileSystem::IsReadOnly(tempFileRenamedPath).Unwrap(), false);
+
+	UTest(false, FileSystem::CreateFolder(folderForTests, TSTR("SearchTests"), true));
+	FilePath rootSearch = folderForTests / TSTR("SearchTests");
+	UTest(false, FileSystem::CreateFolder(rootSearch, TSTR("Folder0"), true));
+	FilePath folder0 = rootSearch / TSTR("Folder0");
+	UTest(false, FileSystem::CreateFolder(rootSearch, TSTR("Folder1"), true));
+	FilePath folder1 = rootSearch / TSTR("Folder1");
+	File file = File(rootSearch / TSTR("rootFile.txt"), FileOpenMode::CreateAlways, FileProcModes::Read);
+	UTest(true, file.IsOpen());
+	file = File(folder0 / TSTR("folder0File.txt"), FileOpenMode::CreateAlways, FileProcModes::Read);
+	UTest(true, file.IsOpen());
+	file = File(folder0 / TSTR("folder0File.bmp"), FileOpenMode::CreateAlways, FileProcModes::Read);
+	UTest(true, file.IsOpen());
+	file = File(folder1 / TSTR("folder1File.txt"), FileOpenMode::CreateAlways, FileProcModes::Read);
+	UTest(true, file.IsOpen());
+	file = File(folder1 / TSTR("folder1File.bmp"), FileOpenMode::CreateAlways, FileProcModes::Read);
+	UTest(true, file.IsOpen());
+	file.Close();
+
+	std::vector<pathString> enumResults;
+	auto enumCallback = [&enumResults](const FileEnumInfo &info)
+	{
+		#ifdef PLATFORM_WINDOWS
+			enumResults.push_back(info.cFileName);
+		#endif
+	};
+	auto contains = [&enumResults](pathStringView value)
+	{
+		return std::find_if(enumResults.begin(), enumResults.end(), [value](const pathString &str) { return str == value; }) != enumResults.end();
+	};
+
+	auto enumError = FileSystem::Enumerate(rootSearch, enumCallback);
+	UTest(true, enumError.IsOk());
+	UTest(Equal, enumResults.size(), 7u);
+	UTest(true, contains(TSTR("Folder0")));
+	UTest(true, contains(TSTR("Folder1")));
+	UTest(true, contains(TSTR("rootFile.txt")));
+	UTest(true, contains(TSTR("folder0File.txt")));
+	UTest(true, contains(TSTR("folder1File.txt")));
+	UTest(true, contains(TSTR("folder0File.bmp")));
+	UTest(true, contains(TSTR("folder1File.bmp")));
 
     UnitTestsLogger::Message("finished filesystem tests\n");
 }
@@ -1734,7 +1775,7 @@ static void DoTests(int argc, char **argv)
     }
 
     FilePath folderForTests = FilePath::FromChar(filesTestFolder);
-    UTest(false, FileSystem::CreateNewFolder(folderForTests, {}, true));
+    UTest(false, FileSystem::CreateFolder(folderForTests, {}, true));
 
     MiscTests();
 	MemOpsTests();

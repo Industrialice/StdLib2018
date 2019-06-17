@@ -13,41 +13,60 @@ namespace StdLib
     using string_utf32 = std::basic_string<utf32char>;
 
 #ifdef PLATFORM_WINDOWS
-	using consoleHandle = void *;
-	static const consoleHandle consoleHandle_undefined = (void *)-1;
-    using fileHandle = void *;
-    static const fileHandle fileHandle_undefined = (void *)-1;
-    using pathChar = wchar_t;
-    constexpr bool IsPathDelim(pathChar ch)
+	struct PlatformFileTime
+	{
+		ui32 dwLowDateTime;
+		ui32 dwHighDateTime;
+	};
+	struct FileEnumInfo
+	{
+		ui32 dwFileAttributes;
+		PlatformFileTime ftCreationTime;
+		PlatformFileTime ftLastAccessTime;
+		PlatformFileTime ftLastWriteTime;
+		ui32 nFileSizeHigh;
+		ui32 nFileSizeLow;
+		ui32 dwReserved0;
+		ui32 dwReserved1;
+		wchar_t cFileName[260];
+		wchar_t cAlternateFileName[14];
+	};
+	using ConsoleHandle = void *;
+	static const ConsoleHandle ConsoleHandle_undefined = (void *)-1;
+    using FileHandle = void *;
+    static const FileHandle FileHandle_undefined = (void *)-1;
+    using PathChar = wchar_t;
+    constexpr bool IsPathDelim(PathChar ch)
     {
         return ch == L'\\' || ch == L'/';
     }
-    constexpr bool IsValidPathDelim(pathChar ch)
+    constexpr bool IsValidPathDelim(PathChar ch)
     {
         return IsPathDelim(ch);
     }
-#define PTHSTR "%ls"
-#define TSTR(str) L##str
+	#define PTHSTR "%ls"
+	#define TSTR(str) L##str
 #else
-	using consoleHandle = int;
-	static constexpr consoleHandle consoleHandle_undefined = -1;
-    using fileHandle = int;
-    static constexpr fileHandle fileHandle_undefined = -1;
-    using pathChar = char;
-    constexpr bool IsPathDelim(pathChar ch)
+	using FileEnumInfo = struct dirent;
+	using ConsoleHandle = int;
+	static constexpr ConsoleHandle ConsoleHandle_undefined = -1;
+    using FileHandle = int;
+    static constexpr FileHandle FileHandle_undefined = -1;
+    using PathChar = char;
+    constexpr bool IsPathDelim(PathChar ch)
     {
         return ch == '\\' || ch == '/';
     }
-    constexpr bool IsValidPathDelim(pathChar ch)
+    constexpr bool IsValidPathDelim(PathChar ch)
     {
         return ch == '/';
     }
-#define PTHSTR "%s"
-#define TSTR(str) str
+	#define PTHSTR "%s"
+	#define TSTR(str) str
 #endif
 
-    using pathString = std::basic_string<pathChar>;
-    using pathStringView = std::basic_string_view<pathChar>;
+    using pathString = std::basic_string<PathChar>;
+    using pathStringView = std::basic_string_view<PathChar>;
 
     constexpr utf32char UTF32SentinelChar = utf32char(0xFFFFFFFF);
 }

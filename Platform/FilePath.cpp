@@ -21,6 +21,11 @@ FilePath FilePath::FromChar(const char *path)
     return FromChar(std::string_view{path});
 }
 
+FilePath FilePath::FromChar(char ch)
+{
+	return FromChar(std::string_view(&ch, 1));
+}
+
 FilePath FilePath::FromChar(const std::string &path)
 {
     return FromChar(std::string_view{path});
@@ -37,7 +42,7 @@ FilePath &FilePath::Normalize()
     uiw target = 0;
     for (uiw source = 0; _path[source]; ++source)
     {
-        pathChar ch = _path[source];
+        PathChar ch = _path[source];
         if (IsPathDelim(ch))
         {
             if (!isPrevDelim)
@@ -139,7 +144,7 @@ FilePath &FilePath::Normalize()
     uiw target = 0;
     for (uiw source = 0; _path[source]; ++source)
     {
-        pathChar ch = _path[source];
+        PathChar ch = _path[source];
         if (IsPathDelim(ch))
         {
             if (!isPrevDelim)
@@ -171,7 +176,7 @@ bool FilePath::IsValid() const
         return false;
     }
 
-    for (pathChar ch : _path)
+    for (PathChar ch : _path)
     {
         if (IsPathDelim(ch))
         {

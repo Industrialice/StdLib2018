@@ -34,7 +34,7 @@ namespace StdLib
     #endif
 
     private:
-        fileHandle _handle = fileHandle_undefined;
+        FileHandle _handle = FileHandle_undefined;
     #ifdef STDLIB_ENABLE_FILE_STATS
         FileStats _stats{};
     #endif
@@ -56,13 +56,13 @@ namespace StdLib
         ~File();
         File() = default;
         File(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, FileShareModes::FileShareMode shareMode = FileShareModes::None, Error<> *error = nullptr);
-        File(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset = 0, Error<> *error = nullptr);
+        File(FileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset = 0, Error<> *error = nullptr);
 
         File(File &&other) noexcept;
         File &operator = (File &&other) noexcept;
 
         [[nodiscard]] Error<> Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, FileShareModes::FileShareMode shareMode = FileShareModes::None);
-        [[nodiscard]] Error<> Open(fileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset = 0);
+        [[nodiscard]] Error<> Open(FileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset = 0);
 
     #ifdef STDLIB_ENABLE_FILE_STATS
 		[[must_be_open]] [[nodiscard]] FileStats StatsGet() const;
@@ -73,9 +73,9 @@ namespace StdLib
 
 		[[must_be_open]] [[nodiscard]] Result<FilePath> PNN() const;
 
-		[[must_be_open]] [[nodiscard]] fileHandle OsFileDescriptor() const;
+		[[must_be_open]] [[nodiscard]] FileHandle OsFileDescriptor() const;
 
-		[[must_be_open]] [[nodiscard]] fileHandle CloseAndGetOsFileDescriptor();
+		[[must_be_open]] [[nodiscard]] FileHandle CloseAndGetOsFileDescriptor();
 
 		[[must_be_open]] bool FlushInternal(); // flushes only internal buffers, doesn't flush system caches
 

@@ -9,6 +9,14 @@ namespace StdLib::FileSystem
         File, Folder
     };
 
+	struct EnumerateOptions
+	{
+		static constexpr struct EnumerateOption : EnumCombinable<EnumerateOption, ui8>
+		{} Recursive = EnumerateOption::Create(1 << 0),
+			ReportFiles = EnumerateOption::Create(1 << 1),
+			ReportFolders = EnumerateOption::Create(1 << 2);
+	};
+
     // use move functions if you want to rename the file
 	[[nodiscard]] Result<ObjectType> Classify(const FilePath &sourcePnn); // use it to also check existence, if it doesn't exist, the result will be NotFound
 	Error<> MoveTo(const FilePath &sourcePnn, const FilePath &targetPnn, bool isReplace); // if moving across volumes, source removing is not guaranteed
@@ -19,7 +27,8 @@ namespace StdLib::FileSystem
 	[[nodiscard]] Result<bool> IsFolderEmpty(const FilePath &pnn);
 	[[nodiscard]] Result<bool> IsReadOnly(const FilePath &pnn);
 	Error<> IsReadOnly(const FilePath &pnn, bool isReadOnly);
-	Error<> CreateNewFolder(const FilePath &where, const FilePath &name, bool isOverrideExisting);
+	Error<> CreateFolder(const FilePath &where, const FilePath &name, bool isOverrideExisting);
 	[[nodiscard]] Result<FilePath> CurrentWorkingPathGet();
 	Error<> CurrentWorkingPathSet(const FilePath &path);
+	Error<> Enumerate(const FilePath &path, const std::function<void(const FileEnumInfo &info)> &callback, const FilePath &mask = {}, EnumerateOptions::EnumerateOption options = EnumerateOptions::Recursive.Combined(EnumerateOptions::ReportFiles).Combined(EnumerateOptions::ReportFolders));
 }

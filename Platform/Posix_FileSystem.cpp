@@ -220,7 +220,7 @@ Error<> FileSystem::IsReadOnly(const FilePath &pnn, bool isReadOnly)
     return DefaultError::Ok();
 }
 
-NOINLINE Error<> FileSystem::CreateNewFolder(const FilePath &where, const FilePath &name, bool isOverrideExisting)
+NOINLINE Error<> FileSystem::CreateFolder(const FilePath &where, const FilePath &name, bool isOverrideExisting)
 {
     FilePath fullPath = where;
     fullPath.AddLevel();

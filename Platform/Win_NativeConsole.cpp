@@ -72,17 +72,17 @@ NativeConsole::NativeConsole(bool isAttachToExisting, Error<> *error)
 NativeConsole::NativeConsole(NativeConsole &&source) noexcept : _inputHandle(source._inputHandle), _outputHandle(source._outputHandle), _isAttached(source._isAttached)
 {
 	ASSUME(this != &source);
-	source._inputHandle = consoleHandle_undefined;
-	source._outputHandle = consoleHandle_undefined;
+	source._inputHandle = ConsoleHandle_undefined;
+	source._outputHandle = ConsoleHandle_undefined;
 }
 
 NativeConsole &NativeConsole::operator = (NativeConsole &&source) noexcept
 {
 	ASSUME(this != &source);
 	_inputHandle = source._inputHandle;
-	source._inputHandle = consoleHandle_undefined;
+	source._inputHandle = ConsoleHandle_undefined;
 	_outputHandle = source._outputHandle;
-	source._outputHandle = consoleHandle_undefined;
+	source._outputHandle = ConsoleHandle_undefined;
 	_isAttached = source._isAttached;
 	return *this;
 }
