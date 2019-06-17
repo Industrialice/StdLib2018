@@ -1261,6 +1261,32 @@ static void TestFileSystem(const FilePath &folderForTests)
 	UTest(true, contains(TSTR("folder1File.txt")));
 	UTest(true, contains(TSTR("folder0File.bmp")));
 	UTest(true, contains(TSTR("folder1File.bmp")));
+	enumResults.clear();
+
+	enumError = FileSystem::Enumerate(rootSearch, enumCallback, FileSystem::EnumerateOptions::Recursive.Combined(FileSystem::EnumerateOptions::ReportFolders));
+	UTest(true, enumError.IsOk());
+	UTest(Equal, enumResults.size(), 2u);
+	UTest(true, contains(TSTR("Folder0")));
+	UTest(true, contains(TSTR("Folder1")));
+	enumResults.clear();
+
+	enumError = FileSystem::Enumerate(rootSearch, enumCallback, FileSystem::EnumerateOptions::Recursive.Combined(FileSystem::EnumerateOptions::ReportFiles));
+	UTest(true, enumError.IsOk());
+	UTest(Equal, enumResults.size(), 5u);
+	UTest(true, contains(TSTR("rootFile.txt")));
+	UTest(true, contains(TSTR("folder0File.txt")));
+	UTest(true, contains(TSTR("folder1File.txt")));
+	UTest(true, contains(TSTR("folder0File.bmp")));
+	UTest(true, contains(TSTR("folder1File.bmp")));
+	enumResults.clear();
+
+	enumError = FileSystem::Enumerate(rootSearch, enumCallback, FileSystem::EnumerateOptions::ReportFolders.Combined(FileSystem::EnumerateOptions::ReportFiles));
+	UTest(true, enumError.IsOk());
+	UTest(Equal, enumResults.size(), 3u);
+	UTest(true, contains(TSTR("Folder0")));
+	UTest(true, contains(TSTR("Folder1")));
+	UTest(true, contains(TSTR("rootFile.txt")));
+	enumResults.clear();
 
     UnitTestsLogger::Message("finished filesystem tests\n");
 }

@@ -292,10 +292,10 @@ Error<> FileSystem::CurrentWorkingPathSet(const FilePath &path)
     return DefaultError::Ok();
 }
 
-static Error<> EnumerateInternal(const FilePath &path, const std::function<void(const FileEnumInfo &info)> &callback, const FilePath &mask, EnumerateOptions::EnumerateOption options, WIN32_FIND_DATAW &data)
+static Error<> EnumerateInternal(const FilePath &path, const std::function<void(const FileEnumInfo &info)> &callback, EnumerateOptions::EnumerateOption options, WIN32_FIND_DATAW &data)
 {
 	FilePath pathToSearch = path;
-	pathToSearch.AddLevel().Append(mask);
+	pathToSearch.AddLevel().Append(L'*');
 
 	HANDLE search = FindFirstFileW(pathToSearch.PlatformPath().data(), &data);
 	if (search == INVALID_HANDLE_VALUE)
@@ -319,7 +319,7 @@ static Error<> EnumerateInternal(const FilePath &path, const std::function<void(
 
 			if (options.Contains(EnumerateOptions::Recursive))
 			{
-				auto error = EnumerateInternal(FilePath(path).AddLevel().Append(data.cFileName), callback, mask, options, data);
+				auto error = EnumerateInternal(FilePath(path).AddLevel().Append(data.cFileName), callback, options, data);
 				ASSUME(error != DefaultError::NotFound());
 			}
 		}
@@ -338,16 +338,16 @@ static Error<> EnumerateInternal(const FilePath &path, const std::function<void(
 	return DefaultError::Ok();
 }
 
-Error<> FileSystem::Enumerate(const FilePath &path, const std::function<void(const FileEnumInfo &info)> &callback, const FilePath &mask, EnumerateOptions::EnumerateOption options)
+Error<> FileSystem::Enumerate(const FilePath &path, const std::function<void(const FileEnumInfo &info)> &callback, EnumerateOptions::EnumerateOption options)
 {
-	if (options.Contains(EnumerateOptions::ReportFiles.Combined(EnumerateOptions::ReportFolders)) == false)
+	if (options.Contains(EnumerateOptions::ReportFiles) == false && options.Contains(EnumerateOptions::ReportFolders) == false)
 	{
 		return DefaultError::InvalidArgument("Neither ReportFiles, nor ReportFolders is specified");
 	}
 
 	static_assert(sizeof(WIN32_FIND_DATAW) == sizeof(FileEnumInfo));
 	WIN32_FIND_DATAW data;
-	return EnumerateInternal(path, callback, mask.IsEmpty() ? FilePath(L'*') : mask, options, data);
+	return EnumerateInternal(path, callback, options, data);
 }
 
 Error<> RemoveFileInternal(const wchar_t *pnn)
