@@ -320,6 +320,14 @@ Error<> FileSystem::Enumerate(const FilePath &path, const std::function<void(con
             continue;
         }
 
+		if (options.Contains(EnumerateOptions::SkipHidden))
+		{
+			if (data->d_name[0] == '.')
+			{
+				continue;
+			}
+		}
+
         if (data->d_type & DT_DIR)
         {
             if (options.Contains(EnumerateOptions::ReportFolders))

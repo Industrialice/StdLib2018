@@ -15,7 +15,8 @@ namespace StdLib::FileSystem
 		{} Recursive = EnumerateOption::Create(1 << 0),
 			ReportFiles = EnumerateOption::Create(1 << 1),
 			ReportFolders = EnumerateOption::Create(1 << 2),
-			FollowSymbolicLinks = EnumerateOption::Create(1 << 3);
+			FollowSymbolicLinks = EnumerateOption::Create(1 << 3),
+			SkipHidden = EnumerateOption::Create(1 << 4);
 	};
 
     // use move functions if you want to rename the file
