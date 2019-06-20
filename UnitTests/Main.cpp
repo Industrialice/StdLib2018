@@ -1688,6 +1688,9 @@ static void PrintSystemInfo()
 	};
 
 	auto cacheInfo = SystemInfo::AcquireCacheInfo();
+	auto monitorsInfo = SystemInfo::MonitorsInfo();
+
+	UTest(LeftGreater, monitorsInfo.size(), 0u);
 
 	UnitTestsLogger::Message("System info:\n");
 	UnitTestsLogger::Message("  Logical CPU cores %u\n", SystemInfo::LogicalCPUCores());
@@ -1727,6 +1730,12 @@ static void PrintSystemInfo()
     UnitTestsLogger::Message("  Memory page size %u\n", static_cast<ui32>(VirtualMemory::PageSize()));
 	UnitTestsLogger::Message("  Peak working set %s\n", sizeToString(SystemInfo::PeakWorkingSet()).c_str());
 	UnitTestsLogger::Message("  Current working set %s\n", sizeToString(SystemInfo::WorkingSet()).c_str());
+	for (uiw index = 0; index < monitorsInfo.size(); ++index)
+	{
+		auto &info = monitorsInfo[index];
+		UnitTestsLogger::Message("  Monitor %zu x:%i y:%i %ix%i\n", index, info.x, info.y, info.width, info.height);
+	}
+
 	const char *arch = nullptr;
 	switch (SystemInfo::CPUArchitecture())
 	{

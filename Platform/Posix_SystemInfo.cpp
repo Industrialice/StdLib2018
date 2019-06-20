@@ -108,6 +108,11 @@ uiw SystemInfo::PeakWorkingSet()
 	#endif
 }
 
+auto SystemInfo::MonitorsInfo() -> std::vector<MonitorInfo>
+{
+	NOIMPL;
+}
+
 namespace StdLib::SystemInfo
 {
 	void Initialize()

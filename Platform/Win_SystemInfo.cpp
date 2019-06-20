@@ -72,6 +72,30 @@ uiw SystemInfo::PeakWorkingSet()
 	return info.PeakWorkingSetSize;
 }
 
+auto SystemInfo::MonitorsInfo() -> std::vector<MonitorInfo>
+{
+	std::vector<MonitorInfo> monitors;
+
+	auto enumDisplayCallback = [](HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) -> BOOL
+	{
+		std::vector<MonitorInfo> *monitors = reinterpret_cast<std::vector<MonitorInfo> *>(dwData);
+		if (lprcMonitor)
+		{
+			i32 x = lprcMonitor->left;
+			i32 y = lprcMonitor->top;
+			i32 width = lprcMonitor->right - lprcMonitor->left;
+			i32 height = lprcMonitor->bottom - lprcMonitor->top;
+			monitors->push_back({x, y, width, height});
+		}
+		return TRUE;
+	};
+
+	BOOL enumResult = EnumDisplayMonitors(NULL, NULL, enumDisplayCallback, reinterpret_cast<LPARAM>(&monitors));
+	ASSUME(enumResult == TRUE);
+
+	return monitors;
+}
+
 namespace StdLib::SystemInfo
 {
 	void Initialize()

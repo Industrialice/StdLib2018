@@ -27,6 +27,12 @@ namespace StdLib::SystemInfo
 		ui32 count{}; // always 0 on POSIX
 	};
 
+	struct MonitorInfo
+	{
+		i32 x, y;
+		i32 width, height;
+	};
+
 	[[nodiscard]] Arch CPUArchitecture();
 	[[nodiscard]] ui32 LogicalCPUCores();
 	[[nodiscard]] ui32 PhysicalCPUCores();
@@ -36,4 +42,5 @@ namespace StdLib::SystemInfo
 	[[nodiscard]] bool IsDebuggerAttached();
 	[[nodiscard]] uiw WorkingSet();
 	[[nodiscard]] uiw PeakWorkingSet();
+	[[nodiscard]] std::vector<MonitorInfo> MonitorsInfo();
 }
