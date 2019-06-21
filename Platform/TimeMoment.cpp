@@ -10,6 +10,11 @@ using namespace StdLib;
 TimeDifference::TimeDifference(i64 counter) : _counter(counter)
 {}
 
+TimeDifference TimeDifference::ToAbsolute() const
+{
+	return TimeDifference(abs(_counter));
+}
+
 TimeDifference TimeDifference::operator - (const TimeDifference &other) const
 {
     return TimeDifference{_counter - other._counter};
@@ -68,8 +73,10 @@ TimeDifference &TimeDifference::operator += (const TimeDifference &other)
 // TimeMoment //
 ////////////////
 
-TimeMoment::TimeMoment(i64 counter) : _counter(counter)
-{}
+namespace
+{
+	constexpr i64 EarliestCounter = i64_min + 1;
+}
 
 bool TimeMoment::HasValue() const
 {
@@ -79,32 +86,71 @@ bool TimeMoment::HasValue() const
 TimeDifference TimeMoment::operator - (const TimeMoment &other) const
 {
     ASSUME(HasValue() && other.HasValue());
-    return TimeDifference{_counter - other._counter};
+	i64 result;
+	if (_counter == EarliestCounter)
+	{
+		result = EarliestCounter;
+	}
+	else if (other._counter == EarliestCounter)
+	{
+		result = i64_max;
+	}
+	else
+	{
+		result = _counter - other._counter;
+	}
+    return TimeDifference{result};
 }
 
 TimeMoment TimeMoment::operator + (const TimeDifference &difference) const
 {
     ASSUME(HasValue());
-    return TimeMoment{_counter + difference._counter};
+	i64 result;
+	if (_counter == EarliestCounter)
+	{
+		result = EarliestCounter;
+	}
+	else if (difference._counter == EarliestCounter)
+	{
+		result = _counter;
+	}
+	else
+	{
+		result = _counter + difference._counter;
+	}
+    return TimeMoment{result};
 }
 
 TimeMoment &TimeMoment::operator += (const TimeDifference &difference)
 {
     ASSUME(HasValue());
-    _counter += difference._counter;
+	if (_counter != EarliestCounter && difference._counter != EarliestCounter)
+	{
+		_counter += difference._counter;
+	}
     return *this;
 }
 
 TimeMoment TimeMoment::operator - (const TimeDifference &difference) const
 {
     ASSUME(HasValue());
-    return TimeMoment{_counter - difference._counter};
+	if (_counter == EarliestCounter || difference._counter == EarliestCounter)
+	{
+		return *this;
+	}
+	else
+	{
+		return TimeMoment{_counter - difference._counter};
+	}
 }
 
 TimeMoment &TimeMoment::operator -= (const TimeDifference &difference)
 {
     ASSUME(HasValue());
-    _counter -= difference._counter;
+	if (_counter != EarliestCounter && difference._counter != EarliestCounter)
+	{
+		_counter -= difference._counter;
+	}
     return *this;
 }
 

@@ -19,6 +19,14 @@ namespace StdLib
 		}
 	};
 
+	struct TimeHoursFP64 : _TimeBase<TimeHoursFP64, f64>
+	{
+		using _TimeBase<TimeHoursFP64, f64>::_TimeBase;
+	};
+	struct TimeHoursI64 : _TimeBase<TimeHoursI64, i64>
+	{
+		using _TimeBase<TimeHoursI64, i64>::_TimeBase;
+	};
     struct TimeMinutesFP64 : _TimeBase<TimeMinutesFP64, f64>
     {
         using _TimeBase<TimeMinutesFP64, f64>::_TimeBase;
@@ -52,6 +60,14 @@ namespace StdLib
 		using _TimeBase<TimeMicroSecondsI64, i64>::_TimeBase;
 	};
 
+	constexpr inline TimeHoursFP64 operator "" _h(long double value)
+	{
+		return {static_cast<f64>(value)};
+	}
+	constexpr inline TimeHoursI64 operator "" _h(unsigned long long value)
+	{
+		return {static_cast<i64>(value)};
+	}
     constexpr inline TimeMinutesFP64 operator "" _m(long double value)
     {
         return {static_cast<f64>(value)};
@@ -95,6 +111,8 @@ namespace StdLib
 
     public:
         TimeDifference() = default;
+		TimeDifference(TimeHoursFP64 time);
+		TimeDifference(TimeHoursI64 time);
         TimeDifference(TimeMinutesFP64 time);
         TimeDifference(TimeMinutesI64 time);
 		TimeDifference(TimeSecondsFP64 time);
@@ -118,6 +136,8 @@ namespace StdLib
 		[[nodiscard]] f64 ToUSec_f64() const;
 		[[nodiscard]] i32 ToUSec_i32() const;
 		[[nodiscard]] i64 ToUSec_i64() const;
+
+		[[nodiscard]] TimeDifference ToAbsolute() const; // -1_s will become 1_s
 
         [[nodiscard]] TimeDifference operator - (const TimeDifference &other) const;
         [[nodiscard]] TimeDifference operator + (const TimeDifference &other) const;
@@ -145,10 +165,10 @@ namespace StdLib
     {
         i64 _counter = i64_min;
 
-        explicit TimeMoment(i64 counter);
+        explicit constexpr TimeMoment(i64 counter);
 
     public:
-        TimeMoment() = default;
+        constexpr TimeMoment() = default;
         bool HasValue() const;
 
         [[nodiscard]] TimeDifference operator - (const TimeMoment &other) const;
@@ -171,5 +191,15 @@ namespace StdLib
         [[nodiscard]] explicit operator bool() const;
 
 		[[nodiscard]] static TimeMoment Now();
+		
+		[[nodiscard]] static constexpr TimeMoment Earliest(); // creates an earliest possible time moment, e.g. if the starting point is 1970, the returned moment would point to that date;
     };
+
+	constexpr TimeMoment::TimeMoment(i64 counter) : _counter(counter)
+	{}
+
+	constexpr TimeMoment TimeMoment::Earliest()
+	{
+		return TimeMoment(i64_min + 1);
+	}
 }

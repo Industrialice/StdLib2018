@@ -9,9 +9,11 @@ static i64 CurrentTime();
 namespace
 {
     constexpr i64 FreqInt = 1'000'000'000;
+	constexpr i64 FreqHInt = 3600'000'000'000;
     constexpr i64 FreqMInt = 60'000'000'000;
     constexpr f64 FreqFP64 = 1'000'000'000.0;
-    constexpr f64 FreqMFP64 = 60'000'000'000.0;
+	constexpr f64 FreqHFP64 = 3600'000'000'000.0;
+	constexpr f64 FreqMFP64 = 60'000'000'000.0;
     constexpr f64 FreqMSFP64 = 1'000'000.0;
     constexpr f64 FreqUSFP64 = 1'000.0;
     constexpr f32 RevFreqFP32 = 0.000'000'001f;
@@ -20,6 +22,16 @@ namespace
     constexpr f64 RevFreqMSFP64 = 0.000'001;
     constexpr f32 RevFreqUSFP32 = 0.001f;
     constexpr f64 RevFreqUSFP64 = 0.001;
+}
+
+TimeDifference::TimeDifference(TimeHoursFP64 time)
+{
+	_counter = static_cast<i64>(time * FreqHFP64);
+}
+
+TimeDifference::TimeDifference(TimeHoursI64 time)
+{
+	_counter = time * FreqHInt;
 }
 
 TimeDifference::TimeDifference(TimeMinutesFP64 time)

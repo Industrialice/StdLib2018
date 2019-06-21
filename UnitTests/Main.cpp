@@ -1376,15 +1376,32 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     UnitTestsLogger::Message("finished memory mapped file tests\n");
 }
 
+namespace
+{
+	TimeDifference GlobalTimeDifferenceTest(15.5_ms);
+}
+
 static void TimeMomentTests()
 {
     using namespace std::chrono_literals;
+
+	UTest(Equal, GlobalTimeDifferenceTest, 15.5_ms);
+
+	constexpr TimeMoment constexprTest1;
+	constexpr TimeMoment constexprTest2 = TimeMoment::Earliest();
+
     TimeMoment moment;
     UTest(false, moment.HasValue());
     moment = TimeMoment::Now();
     UTest(true, moment.HasValue());
+
+	TimeDifference diffToEarliest = moment - TimeMoment::Earliest();
+	UTest(LeftGreater, diffToEarliest, 1000_m);
+
     std::this_thread::sleep_for(10ms);
+
     TimeMoment moment2 = TimeMoment::Now();
+
     UTest(LeftLesser, moment, moment2);
     UTest(LeftGreater, moment2, moment);
     UTest(LeftGreater, moment + 0.5_s, moment2);
@@ -1396,6 +1413,7 @@ static void TimeMomentTests()
     UTest(LeftGreaterEqual, TimeMoment::Now(), moment);
     UTest(true, EqualsWithEpsilon(((moment + diff) - moment2).ToSec(), 0.0f, 0.0001f));
     UTest(true, EqualsWithEpsilon(((moment2 - diff) - moment).ToSec(), 0.0f, 0.0001f));
+
     TimeDifference refDiff = 0.5_s;
     auto testWithRef = [](TimeDifference refDiff, i64 timeUSec)
     {
@@ -1420,7 +1438,17 @@ static void TimeMomentTests()
     testWithRef(500'000_us, 500'000);
     testWithRef(2_s, 2'000'000);
     testWithRef(-2_s, -2'000'000);
+
+	UTest(Equal, TimeDifference(0.2_s), TimeDifference(-0.2_s).ToAbsolute());
     UTest(LeftLesser, TimeDifference(0.2_s), TimeDifference(0.5_s));
+	UTest(LeftLesser, (TimeDifference(5_h) - TimeDifference(300_m)).ToAbsolute(), 2000_us);
+	UTest(LeftLesser, (TimeDifference(5.0_h) - TimeDifference(300.0_m)).ToAbsolute(), 2000_us);
+	UTest(LeftLesser, (TimeDifference(5_m) - TimeDifference(300_s)).ToAbsolute(), 200_us);
+	UTest(LeftLesser, (TimeDifference(5.0_m) - TimeDifference(300.0_s)).ToAbsolute(), 200_us);
+	UTest(LeftLesser, (TimeDifference(5_s) - TimeDifference(5000_ms)).ToAbsolute(), 20_us);
+	UTest(LeftLesser, (TimeDifference(5.0_s) - TimeDifference(5000.0_ms)).ToAbsolute(), 20_us);
+	UTest(LeftLesser, (TimeDifference(5_ms) - TimeDifference(5000_us)).ToAbsolute(), 2_us);
+	UTest(LeftLesser, (TimeDifference(5.0_ms) - TimeDifference(5000.0_us)).ToAbsolute(), 2_us);
 
     UnitTestsLogger::Message("finished time moment tests\n");
 }
@@ -1690,7 +1718,9 @@ static void PrintSystemInfo()
 	auto cacheInfo = SystemInfo::AcquireCacheInfo();
 	auto monitorsInfo = SystemInfo::MonitorsInfo();
 
-	UTest(LeftGreater, monitorsInfo.size(), 0u);
+    #ifdef PLATFORM_WINDOWS
+	    UTest(LeftGreater, monitorsInfo.size(), 0u);
+    #endif
 
 	UnitTestsLogger::Message("System info:\n");
 	UnitTestsLogger::Message("  Logical CPU cores %u\n", SystemInfo::LogicalCPUCores());

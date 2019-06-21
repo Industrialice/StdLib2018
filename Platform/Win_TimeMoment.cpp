@@ -1,13 +1,20 @@
 #include "_PreHeader.hpp"
 #include "TimeMoment.hpp"
 
-using namespace StdLib;
+using namespace StdLib; 
+
+namespace StdLib::TimeMomentInitialization
+{
+	NOINLINE void Initialize();
+}
 
 namespace
 {
     bool IsInitialized;
 	i64 FreqInt;
 	f64 FreqFP64;
+	i64 FreqHInt;
+	f64 FreqHFP64;
     i64 FreqMInt;
     f64 FreqMFP64;
 	f64 FreqMSFP64;
@@ -20,63 +27,75 @@ namespace
 	f64 RevFreqUSFP64;
 }
 
+TimeDifference::TimeDifference(TimeHoursFP64 time)
+{
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
+	_counter = static_cast<i64>(time * FreqHFP64);
+}
+
+TimeDifference::TimeDifference(TimeHoursI64 time)
+{
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
+	_counter = time * FreqHInt;
+}
+
 TimeDifference::TimeDifference(TimeMinutesFP64 time)
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     _counter = static_cast<i64>(time * FreqMFP64);
 }
 
 TimeDifference::TimeDifference(TimeMinutesI64 time)
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     _counter = time * FreqMInt;
 }
 
 TimeDifference::TimeDifference(TimeSecondsFP64 time)
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     _counter = static_cast<i64>(time * FreqFP64);
 }
 
 TimeDifference::TimeDifference(TimeSecondsI64 time)
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     _counter = time * FreqInt;
 }
 
 TimeDifference::TimeDifference(TimeMilliSecondsFP64 time)
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     _counter = static_cast<i64>(time * FreqMSFP64);
 }
 
 TimeDifference::TimeDifference(TimeMilliSecondsI64 time)
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     _counter = time * FreqInt / 1'000;
 }
 
 TimeDifference::TimeDifference(TimeMicroSecondsFP64 time)
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     _counter = static_cast<i64>(time * FreqUSFP64);
 }
 
 TimeDifference::TimeDifference(TimeMicroSecondsI64 time)
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     _counter = time * FreqInt / 1'000'000;
 }
 
 f32 TimeDifference::ToSec() const
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     return _counter * RevFreqFP32;
 }
 
 f64 TimeDifference::ToSec_f64() const
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     return _counter * RevFreqFP64;
 }
 
@@ -89,19 +108,19 @@ i32 TimeDifference::ToSec_i32() const
 
 i64 TimeDifference::ToSec_i64() const
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     return _counter / FreqInt;
 }
 
 f32 TimeDifference::ToMSec() const
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     return _counter * RevFreqMSFP32;
 }
 
 f64 TimeDifference::ToMSec_f64() const
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     return _counter * RevFreqMSFP64;
 }
 
@@ -114,19 +133,19 @@ i32 TimeDifference::ToMSec_i32() const
 
 i64 TimeDifference::ToMSec_i64() const
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     return (_counter * 1'000) / FreqInt;
 }
 
 f32 TimeDifference::ToUSec() const
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     return _counter * RevFreqUSFP32;
 }
 
 f64 TimeDifference::ToUSec_f64() const
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     return _counter * RevFreqUSFP64;
 }
 
@@ -139,7 +158,7 @@ i32 TimeDifference::ToUSec_i32() const
 
 i64 TimeDifference::ToUSec_i64() const
 {
-    ASSUME(IsInitialized);
+	if (!IsInitialized) TimeMomentInitialization::Initialize();
     return (_counter * 1'000'000) / FreqInt;
 }
 
@@ -154,13 +173,15 @@ TimeMoment TimeMoment::Now()
 
 namespace StdLib::TimeMomentInitialization
 {
-    void Initialize()
+    NOINLINE void Initialize()
     {
         LARGE_INTEGER freq;
         QueryPerformanceFrequency(&freq);
 
 		FreqInt = freq.QuadPart;
 		FreqFP64 = static_cast<f64>(FreqInt);
+		FreqHInt = FreqInt * 3600;
+		FreqHFP64 = FreqInt * 3600.0;
         FreqMInt = FreqInt * 60;
         FreqMFP64 = FreqInt * 60.0;
 		FreqMSFP64 = FreqInt * 0.001;

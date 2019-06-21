@@ -49,7 +49,7 @@ namespace StdLib
 #else
     struct FileEnumInfo
     {
-        uiw d_ino;
+        ui64 d_ino;
         i64 d_off;
         unsigned short d_reclen;
         unsigned char d_type;
