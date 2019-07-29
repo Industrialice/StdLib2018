@@ -284,7 +284,7 @@ namespace StdLib
         static constexpr uiw columns = Columns;
         static constexpr uiw numberOfElements = Rows * Columns;
 
-        std::array<std::array<f32, Columns>, Rows> elements;
+		std::array<std::array<f32, Columns>, Rows> elements{};
 
         [[nodiscard]] MatrixType operator + (const _Matrix &other) const;
         MatrixType &operator += (const _Matrix &other);
@@ -711,11 +711,11 @@ namespace StdLib
 
             if constexpr (Dim > 2)
             {
-                if (index == 2) _VectorElements<_ScalarType, Dim>::z = value;
+                if (index == 2) this->z = value;
 
                 if constexpr (Dim > 3)
                 {
-                    if (index == 3) _VectorElements<_ScalarType, Dim>::w = value;
+                    if (index == 3) this->w = value;
                 }
             }
 
