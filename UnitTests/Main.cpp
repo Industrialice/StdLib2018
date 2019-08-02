@@ -119,6 +119,12 @@ static void StringViewNullTerminatedTests()
 	UTest(Equal, sv2, "hey");
 	UTest(Equal, sv2.length(), 3);
 
+	[](std::string_view text)
+	{
+		UTest(Equal, text, "hey");
+		UTest(Equal, text.length(), 3);
+	} (sv2);
+
 	UnitTestsLogger::Message("finished string view null terminated tests\n");
 }
 

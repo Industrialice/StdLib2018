@@ -33,11 +33,13 @@ namespace StdLib
 
 		StringViewNullTerminated(std::string_view source) : std::basic_string_view<char>(source)
 		{
+			ASSUME(source.data());
 			ASSUME(source.data()[source.size()] == '\0');
 		}
 
 		StringViewNullTerminated(const char *source, uiw count) : std::basic_string_view<char>(source, count)
 		{
+			ASSUME(source);
 			ASSUME(source[count] == '\0');
 		}
 
@@ -59,6 +61,7 @@ namespace StdLib
 
 		StringViewNullTerminated &operator = (std::string_view source)
 		{
+			ASSUME(source.data());
 			ASSUME(source.data()[source.size()] == '\0');
 			std::basic_string_view<char>::operator=(source);
 			return *this;
