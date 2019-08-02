@@ -82,6 +82,46 @@ static void MiscTests()
     UnitTestsLogger::Message("finished misc tests\n");
 }
 
+static void StringViewNullTerminatedTests()
+{
+	StringViewNullTerminated sv;
+	UTest(Equal, sv, "");
+
+	std::string_view other = "hi";
+	sv = other;
+	UTest(Equal, sv, "hi");
+	UTest(Equal, sv, other);
+	UTest(Equal, sv.length(), 2);
+
+	Reinitialize(sv, other);
+	UTest(Equal, sv, "hi");
+	UTest(Equal, sv, other);
+
+	std::string str = "hello";
+	sv = str;
+	UTest(Equal, sv, "hello");
+	UTest(Equal, sv, str);
+	UTest(Equal, sv.length(), 5);
+
+	Reinitialize(sv, str);
+	UTest(Equal, sv, "hello");
+	UTest(Equal, sv, str);
+
+	Reinitialize(sv, "hey", 3);
+	UTest(Equal, sv, "hey");
+	UTest(Equal, sv.length(), 3);
+
+	StringViewNullTerminated sv2 = sv;
+	UTest(Equal, sv2, "hey");
+	UTest(Equal, sv2.length(), 3);
+
+	sv2 = sv;
+	UTest(Equal, sv2, "hey");
+	UTest(Equal, sv2.length(), 3);
+
+	UnitTestsLogger::Message("finished string view null terminated tests\n");
+}
+
 namespace
 {
 	ui32 InvalidParametersReceived;
@@ -1845,6 +1885,7 @@ static void DoTests(int argc, char **argv)
     UTest(false, FileSystem::CreateFolder(folderForTests, {}, true));
 
     MiscTests();
+	StringViewNullTerminatedTests();
 	MemOpsTests();
 	TupleHelpersTests();
     CompileTimeSortingTests();

@@ -37,6 +37,7 @@ using namespace std::literals;
 #include "CoreTypes.hpp"
 #include "PlatformDefines.hpp"
 #include "CoreDefines.hpp"
+#include "AuxTypes.hpp"
 #include "MemOps.hpp"
 
 #ifdef SPACESHIP_SUPPORTED

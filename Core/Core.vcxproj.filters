@@ -119,6 +119,9 @@
     <ClInclude Include="SpinLock.hpp">
       <Filter>MT Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AuxTypes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StdCoreLib.cpp">

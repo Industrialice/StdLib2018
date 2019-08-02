@@ -71,11 +71,11 @@ namespace StdLib
 
 	template <typename MetaType> struct _LoggerCallbackType
 	{
-		using type = std::function<void(LogLevels::LogLevel level, std::string_view message, const MetaType &meta)>;
+		using type = std::function<void(LogLevels::LogLevel level, StringViewNullTerminated message, const MetaType &meta)>;
 	};
 	template <> struct _LoggerCallbackType<void>
 	{
-		using type = std::function<void(LogLevels::LogLevel level, std::string_view message)>;
+		using type = std::function<void(LogLevels::LogLevel level, StringViewNullTerminated message)>;
 	};
 
 	template <typename MetaType = void, bool IsThreadSafe = false> class Logger : public _LoggerThreadSafeData<IsThreadSafe>, public _LoggerMessageMethod<MetaType, IsThreadSafe>
@@ -418,11 +418,11 @@ namespace StdLib
 			{
 				if constexpr (std::is_same_v<MetaType, void>)
 				{
-					listener.callback(level, std::string_view(targetBuffer, printed));
+					listener.callback(level, StringViewNullTerminated(targetBuffer, printed));
 				}
 				else
 				{
-					listener.callback(level, std::string_view(targetBuffer, printed), *static_cast<const MetaType *>(meta));
+					listener.callback(level, StringViewNullTerminated(targetBuffer, printed), *static_cast<const MetaType *>(meta));
 				}
 			}
 		}

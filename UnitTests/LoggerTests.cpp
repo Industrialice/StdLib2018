@@ -10,7 +10,7 @@ void LoggerTests()
     bool isShouldBeCalled = true;
     LogLevels::LogLevel currentLevel = LogLevels::Attention;
     std::string_view currentReference;
-    auto testDest = [&isShouldBeCalled, &currentLevel, &currentReference](LogLevels::LogLevel level, std::string_view message)
+    auto testDest = [&isShouldBeCalled, &currentLevel, &currentReference](LogLevels::LogLevel level, StringViewNullTerminated message)
     {
         UTest(Equal, isShouldBeCalled, true);
         UTest(Equal, currentLevel, level);
@@ -33,7 +33,7 @@ void LoggerTests()
     auto logger2 = Logger<std::string, true>();
 
     isShouldBeCalled = true;
-    auto testDest2 = [&isShouldBeCalled, &currentLevel, &currentReference](LogLevels::LogLevel level, std::string_view message, const std::string &meta)
+    auto testDest2 = [&isShouldBeCalled, &currentLevel, &currentReference](LogLevels::LogLevel level, StringViewNullTerminated message, const std::string &meta)
     {
         UTest(Equal, isShouldBeCalled, true);
         UTest(Equal, currentLevel, level);
