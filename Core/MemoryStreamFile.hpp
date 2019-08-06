@@ -28,8 +28,8 @@ namespace StdLib
         virtual void Close() override;
         [[nodiscard]] virtual bool IsOpen() const override;
 
-		[[must_be_open]] virtual bool Read(void *RSTR target, ui32 len, ui32 *RSTR read = 0) override;
-		[[must_be_open]] virtual bool Write(const void *RSTR source, ui32 len, ui32 *RSTR written = 0) override;
+		[[must_be_open]] virtual bool Read(void *RSTR target, ui32 len, ui32 *RSTR read = nullptr) override;
+		[[must_be_open]] virtual bool Write(const void *RSTR source, ui32 len, ui32 *RSTR written = nullptr) override;
 
 		[[must_be_open]] virtual bool Flush() override;
 		[[nodiscard]] virtual bool IsBufferingSupported() const override;

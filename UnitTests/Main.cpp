@@ -147,6 +147,7 @@ static void MemOpsTests()
 	};
 
 #ifdef PLATFORM_WINDOWS
+	InvalidParametersReceived = 0;
 	auto myInvalidParameterHandler = [](const wchar_t *expression, const wchar_t *function,	const wchar_t *file, unsigned int line,	uintptr_t pReserved)
 	{
 		++InvalidParametersReceived;
