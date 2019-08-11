@@ -654,7 +654,7 @@ static void RotateBitsTests()
 
 static void ErrorTests()
 {
-    constexpr auto okError = DefaultError::Ok();
+    constexpr Error<> okError;
     UTest(true, okError.IsOk());
     UTest(false, okError);
     UTest(Equal, okError, DefaultError::Ok());
@@ -1126,7 +1126,7 @@ static void TestFileToMemoryStream()
 {
     MemoryStreamAllocator<> memoryStream;
     
-    Error<> fileError = DefaultError::Ok();
+    Error<> fileError;
     MemoryStreamFile file = MemoryStreamFile(memoryStream, FileProcModes::Write, 0, &fileError);
     UTest(true, !fileError && file);
     FileWrite(file);
@@ -1162,7 +1162,7 @@ template <typename T> static void TestFile(const FilePath &folderForTests)
     {
 		FilePath path = folderForTests / TSTR("TestFile.txt");
 
-        Error<> fileError = DefaultError::Ok();
+        Error<> fileError;
         T file = T(path, FileOpenMode::CreateAlways, FileProcModes::Write, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
         UTest(true, !fileError && file);
         file.Buffer(bufferSize, allocBufFunc());
@@ -1226,7 +1226,7 @@ template <typename T> static void TestFile(const FilePath &folderForTests)
 
 template <typename T> static void TestFileSharing(const FilePath &folderForTests)
 {
-    Error<> fileError = DefaultError::Ok();
+    Error<> fileError;
     T file = T(folderForTests / TSTR("fileSharingTest.txt"), FileOpenMode::CreateAlways, FileProcModes::Write, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
     UTest(true, !fileError && file);
 
@@ -1256,7 +1256,7 @@ static void TestFileSystem(const FilePath &folderForTests)
 
     UTest(false, FileSystem::CreateFolder(dirTestPath, {}, false)); // for some reason creating this folder will make folderForTests NotFound
     UTest(Equal, FileSystem::IsFolderEmpty(dirTestPath).Unwrap(), true);
-    Error<> fileError = DefaultError::Ok();
+    Error<> fileError;
     FilePath tempFilePath = dirTestPath / TSTR("tempFile.txt");
     UTest(Equal, FileSystem::Classify(tempFilePath).GetError(), DefaultError::NotFound());
     StandardFile tempFile(tempFilePath, FileOpenMode::CreateAlways, FileProcModes::Write, 0, FileCacheModes::Default, FileShareModes::None, &fileError);
@@ -1365,7 +1365,7 @@ static void TestMemoryMappedFile(const FilePath &folderForTests)
     UTest(true, file);
     UTest(true, file.Write(crapString.data(), static_cast<ui32>(crapString.length())));
 
-    Error<> error = DefaultError::Ok();
+    Error<> error;
     MemoryMappedFile mapping = MemoryMappedFile(file, 0, uiw_max, false, false, &error);
     UTest(false, error);
     UTest(true, mapping);

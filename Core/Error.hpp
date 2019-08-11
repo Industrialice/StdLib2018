@@ -13,6 +13,9 @@ namespace StdLib
         const char *_description;
 
     public:
+		constexpr Error() : Error(_ErrorCodes::Ok(), nullptr, nullptr)
+		{}
+
         constexpr Error(const _ErrorCodes::ErrorCodeBase &code, const char *errorClass, const char *description) : _code(code), _errorClass(errorClass), _description(description)
         {
             if (!_errorClass)
@@ -95,6 +98,8 @@ namespace StdLib
         DescriptionType _description;
 
     public:
+		constexpr Error() = default;
+
 		constexpr Error(const Error<> &error, const DescriptionType &description) : Error<>(error), _description(description)
         {}
 
@@ -117,6 +122,8 @@ namespace StdLib
         DescriptionType _description;
 
     public:
+		constexpr Error() = default;
+
 		constexpr Error(const Error<> &error, const AttachmentType &attachment, const DescriptionType &description) : Error<AttachmentType>(error, attachment), _description(description)
         {}
 
