@@ -116,3 +116,14 @@ namespace StdLib
         void ReplaceFileNameExt(pathStringView newName); // does nothing if HasFileNameExt() is false
     };
 }
+
+namespace std
+{
+	template <> struct hash<StdLib::FilePath>
+	{
+		[[nodiscard]] size_t operator()(const StdLib::FilePath &value) const
+		{
+			return hash<StdLib::pathStringView>()(value.PlatformPath());
+		}
+	};
+}
