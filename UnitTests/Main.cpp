@@ -927,6 +927,17 @@ static void FilePathTests()
     UTest(Equal, path.PlatformPath(), TSTR("C:/folder/file.ext"));
     path.ReplaceFileNameExt(TSTR("new.fil"));
     UTest(Equal, path.PlatformPath(), TSTR("C:/folder/new.fil"));
+	path.RemoveTopLevel();
+	UTest(Equal, path.PlatformPath(), TSTR("folder/new.fil"));
+	path.RemoveTopLevel();
+	UTest(Equal, path.PlatformPath(), TSTR("new.fil"));
+	path.RemoveTopLevel();
+	UTest(Equal, path.PlatformPath(), TSTR(""));
+	path.RemoveTopLevel();
+	UTest(Equal, path.PlatformPath(), TSTR(""));
+
+	UTest(Equal, FilePath::FromChar("C:/test").GetWithRemovedTopLevel().PlatformPath(), TSTR("test"));
+	UTest(Equal, FilePath::FromChar("test").GetWithRemovedTopLevel().PlatformPath(), TSTR(""));
 
     UnitTestsLogger::Message("finished file path tests\n");
 }

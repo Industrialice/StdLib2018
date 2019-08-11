@@ -233,6 +233,32 @@ FilePath &FilePath::RemoveLevel()
     return *this;
 }
 
+FilePath &FilePath::RemoveTopLevel()
+{
+	for (uiw index = 0; index < _path.size(); ++index)
+	{
+		if (IsPathDelim(_path[index]))
+		{
+			_path.erase(0, index + 1);
+			return *this;
+		}
+	}
+	_path.clear();
+	return *this;
+}
+
+FilePath FilePath::GetWithRemovedTopLevel() const
+{
+	for (uiw index = 0; index < _path.size(); ++index)
+	{
+		if (IsPathDelim(_path[index]))
+		{
+			return _path.substr(index + 1);
+		}
+	}
+	return FilePath();
+}
+
 bool FilePath::IsEmpty() const
 {
     return _path.empty();
