@@ -292,7 +292,7 @@ Error<> FileSystem::CurrentWorkingPathSet(const FilePath &path)
     return DefaultError::Ok();
 }
 
-static Error<> EnumerateInternal(const FilePath &path, const std::function<void(const FileEnumInfo &info)> &callback, EnumerateOptions::EnumerateOption options, WIN32_FIND_DATAW &data)
+static Error<> EnumerateInternal(const FilePath &path, const std::function<void(const FileEnumInfo &info, const FilePath &currentPath)> &callback, EnumerateOptions::EnumerateOption options, WIN32_FIND_DATAW &data)
 {
 	FilePath pathToSearch = path;
 	pathToSearch.AddLevel().Append(L'*');
@@ -331,7 +331,7 @@ static Error<> EnumerateInternal(const FilePath &path, const std::function<void(
 		{
 			if (options.Contains(EnumerateOptions::ReportFolders))
 			{
-				callback(reinterpret_cast<FileEnumInfo &>(data));
+				callback(reinterpret_cast<FileEnumInfo &>(data), path);
 			}
 
 			if (options.Contains(EnumerateOptions::Recursive))
@@ -344,7 +344,7 @@ static Error<> EnumerateInternal(const FilePath &path, const std::function<void(
 		{
 			if (options.Contains(EnumerateOptions::ReportFiles))
 			{
-				callback(reinterpret_cast<FileEnumInfo &>(data));
+				callback(reinterpret_cast<FileEnumInfo &>(data), path);
 			}
 		}
 	} while (FindNextFileW(search, &data) == TRUE);
@@ -355,7 +355,7 @@ static Error<> EnumerateInternal(const FilePath &path, const std::function<void(
 	return DefaultError::Ok();
 }
 
-Error<> FileSystem::Enumerate(const FilePath &path, const std::function<void(const FileEnumInfo &info)> &callback, EnumerateOptions::EnumerateOption options)
+Error<> FileSystem::Enumerate(const FilePath &path, const std::function<void(const FileEnumInfo &info, const FilePath &currentPath)> &callback, EnumerateOptions::EnumerateOption options)
 {
 	if (options.Contains(EnumerateOptions::ReportFiles) == false && options.Contains(EnumerateOptions::ReportFolders) == false)
 	{

@@ -292,7 +292,7 @@ Error<> FileSystem::CurrentWorkingPathSet(const FilePath &path)
 }
 
 // assume that all regular files are also symbolic links
-Error<> FileSystem::Enumerate(const FilePath &path, const std::function<void(const FileEnumInfo &info)> &callback, EnumerateOptions::EnumerateOption options)
+Error<> FileSystem::Enumerate(const FilePath &path, const std::function<void(const FileEnumInfo &info, const FilePath &currentPath)> &callback, EnumerateOptions::EnumerateOption options)
 {
 	if (options.Contains(EnumerateOptions::ReportFiles) == false && options.Contains(EnumerateOptions::ReportFolders) == false)
 	{
@@ -332,7 +332,7 @@ Error<> FileSystem::Enumerate(const FilePath &path, const std::function<void(con
         {
             if (options.Contains(EnumerateOptions::ReportFolders))
             {
-                callback(reinterpret_cast<FileEnumInfo &>(*data));
+                callback(reinterpret_cast<FileEnumInfo &>(*data), path);
             }
 
             if (options.Contains(EnumerateOptions::Recursive))
@@ -345,7 +345,7 @@ Error<> FileSystem::Enumerate(const FilePath &path, const std::function<void(con
         {
             if (options.Contains(EnumerateOptions::ReportFiles))
             {
-                callback(reinterpret_cast<FileEnumInfo &>(*data));
+                callback(reinterpret_cast<FileEnumInfo &>(*data), path);
             }
         }
     }

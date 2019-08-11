@@ -1223,14 +1223,14 @@ void MathLibTests()
 
 	MeasuringApproxPrecision();
 
-#ifndef PLATFORM_WINXP
-	volatile ui32 counter = 0;
-	for (ui32 index = 1; index < 1000000; ++index)
-	{
-		counter /= index;
-		counter *= index;
-	}
-#endif
+//#ifndef PLATFORM_WINXP
+//	volatile ui32 counter = 0;
+//	for (ui32 index = 1; index < 1000000; ++index)
+//	{
+//		counter /= index;
+//		counter *= index;
+//	}
+//#endif
 	//printf("\n");
 	//SinCosBenchmarks();
 	//printf("\n");

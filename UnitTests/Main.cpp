@@ -1068,7 +1068,7 @@ static void FileWriteRead(IFile &file)
     {
         ch = 32 + rand() % 96;
     }
-
+	
     ui32 written = 0xBAADDEAD, read = 0xFACCF00D;
 
     char readBuf[256];
@@ -1287,7 +1287,7 @@ static void TestFileSystem(const FilePath &folderForTests)
 	file.Close();
 
 	std::vector<pathString> enumResults;
-	auto enumCallback = [&enumResults](const FileEnumInfo &info)
+	auto enumCallback = [&enumResults](const FileEnumInfo &info, const FilePath &currentPath)
 	{
 		#ifdef PLATFORM_WINDOWS
 			enumResults.push_back(info.cFileName);

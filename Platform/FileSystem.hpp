@@ -32,5 +32,5 @@ namespace StdLib::FileSystem
 	Error<> CreateFolder(const FilePath &where, const FilePath &name, bool isOverrideExisting);
 	[[nodiscard]] Result<FilePath> CurrentWorkingPathGet();
 	Error<> CurrentWorkingPathSet(const FilePath &path);
-	Error<> Enumerate(const FilePath &path, const std::function<void(const FileEnumInfo &info)> &callback, EnumerateOptions::EnumerateOption options = EnumerateOptions::Recursive.Combined(EnumerateOptions::ReportFiles).Combined(EnumerateOptions::ReportFolders));
+	Error<> Enumerate(const FilePath &path, const std::function<void(const FileEnumInfo &info, const FilePath &currentPath)> &callback, EnumerateOptions::EnumerateOption options = EnumerateOptions::Recursive.Combined(EnumerateOptions::ReportFiles).Combined(EnumerateOptions::ReportFolders));
 }

@@ -238,7 +238,7 @@ static inline std::optional<Matrix4x4> _Inverse4x4Matrix(const Matrix4x4 &m)
         return std::nullopt;
     }
 
-    f32 revDet = 1.f / det;
+    f32 revDet = 1.0f / det;
     r *= revDet;
 
     return r;
@@ -277,7 +277,7 @@ static inline std::optional<Matrix4x3> _Inverse4x3Matrix(const Matrix4x3 &m)
         return std::nullopt;
     }
 
-    f32 revDet = 1.f / det;
+    f32 revDet = 1.0f / det;
     r *= revDet;
 
     return r;
@@ -317,7 +317,7 @@ static inline std::optional<Matrix3x4> _Inverse3x4Matrix(const Matrix3x4 &m)
 		return std::nullopt;
 	}
 
-	f32 revDet = 1.f / det;
+	f32 revDet = 1.0f / det;
 	r *= revDet;
 
 	return r;
@@ -340,7 +340,7 @@ static inline std::optional<Matrix2x2> _Inverse2x2Matrix(const Matrix2x2 &m)
         return std::nullopt;
     }
 
-    f32 revDet = 1.f / det;
+    f32 revDet = 1.0f / det;
     r *= revDet;
 
     return r;
@@ -365,7 +365,7 @@ static inline std::optional<Matrix3x2> _Inverse3x2Matrix(const Matrix3x2 &m)
 		return std::nullopt;
 	}
 
-	f32 revDet = 1.f / det;
+	f32 revDet = 1.0f / det;
 	r *= revDet;
 
 	return r;
@@ -391,7 +391,7 @@ static inline std::optional<Matrix2x3> _Inverse2x3Matrix(const Matrix2x3 &m)
 		return std::nullopt;
 	}
 
-	f32 revDet = 1.f / det;
+	f32 revDet = 1.0f / det;
 	r *= revDet;
 
 	return r;
@@ -420,7 +420,7 @@ static inline std::optional<Matrix3x3> _Inverse3x3Matrix(const Matrix3x3 &m)
 		return std::nullopt;
 	}
 
-	f32 revDet = 1.f / det;
+	f32 revDet = 1.0f / det;
 	r *= revDet;
 
 	return r;
@@ -820,7 +820,7 @@ Matrix4x4 Matrix4x4::CreateRTS(const std::optional<Quaternion> &rotation, const 
 
 Matrix4x4 Matrix4x4::CreatePerspectiveProjection(f32 horizontalFOVRad, f32 aspectRatio, f32 nearPlane, f32 farPlane, ProjectionTarget target)
 {
-	ASSUME(horizontalFOVRad > DefaultF32Epsilon && horizontalFOVRad < MathPi() && aspectRatio > DefaultF32Epsilon && nearPlane > DefaultF32Epsilon && farPlane > nearPlane);
+	ASSUME(horizontalFOVRad > DefaultF32Epsilon && horizontalFOVRad < MathPi() && aspectRatio > DefaultF32Epsilon && nearPlane > DefaultF32Epsilon && farPlane > DefaultF32Epsilon);
 
     Matrix4x4 r;
 
