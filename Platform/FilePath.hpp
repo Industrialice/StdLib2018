@@ -87,6 +87,7 @@ namespace StdLib
 
 		FilePath &AddLevel(); // ignored if the path ends with a path delimiter
 		FilePath &RemoveLevel(); /* does nothing if empty, C:/Pictures/ becomes C:/, C:/Pictures becomes C:/ */
+		FilePath GetWithRemovedLevel() const;
 
 		FilePath &RemoveTopLevel(); // C:/Pictures becomes Pictures
 		FilePath GetWithRemovedTopLevel() const;

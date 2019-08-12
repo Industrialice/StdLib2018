@@ -233,6 +233,13 @@ FilePath &FilePath::RemoveLevel()
     return *this;
 }
 
+FilePath FilePath::GetWithRemovedLevel() const
+{
+	FilePath copy = *this;
+	copy.RemoveLevel();
+	return copy;
+}
+
 FilePath &FilePath::RemoveTopLevel()
 {
 	for (uiw index = 0; index < _path.size(); ++index)

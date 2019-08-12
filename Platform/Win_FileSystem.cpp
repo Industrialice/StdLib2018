@@ -232,8 +232,34 @@ NOINLINE Error<> FileSystem::IsReadOnly(const FilePath &pnn, bool isReadOnly)
     return DefaultError::Ok();
 }
 
-NOINLINE Error<> FileSystem::CreateFolder(const FilePath &where, const FilePath &name, bool isOverrideExisting)
+static bool CreateFolderLevelRecursively(const FilePath &path)
 {
+	if (FileSystem::Classify(path))
+	{
+		return true;
+	}
+	if (path.IsEmpty())
+	{
+		return false;
+	}
+	bool result = CreateFolderLevelRecursively(path.GetWithRemovedLevel());
+	if (!result)
+	{
+		return false;
+	}
+	return CreateDirectoryW(path.PlatformPath().data(), 0) == TRUE;
+}
+
+NOINLINE Error<> FileSystem::CreateFolder(const FilePath &where, const FilePath &name, bool isOverrideExisting, bool isCreateHierarchy)
+{
+	if (isCreateHierarchy)
+	{
+		if (!CreateFolderLevelRecursively(where))
+		{
+			return PlatformErrorResolve();
+		}
+	}
+
     FilePath fullPath = where;
     fullPath.AddLevel();
     fullPath += name;

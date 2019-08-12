@@ -1246,15 +1246,17 @@ template <typename T> static void TestFileSharing(const FilePath &folderForTests
 
 static void TestFileSystem(const FilePath &folderForTests)
 {
-    UTest(false, FileSystem::CreateFolder(folderForTests, TSTR("folder"), true));
-    UTest(true, FileSystem::CreateFolder(folderForTests, TSTR("folder"), false));
+	UTest(Equal, DefaultError::Ok(), FileSystem::CreateFolder(folderForTests / TSTR("Level1") / TSTR("Level2"), TSTR("folder"), true, true)); // attempting to create a folder in non-existant hierarchy
+
+	UTest(Equal, DefaultError::Ok(), FileSystem::CreateFolder(folderForTests, TSTR("folder"), true));
+	UTest(NotEqual, DefaultError::Ok(), FileSystem::CreateFolder(folderForTests, TSTR("folder"), false));
     FilePath dirTestPath = folderForTests / TSTR("folder");
     UTest(Equal, FileSystem::Classify(dirTestPath).Unwrap(), FileSystem::ObjectType::Folder);
     UTest(NotEqual, FileSystem::Classify(dirTestPath).Unwrap(), FileSystem::ObjectType::File);
     UTest(true, FileSystem::IsFolderEmpty(dirTestPath).Unwrap());
-    UTest(false, FileSystem::Remove(dirTestPath));
+	UTest(Equal, DefaultError::Ok(), FileSystem::Remove(dirTestPath));
 
-    UTest(false, FileSystem::CreateFolder(dirTestPath, {}, false)); // for some reason creating this folder will make folderForTests NotFound
+	UTest(Equal, DefaultError::Ok(), FileSystem::CreateFolder(dirTestPath, {}, false)); // for some reason creating this folder will make folderForTests NotFound
     UTest(Equal, FileSystem::IsFolderEmpty(dirTestPath).Unwrap(), true);
     Error<> fileError;
     FilePath tempFilePath = dirTestPath / TSTR("tempFile.txt");
@@ -1266,9 +1268,9 @@ static void TestFileSystem(const FilePath &folderForTests)
     UTest(Equal, FileSystem::IsFolderEmpty(dirTestPath).Unwrap(), false);
     UTest(Equal, FileSystem::Classify(tempFilePath).Unwrap(), FileSystem::ObjectType::File);
     FilePath tempFile2Path = dirTestPath / TSTR("tempFile2.txt");
-    UTest(false, FileSystem::CopyTo(tempFilePath, tempFile2Path, false));
+	UTest(Equal, DefaultError::Ok(), FileSystem::CopyTo(tempFilePath, tempFile2Path, false));
     FilePath tempFileRenamedPath = dirTestPath / TSTR("tempFileRenamed.txt");
-    UTest(false, FileSystem::MoveTo(tempFilePath, tempFileRenamedPath, false));
+	UTest(Equal, DefaultError::Ok(), FileSystem::MoveTo(tempFilePath, tempFileRenamedPath, false));
     UTest(Equal, FileSystem::Classify(tempFilePath).GetError(), DefaultError::NotFound());
     UTest(Equal, FileSystem::Classify(tempFileRenamedPath).Unwrap(), FileSystem::ObjectType::File);
     //UTest(false, FileSystem::CopyTo(dirTestPath, dirTestPath / TSTR("foldierCopy"), false));
@@ -1279,11 +1281,11 @@ static void TestFileSystem(const FilePath &folderForTests)
     UTest(false, FileSystem::IsReadOnly(tempFileRenamedPath, false));
     UTest(Equal, FileSystem::IsReadOnly(tempFileRenamedPath).Unwrap(), false);
 
-	UTest(false, FileSystem::CreateFolder(folderForTests, TSTR("SearchTests"), true));
+	UTest(Equal, DefaultError::Ok(), FileSystem::CreateFolder(folderForTests, TSTR("SearchTests"), true));
 	FilePath rootSearch = folderForTests / TSTR("SearchTests");
-	UTest(false, FileSystem::CreateFolder(rootSearch, TSTR("Folder0"), true));
+	UTest(Equal, DefaultError::Ok(), FileSystem::CreateFolder(rootSearch, TSTR("Folder0"), true));
 	FilePath folder0 = rootSearch / TSTR("Folder0");
-	UTest(false, FileSystem::CreateFolder(rootSearch, TSTR("Folder1"), true));
+	UTest(Equal, DefaultError::Ok(), FileSystem::CreateFolder(rootSearch, TSTR("Folder1"), true));
 	FilePath folder1 = rootSearch / TSTR("Folder1");
 	File file = File(rootSearch / TSTR("rootFile.txt"), FileOpenMode::CreateAlways, FileProcModes::Write);
 	UTest(true, file.IsOpen());

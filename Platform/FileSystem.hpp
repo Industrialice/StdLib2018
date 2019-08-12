@@ -29,7 +29,7 @@ namespace StdLib::FileSystem
 	[[nodiscard]] Result<bool> IsFolderEmpty(const FilePath &pnn);
 	[[nodiscard]] Result<bool> IsReadOnly(const FilePath &pnn);
 	Error<> IsReadOnly(const FilePath &pnn, bool isReadOnly);
-	Error<> CreateFolder(const FilePath &where, const FilePath &name, bool isOverrideExisting);
+	Error<> CreateFolder(const FilePath &where, const FilePath &name, bool isOverrideExisting, bool isCreateHierarchy = false); // isCreateHierarchy means that if you're trying to create D:/Folder1/Folder2 and Folder1 doesn't exist, it will be created as well
 	[[nodiscard]] Result<FilePath> CurrentWorkingPathGet();
 	Error<> CurrentWorkingPathSet(const FilePath &path);
 	Error<> Enumerate(const FilePath &path, const std::function<void(const FileEnumInfo &info, const FilePath &currentPath)> &callback, EnumerateOptions::EnumerateOption options = EnumerateOptions::Recursive.Combined(EnumerateOptions::ReportFiles).Combined(EnumerateOptions::ReportFolders));
