@@ -40,6 +40,22 @@ template <typename T> static void Compare(T v2, T v0, T v1, typename T::ScalarTy
 	}
 }
 
+template <typename T> void CheckMatrixMultiplyResult(const T &m0, const T &m1, const T &result)
+{
+	for (uiw rowIndex = 0; rowIndex < T::rows; ++rowIndex)
+	{
+		for (uiw columnIndex = 0; columnIndex < T::columns; ++columnIndex)
+		{
+			f32 value = 0;
+			for (uiw subRowIndex = 0; subRowIndex < T::rows; ++subRowIndex)
+			{
+				value += m0[rowIndex][subRowIndex] * m1[subRowIndex][columnIndex];
+			}
+			UTest(true, EqualsWithEpsilon(result[rowIndex][columnIndex], value));
+		}
+	}
+}
+
 template <typename T> static T GenerateVec(bool isAllowZero)
 {
 	using st = typename T::ScalarType;
@@ -482,11 +498,11 @@ static void QuaternionTests()
 
 template <typename T> static void MatrixTestsHelper()
 {
-	T m0, m1, m2, m3;
+	T m2, m3;
 	for (ui32 index = 0; index < TestIterations; ++index)
 	{
-		m0 = GenerateMatrix<T>();
-		m1 = GenerateMatrix<T>();
+		const T m0 = GenerateMatrix<T>();
+		const T m1 = GenerateMatrix<T>();
 
         for (uiw row = 0; row < T::rows; ++row)
         {
@@ -540,11 +556,29 @@ template <typename T> static void MatrixTestsHelper()
 
         UTest(true, m2.EqualsWithEpsilon(m2, 0));
 
+		if constexpr (T::rows == T::columns)
+		{
+			m2 = m0 * m1;
+			CheckMatrixMultiplyResult(m0, m1, m2);
+			m2 = m0;
+			m2 *= m1;
+			CheckMatrixMultiplyResult(m0, m1, m2);
+		}
+
         Matrix2x2 convertTest = m0.template As<Matrix2x2>();
         UTest(Equal, convertTest[0][0], m0[0][0]);
         UTest(Equal, convertTest[0][1], m0[0][1]);
         UTest(Equal, convertTest[1][0], m0[1][0]);
         UTest(Equal, convertTest[1][1], m0[1][1]);
+
+		Matrix4x4 convertTest2 = m0.template As<Matrix4x4>();
+		for (uiw row = 0; row < 4; ++row)
+		{
+			for (uiw column = 0; column < 4; ++column)
+			{
+				UTest(Equal, m0.FetchValueBoundless(row, column), convertTest2[row][column]);
+			}
+		}
     }
 }
 
@@ -731,6 +765,12 @@ static void Matrix4x3Tests()
 
 	f32 det = constexprTest.Determinant();
 	UTest(true, EqualsWithEpsilon(det, -9));
+
+	Matrix4x3 m0 = GenerateMatrix<Matrix4x3>();
+	Matrix4x4 m1 = GenerateMatrix<Matrix4x4>();
+
+	Matrix4x4 m2 = m0 * m1;
+	CheckMatrixMultiplyResult(m0.As<Matrix4x4>(), m1, m2);
 }
 
 static void Matrix4x4Tests()
@@ -893,6 +933,41 @@ static void RectangleTests()
 	RectangleTestsHelper<RectangleUI32>();
 
 	UnitTestsLogger::Message("  finished rectangle tests\n");
+}
+
+template <typename ModelType, typename VPType, typename ResultType = VPType> void MatrixMultiplyBenchmark()
+{
+	constexpr uiw passesCount = 1'000'000;
+	constexpr uiw count = 128;
+	std::vector<ModelType> model(count);
+	std::vector<VPType> vp(count);
+	std::vector<ResultType> mvp(count);
+
+	for (uiw index = 0; index < count; ++index)
+	{
+		model[index] = GenerateMatrix<ModelType>();
+		vp[index] = GenerateMatrix<VPType>();
+	}
+
+	TimeMoment start = TimeMoment::Now();
+
+	for (uiw total = 0; total < passesCount; ++total)
+	{
+		uiw indexOffset = rand();
+
+		for (uiw index = 0; index < count; ++index)
+		{
+			mvp[(index + indexOffset) % count] = model[index] * vp[index];
+		}
+	}
+
+	TimeMoment end = TimeMoment::Now();
+
+	volatile ResultType temp = mvp[rand() % count];
+
+	f64 delta = (end - start).ToSec_f64();
+	constexpr uiw processedTotal = passesCount * count;
+	UnitTestsLogger::Message("Matrices benchmark finished in %.2lf, %.1lfkk/s\n", delta, processedTotal / delta / 1000 / 1000);
 }
 
 // TODO: average relative is broken
@@ -1231,6 +1306,8 @@ void MathLibTests()
 //		counter *= index;
 //	}
 //#endif
+//	printf("\n");
+//	MatrixMultiplyBenchmark<Matrix4x3, Matrix4x4>();
 	//printf("\n");
 	//SinCosBenchmarks();
 	//printf("\n");

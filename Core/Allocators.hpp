@@ -16,7 +16,9 @@ namespace StdLib::Allocator
             {
                 count *= sizeof(T);
             }
-            return static_cast<T *>(malloc(count));
+            T *memory = static_cast<T *>(malloc(count));
+			ASSUME(count == 0 || memory);
+			return memory;
         }
 
         template <typename T> [[nodiscard]] ALLOCATORFUNC RETURNS_NONNULL static T *Reallocate(T *memory, uiw count)
@@ -25,7 +27,9 @@ namespace StdLib::Allocator
             {
                 count *= sizeof(T);
             }
-            return static_cast<T *>(realloc(memory, count));
+            memory = static_cast<T *>(realloc(memory, count));
+			ASSUME(count == 0 || memory);
+			return memory;
         }
 
         template <typename T> [[nodiscard]] ALLOCATORFUNC static bool ReallocateInplace(T *memory, uiw count)
@@ -88,23 +92,27 @@ namespace StdLib::Allocator
 
 			ASSUME(Funcs::IsPowerOf2(alignment));
 
+			T *memory;
+
 			#ifdef PLATFORM_WINDOWS
-				return static_cast<T *>(_aligned_malloc(count, alignment));
+				memory = static_cast<T *>(_aligned_malloc(count, alignment));
 			#else
 				if (alignment > MinimalGuaranteedAlignment)
 				{
 					alignment = Funcs::AlignAs(alignment, sizeof(void *)); // posix_memalign requires alignment to be divisible by sizeof(void *)
-					void *memory;
 					int code = posix_memalign(&memory, alignment, count);
 					ASSUME(code == 0);
 					ASSUME(Funcs::IsAligned(memory, alignment));
-					return static_cast<T *>(memory);
+					ASSUME(count == 0 || memory);
 				}
 				else
 				{
-					return static_cast<T *>(malloc(count));
+					memory = static_cast<T *>(malloc(count));
 				}
 			#endif
+
+			ASSUME(count == 0 || memory);
+			return memory;
 		}
 
 		template <typename T> [[nodiscard]] ALLOCATORFUNC RETURNS_NONNULL static T *Reallocate(T *memory, uiw count, uiw alignment)
@@ -117,7 +125,7 @@ namespace StdLib::Allocator
 			ASSUME(Funcs::IsPowerOf2(alignment));
 
 			#ifdef PLATFORM_WINDOWS
-				return static_cast<T *>(_aligned_realloc(memory, count, alignment));
+				memory = static_cast<T *>(_aligned_realloc(memory, count, alignment));
 			#else
 				memory = static_cast<T *>(realloc(memory, count));
 				if (!Funcs::IsAligned(memory, alignment))
@@ -131,8 +139,10 @@ namespace StdLib::Allocator
 					memory = static_cast<T *>(temp);
 					ASSUME(Funcs::IsAligned(memory, alignment));
 				}
-				return memory;
 			#endif
+				
+			ASSUME(count == 0 || memory);
+			return memory;
 		}
 
 		template <typename T> static void Free(T *memory)

@@ -685,12 +685,12 @@ Matrix4x4 Matrix4x3::operator * (const Matrix4x4 &other) const
                 elements[row][0] * other[0][column] +
                 elements[row][1] * other[1][column] +
                 elements[row][2] * other[2][column];
-            if (row == 3)
-            {
-                r[row][column] += other[3][column];
-            }
         }
     }
+	r[3][0] += other[3][0];
+	r[3][1] += other[3][1];
+	r[3][2] += other[3][2];
+	r[3][3] += other[3][3];
 	_ValidateValues(*this, other, r);
 	return r;
 }
