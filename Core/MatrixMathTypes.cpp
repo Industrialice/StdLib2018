@@ -999,7 +999,8 @@ Quaternion Quaternion::FromEuler(const Vector3 &source)
     f32 y = cx * sy * cz + sx * cy * sz;
     f32 z = cx * cy * sz - sx * sy * cz;
 
-    Quaternion result = {x, y, z, w};
+	Quaternion result = {x, y, z, w};
+
 	_ValidateValues(source, result);
 	return result;
 }

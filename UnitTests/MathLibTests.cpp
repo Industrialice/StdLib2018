@@ -455,9 +455,16 @@ static void QuaternionTests()
 {
     f32 epsilon = 0.0001f;
     Quaternion q0, q1;
+	Vector3 toEuler, fromEuler;
+
+	fromEuler = {RadNormalize(MathPiDouble() + MathPi()), RadNormalize(-MathPi()), RadNormalize(MathPiDouble() + MathPi())};
+	//fromEuler = {MathPi(), MathPi(), MathPi()};
+	q0 = Quaternion::FromEuler(fromEuler * 0.25f);
+	toEuler = q0.ToEuler() * 4;
+	UTest(true, toEuler.EqualsWithEpsilon({MathPi(), MathPi(), MathPi()}));
     
     q0 = Quaternion::FromEuler(Vector3{25.0f, 40.0f, 75.0f} * DegToRadF32Const);
-    Vector3 toEuler = q0.ToEuler().ForEach(RadToDeg);
+    toEuler = q0.ToEuler().ForEach(RadToDeg);
     UTest(true, toEuler.EqualsWithEpsilon({25.0f, 40.0f, 75.0f}, epsilon));
 
     auto mat = Matrix3x3::CreateRS(Vector3{25.0f, 40.0f, 75.0f}.ForEach(DegToRad)); // positive trace matrix
@@ -475,6 +482,9 @@ static void QuaternionTests()
 
 	revMat = q0.ToMatrix();
 	UTest(true, revMat.EqualsWithEpsilon(mat));
+
+	Vector3 vecToTransform = GenerateVec<Vector3>(false);
+	UTest(true, EqualsWithEpsilon(vecToTransform * mat, q0.RotateVector(vecToTransform)));
 
     /*for (ui32 index = 0; index < TestIterations; ++index)
     {
@@ -771,6 +781,11 @@ static void Matrix4x3Tests()
 
 	Matrix4x4 m2 = m0 * m1;
 	CheckMatrixMultiplyResult(m0.As<Matrix4x4>(), m1, m2);
+
+	refRotationEuler = Vector3{0, 270, 0}.ForEach(DegToRad);
+	rtsEuler = Matrix4x3::CreateRTS(refRotationEuler, Vector3(10, 20, 30), Vector3(0.4f, 0.5f, 0.6f));
+	rtsQuat = Matrix4x3::CreateRTS(Quaternion::FromEuler(refRotationEuler), Vector3(10, 20, 30), Vector3(0.4f, 0.5f, 0.6f));
+	UTest(true, rtsEuler.EqualsWithEpsilon(rtsQuat));
 }
 
 static void Matrix4x4Tests()

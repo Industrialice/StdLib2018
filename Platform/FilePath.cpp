@@ -427,20 +427,20 @@ void FilePath::ReplaceExtension(pathStringView newExt)
     }
 }
 
-bool FilePath::HasFileNameExt() const
+bool FilePath::HasFileNameWithExtension() const
 {
     return HasFileName();
 }
 
-std::optional<FilePath> FilePath::FileNameExt(std::optional<pathStringView> defaultName) const
+std::optional<FilePath> FilePath::FileNameWithExtension(std::optional<pathStringView> defaultName) const
 {
-    auto view = FileNameExtView();
+    auto view = FileNameWithExtensionView();
     if (view) return {*view};
     if (defaultName) return {*defaultName};
     return std::nullopt;
 }
 
-std::optional<pathStringView> FilePath::FileNameExtView(std::optional<pathStringView> defaultName) const
+std::optional<pathStringView> FilePath::FileNameWithExtensionView(std::optional<pathStringView> defaultName) const
 {
     if (!IsValid() || IsPathDelim(_path.back()))
     {
@@ -458,7 +458,7 @@ std::optional<pathStringView> FilePath::FileNameExtView(std::optional<pathString
     return defaultName;
 }
 
-void FilePath::ReplaceFileNameExt(pathStringView newName)
+void FilePath::ReplaceFileNameWithExtension(pathStringView newName)
 {
     if (!IsValid() || IsPathDelim(_path.back()))
     {

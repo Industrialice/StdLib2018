@@ -114,10 +114,11 @@ namespace StdLib
 		[[nodiscard]] std::optional<pathStringView> ExtensionView(std::optional<pathStringView> defaultName = std::nullopt) const;
         void ReplaceExtension(pathStringView newExt); // does nothing if both HasFileName() and HasExtension() are false
 
-		[[nodiscard]] bool HasFileNameExt() const;
-		[[nodiscard]] std::optional <FilePath> FileNameExt(std::optional<pathStringView> defaultName = std::nullopt) const;
-		[[nodiscard]] std::optional <pathStringView> FileNameExtView(std::optional<pathStringView> defaultName = std::nullopt) const;
-        void ReplaceFileNameExt(pathStringView newName); // does nothing if HasFileNameExt() is false
+		// file name with exntension
+		[[nodiscard]] bool HasFileNameWithExtension() const;
+		[[nodiscard]] std::optional <FilePath> FileNameWithExtension(std::optional<pathStringView> defaultName = std::nullopt) const;
+		[[nodiscard]] std::optional <pathStringView> FileNameWithExtensionView(std::optional<pathStringView> defaultName = std::nullopt) const;
+        void ReplaceFileNameWithExtension(pathStringView newName); // does nothing if HasFileNameExt() is false
     };
 }
 

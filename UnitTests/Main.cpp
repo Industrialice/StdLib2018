@@ -911,7 +911,7 @@ static void FilePathTests()
     fileName = path.FileNameView();
     UTest(Equal, fileName.value(), TSTR("yes"));
     UTest(Equal, path.PlatformPath(), TSTR("C:/ext/yes.bmp"));
-    UTest(Equal, path.FileNameExtView().value(), TSTR("yes.bmp"));
+    UTest(Equal, path.FileNameWithExtensionView().value(), TSTR("yes.bmp"));
     path.RemoveLevel();
     UTest(Equal, path.PlatformPath(), TSTR("C:/ext/"));
     path.RemoveLevel();
@@ -919,13 +919,13 @@ static void FilePathTests()
     path += TSTR("folder");
     UTest(Equal, path.PlatformPath(), TSTR("C:/folder"));
     UTest(Equal, path.FileNameView().value(), TSTR("folder"));
-    UTest(Equal, path.FileNameExtView().value(), TSTR("folder"));
+    UTest(Equal, path.FileNameWithExtensionView().value(), TSTR("folder"));
     UTest(true, path.HasFileName());
     UTest(false, path.ExtensionView());
     UTest(false, path.HasExtension());
     path /= TSTR("file.ext");
     UTest(Equal, path.PlatformPath(), TSTR("C:/folder/file.ext"));
-    path.ReplaceFileNameExt(TSTR("new.fil"));
+    path.ReplaceFileNameWithExtension(TSTR("new.fil"));
     UTest(Equal, path.PlatformPath(), TSTR("C:/folder/new.fil"));
 	path.RemoveTopLevel();
 	UTest(Equal, path.PlatformPath(), TSTR("folder/new.fil"));
