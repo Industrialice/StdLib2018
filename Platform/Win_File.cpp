@@ -9,13 +9,25 @@ namespace
 	DWORD(WINAPI *StdLib_GetFinalPathNameByHandleW)(HANDLE hFile, LPWSTR lpszFilePath, DWORD cchFilePath, DWORD dwFlags);
 }
 
-Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode)
+Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, std::optional<FileShareModes::FileShareMode> shareMode)
 {
     Close();
 
     ASSUME(_handle == INVALID_HANDLE_VALUE);
 
     offset = std::min<ui64>(offset, i64_max);
+
+	if (!shareMode)
+	{
+		if (procMode.Contains(FileProcModes::Write))
+		{
+			shareMode = FileShareModes::None;
+		}
+		else
+		{
+			shareMode = FileShareModes::Read;
+		}
+	}
 
     DWORD dwDesiredAccess = 0;
     DWORD dwCreationDisposition = 0;
@@ -119,22 +131,22 @@ Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::Fi
         dwFlagsAndAttributes |= FILE_FLAG_WRITE_THROUGH;
     }
 
-    if (shareMode.Contains(FileShareModes::Delete))
+    if (shareMode->Contains(FileShareModes::Delete))
     {
         dwShareMode |= FILE_SHARE_DELETE;
     }
-    if (shareMode.Contains(FileShareModes::Read))
+    if (shareMode->Contains(FileShareModes::Read))
     {
         if (procMode.Contains(FileProcModes::Write))
         {
-            if (!shareMode.Contains(FileShareModes::Write))
+            if (!shareMode->Contains(FileShareModes::Write))
             {
                 return DefaultError::InvalidArgument("FileShareModes::Read without FileShareModes::Write is not a valid sharable option for a file that is open for write");
             }
         }
         dwShareMode |= FILE_SHARE_READ;
     }
-    if (shareMode.Contains(FileShareModes::Write))
+    if (shareMode->Contains(FileShareModes::Write))
     {
         dwShareMode |= FILE_SHARE_WRITE;
     }

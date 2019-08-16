@@ -21,12 +21,12 @@ namespace StdLib
     public:
         ~StandardFile();
         StandardFile() = default;
-        StandardFile(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, FileShareModes::FileShareMode shareMode = FileShareModes::None, Error<> *error = 0);
+		StandardFile(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, std::optional<FileShareModes::FileShareMode> shareMode = {}, Error<> * error = 0);
 
         StandardFile(StandardFile &&source) noexcept;
         StandardFile &operator = (StandardFile &&source) noexcept;
 
-        Error<> Open(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, FileShareModes::FileShareMode shareMode = FileShareModes::None);
+		Error<> Open(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, std::optional<FileShareModes::FileShareMode> shareMode = {});
 
 		[[must_be_open]] [[nodiscard]] FileOpenMode OpenMode() const;
 

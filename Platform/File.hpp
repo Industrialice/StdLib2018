@@ -55,13 +55,13 @@ namespace StdLib
     public:
         ~File();
         File() = default;
-        File(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, FileShareModes::FileShareMode shareMode = FileShareModes::None, Error<> *error = nullptr);
+		File(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, std::optional<FileShareModes::FileShareMode> shareMode = {}, Error<> * error = nullptr);
         File(FileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset = 0, Error<> *error = nullptr);
 
         File(File &&other) noexcept;
         File &operator = (File &&other) noexcept;
 
-        [[nodiscard]] Error<> Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, FileShareModes::FileShareMode shareMode = FileShareModes::None);
+        [[nodiscard]] Error<> Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset = 0, FileCacheModes::FileCacheMode cacheMode = FileCacheModes::Default, std::optional<FileShareModes::FileShareMode> shareMode = {});
         [[nodiscard]] Error<> Open(FileHandle osFileDescriptor, bool isGettingFileDescriptorOwnership, ui64 offset = 0);
 
     #ifdef STDLIB_ENABLE_FILE_STATS

@@ -8,7 +8,7 @@ File::~File()
     Close();
 }
 
-File::File(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode, Error<> *error)
+File::File(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, std::optional<FileShareModes::FileShareMode> shareMode, Error<> *error)
 {
     Error<> tempError = File::Open(pnn, openMode, procMode, offset, cacheMode, shareMode);
     if (error) *error = tempError;

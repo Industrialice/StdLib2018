@@ -35,7 +35,7 @@ StandardFile::~StandardFile()
     this->Close();
 }
 
-StandardFile::StandardFile(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode, Error<> *error)
+StandardFile::StandardFile(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, std::optional<FileShareModes::FileShareMode> shareMode, Error<> *error)
 {
     auto result = this->Open(path, openMode, procMode, offset, cacheMode, shareMode);
     if (error) *error = result;
@@ -62,9 +62,21 @@ StandardFile &StandardFile::operator = (StandardFile &&source) noexcept
     return *this;
 }
 
-Error<> StandardFile::Open(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode)
+Error<> StandardFile::Open(const FilePath &path, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, std::optional<FileShareModes::FileShareMode> shareMode)
 {
     offset = std::min<ui64>(i64_max, offset);
+
+	if (!shareMode)
+	{
+		if (procMode.Contains(FileProcModes::Write))
+		{
+			shareMode = FileShareModes::None;
+		}
+		else
+		{
+			shareMode = FileShareModes::Read;
+		}
+	}
 
     this->Close();
 
@@ -160,11 +172,11 @@ Error<> StandardFile::Open(const FilePath &path, FileOpenMode openMode, FileProc
         procModeStr = TSTR("w");
     }
 
-    if (shareMode.Contains(FileShareModes::Read))
+    if (shareMode->Contains(FileShareModes::Read))
     {
         if (procMode.Contains(FileProcModes::Write))
         {
-            if (!shareMode.Contains(FileShareModes::Write))
+            if (!shareMode->Contains(FileShareModes::Write))
             {
                 return DefaultError::InvalidArgument("FileShareModes::Read without FileShareModes::Write is not a valid sharable option for a file that is open for write");
             }
@@ -179,7 +191,7 @@ Error<> StandardFile::Open(const FilePath &path, FileOpenMode openMode, FileProc
         _SH_DENYRD, // FileShareModes::Write
         _SH_DENYNO  // FileShareModes::Read + FileShareModes::Write
     };
-    int sharingOption = sharingArray[shareMode.AsInteger() & 0b11];
+    int sharingOption = sharingArray[shareMode->AsInteger() & 0b11];
     wchar_t binaryProcModeStr[8];
     wcscpy(binaryProcModeStr, procModeStr);
     wcscat(binaryProcModeStr, L"b");

@@ -10,11 +10,24 @@
 
 using namespace StdLib;
 
-Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, FileShareModes::FileShareMode shareMode)
+Error<> File::Open(const FilePath &pnn, FileOpenMode openMode, FileProcModes::FileProcMode procMode, ui64 offset, FileCacheModes::FileCacheMode cacheMode, std::optional<FileShareModes::FileShareMode> shareMode)
 {
     Close();
 
     offset = std::min<ui64>(offset, i64_max);
+
+	// TODO: why is shareMode completely ignored?
+	if (!shareMode)
+	{
+		if (procMode.Contains(FileProcModes::Write))
+		{
+			shareMode = FileShareModes::None;
+		}
+		else
+		{
+			shareMode = FileShareModes::Read;
+		}
+	}
 
     int flags = 0;
 
