@@ -145,6 +145,9 @@
     <ClCompile Include="SpinLock.cpp">
       <Filter>MT Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="IFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />

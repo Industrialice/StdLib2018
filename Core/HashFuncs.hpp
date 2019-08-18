@@ -6,29 +6,54 @@ namespace StdLib::Hash
 {
 	enum class Precision { P32, P64 };
 
-	template <Precision precision> [[nodiscard]] auto FNVHash(const void *source, uiw length)
+	template <Precision precision, bool IsLengthDefined> [[nodiscard]] auto _FNVHash(const void *source, uiw length)
 	{
 		const ui8 *p = static_cast<const ui8 *>(source);
-		if constexpr (precision == Precision::P32)
+
+		auto calculate = [p](auto initialConstant, auto multiplier, bool isLengthDefined, uiw length) -> decltype(initialConstant)
 		{
-			ui32 hash = 0x811c9dc5u;
-			for (uiw index = 0; index < length; ++index)
+			auto hash = initialConstant;
+			for (uiw index = 0; ; ++index)
 			{
+				if (isLengthDefined)
+				{
+					if (index >= length)
+					{
+						break;
+					}
+				}
+				else
+				{
+					if (p[index] == 0)
+					{
+						break;
+					}
+				}
+
 				hash ^= p[index];
-				hash *= 16777619u;
+				hash *= multiplier;
 			}
 			return hash;
+		};
+
+		if constexpr (precision == Precision::P32)
+		{
+			return calculate(0x811c9dc5u, 16777619u, IsLengthDefined, length);
 		}
 		else if constexpr (precision == Precision::P64)
 		{
-			ui64 hash = 0xcbf29ce484222325ull;
-			for (uiw index = 0; index < length; ++index)
-			{
-				hash ^= p[index];
-				hash *= 1099511628211ull;
-			}
-			return hash;
+			return calculate(0xcbf29ce484222325ull, 1099511628211ull, IsLengthDefined, length);
 		}
+	}
+
+	template <Precision precision> [[nodiscard]] auto FNVHash(const char *source)
+	{
+		return _FNVHash<precision, false>(source, 0);
+	}
+
+	template <Precision precision> [[nodiscard]] auto FNVHash(const void *source, uiw length)
+	{
+		return _FNVHash<precision, true>(source, length);
 	}
 
 	template <Precision precision> [[nodiscard]] auto FNVHash(std::string_view str)
@@ -73,7 +98,7 @@ namespace StdLib::Hash
 		return FNVHashCT<precision, T, length>(static_cast<const T *>(source));
 	}
 
-	template <Precision precision, typename T> [[nodiscard]] constexpr auto FNVHash(const T &value)
+	template <Precision precision, typename T, typename = std::enable_if_t<std::is_pointer_v<T> == false>> [[nodiscard]] constexpr auto FNVHash(const T &value)
 	{
 		if constexpr (std::is_integral_v<T>)
 		{

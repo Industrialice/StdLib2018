@@ -84,6 +84,8 @@ namespace StdLib
         virtual bool Read(void *RSTR target, ui32 len, ui32 *RSTR read = nullptr) = 0;
         virtual bool Write(const void *RSTR source, ui32 len, ui32 *RSTR written = nullptr) = 0;
 
+		std::optional<ui32> WriteFormatted(PRINTF_VERIFY_FRONT const char *format, ...) PRINTF_VERIFY_BACK(1, 2); // returns amount of bytes written, nullopt on error
+
         virtual bool Flush() = 0;
 		[[nodiscard]] virtual bool IsBufferingSupported() const = 0;
         virtual bool Buffer(ui32 size, bufferType &&buffer = {nullptr, nullptr}) = 0; // will reject this call if buffering isn't supported, pass nullptr as a buffer to use an auto allocated buffer, pass 0 as size to disable buffering

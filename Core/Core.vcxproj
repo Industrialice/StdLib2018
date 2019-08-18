@@ -229,6 +229,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DIWRSpinLock.cpp" />
+    <ClCompile Include="IFile.cpp" />
     <ClCompile Include="MemoryStreamFile.cpp" />
     <ClCompile Include="HashFuncs.cpp" />
     <ClCompile Include="MatrixMathTypes.cpp" />
