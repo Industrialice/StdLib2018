@@ -5,13 +5,57 @@
 
 namespace StdLib
 {
-    /////////////////
-    // _VectorBase //
-    /////////////////
+	/////////////////
+	// _VectorBase //
+	/////////////////
 
-#define VECDATA(v, index) ((&(v).x)[index])
+	#define VECDATA(v, index) ((&(v).x)[index])
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator + (const _VectorBase &other) const -> VectorType
+	template <typename _ScalarType, uiw Dim> inline bool _VectorBase<_ScalarType, Dim>::operator == (const _VectorBase &other) const
+	{
+		_ValidateValues(*this, other);
+		for (uiw index = 0; index < Dim; ++index)
+			if (VECDATA(*this, index) != VECDATA(other, index))
+				return false;
+		return true;
+	}
+
+	template <typename _ScalarType, uiw Dim> inline bool _VectorBase<_ScalarType, Dim>::operator != (const _VectorBase &other) const
+	{
+		return !operator==(other);
+	}
+
+	template <typename ScalarType, uiw Dim> inline std::array<ScalarType, Dim> &_VectorBase<ScalarType, Dim>::Data()
+	{
+		_ValidateValues(*this);
+		return *reinterpret_cast<std::array<ScalarType, Dim> *>(&x);
+	}
+
+	template <typename ScalarType, uiw Dim> inline const std::array<ScalarType, Dim> &_VectorBase<ScalarType, Dim>::Data() const
+	{
+		_ValidateValues(*this);
+		return *reinterpret_cast<const std::array<ScalarType, Dim> *>(&x);
+	}
+
+	template <typename ScalarType, uiw Dim> inline ScalarType &_VectorBase<ScalarType, Dim>::operator[](uiw index)
+	{
+		_ValidateValues(*this);
+		ASSUME(index < Dim);
+		return VECDATA(*this, index);
+	}
+
+	template <typename ScalarType, uiw Dim> inline const ScalarType &_VectorBase<ScalarType, Dim>::operator[](uiw index) const
+	{
+		_ValidateValues(*this);
+		ASSUME(index < Dim);
+		return VECDATA(*this, index);
+	}
+
+    ///////////////////////////
+    // _VectorArithmeticBase //
+    ///////////////////////////
+
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator + (const _VectorArithmeticBase &other) const -> VectorType
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
@@ -20,7 +64,7 @@ namespace StdLib
         return result;
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator + (ScalarType scalar) const -> VectorType
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator + (ScalarType scalar) const -> VectorType
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
@@ -29,7 +73,7 @@ namespace StdLib
         return result;
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator += (const _VectorBase &other) -> VectorType &
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator += (const _VectorArithmeticBase &other) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) += VECDATA(other, index);
@@ -37,7 +81,7 @@ namespace StdLib
 		return *static_cast<VectorType *>(this);
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator += (ScalarType scalar) -> VectorType &
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator += (ScalarType scalar) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) += scalar;
@@ -45,7 +89,7 @@ namespace StdLib
 		return *static_cast<VectorType *>(this);
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator - (const _VectorBase &other) const -> VectorType
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator - (const _VectorArithmeticBase &other) const -> VectorType
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
@@ -54,7 +98,7 @@ namespace StdLib
         return result;
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator - (ScalarType scalar) const -> VectorType
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator - (ScalarType scalar) const -> VectorType
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
@@ -63,7 +107,7 @@ namespace StdLib
         return result;
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator -= (const _VectorBase &other) -> VectorType &
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator -= (const _VectorArithmeticBase &other) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) -= VECDATA(other, index);
@@ -71,7 +115,7 @@ namespace StdLib
 		return *static_cast<VectorType *>(this);
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator -= (ScalarType scalar) -> VectorType &
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator -= (ScalarType scalar) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) -= scalar;
@@ -79,7 +123,7 @@ namespace StdLib
 		return *static_cast<VectorType *>(this);
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator * (const _VectorBase &other) const -> VectorType
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator * (const _VectorArithmeticBase &other) const -> VectorType
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
@@ -88,7 +132,7 @@ namespace StdLib
         return result;
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator * (ScalarType scalar) const -> VectorType
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator * (ScalarType scalar) const -> VectorType
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
@@ -97,7 +141,7 @@ namespace StdLib
         return result;
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator *= (const _VectorBase &other) -> VectorType &
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator *= (const _VectorArithmeticBase &other) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) *= VECDATA(other, index);
@@ -105,7 +149,7 @@ namespace StdLib
 		return *static_cast<VectorType *>(this);
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator *= (ScalarType scalar) -> VectorType &
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator *= (ScalarType scalar) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) *= scalar;
@@ -113,7 +157,7 @@ namespace StdLib
 		return *static_cast<VectorType *>(this);
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator / (const _VectorBase &other) const -> VectorType
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator / (const _VectorArithmeticBase &other) const -> VectorType
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
@@ -122,7 +166,7 @@ namespace StdLib
         return result;
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator / (ScalarType scalar) const -> VectorType
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator / (ScalarType scalar) const -> VectorType
     {
         VectorType result;
         for (uiw index = 0; index < Dim; ++index)
@@ -131,7 +175,7 @@ namespace StdLib
         return result;
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator /= (const _VectorBase &other) -> VectorType &
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator /= (const _VectorArithmeticBase &other) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) /= VECDATA(other, index);
@@ -139,7 +183,7 @@ namespace StdLib
 		return *static_cast<VectorType *>(this);
     }
 
-    template <typename ScalarType, uiw Dim> inline auto _VectorBase<ScalarType, Dim>::operator /= (ScalarType scalar) -> VectorType &
+    template <typename ScalarType, uiw Dim> inline auto _VectorArithmeticBase<ScalarType, Dim>::operator /= (ScalarType scalar) -> VectorType &
     {
         for (uiw index = 0; index < Dim; ++index)
             VECDATA(*this, index) /= scalar;
@@ -147,7 +191,7 @@ namespace StdLib
         return *static_cast<VectorType *>(this);
     }
 
-    template <typename _ScalarType, uiw Dim> inline auto _VectorBase<_ScalarType, Dim>::operator - () const -> VectorType
+    template <typename _ScalarType, uiw Dim> inline auto _VectorArithmeticBase<_ScalarType, Dim>::operator - () const -> VectorType
     {
         VectorType result;
         if constexpr (std::is_signed_v<_ScalarType>)
@@ -164,51 +208,11 @@ namespace StdLib
         return result;
     }
 
-	template <typename _ScalarType, uiw Dim> inline bool _VectorBase<_ScalarType, Dim>::operator == (const _VectorBase &other) const
-	{
-		_ValidateValues(*this, other);
-		for (uiw index = 0; index < Dim; ++index)
-			if (VECDATA(*this, index) != VECDATA(other, index))
-				return false;
-		return true;
-	}
-
-	template <typename _ScalarType, uiw Dim> inline bool _VectorBase<_ScalarType, Dim>::operator != (const _VectorBase &other) const
-	{
-		return !operator==(other);
-	}
-
-    template <typename ScalarType, uiw Dim> inline std::array<ScalarType, Dim> &_VectorBase<ScalarType, Dim>::Data()
-    {
-		_ValidateValues(*this);
-        return *reinterpret_cast<std::array<ScalarType, Dim> *>(&x);
-    }
-
-    template <typename ScalarType, uiw Dim> inline const std::array<ScalarType, Dim> &_VectorBase<ScalarType, Dim>::Data() const
-    {
-		_ValidateValues(*this);
-        return *reinterpret_cast<const std::array<ScalarType, Dim> *>(&x);
-    }
-
-    template <typename ScalarType, uiw Dim> inline ScalarType &_VectorBase<ScalarType, Dim>::operator[](uiw index)
-    {
-        _ValidateValues(*this);
-        ASSUME(index < Dim);
-        return VECDATA(*this, index);
-    }
-
-    template <typename ScalarType, uiw Dim> inline const ScalarType &_VectorBase<ScalarType, Dim>::operator[](uiw index) const
-    {
-        _ValidateValues(*this);
-        ASSUME(index < Dim);
-        return VECDATA(*this, index);
-    }
-
     /////////////////
     // Vector2Base //
     /////////////////
 
-	template<typename ScalarType> inline VectorTypeByDimension<ScalarType, 2> Vector2Base<ScalarType>::ToVector2() const
+	template<typename BaseType> inline VectorTypeByDimension<typename BaseType::ScalarType, 2> Vector2Base<BaseType>::ToVector2() const
 	{
 		_ValidateValues(*this);
 		return {x, y};
@@ -218,38 +222,38 @@ namespace StdLib
     // Vector3Base //
     /////////////////
 
-    template <typename ScalarType> inline VectorTypeByDimension<ScalarType, 2> Vector3Base<ScalarType>::ToVector2() const
+    template <typename BaseType> inline VectorTypeByDimension<typename BaseType::ScalarType, 2> Vector3Base<BaseType>::ToVector2() const
     {
 		_ValidateValues(*this);
         return {x, y};
     }
 
-	template<typename ScalarType> inline VectorTypeByDimension<ScalarType, 3> Vector3Base<ScalarType>::ToVector3() const
+	template<typename BaseType> inline VectorTypeByDimension<typename BaseType::ScalarType, 3> Vector3Base<BaseType>::ToVector3() const
 	{
 		_ValidateValues(*this);
-		return {x, y, z};
+		return {x, y, this->z};
 	}
 
     /////////////////
     // Vector4Base //
     /////////////////
 
-    template <typename ScalarType> inline VectorTypeByDimension<ScalarType, 2> Vector4Base<ScalarType>::ToVector2() const
+    template <typename BaseType> inline VectorTypeByDimension<typename BaseType::ScalarType, 2> Vector4Base<BaseType>::ToVector2() const
     {
 		_ValidateValues(*this);
         return {x, y};
     }
 
-    template <typename ScalarType> inline VectorTypeByDimension<ScalarType, 3> Vector4Base<ScalarType>::ToVector3() const
+    template <typename BaseType> inline VectorTypeByDimension<typename BaseType::ScalarType, 3> Vector4Base<BaseType>::ToVector3() const
     {
 		_ValidateValues(*this);
-        return {x, y, z};
+        return {x, y, this->z};
     }
 
-	template<typename ScalarType> inline VectorTypeByDimension<ScalarType, 4> Vector4Base<ScalarType>::ToVector4() const
+	template<typename BaseType> inline VectorTypeByDimension<typename BaseType::ScalarType, 4> Vector4Base<BaseType>::ToVector4() const
 	{
 		_ValidateValues(*this);
-		return {x, y, z, w};
+		return {x, y, this->z, this->w};
 	}
 
     /////////////
@@ -350,7 +354,7 @@ namespace StdLib
         return *this + (other - *this) * interpolant;
     }
 
-#undef VECDATA
+	#undef VECDATA
 
     /////////////
     // _Matrix //

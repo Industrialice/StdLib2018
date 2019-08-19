@@ -7,33 +7,53 @@ using namespace StdLib;
 
 namespace StdLib
 {
-    template struct _VectorBase<f32, 2>;
-    template struct _VectorBase<f32, 3>;
-    template struct _VectorBase<f32, 4>;
+	template struct _VectorBase<f32, 2>;
+	template struct _VectorBase<f32, 3>;
+	template struct _VectorBase<f32, 4>;
 
-    template struct _VectorBase<i32, 2>;
-    template struct _VectorBase<i32, 3>;
-    template struct _VectorBase<i32, 4>;
+	template struct _VectorBase<i32, 2>;
+	template struct _VectorBase<i32, 3>;
+	template struct _VectorBase<i32, 4>;
 
-    template struct _VectorBase<ui32, 2>;
-    template struct _VectorBase<ui32, 3>;
-    template struct _VectorBase<ui32, 4>;
+	template struct _VectorBase<ui32, 2>;
+	template struct _VectorBase<ui32, 3>;
+	template struct _VectorBase<ui32, 4>;
 
-    template struct Vector2Base<f32>;
-    template struct Vector3Base<f32>;
-    template struct Vector4Base<f32>;
+    template struct _VectorArithmeticBase<f32, 2>;
+    template struct _VectorArithmeticBase<f32, 3>;
+    template struct _VectorArithmeticBase<f32, 4>;
 
-    template struct Vector2Base<i32>;
-    template struct Vector3Base<i32>;
-    template struct Vector4Base<i32>;
+    template struct _VectorArithmeticBase<i32, 2>;
+    template struct _VectorArithmeticBase<i32, 3>;
+    template struct _VectorArithmeticBase<i32, 4>;
 
-    template struct Vector2Base<ui32>;
-    template struct Vector3Base<ui32>;
-    template struct Vector4Base<ui32>;
+    template struct _VectorArithmeticBase<ui32, 2>;
+    template struct _VectorArithmeticBase<ui32, 3>;
+    template struct _VectorArithmeticBase<ui32, 4>;
 
-    template struct _VectorFP<Vector2Base<f32>>;
-    template struct _VectorFP<Vector3Base<f32>>;
-    template struct _VectorFP<Vector4Base<f32>>;
+	template struct _VectorBase<bool, 2>;
+	template struct _VectorBase<bool, 3>;
+	template struct _VectorBase<bool, 4>;
+
+    template struct Vector2Base<_VectorArithmeticBase<f32, 2>>;
+    template struct Vector3Base<_VectorArithmeticBase<f32, 3>>;
+    template struct Vector4Base<_VectorArithmeticBase<f32, 4>>;
+
+    template struct Vector2Base<_VectorArithmeticBase<i32, 2>>;
+    template struct Vector3Base<_VectorArithmeticBase<i32, 3>>;
+    template struct Vector4Base<_VectorArithmeticBase<i32, 4>>;
+
+    template struct Vector2Base<_VectorArithmeticBase<ui32, 2>>;
+    template struct Vector3Base<_VectorArithmeticBase<ui32, 3>>;
+    template struct Vector4Base<_VectorArithmeticBase<ui32, 4>>;
+
+	template struct Vector2Base<_VectorBase<bool, 2>>;
+	template struct Vector3Base<_VectorBase<bool, 3>>;
+	template struct Vector4Base<_VectorBase<bool, 4>>;
+
+    template struct _VectorFP<Vector2Base<_VectorArithmeticBase<f32, 2>>>;
+    template struct _VectorFP<Vector3Base<_VectorArithmeticBase<f32, 3>>>;
+    template struct _VectorFP<Vector4Base<_VectorArithmeticBase<f32, 4>>>;
 
     template struct _Matrix<2, 2>;
     template struct _Matrix<3, 2>;

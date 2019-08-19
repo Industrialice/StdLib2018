@@ -8,9 +8,12 @@
 
 namespace StdLib
 {
-    template <typename ScalarType> struct Vector2Base;
-    template <typename ScalarType> struct Vector3Base;
-    template <typename ScalarType> struct Vector4Base;
+	template <typename _ScalarType, uiw Dim> struct _VectorBase;
+	template <typename _ScalarType, uiw Dim> struct _VectorArithmeticBase;
+
+    template <typename BaseType> struct Vector2Base;
+    template <typename BaseType> struct Vector3Base;
+    template <typename BaseType> struct Vector4Base;
 
     struct Vector2;
     struct Vector3;
@@ -24,17 +27,24 @@ namespace StdLib
     struct ui32Vector3;
     struct ui32Vector4;
 
+	struct boolVector2;
+	struct boolVector3;
+	struct boolVector4;
+
     template <uiw Rows, uiw Columns> struct _Matrix;
 
-    struct Matrix4x3;
-    struct Matrix3x4;
-    struct Matrix4x4;
+	struct Matrix2x2;
+	struct Matrix2x3;
     struct Matrix3x2;
-    struct Matrix2x3;
     struct Matrix3x3;
-    struct Matrix2x2;
+	struct Matrix4x3;
+	struct Matrix3x4;
+	struct Matrix4x4;
 
     struct Quaternion;
+
+	template <typename ScalarType, uiw Dim> struct _ChooseVectorBase { using Type = _VectorArithmeticBase<ScalarType, Dim>; };
+	template <uiw Dim> struct _ChooseVectorBase<bool, Dim> { using Type = _VectorBase<bool, Dim>; };
 
     template <typename ScalarType, uiw Dim> struct _ChooseVectorType;
 
@@ -50,9 +60,13 @@ namespace StdLib
     template <> struct _ChooseVectorType<ui32, 3> { using Type = ui32Vector3; };
     template <> struct _ChooseVectorType<ui32, 4> { using Type = ui32Vector4; };
 
-    template <typename ScalarType> struct _ChooseVectorType<ScalarType, 2> { using Type = Vector2Base<ScalarType>; };
-    template <typename ScalarType> struct _ChooseVectorType<ScalarType, 3> { using Type = Vector3Base<ScalarType>; };
-    template <typename ScalarType> struct _ChooseVectorType<ScalarType, 4> { using Type = Vector4Base<ScalarType>; };
+	template <> struct _ChooseVectorType<bool, 2> { using Type = boolVector2; };
+	template <> struct _ChooseVectorType<bool, 3> { using Type = boolVector3; };
+	template <> struct _ChooseVectorType<bool, 4> { using Type = boolVector4; };
+
+    template <typename ScalarType> struct _ChooseVectorType<ScalarType, 2> { using Type = Vector2Base<typename _ChooseVectorBase<ScalarType, 2>::Type>; };
+    template <typename ScalarType> struct _ChooseVectorType<ScalarType, 3> { using Type = Vector3Base<typename _ChooseVectorBase<ScalarType, 3>::Type>; };
+    template <typename ScalarType> struct _ChooseVectorType<ScalarType, 4> { using Type = Vector4Base<typename _ChooseVectorBase<ScalarType, 4>::Type>; };
 
     template <typename ScalarType, uiw Dim> using VectorTypeByDimension = typename _ChooseVectorType<ScalarType, Dim>::Type;
 
@@ -98,32 +112,6 @@ namespace StdLib
 
         constexpr _VectorBase() = default;
 
-        [[nodiscard]] VectorType operator + (const _VectorBase &other) const;
-        [[nodiscard]] VectorType operator + (ScalarType scalar) const;
-
-        VectorType &operator += (const _VectorBase &other);
-        VectorType &operator += (ScalarType scalar);
-
-        [[nodiscard]] VectorType operator - (const _VectorBase &other) const;
-        [[nodiscard]] VectorType operator - (ScalarType scalar) const;
-
-        VectorType &operator -= (const _VectorBase &other);
-        VectorType &operator -= (ScalarType scalar);
-
-        [[nodiscard]] VectorType operator * (const _VectorBase &other) const;
-        [[nodiscard]] VectorType operator * (ScalarType scalar) const;
-
-        VectorType &operator *= (const _VectorBase &other);
-        VectorType &operator *= (ScalarType scalar);
-
-        [[nodiscard]] VectorType operator / (const _VectorBase &other) const;
-        [[nodiscard]] VectorType operator / (ScalarType scalar) const;
-
-        VectorType &operator /= (const _VectorBase &other);
-        VectorType &operator /= (ScalarType scalar);
-
-        VectorType operator - () const; // only valid for signed scalar types
-
         [[nodiscard]] bool operator == (const _VectorBase &other) const;
         [[nodiscard]] bool operator != (const _VectorBase &other) const;
 
@@ -133,31 +121,76 @@ namespace StdLib
         [[nodiscard]] ScalarType &operator [] (uiw index);
         [[nodiscard]] const ScalarType &operator [] (uiw index) const;
 
-        VectorType &ForEach(_ScalarType func(_ScalarType));
-        template <typename ReturnType> VectorType &ForEach(ReturnType func(_ScalarType &));
-        template <typename Func> VectorType &ForEach(Func func);
-        template <typename ReturnType> const VectorType &ForEach(ReturnType func(_ScalarType)) const;
-        template <typename Func> const VectorType &ForEach(Func func) const;
-
     protected:
         template <typename... Args> constexpr _VectorBase(Args... args);
     };
 
-    template <typename ScalarType> struct Vector2Base : _VectorBase<ScalarType, 2>
+	template <typename _ScalarType, uiw Dim> struct _VectorArithmeticBase : _VectorBase<_ScalarType, Dim>
+	{
+		using BaseType = typename _VectorBase<_ScalarType, Dim>;
+
+		using BaseType::_VectorBase;
+		using BaseType::operator ==;
+		using BaseType::operator !=;
+		using BaseType::Data;
+		using BaseType::operator [];
+
+		static constexpr uiw dim = Dim;
+
+		using ScalarType = _ScalarType;
+		using VectorType = VectorTypeByDimension<ScalarType, dim>;
+
+		constexpr _VectorArithmeticBase() = default;
+
+		[[nodiscard]] VectorType operator + (const _VectorArithmeticBase &other) const;
+		[[nodiscard]] VectorType operator + (ScalarType scalar) const;
+
+		VectorType &operator += (const _VectorArithmeticBase &other);
+		VectorType &operator += (ScalarType scalar);
+
+		[[nodiscard]] VectorType operator - (const _VectorArithmeticBase &other) const;
+		[[nodiscard]] VectorType operator - (ScalarType scalar) const;
+
+		VectorType &operator -= (const _VectorArithmeticBase &other);
+		VectorType &operator -= (ScalarType scalar);
+
+		[[nodiscard]] VectorType operator * (const _VectorArithmeticBase &other) const;
+		[[nodiscard]] VectorType operator * (ScalarType scalar) const;
+
+		VectorType &operator *= (const _VectorArithmeticBase &other);
+		VectorType &operator *= (ScalarType scalar);
+
+		[[nodiscard]] VectorType operator / (const _VectorArithmeticBase &other) const;
+		[[nodiscard]] VectorType operator / (ScalarType scalar) const;
+
+		VectorType &operator /= (const _VectorArithmeticBase &other);
+		VectorType &operator /= (ScalarType scalar);
+
+		VectorType operator - () const; // only valid for signed scalar types
+
+		VectorType &ForEach(_ScalarType func(_ScalarType));
+		template <typename ReturnType> VectorType &ForEach(ReturnType func(_ScalarType &));
+		template <typename Func> VectorType &ForEach(Func func);
+		template <typename ReturnType> const VectorType &ForEach(ReturnType func(_ScalarType)) const;
+		template <typename Func> const VectorType &ForEach(Func func) const;
+	};
+
+    template <typename BaseType> struct Vector2Base : BaseType
     {
-        using _VectorBase<ScalarType, 2>::x;
-        using _VectorBase<ScalarType, 2>::y;
+		using typename BaseType::ScalarType;
+        using BaseType::x;
+        using BaseType::y;
 
         constexpr Vector2Base() = default;
         constexpr Vector2Base(ScalarType x, ScalarType y);
 		[[nodiscard]] VectorTypeByDimension<ScalarType, 2> ToVector2() const;
     };
 
-    template <typename ScalarType> struct Vector3Base : _VectorBase<ScalarType, 3>
+    template <typename BaseType> struct Vector3Base : BaseType
     {
-        using _VectorBase<ScalarType, 3>::x;
-        using _VectorBase<ScalarType, 3>::y;
-        using _VectorBase<ScalarType, 3>::z;
+		using typename BaseType::ScalarType;
+		using BaseType::x;
+        using BaseType::y;
 
         constexpr Vector3Base() = default;
         constexpr Vector3Base(ScalarType x, ScalarType y, ScalarType z);
@@ -166,12 +199,11 @@ namespace StdLib
 		[[nodiscard]] VectorTypeByDimension<ScalarType, 3> ToVector3() const;
     };
 
-    template <typename ScalarType> struct Vector4Base : _VectorBase<ScalarType, 4>
+    template <typename BaseType> struct Vector4Base : BaseType
     {
-        using _VectorBase<ScalarType, 4>::x;
-        using _VectorBase<ScalarType, 4>::y;
-        using _VectorBase<ScalarType, 4>::z;
-        using _VectorBase<ScalarType, 4>::w;
+		using typename BaseType::ScalarType;
+		using BaseType::x;
+        using BaseType::y;
 
         constexpr Vector4Base() = default;
         constexpr Vector4Base(ScalarType x, ScalarType y, ScalarType z, ScalarType w);
@@ -222,7 +254,7 @@ namespace StdLib
         template <uiw Rows, uiw Columns> VectorType &operator *= (const _Matrix<Rows, Columns> &matrix);
     };
 
-    struct Vector2 : _VectorFP<Vector2Base<f32>>
+    struct Vector2 : _VectorFP<Vector2Base<_VectorArithmeticBase<f32, 2>>>
     {
         using _VectorFP::_VectorFP;
 
@@ -230,7 +262,7 @@ namespace StdLib
         [[nodiscard]] Vector2 GetRightNormal() const; // no normalization
     };
 
-    struct Vector3 : _VectorFP<Vector3Base<f32>>
+    struct Vector3 : _VectorFP<Vector3Base<_VectorArithmeticBase<f32, 3>>>
     {
         using _VectorFP::_VectorFP;
 
@@ -238,40 +270,55 @@ namespace StdLib
         [[nodiscard]] Vector3 GetCrossed(const Vector3 &other) const;
     };
 
-    struct Vector4 : _VectorFP<Vector4Base<f32>>
+    struct Vector4 : _VectorFP<Vector4Base<_VectorArithmeticBase<f32, 4>>>
     {
         using _VectorFP::_VectorFP;
     };
 
-    struct i32Vector2 : Vector2Base<i32>
+    struct i32Vector2 : Vector2Base<_VectorArithmeticBase<i32, 2>>
     {
         using Vector2Base::Vector2Base;
     };
 
-    struct i32Vector3 : Vector3Base<i32>
+    struct i32Vector3 : Vector3Base<_VectorArithmeticBase<i32, 3>>
     {
         using Vector3Base::Vector3Base;
     };
 
-    struct i32Vector4 : Vector4Base<i32>
+    struct i32Vector4 : Vector4Base<_VectorArithmeticBase<i32, 4>>
     {
         using Vector4Base::Vector4Base;
     };
 
-    struct ui32Vector2 : Vector2Base<ui32>
+    struct ui32Vector2 : Vector2Base<_VectorArithmeticBase<ui32, 2>>
     {
         using Vector2Base::Vector2Base;
     };
 
-    struct ui32Vector3 : Vector3Base<ui32>
+    struct ui32Vector3 : Vector3Base<_VectorArithmeticBase<ui32, 3>>
     {
         using Vector3Base::Vector3Base;
     };
 
-    struct ui32Vector4 : Vector4Base<ui32>
+    struct ui32Vector4 : Vector4Base<_VectorArithmeticBase<ui32, 4>>
     {
         using Vector4Base::Vector4Base;
     };
+
+	struct boolVector2 : Vector2Base<_VectorBase<bool, 2>>
+	{
+		using Vector2Base::Vector2Base;
+	};
+
+	struct boolVector3 : Vector3Base<_VectorBase<bool, 3>>
+	{
+		using Vector3Base::Vector3Base;
+	};
+
+	struct boolVector4 : Vector4Base<_VectorBase<bool, 4>>
+	{
+		using Vector4Base::Vector4Base;
+	};
 
     template <uiw Rows, uiw Columns> struct _Matrix
     {
@@ -607,8 +654,38 @@ namespace StdLib
     // _VectorBase //
     /////////////////
 
+	template <typename _ScalarType, uiw Dim>
+	template <typename... Args>
+	inline constexpr _VectorBase<_ScalarType, Dim>::_VectorBase(Args... args)
+	{
+		uiw index = 0;
+		auto writeValue = [&index, this](_ScalarType value) mutable constexpr
+		{
+			if (index == 0) x = value;
+			else if (index == 1) y = value;
+
+			if constexpr (Dim > 2)
+			{
+				if (index == 2) this->z = value;
+
+				if constexpr (Dim > 3)
+				{
+					if (index == 3) this->w = value;
+				}
+			}
+
+			++index;
+		};
+		(writeValue(args), ...);
+		_ValidateValues(*this);
+	}
+
+	///////////////////////////
+	// _VectorArithmeticBase //
+	///////////////////////////
+
     template <typename _ScalarType, uiw Dim>
-    auto _VectorBase<_ScalarType, Dim>::ForEach(_ScalarType func(_ScalarType)) -> VectorType &
+    auto _VectorArithmeticBase<_ScalarType, Dim>::ForEach(_ScalarType func(_ScalarType)) -> VectorType &
     {
         _ValidateValues(*this);
         for (auto &e : Data())
@@ -621,7 +698,7 @@ namespace StdLib
 
     template <typename _ScalarType, uiw Dim>
     template <typename ReturnType>
-    auto _VectorBase<_ScalarType, Dim>::ForEach(ReturnType func(_ScalarType &)) -> VectorType &
+    auto _VectorArithmeticBase<_ScalarType, Dim>::ForEach(ReturnType func(_ScalarType &)) -> VectorType &
     {
         _ValidateValues(*this);
         for (auto &e : Data())
@@ -641,7 +718,7 @@ namespace StdLib
 
     template <typename _ScalarType, uiw Dim>
     template <typename Func>
-    auto _VectorBase<_ScalarType, Dim>::ForEach(Func func) -> VectorType &
+    auto _VectorArithmeticBase<_ScalarType, Dim>::ForEach(Func func) -> VectorType &
     {
         _ValidateValues(*this);
         for (auto &e : Data())
@@ -661,7 +738,7 @@ namespace StdLib
 
     template <typename _ScalarType, uiw Dim>
     template <typename ReturnType>
-    auto _VectorBase<_ScalarType, Dim>::ForEach(ReturnType func(_ScalarType)) const -> const VectorType &
+    auto _VectorArithmeticBase<_ScalarType, Dim>::ForEach(ReturnType func(_ScalarType)) const -> const VectorType &
     {
         _ValidateValues(*this);
         for (const auto &e : Data())
@@ -681,7 +758,7 @@ namespace StdLib
 
     template <typename _ScalarType, uiw Dim>
     template <typename Func>
-    auto _VectorBase<_ScalarType, Dim>::ForEach(Func func) const -> const VectorType &
+    auto _VectorArithmeticBase<_ScalarType, Dim>::ForEach(Func func) const -> const VectorType &
     {
         _ValidateValues(*this);
         for (const auto &e : Data())
@@ -699,55 +776,29 @@ namespace StdLib
 		return *static_cast<VectorType*>(this);
     }
 
-    template <typename _ScalarType, uiw Dim> 
-    template <typename... Args>
-    inline constexpr _VectorBase<_ScalarType, Dim>::_VectorBase(Args... args)
-    {
-        uiw index = 0;
-        auto writeValue = [&index, this](_ScalarType value) mutable constexpr
-        {
-            if (index == 0) x = value;
-            else if (index == 1) y = value;
-
-            if constexpr (Dim > 2)
-            {
-                if (index == 2) this->z = value;
-
-                if constexpr (Dim > 3)
-                {
-                    if (index == 3) this->w = value;
-                }
-            }
-
-            ++index;
-        };
-        (writeValue(args), ...);
-        _ValidateValues(*this);
-    }
-
     /////////////////
     // Vector2Base //
     /////////////////
 
-    template <typename ScalarType> inline constexpr Vector2Base<ScalarType>::Vector2Base(ScalarType x, ScalarType y) : _VectorBase<ScalarType, 2>(x, y) {}
+    template <typename BaseType> inline constexpr Vector2Base<BaseType>::Vector2Base(ScalarType x, ScalarType y) : BaseType(x, y) {}
 
     /////////////////
     // Vector3Base //
     /////////////////
 
-    template <typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(ScalarType x, ScalarType y, ScalarType z) : _VectorBase<ScalarType, 3>(x, y, z) {}
+    template <typename BaseType> inline constexpr Vector3Base<BaseType>::Vector3Base(ScalarType x, ScalarType y, ScalarType z) : BaseType(x, y, z) {}
 
-    template <typename ScalarType> inline constexpr Vector3Base<ScalarType>::Vector3Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z) : Vector3Base(vec.x, vec.y, z) {}
+    template <typename BaseType> inline constexpr Vector3Base<BaseType>::Vector3Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z) : Vector3Base(vec.x, vec.y, z) {}
 
     /////////////////
     // Vector4Base //
     /////////////////
 
-    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(ScalarType x, ScalarType y, ScalarType z, ScalarType w) : _VectorBase<ScalarType, 4>(x, y, z, w) {}
+    template <typename BaseType> inline constexpr Vector4Base<BaseType>::Vector4Base(ScalarType x, ScalarType y, ScalarType z, ScalarType w) : BaseType(x, y, z, w) {}
 
-    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z, ScalarType w) : Vector4Base(vec.x, vec.y, z, w) {}
-    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 3> &vec, ScalarType w) : Vector4Base(vec.x, vec.y, vec.z, w) {}
-    template <typename ScalarType> inline constexpr Vector4Base<ScalarType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &v0, const VectorTypeByDimension<ScalarType, 2> &v1) : Vector4Base(v0.x, v0.y, v1.x, v1.y) {}
+    template <typename BaseType> inline constexpr Vector4Base<BaseType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &vec, ScalarType z, ScalarType w) : Vector4Base(vec.x, vec.y, z, w) {}
+    template <typename BaseType> inline constexpr Vector4Base<BaseType>::Vector4Base(const VectorTypeByDimension<ScalarType, 3> &vec, ScalarType w) : Vector4Base(vec.x, vec.y, vec.z, w) {}
+    template <typename BaseType> inline constexpr Vector4Base<BaseType>::Vector4Base(const VectorTypeByDimension<ScalarType, 2> &v0, const VectorTypeByDimension<ScalarType, 2> &v1) : Vector4Base(v0.x, v0.y, v1.x, v1.y) {}
 
     /////////////
     // _Matrix //

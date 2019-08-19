@@ -56,6 +56,22 @@ template <typename T> void CheckMatrixMultiplyResult(const T &m0, const T &m1, c
 	}
 }
 
+template <typename T> static T GenerateBoolVec()
+{
+	T v;
+	v.x = rand() % 2 == 0;
+	v.y = rand() % 2 == 0;
+	if constexpr (T::dim > 2)
+	{
+		v.z = rand() % 2 == 0;
+		if constexpr (T::dim > 3)
+		{
+			v.w = rand() % 2 == 0;
+		}
+	}
+	return v;
+}
+
 template <typename T> static T GenerateVec(bool isAllowZero)
 {
 	using st = typename T::ScalarType;
@@ -222,6 +238,22 @@ template <typename T> static void BaseVectorTestsHelper()
 		v2 = v1;
 		v2 /= v0p;
 		Compare(v2, v1, v0p, divTransform);
+	}
+}
+
+template <typename T> static void BoolVectorTestsHelper()
+{
+	T v0, v1;
+	for (ui32 index = 0; index < TestIterations; ++index)
+	{
+		v0 = GenerateBoolVec<T>();
+		v1 = GenerateBoolVec<T>();
+
+		bool equals = (Get<0>(v0) == Get<0>(v1)) && (Get<1>(v0) == Get<1>(v1)) && (Get<2>(v0) == Get<2>(v1)) && (Get<3>(v0) == Get<3>(v1));
+		UTest(Equal, v0 == v1, equals);
+		UTest(NotEqual, v0 != v1, equals);
+		UTest(Equal, v0, v0);
+		UTest(false, v0 != v0);
 	}
 }
 
@@ -896,6 +928,10 @@ static void BaseVectorTests()
 	BaseVectorTestsHelper<Vector2>();
 	BaseVectorTestsHelper<Vector3>();
 	BaseVectorTestsHelper<Vector4>();
+
+	BoolVectorTestsHelper<boolVector2>();
+	BoolVectorTestsHelper<boolVector3>();
+	BoolVectorTestsHelper<boolVector4>();
 
 	IntegerVectorTestsHelper<i32Vector2>();
 	IntegerVectorTestsHelper<i32Vector3>();
