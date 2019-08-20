@@ -7,16 +7,16 @@
 #define _SUPPRESS_CORE_INITIALIZE
 
 #include "PlatformTypes.hpp"
-#include "FilePath.hpp"
-#include "VirtualMemory.hpp"
-#include "TimeMoment.hpp"
-#include "File.hpp"
-#include "FileSystem.hpp"
-#include "MemoryMappedFile.hpp"
-#include "SystemInfo.hpp"
-#include "VirtualKeys.hpp"
-#include "NativeConsole.hpp"
-#include "StandardFile.hpp"
+//#include "FilePath.hpp"
+//#include "VirtualMemory.hpp"
+//#include "TimeMoment.hpp"
+//#include "File.hpp"
+//#include "FileSystem.hpp"
+//#include "MemoryMappedFile.hpp"
+//#include "SystemInfo.hpp"
+//#include "VirtualKeys.hpp"
+//#include "NativeConsole.hpp"
+//#include "StandardFile.hpp"
 #include "_PlatformInitialization.hpp"
 
 #define _STD_PLATFORM_LIB_INCLUDED

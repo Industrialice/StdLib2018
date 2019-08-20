@@ -50,7 +50,26 @@
 #include <thread>
 #include <stdarg.h>
 #include <unordered_set>
+
 #include <StdMiscLib.hpp>
+#include <DIWRSpinLock.hpp>
+#include <MTMessageQueue.hpp>
+#include <MemoryStreamFile.hpp>
+#include <MathFunctions.hpp>
+#include <ApproxMath.hpp>
+#include <FunctionInfo.hpp>
+#include <UnitTestsLogger.hpp>
+#include <Logger.hpp>
+#include <UniqueIdManager.hpp>
+#include <TimeMoment.hpp>
+#include <VirtualMemory.hpp>
+#include <FileSystem.hpp>
+#include <SystemInfo.hpp>
+#include <StandardFile.hpp>
+#include <File.hpp>
+#include <MemoryMappedFile.hpp>
+#include <VirtualKeys.hpp>
+#include <NativeConsole.hpp>
 
 enum UnitTestType
 {
