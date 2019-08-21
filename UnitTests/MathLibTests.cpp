@@ -108,6 +108,8 @@ template <typename T> static void BaseVectorTestsHelper()
     using st = typename T::ScalarType;
 	T v0, v1, v2;
 
+	uiw hash = std::hash<T>()(v0);
+
     // making sure everything is properly accessible
     v0.x = 0;
     UTest(Equal, v0[0], 0);
@@ -489,6 +491,8 @@ static void QuaternionTests()
     Quaternion q0, q1;
 	Vector3 toEuler, fromEuler;
 
+	uiw hash = std::hash<Quaternion>()(q0);
+
 	fromEuler = {RadNormalize(MathPiDouble() + MathPi()), RadNormalize(-MathPi()), RadNormalize(MathPiDouble() + MathPi())};
 	//fromEuler = {MathPi(), MathPi(), MathPi()};
 	q0 = Quaternion::FromEuler(fromEuler * 0.25f);
@@ -621,6 +625,8 @@ template <typename T> static void MatrixTestsHelper()
 				UTest(Equal, m0.FetchValueBoundless(row, column), convertTest2[row][column]);
 			}
 		}
+
+		uiw hash = std::hash<T>()(m0);
     }
 }
 

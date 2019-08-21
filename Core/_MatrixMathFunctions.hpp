@@ -51,6 +51,19 @@ namespace StdLib
 		return VECDATA(*this, index);
 	}
 
+	template <typename ScalarType, uiw Dim> inline uiw _VectorBase<ScalarType, Dim>::Hash() const
+	{
+		_ValidateValues(*this);
+		uiw hash = 0x811c9dc5u;
+		for (uiw index = 0; index < Dim; ++index)
+		{
+			hash ^= std::hash<ScalarType>()(VECDATA(*this, index));
+			if (index + 1 < Dim)
+				hash *= 16777619u;
+		}
+		return hash;
+	}
+
     ///////////////////////////
     // _VectorArithmeticBase //
     ///////////////////////////
@@ -547,19 +560,30 @@ namespace StdLib
     {
         auto inversed = static_cast<MatrixType *>(this)->GetInversed();
         if (inversed)
-        {
             *static_cast<MatrixType *>(this) = *inversed;
-        }
         else
-        {
             SOFTBREAK;
-        }
         return *static_cast<MatrixType *>(this);
     }
+
+	template <uiw Rows, uiw Columns> inline uiw _Matrix<Rows, Columns>::Hash() const
+	{
+		_ValidateValues(*this);
+		size_t hash = 0x811c9dc5u;
+		for (size_t row = 0; row < Rows; ++row)
+			for (size_t column = 0; column < Columns; ++column)
+			{
+				hash ^= std::hash<f32>()(elements[row][column]);
+				hash *= 16777619u;
+			}
+		return hash;
+	}
 
     ///////////////
     // Rectangle //
     ///////////////
+
+	// TODO: validating values
 
     template <typename T, bool IsTopLessThanBottom> inline bool Rectangle<T, IsTopLessThanBottom>::IsIntersected(const Rectangle &other) const
     {
@@ -736,4 +760,22 @@ namespace StdLib
     {
         return !(this->operator==(other));
     }
+
+	template <typename T, bool IsTopLessThanBottom> inline uiw Rectangle<T, IsTopLessThanBottom>::Hash() const
+	{
+		uiw hash = 0x811c9dc5u;
+
+		hash ^= std::hash<T>()(left);
+		hash *= 16777619u;
+
+		hash ^= std::hash<T>()(right);
+		hash *= 16777619u;
+
+		hash ^= std::hash<T>()(top);
+		hash *= 16777619u;
+
+		hash ^= std::hash<T>()(bottom);
+
+		return hash;
+	}
 }

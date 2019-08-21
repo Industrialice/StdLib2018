@@ -1440,3 +1440,15 @@ bool Quaternion::EqualsWithEpsilon(const Quaternion &other, f32 epsilon) const
 	_ValidateValues(*this, other, epsilon);
 	return StdLib::EqualsWithEpsilon({x, y, z, w}, {other.x, other.y, other.z, other.w}, epsilon);
 }
+
+uiw Quaternion::Hash() const
+{
+	_ValidateValues(*this);
+	uiw hash = 0x811c9dc5u;
+	for (uiw index = 0; index < 4; ++index)
+	{
+		hash ^= std::hash<f32>()(this->operator[](index));
+		hash *= 16777619u;
+	}
+	return hash;
+}

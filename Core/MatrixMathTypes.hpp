@@ -121,6 +121,8 @@ namespace StdLib
         [[nodiscard]] ScalarType &operator [] (uiw index);
         [[nodiscard]] const ScalarType &operator [] (uiw index) const;
 
+		[[nodiscard]] uiw Hash() const;
+
     protected:
         template <typename... Args> constexpr _VectorBase(Args... args);
     };
@@ -368,6 +370,8 @@ namespace StdLib
 
         MatrixType &Inverse(); // assertion fails if failed to inverse, the matrix isn't modified
 
+		[[nodiscard]] uiw Hash() const;
+
     protected:
         constexpr _Matrix(); // will create identity matrix
         template <typename... Args> constexpr _Matrix(Args &&... args);
@@ -527,6 +531,9 @@ namespace StdLib
     // first applies A then B to any subsequent transformation(left first, then right).
     struct Quaternion
     {
+		static constexpr uiw dim = 4;
+		using ScalarType = f32;
+
         f32 x = 0, y = 0, z = 0, w = 1;
 
         static Quaternion FromEuler(const Vector3 &source);
@@ -574,6 +581,8 @@ namespace StdLib
         [[nodiscard]] Matrix3x3 ToMatrix() const; // Must quaternion be normalized?
 
         [[nodiscard]] bool EqualsWithEpsilon(const Quaternion &other, f32 epsilon = DefaultF32Epsilon) const;
+
+		[[nodiscard]] uiw Hash() const;
     };
 
     template <typename T, bool IsTopLessThanBottom = true> struct Rectangle
@@ -606,6 +615,8 @@ namespace StdLib
 
         [[nodiscard]] bool operator == (const Rectangle &other) const;
         [[nodiscard]] bool operator != (const Rectangle &other) const;
+
+		[[nodiscard]] uiw Hash() const;
     };
 
     using RectangleF32 = Rectangle<f32>;
@@ -902,4 +913,39 @@ namespace StdLib
     {
         return {x, x, y, y};
     }
+}
+
+namespace std
+{
+	template <typename T> struct _HashBase
+	{
+		[[nodiscard]] size_t operator()(const T &value) const
+		{
+			return value.Hash();
+		}
+	};
+
+	template <> struct hash<StdLib::Vector2> : _HashBase<StdLib::Vector2> {};
+	template <> struct hash<StdLib::Vector3> : _HashBase<StdLib::Vector3> {};
+	template <> struct hash<StdLib::Vector4> : _HashBase<StdLib::Vector4> {};
+	template <> struct hash<StdLib::i32Vector2> : _HashBase<StdLib::i32Vector2> {};
+	template <> struct hash<StdLib::i32Vector3> : _HashBase<StdLib::i32Vector3> {};
+	template <> struct hash<StdLib::i32Vector4> : _HashBase<StdLib::i32Vector4> {};
+	template <> struct hash<StdLib::ui32Vector2> : _HashBase<StdLib::ui32Vector2> {};
+	template <> struct hash<StdLib::ui32Vector3> : _HashBase<StdLib::ui32Vector3> {};
+	template <> struct hash<StdLib::ui32Vector4> : _HashBase<StdLib::ui32Vector4> {};
+	template <> struct hash<StdLib::boolVector2> : _HashBase<StdLib::boolVector2> {};
+	template <> struct hash<StdLib::boolVector3> : _HashBase<StdLib::boolVector3> {};
+	template <> struct hash<StdLib::boolVector4> : _HashBase<StdLib::boolVector4> {};
+	template <> struct hash<StdLib::Matrix2x2> : _HashBase<StdLib::Matrix2x2> {};
+	template <> struct hash<StdLib::Matrix3x2> : _HashBase<StdLib::Matrix3x2> {};
+	template <> struct hash<StdLib::Matrix2x3> : _HashBase<StdLib::Matrix2x3> {};
+	template <> struct hash<StdLib::Matrix3x3> : _HashBase<StdLib::Matrix3x3> {};
+	template <> struct hash<StdLib::Matrix4x3> : _HashBase<StdLib::Matrix4x3> {};
+	template <> struct hash<StdLib::Matrix3x4> : _HashBase<StdLib::Matrix3x4> {};
+	template <> struct hash<StdLib::Matrix4x4> : _HashBase<StdLib::Matrix4x4> {};
+	template <> struct hash<StdLib::Quaternion> : _HashBase<StdLib::Quaternion> {};
+	template <> struct hash<StdLib::RectangleF32> : _HashBase<StdLib::RectangleF32> {};
+	template <> struct hash<StdLib::RectangleI32> : _HashBase<StdLib::RectangleI32> {};
+	template <> struct hash<StdLib::RectangleUI32> : _HashBase<StdLib::RectangleUI32> {};
 }
