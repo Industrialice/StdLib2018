@@ -26,7 +26,7 @@ namespace StdLib
 		[[nodiscard]] static FilePath FromChar(const std::string &path);
 		[[nodiscard]] static FilePath FromChar(std::string &&path);
 
-		[[nodiscard]] pathStringView PlatformPath() const { ASSUME(!_path[_path.size()]); return _path; } // always null-terminated
+		[[nodiscard]] pathStringViewNullTerminated PlatformPath() const { ASSUME(!_path[_path.size()]); return _path; }
 
 		FilePath &Append(pathStringView path) { _path += path; return *this; }
 		FilePath &Append(const PathChar *path) { _path += path; return *this; }

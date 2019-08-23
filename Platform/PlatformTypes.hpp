@@ -74,6 +74,7 @@ namespace StdLib
 
     using pathString = std::basic_string<PathChar>;
     using pathStringView = std::basic_string_view<PathChar>;
+	using pathStringViewNullTerminated = _BaseStringViewNullTerminated<PathChar>;
 
     constexpr utf32char UTF32SentinelChar = utf32char(0xFFFFFFFF);
 }

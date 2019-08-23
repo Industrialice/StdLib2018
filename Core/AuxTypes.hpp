@@ -20,51 +20,58 @@ namespace StdLib
 		}
 	};
 
-	struct StringViewNullTerminated : public std::basic_string_view<char>
+	template <typename T> struct _BaseStringViewNullTerminated : public std::basic_string_view<T>
 	{
-		StringViewNullTerminated() : std::basic_string_view<char>("", 0)
+		static constexpr T empty[] = {T('\0')};
+
+		_BaseStringViewNullTerminated() : std::basic_string_view<T>(empty, 0)
 		{}
 
-		StringViewNullTerminated(const std::string &source) : std::basic_string_view<char>(source)
+		_BaseStringViewNullTerminated(const std::basic_string<T> &source) : std::basic_string_view<T>(source)
 		{
 		}
 
-		StringViewNullTerminated(std::string &&) noexcept = delete;
+		_BaseStringViewNullTerminated(std::basic_string<T> &&) noexcept = delete;
 
-		StringViewNullTerminated(std::string_view source) : std::basic_string_view<char>(source)
+		_BaseStringViewNullTerminated(std::basic_string_view<T> source) : std::basic_string_view<T>(source)
 		{
 			ASSUME(source.data());
-			ASSUME(source.data()[source.size()] == '\0');
+			ASSUME(source.data()[source.size()] == T('\0'));
 		}
 
-		StringViewNullTerminated(const char *source, uiw count) : std::basic_string_view<char>(source, count)
+		_BaseStringViewNullTerminated(const T *source, uiw count) : std::basic_string_view<T>(source, count)
 		{
 			ASSUME(source);
-			ASSUME(source[count] == '\0');
+			ASSUME(source[count] == T('\0'));
 		}
 
-		StringViewNullTerminated(const StringViewNullTerminated &) = default;
+		_BaseStringViewNullTerminated(const _BaseStringViewNullTerminated &) = default;
 
-		StringViewNullTerminated(StringViewNullTerminated &&) = default;
+		_BaseStringViewNullTerminated(_BaseStringViewNullTerminated &&) = default;
 
-		StringViewNullTerminated &operator = (const StringViewNullTerminated &) = default;
+		_BaseStringViewNullTerminated &operator = (const _BaseStringViewNullTerminated &) = default;
 
-		StringViewNullTerminated &operator = (StringViewNullTerminated &&) noexcept = default;
+		_BaseStringViewNullTerminated &operator = (_BaseStringViewNullTerminated &&) noexcept = default;
 
-		StringViewNullTerminated &operator = (const std::string &source)
+		_BaseStringViewNullTerminated &operator = (const std::basic_string<T> &source)
 		{
-			std::basic_string_view<char>::operator=(source);
+			std::basic_string_view<T>::operator=(source);
 			return *this;
 		}
 
-		StringViewNullTerminated &operator = (std::string &&source) noexcept = delete;
+		_BaseStringViewNullTerminated &operator = (std::basic_string<T> &&source) noexcept = delete;
 
-		StringViewNullTerminated &operator = (std::string_view source)
+		_BaseStringViewNullTerminated &operator = (std::basic_string_view<T> source)
 		{
 			ASSUME(source.data());
-			ASSUME(source.data()[source.size()] == '\0');
-			std::basic_string_view<char>::operator=(source);
+			ASSUME(source.data()[source.size()] == T('\0'));
+			std::basic_string_view<T>::operator=(source);
 			return *this;
 		}
+	};
+
+	struct StringViewNullTerminated : _BaseStringViewNullTerminated<char>
+	{
+		using _BaseStringViewNullTerminated::_BaseStringViewNullTerminated;
 	};
 }
