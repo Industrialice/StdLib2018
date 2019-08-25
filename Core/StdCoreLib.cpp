@@ -94,6 +94,16 @@ void DefaultSoftBreakCallback(const char *file, i32 line, i32 counter)
 
     std::string text = "Soft break occured in file "s + file + " at line " + std::to_string(line) + "\nAbort - abort program execution\nRetry - break\nIgnore - ignore this break and stop reporting it";
 
+	CURSORINFO cursorInfo{sizeof(CURSORINFO)};
+	BOOL winApiResult = GetCursorInfo(&cursorInfo);
+	ASSUME(winApiResult == TRUE);
+
+	bool isCursorHidden = cursorInfo.flags == 0;
+	if (isCursorHidden)
+	{
+		ShowCursor(TRUE);
+	}
+
     int result = MessageBoxA(0, text.c_str(), "Soft break has occured", MB_ABORTRETRYIGNORE);
     switch (result)
     {
@@ -112,4 +122,9 @@ void DefaultSoftBreakCallback(const char *file, i32 line, i32 counter)
 #else
     fprintf(stderr, "soft break %s %i\n", file, line);
 #endif
+
+	if (isCursorHidden)
+	{
+		ShowCursor(FALSE);
+	}
 }
