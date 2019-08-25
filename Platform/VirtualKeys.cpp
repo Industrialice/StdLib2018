@@ -30,7 +30,7 @@ bool VirtualKeys::IsNPadArrow(KeyCode key)
 
 bool VirtualKeys::IsMouseButton(KeyCode key)
 {
-    return key >= KeyCode::MButton0 && key <= KeyCode::MButton6;
+    return key >= KeyCode::MousePrimary && key <= KeyCode::MouseButton6;
 }
 
 bool VirtualKeys::IsArrowKey(KeyCode key)
@@ -81,7 +81,7 @@ std::optional<ui32> VirtualKeys::KeyNumber(KeyCode key)
     }
     if (IsMouseButton(key))
     {
-        return static_cast<ui32>(key) - static_cast<ui32>(KeyCode::MButton0);
+        return static_cast<ui32>(key) - static_cast<ui32>(KeyCode::MousePrimary);
     }
     if (IsNPadDigit(key))
     {

@@ -1716,7 +1716,7 @@ static void VirtualKeysTests()
     TestKeys<KeyCode::LShift, KeyCode::RShift>(VirtualKeys::IsShift);
     TestKeys<KeyCode::LSystem, KeyCode::RSystem>(VirtualKeys::IsSystem);
     TestKeys<KeyCode::LDelete, KeyCode::RDelete>(VirtualKeys::IsDelete);
-    TestKeys<KeyCode::MButton0, KeyCode::MButton1, KeyCode::MButton2, KeyCode::MButton3, KeyCode::MButton4, KeyCode::MButton5, KeyCode::MButton6>(VirtualKeys::IsMouseButton);
+    TestKeys<KeyCode::MousePrimary, KeyCode::MouseSecondary, KeyCode::MouseMiddle, KeyCode::MouseButton3, KeyCode::MouseButton4, KeyCode::MouseButton5, KeyCode::MouseButton6>(VirtualKeys::IsMouseButton);
 
     UnitTestsLogger::Message("finished virtual keys tests\n");
 }

@@ -5,7 +5,7 @@ namespace StdLib
     enum class KeyCode : ui8
     {
         Undefined,
-        MButton0, MButton1, MButton2, MButton3, MButton4, MButton5, MButton6,
+        MousePrimary, MouseSecondary, MouseMiddle, MouseButton3, MouseButton4, MouseButton5, MouseButton6,
         LShift, RShift,
         LControl, RControl,
         LAlt, RAlt,
