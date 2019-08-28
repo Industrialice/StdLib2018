@@ -12,6 +12,8 @@ namespace StdLib::Allocator
     {
         template <typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN ALLOCATORFUNC RETURNS_NONNULL static T *Allocate(uiw count)
         {
+			static_assert(alignof(T) <= MinimalGuaranteedAlignment, "Violating object's alignment requirements");
+
             if constexpr (!std::is_same_v<T, void>)
             {
                 count *= sizeof(T);
@@ -23,6 +25,8 @@ namespace StdLib::Allocator
 
         template <typename T> [[nodiscard]] ALLOCATORFUNC RETURNS_NONNULL static T *Reallocate(T *memory, uiw count)
         {
+			static_assert(alignof(T) <= MinimalGuaranteedAlignment, "Violating object's alignment requirements");
+
             if constexpr (!std::is_same_v<T, void>)
             {
                 count *= sizeof(T);
@@ -34,6 +38,8 @@ namespace StdLib::Allocator
 
         template <typename T> [[nodiscard]] ALLOCATORFUNC static bool ReallocateInplace(T *memory, uiw count)
         {
+			static_assert(alignof(T) <= MinimalGuaranteedAlignment, "Violating object's alignment requirements");
+
             if constexpr (!std::is_same_v<T, void>)
             {
                 count *= sizeof(T);
@@ -59,6 +65,8 @@ namespace StdLib::Allocator
 
         template <typename T> [[nodiscard]] static uiw MemorySize(const T *memory)
         {
+			static_assert(alignof(T) <= MinimalGuaranteedAlignment, "Violating object's alignment requirements");
+
         #ifdef PLATFORM_WINDOWS
             return memory ? _msize(const_cast<T *>(memory)) : 0;
         #elif defined(PLATFORM_ANDROID)
@@ -85,6 +93,8 @@ namespace StdLib::Allocator
 	{
 		template <typename T = std::byte> [[nodiscard]] UNIQUEPTRRETURN ALLOCATORFUNC RETURNS_NONNULL static T *Allocate(uiw count, uiw alignment)
 		{
+			ASSUME(alignof(T) <= alignment);
+
 			if constexpr (!std::is_same_v<T, void>)
 			{
 				count *= sizeof(T);
@@ -117,6 +127,8 @@ namespace StdLib::Allocator
 
 		template <typename T> [[nodiscard]] ALLOCATORFUNC RETURNS_NONNULL static T *Reallocate(T *memory, uiw count, uiw alignment)
 		{
+			ASSUME(alignof(T) <= alignment);
+
 			if constexpr (!std::is_same_v<T, void>)
 			{
 				count *= sizeof(T);
@@ -162,6 +174,7 @@ namespace StdLib::Allocator
 
         template <typename T> [[nodiscard]] static uiw MemorySize(const T *memory, uiw alignment)
         {
+			ASSUME(alignof(T) <= alignment);
 			ASSUME(Funcs::IsPowerOf2(alignment));
 
 			#ifdef PLATFORM_WINDOWS
