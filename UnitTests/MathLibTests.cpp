@@ -811,6 +811,13 @@ static void Matrix4x3Tests()
     Vector3 originalPoint = Vector4(transformed, 1) * *inversedClipped;
     UTest(true, originalPoint.EqualsWithEpsilon({1, 2, 3}, 0.0001f));
 
+	rtsQuat = Matrix4x3::CreateRTS(refRotationQ.GetInversed(), Vector3(-10, 20, 30), Vector3(0.4f, 1.5f, -0.6f));
+	transformed = toTransform * rtsQuat;
+	inversedClipped = rtsQuat.GetInversed();
+	UTest(NotEqual, inversedClipped, std::nullopt);
+	originalPoint = Vector4(transformed, 1) * *inversedClipped;
+	UTest(true, originalPoint.EqualsWithEpsilon({1, 2, 3}, 0.0001f));
+
 	f32 det = constexprTest.Determinant();
 	UTest(true, EqualsWithEpsilon(det, -9));
 

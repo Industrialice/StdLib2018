@@ -50,3 +50,8 @@ namespace StdLib
 }
 
 template <typename...> inline constexpr bool false_v = false;
+
+template <bool condition> void StaticAssert()
+{
+	static_assert(condition);
+}
